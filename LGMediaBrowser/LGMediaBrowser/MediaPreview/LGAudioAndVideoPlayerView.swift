@@ -55,8 +55,7 @@ open class LGAudioAndVideoPlayerView: UIView {
         if let playerLayer = self.layer as? AVPlayerLayer {
             playerLayer.player = player
         }
-        
-//        self.translatesAutoresizingMaskIntoConstraints = false
+        self.backgroundColor = UIColor.black
     }
     
     

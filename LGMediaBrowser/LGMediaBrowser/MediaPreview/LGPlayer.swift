@@ -73,6 +73,7 @@ open class LGPlayer: LGAudioAndVideoPlayerView {
             return
         }
         let _ = player.observe(\.rate) { (player, value) in
+            print(value.newValue)
             let new = value.newValue
             if new == 0.0 {
                 if self.mediaType == LGMediaType.video {
@@ -116,9 +117,6 @@ open class LGPlayer: LGAudioAndVideoPlayerView {
         self.addSubview(progressSlider)
         self.addSubview(totalTimeLabel)
         self.addSubview(currentTimeLabel)
-        
-        let duration = self.player?.currentItem?.duration
-        let currentTime = self.player?.currentItem?.currentTime()
     }
     
     private func constructVideoPlayerControls() {
@@ -127,6 +125,16 @@ open class LGPlayer: LGAudioAndVideoPlayerView {
         self.addSubview(progressSlider)
         self.addSubview(totalTimeLabel)
         self.addSubview(currentTimeLabel)
+        
+        let duration = self.player?.currentItem?.duration
+        let currentTime = self.player?.currentItem?.currentTime()
+        self.player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1.0,
+                                                                 preferredTimescale: CMTimeScale),
+                                             queue: DispatchQueue.main,
+                                             using: { (time) in
+                                                
+        })
+        print(duration?.seconds, currentTime?.seconds)
 
     }
     

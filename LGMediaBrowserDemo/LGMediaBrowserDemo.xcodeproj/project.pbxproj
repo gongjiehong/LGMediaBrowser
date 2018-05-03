@@ -14,7 +14,33 @@
 		FE0980F62099B88B006B6D8C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FE0980F42099B88B006B6D8C /* LaunchScreen.storyboard */; };
 		FE0980FE2099B953006B6D8C /* LGMediaBrowser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */; };
 		FE0980FF2099B953006B6D8C /* LGMediaBrowser.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FE5B9DD5209B1AF700F5826C /* SnapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE5B9DD2209B1AEE00F5826C /* SnapKit.framework */; };
+		FE5B9DD6209B1AF700F5826C /* SnapKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FE5B9DD2209B1AEE00F5826C /* SnapKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FE5B9DD1209B1AEE00F5826C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FE5B9DCC209B1AEE00F5826C /* SnapKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EEBCC9D819CC627D0083B827;
+			remoteInfo = SnapKit;
+		};
+		FE5B9DD3209B1AEE00F5826C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FE5B9DCC209B1AEE00F5826C /* SnapKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = EEBCC9E219CC627E0083B827;
+			remoteInfo = "SnapKit Tests";
+		};
+		FE5B9DD7209B1AF700F5826C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FE5B9DCC209B1AEE00F5826C /* SnapKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = EEBCC9D719CC627D0083B827;
+			remoteInfo = SnapKit;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		FE0981002099B953006B6D8C /* Embed Frameworks */ = {
@@ -24,6 +50,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				FE0980FF2099B953006B6D8C /* LGMediaBrowser.framework in Embed Frameworks */,
+				FE5B9DD6209B1AF700F5826C /* SnapKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -39,6 +66,7 @@
 		FE0980F52099B88B006B6D8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FE0980F72099B88B006B6D8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGMediaBrowser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE5B9DCC209B1AEE00F5826C /* SnapKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SnapKit.xcodeproj; path = ../../../Sudy/SnapKit/SnapKit.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +75,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE0980FE2099B953006B6D8C /* LGMediaBrowser.framework in Frameworks */,
+				FE5B9DD5209B1AF700F5826C /* SnapKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -73,6 +102,7 @@
 		FE0980EA2099B88A006B6D8C /* LGMediaBrowserDemo */ = {
 			isa = PBXGroup;
 			children = (
+				FE5B9DCC209B1AEE00F5826C /* SnapKit.xcodeproj */,
 				FE0980EB2099B88A006B6D8C /* AppDelegate.swift */,
 				FE0980ED2099B88A006B6D8C /* ViewController.swift */,
 				FE0980EF2099B88A006B6D8C /* Main.storyboard */,
@@ -81,6 +111,15 @@
 				FE0980F72099B88B006B6D8C /* Info.plist */,
 			);
 			path = LGMediaBrowserDemo;
+			sourceTree = "<group>";
+		};
+		FE5B9DCD209B1AEE00F5826C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FE5B9DD2209B1AEE00F5826C /* SnapKit.framework */,
+				FE5B9DD4209B1AEE00F5826C /* SnapKit Tests.xctest */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -98,6 +137,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				FE5B9DD8209B1AF700F5826C /* PBXTargetDependency */,
 			);
 			name = LGMediaBrowserDemo;
 			productName = LGMediaBrowserDemo;
@@ -130,12 +170,35 @@
 			mainGroup = FE0980DF2099B889006B6D8C;
 			productRefGroup = FE0980E92099B88A006B6D8C /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = FE5B9DCD209B1AEE00F5826C /* Products */;
+					ProjectRef = FE5B9DCC209B1AEE00F5826C /* SnapKit.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				FE0980E72099B88A006B6D8C /* LGMediaBrowserDemo */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		FE5B9DD2209B1AEE00F5826C /* SnapKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = SnapKit.framework;
+			remoteRef = FE5B9DD1209B1AEE00F5826C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FE5B9DD4209B1AEE00F5826C /* SnapKit Tests.xctest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "SnapKit Tests.xctest";
+			remoteRef = FE5B9DD3209B1AEE00F5826C /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FE0980E62099B88A006B6D8C /* Resources */ = {
@@ -161,6 +224,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FE5B9DD8209B1AF700F5826C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = SnapKit;
+			targetProxy = FE5B9DD7209B1AF700F5826C /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		FE0980EF2099B88A006B6D8C /* Main.storyboard */ = {
@@ -299,10 +370,12 @@
 		FE0980FB2099B88B006B6D8C /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 44YP76NRV2;
 				INFOPLIST_FILE = LGMediaBrowserDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -319,10 +392,12 @@
 		FE0980FC2099B88B006B6D8C /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_TEAM = 44YP76NRV2;
 				INFOPLIST_FILE = LGMediaBrowserDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

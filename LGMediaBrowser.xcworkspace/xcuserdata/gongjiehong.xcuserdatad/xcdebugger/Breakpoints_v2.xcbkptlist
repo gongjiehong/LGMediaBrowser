@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGAudioAndVideoPlayerView.swift"
-            timestampString = "546950882.521371"
+            timestampString = "547036327.345488"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "80"
-            endingLineNumber = "80"
+            startingLineNumber = "79"
+            endingLineNumber = "79"
             landmarkName = "didMoveToSuperview()"
             landmarkType = "7">
          </BreakpointContent>
