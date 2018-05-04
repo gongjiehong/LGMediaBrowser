@@ -9,14 +9,21 @@
 import UIKit
 import LGMediaBrowser
 import SnapKit
+import AVFoundation
 
 class ViewController: UIViewController {
 
+    var player: LGPlayerControlView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         
-        let player = LGPlayer(frame: self.view.bounds, mediaURL: URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8")!)
+
+        player = LGPlayerControlView(frame: CGRect.zero,
+                                     mediaURL: URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8")!,
+                                     isMuted: false)
+
         player.mediaType = LGMediaType.video
         self.view.addSubview(player)
         

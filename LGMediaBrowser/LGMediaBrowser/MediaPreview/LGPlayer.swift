@@ -9,154 +9,326 @@
 import UIKit
 import AVFoundation
 
-open class LGPlayer: LGAudioAndVideoPlayerView {
-    lazy var centerPlayButton: UIButton = {
-        let button = UIButton(type: UIButtonType.custom)
-        button.setBackgroundImage(UIImage(named: "play_center_big",
-                                          in: Bundle(for: LGPlayer.self),
-                                          compatibleWith: nil),
-                                  for: UIControlState.normal)
-        button.bounds = CGRect(x: 0, y: 0, width: 60.0, height: 60.0)
-        button.addTarget(self, action: #selector(centerPlayButtonPressed(_:)), for: UIControlEvents.touchUpInside)
-        return button
-    }()
+public protocol LGPlayerDelegate: NSObjectProtocol {
+    func player(_ palyer: LGPlayer, didPlay currentTime: CMTime, loopsCount: Int)
     
-    lazy var playOrPauseButton: UIButton = {
-        let button = UIButton(type: UIButtonType.custom)
-        button.setBackgroundImage(UIImage(named: "menu_play",
-                                          in: Bundle(for: LGPlayer.self),
-                                          compatibleWith: nil),
-                                  for: UIControlState.normal)
-        button.bounds = CGRect(x: 0, y: 0, width: 20.0, height: 20.0)
-        button.addTarget(self, action: #selector(playOrPauseButtonPressed(_:)), for: UIControlEvents.touchUpInside)
-        return button
-    }()
+    func player(_ player: LGPlayer, didChange item: AVPlayerItem?)
     
-    lazy var progressSlider: UISlider = {
-        let slider = UISlider(frame: CGRect.zero)
-        slider.thumbTintColor = UIColor.white
-        return slider
-    }()
+    func player(_ player: LGPlayer, didReachEndFor item: AVPlayerItem?)
     
-    lazy var totalTimeLabel: UILabel = {
-        let label = UILabel(frame: CGRect.zero)
-        label.numberOfLines = 1
-        label.font = UIFont.systemFont(ofSize: 14.0)
-        label.textColor = UIColor.white
-        return label
-    }()
+    func player(_ player: LGPlayer, itemReadyToPlay item: AVPlayerItem?)
     
-    lazy var currentTimeLabel: UILabel = {
-        let label = UILabel(frame: CGRect.zero)
-        label.numberOfLines = 1
-        label.font = UIFont.systemFont(ofSize: 14.0)
-        label.textColor = UIColor.white
-        return label
-    }()
+    func player(_ player: LGPlayer, didUpdateLoadedTimeRanges timeRange: CMTimeRange)
     
-    private var rateKvoContext: Int = 0
+    func player(_ player: LGPlayer, itemPlaybackBufferIsEmpty item: AVPlayerItem?)
     
-    public override init(frame: CGRect, mediaPlayerItem: AVPlayerItem, isMuted: Bool) {
-        super.init(frame: frame, mediaPlayerItem: mediaPlayerItem, isMuted: isMuted)
-        addObserver()
+    func player(_ player: LGPlayer, playStateDidChanged rate: Float)
+}
+
+
+open class LGPlayer: AVPlayer {
+    fileprivate struct KVOContext {
+        static var statusChanged = "StatusContext"
+        static var itemChanged = "CurrentItemContext"
+        static var playbackBufferEmpty = "PlaybackBufferEmptyContext"
+        static var loadedTimeRanges = "LoadedTimeRangesContext"
+        static var rateChanged = "RateContext"
     }
     
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+    fileprivate var _oldItem: AVPlayerItem?
+    fileprivate var _itemsLoopLength: Float64 = 1.0
+    fileprivate var _timeObserver: Any?
+    
+    public var isPlaying: Bool {
+        return self.rate > 0.0
+    }
+    
+    
+    public weak var delegate: LGPlayerDelegate?
+    public var isLoopEnabled: Bool = false {
+        didSet {
+            self.actionAtItemEnd = isLoopEnabled ? .none : .pause
+        }
+    }
+    public var isSendingPlayMessages: Bool {
+        return _timeObserver != nil
+    }
+    
+    
+    /// 获取当前总时长
+    public var itemDuration: CMTime {
+        let ratio = 1.0 / _itemsLoopLength
+        if let duration = self.currentItem?.duration {
+            return CMTimeMultiply(duration, Int32(ratio))
+        } else {
+            return kCMTimeZero
+        }
+    }
+    
+    
+    /// 可以播放的时长
+    public var playableDuration: CMTime {
+        if let item = self.currentItem {
+            var playableDuration = kCMTimeZero
+            if item.status != .failed {
+                for value in item.loadedTimeRanges {
+                    let timeRange = value.timeRangeValue
+                    playableDuration = CMTimeAdd(playableDuration, timeRange.duration)
+                }
+            }
+            return playableDuration
+        } else {
+            return kCMTimeZero
+        }
+    }
+    
+    override public init() {
+        super.init()
+        addCurrentItemObserver()
+    }
+    
+    override public init(playerItem item: AVPlayerItem?) {
+        super.init(playerItem: item)
+    }
+    
+    override public init(url URL: URL) {
+        super.init(url: URL)
+    }
+    
+    func addCurrentItemObserver() {
+        self.addObserver(self,
+                         forKeyPath: "currentItem",
+                         options: .new,
+                         context: &KVOContext.itemChanged)
+        self.addObserver(self,
+                         forKeyPath: "rate",
+                         options: .new,
+                         context: &KVOContext.rateChanged)
+    }
+    
+    func initObserver() {
+        removeOldObserver()
+        if let currentItem = self.currentItem {
+            NotificationCenter.default.addObserver(self,
+                                                   selector: #selector(playReachedEnd(_:)),
+                                                   name: NSNotification.Name.AVPlayerItemDidPlayToEndTime,
+                                                   object: currentItem)
+            _oldItem = currentItem
+            
+            currentItem.addObserver(self,
+                                    forKeyPath: "status",
+                                    options: .new,
+                                    context: &KVOContext.statusChanged)
+            
+            currentItem.addObserver(self,
+                                    forKeyPath: "playbackBufferEmpty",
+                                    options: .new,
+                                    context: &KVOContext.playbackBufferEmpty)
+            
+            currentItem.addObserver(self,
+                                    forKeyPath: "loadedTimeRanges",
+                                    options: .new,
+                                    context: &KVOContext.loadedTimeRanges)
+        }
+        delegate?.player(self, didChange: self.currentItem)
+    }
+    
+    func removeOldObserver() {
+        NotificationCenter.default.removeObserver(self)
+        if let oldItem = _oldItem {
+            oldItem.removeObserver(self, forKeyPath: "status")
+            oldItem.removeObserver(self, forKeyPath: "playbackBufferEmpty")
+            oldItem.removeObserver(self, forKeyPath: "loadedTimeRanges")
+        }
+        _oldItem = nil
     }
     
     deinit {
+        self.removeObserver(self, forKeyPath: "currentItem")
+        self.removeObserver(self, forKeyPath: "rate")
+        self.removeOldObserver()
+        self.endSendingPlayMessages()
     }
     
-    private func addObserver() {
-        guard let player = self.player else {
-            return
-        }
-        let _ = player.observe(\.rate) { (player, value) in
-            print(value.newValue)
-            let new = value.newValue
-            if new == 0.0 {
-                if self.mediaType == LGMediaType.video {
-                    self.centerPlayButton.isHidden = false
-                } else if self.mediaType == LGMediaType.audio {
-                    
-                } else {
-                    // not work
-                }
+    override open func observeValue(forKeyPath keyPath: String?,
+                               of object: Any?,
+                               change: [NSKeyValueChangeKey : Any]?,
+                               context: UnsafeMutableRawPointer?)
+    {
+        if context == &KVOContext.itemChanged {
+            self.initObserver()
+        } else if context == &KVOContext.statusChanged {
+            func invokeDelegate() {
+                delegate?.player(self, itemReadyToPlay: self.currentItem)
+            }
+            if Thread.isMainThread {
+                invokeDelegate()
             } else {
-                if self.mediaType == LGMediaType.video {
-                    self.centerPlayButton.isHidden = true
-                } else if self.mediaType == LGMediaType.audio {
-                    
-                } else {
-                    // not work
+                DispatchQueue.main.async {
+                    invokeDelegate()
                 }
             }
-        }
-    }
-    
-
-    public var mediaType: LGMediaType = LGMediaType.other {
-        didSet {
-            layoutControlsIfNeeded()
-        }
-    }
-    
-    private func layoutControlsIfNeeded() {
-        if mediaType == LGMediaType.audio {
-            constructAudioPlayerControls()
-        } else if mediaType == LGMediaType.video {
-            constructVideoPlayerControls()
+        } else if context == &KVOContext.loadedTimeRanges {
+            func invokeDelegate() {
+                if let ranges = self.currentItem?.loadedTimeRanges, ranges.count > 0 {
+                    if let range: CMTimeRange = ranges.first?.timeRangeValue {
+                        delegate?.player(self, didUpdateLoadedTimeRanges: range)
+                    }
+                }
+            }
+            if Thread.isMainThread {
+                invokeDelegate()
+            } else {
+                DispatchQueue.main.async {
+                    invokeDelegate()
+                }
+            }
+        } else if context == &KVOContext.playbackBufferEmpty {
+            func invokeDelegate() {
+                delegate?.player(self, itemPlaybackBufferIsEmpty: self.currentItem)
+            }
+            if Thread.isMainThread {
+                invokeDelegate()
+            } else {
+                DispatchQueue.main.async {
+                    invokeDelegate()
+                }
+            }
+        } else if context == &KVOContext.rateChanged {
+            func invokeDelegate() {
+                delegate?.player(self, playStateDidChanged: self.rate)
+            }
+            if Thread.isMainThread {
+                invokeDelegate()
+            } else {
+                DispatchQueue.main.async {
+                    invokeDelegate()
+                }
+            }
         } else {
-            fatalError("LGPlayer can not support media type: \(mediaType)")
+            super.observeValue(forKeyPath: keyPath, of: object, change: change, context: context)
         }
     }
     
-    private func constructAudioPlayerControls() {
-        self.addSubview(playOrPauseButton)
-        self.addSubview(progressSlider)
-        self.addSubview(totalTimeLabel)
-        self.addSubview(currentTimeLabel)
+    func beginSendingPlayMessages() {
+        if !isSendingPlayMessages {
+            _timeObserver = self.addPeriodicTimeObserver(forInterval: CMTime(value: 1,
+                                                                             timescale: 24),
+                                                         queue: DispatchQueue.main,
+                                                         using:
+                {[weak self] (resultTime) in
+                    guard let weakSelf = self else {
+                        return
+                    }
+                    
+                    if resultTime.seconds.isNaN {
+                        return
+                    }
+                    
+                    if let delegate = weakSelf.delegate {
+                        var itemsLoopLength = 1.0
+                        itemsLoopLength = weakSelf._itemsLoopLength
+                        let ratio = 1.0 / itemsLoopLength
+                        let currentTime = CMTimeMultiplyByFloat64(resultTime, ratio)
+                        if let durationSeconds = weakSelf.currentItem?.duration.seconds, !durationSeconds.isNaN {
+                            let loopCount = resultTime.seconds / durationSeconds / itemsLoopLength
+                            delegate.player(weakSelf, didPlay: currentTime, loopsCount: Int(loopCount))
+                        }
+                    }
+            })
+        }
     }
     
-    private func constructVideoPlayerControls() {
-        self.addSubview(centerPlayButton)
-        self.addSubview(playOrPauseButton)
-        self.addSubview(progressSlider)
-        self.addSubview(totalTimeLabel)
-        self.addSubview(currentTimeLabel)
-        
-        let duration = self.player?.currentItem?.duration
-        let currentTime = self.player?.currentItem?.currentTime()
-        self.player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 1.0,
-                                                                 preferredTimescale: CMTimeScale),
-                                             queue: DispatchQueue.main,
-                                             using: { (time) in
-                                                
-        })
-        print(duration?.seconds, currentTime?.seconds)
-
+    public func endSendingPlayMessages() {
+        if let timeObserver = _timeObserver {
+            self.removeTimeObserver(timeObserver)
+            _timeObserver = nil
+        }
     }
     
     
-    override open func layoutSubviews() {
-        super.layoutSubviews()
-        self.centerPlayButton.center = self.center
-    }
-    
-    // MARK: -  actions
-    @objc func centerPlayButtonPressed(_ sender: UIButton) {
-        self.play()
-    }
-    
-    @objc func playOrPauseButtonPressed(_ sender: UIButton) {
-        if self.player?.rate == 0.0 {
-            self.play()
+    public func setItemBy(_ stringPath: String?) {
+        if let path = stringPath {
+            if  let _ = path.range(of: "://") {
+                let url = URL(string: path)
+                setItemBy(url)
+            } else {
+                let url = URL(fileURLWithPath: path)
+                setItemBy(url)
+            }
         } else {
-            self.pause()
+            setItem(nil)
         }
     }
     
-    // MARK: -  KVO监听
+    public func setItemBy(_ url: URL?) {
+        if let url = url {
+            setItem(AVPlayerItem(url: url))
+        } else {
+            setItem(nil)
+        }
+    }
+    
+    
+    public func setItemBy(_ asset: AVAsset?) {
+        if let asset = asset {
+            setItem(AVPlayerItem(asset: asset))
+        } else {
+            setItem(nil)
+        }
+    }
+    
+    public func setItem(_ item: AVPlayerItem?) {
+        self.replaceCurrentItem(with: item)
+    }
+    
+    public func setSmoothLoopItemByStringPath(_ stringPath: String?, smoothLoopCount loopCount: Int) {
+        guard let path = stringPath else {
+            return
+        }
+        if path.range(of: "://") != nil {
+            setSmoothLoopItemBy(URL(string: path), smoothLoopCount: loopCount)
+        } else {
+            setSmoothLoopItemBy(URL(fileURLWithPath: path), smoothLoopCount: loopCount)
+        }
+    }
+    
 
+    public func setSmoothLoopItemBy(_ url: URL?, smoothLoopCount loopCount: Int) {
+        guard let url = url else {
+            return
+        }
+        setSmoothLoopItemBy(AVAsset(url: url), smoothLoopCount: loopCount)
+    }
+
+    public func setSmoothLoopItemBy(_ asset: AVAsset?, smoothLoopCount loopCount: Int) {
+        guard let asset = asset else {
+            return
+        }
+        let composition = AVMutableComposition()
+        let timeRange = CMTimeRangeMake(kCMTimeZero, asset.duration)
+        do {
+            for _ in 0..<loopCount {
+                try composition.insertTimeRange(timeRange, of: asset, at: composition.duration)
+            }
+        } catch {
+            
+        }
+        self.setItemBy(composition)
+        _itemsLoopLength = Float64(loopCount)
+    }
+    
+    @objc func playReachedEnd(_ noti: Notification) {
+        if let object = noti.object as? AVPlayerItem, self.currentItem == object {
+            if self.isLoopEnabled {
+                self.seek(to: kCMTimeZero)
+                if self.isPlaying {
+                    self.play()
+                }
+            }
+            delegate?.player(self, didReachEndFor: self.currentItem)
+        }
+    }
 }
+
+

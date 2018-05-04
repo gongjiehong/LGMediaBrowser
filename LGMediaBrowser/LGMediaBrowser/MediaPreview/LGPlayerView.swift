@@ -10,10 +10,10 @@ import UIKit
 import AVFoundation
 
 /// 播放视频和音频的视图
-open class LGAudioAndVideoPlayerView: UIView {
+open class LGPlayerView: UIView {
     
     /// 播放器对象
-    open weak var player: AVPlayer?
+    open weak var player: LGPlayer?
     
     /// 指定当前视图的layerclass，方便播放
     open override class var layerClass: Swift.AnyClass {
@@ -42,15 +42,23 @@ open class LGAudioAndVideoPlayerView: UIView {
     ///   - isMuted: 是否如静音，默认不静音
     public init(frame: CGRect, mediaPlayerItem: AVPlayerItem, isMuted: Bool = false) {
         super.init(frame: frame)
-        let player = AVPlayer(playerItem: mediaPlayerItem)
+        let player = LGPlayer(playerItem: mediaPlayerItem)
         player.isMuted = isMuted
         constructPlayerAndPlay(player)
+        if !isMuted {
+            do {
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback,
+                                                                with: [])
+            } catch {
+                
+            }
+        }
     }
     
     /// 设置player并播放
     ///
     /// - Parameter player: 初始化完成的AVPlayer
-    private func constructPlayerAndPlay(_ player: AVPlayer) {
+    private func constructPlayerAndPlay(_ player: LGPlayer) {
         self.player = player
         if let playerLayer = self.layer as? AVPlayerLayer {
             playerLayer.player = player
