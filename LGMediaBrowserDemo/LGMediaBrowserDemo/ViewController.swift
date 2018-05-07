@@ -8,7 +8,6 @@
 
 import UIKit
 import LGMediaBrowser
-import SnapKit
 import AVFoundation
 
 class ViewController: UIViewController {
@@ -27,15 +26,12 @@ class ViewController: UIViewController {
         player.mediaType = LGMediaType.video
         self.view.addSubview(player)
         
-        player.snp.makeConstraints { (maker) in
-            maker.edges.equalTo(self.view)
-        }
         
-//        player.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
-//        player.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
-//        player.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-//        player.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        player.frame = self.view.bounds
     }
 
     override func didReceiveMemoryWarning() {

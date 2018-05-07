@@ -23,9 +23,14 @@ public protocol LGMediaLocation {
 }
 
 public protocol LGMediaProtocol {
-    var mediaURL: LGMediaLocation { get }
+    var mediaLocation: LGMediaLocation { get }
     var mediaType: LGMediaType { get }
     var isLocalFile: Bool { get }
+    
+    var placeholderImage: UIImage? { get set }
 
-    init(mediaURL: LGMediaLocation, mediaType: LGMediaType, isLocalFile: Bool)
+    init(mediaLocation: LGMediaLocation,
+         mediaType: LGMediaType,
+         isLocalFile: Bool,
+         placeholderImage: UIImage?)
 }

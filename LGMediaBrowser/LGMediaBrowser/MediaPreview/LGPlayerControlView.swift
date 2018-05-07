@@ -97,6 +97,27 @@ open class LGPlayerControlView: LGPlayerView {
         self.player?.beginSendingPlayMessages()
     }
 
+    /// 通过媒体类型和数据类型进行初始化
+    ///
+    /// - Parameters:
+    ///   - frame: 视图位置和大小
+    ///   - mediaLocation: 媒体文件位置
+    ///   - mediaType: 媒体文件类型
+    ///   - isLocalFile: 是否为本地文件
+    ///   - placeholderImage: 占位图
+    /// - Throws: 转换URL时出现异常
+    public required convenience init(frame: CGRect,
+                                     mediaLocation: LGMediaLocation,
+                                     mediaType: LGMediaType,
+                                     isLocalFile: Bool,
+                                     placeholderImage: UIImage?) throws
+    {
+        let url = try mediaLocation.asURL()
+        self.init(frame: frame, mediaURL: url, isMuted: false)
+        self.layer.contents = placeholderImage?.cgImage
+        self.mediaType = mediaType
+    }
+    
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }

@@ -9,15 +9,22 @@
 import Foundation
 
 public struct LGVideo: LGMediaProtocol {
-    public var mediaURL: LGMediaLocation
+    public var mediaLocation: LGMediaLocation
     
     public var mediaType: LGMediaType
     
     public var isLocalFile: Bool
     
-    public init(mediaURL: LGMediaLocation, mediaType: LGMediaType, isLocalFile: Bool) {
-        self.mediaURL = mediaURL
+    public var placeholderImage: UIImage?
+    
+    public init(mediaLocation: LGMediaLocation,
+                mediaType: LGMediaType,
+                isLocalFile: Bool,
+                placeholderImage: UIImage?)
+    {
+        self.mediaLocation = mediaLocation
         self.mediaType = mediaType
         self.isLocalFile = isLocalFile
+        self.placeholderImage = placeholderImage
     }
 }
