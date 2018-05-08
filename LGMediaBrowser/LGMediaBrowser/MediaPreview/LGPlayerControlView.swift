@@ -116,6 +116,7 @@ open class LGPlayerControlView: LGPlayerView {
         self.init(frame: frame, mediaURL: url, isMuted: false)
         self.layer.contents = placeholderImage?.cgImage
         self.mediaType = mediaType
+        layoutControlsIfNeeded()
     }
     
     required public init?(coder aDecoder: NSCoder) {

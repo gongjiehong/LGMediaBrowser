@@ -13,11 +13,12 @@ open class LGZoomingScrollView<ContentViewType>: UIScrollView, UIScrollViewDeleg
     ContentViewType: UIView,
     ContentViewType: LGMediaPreviewerProtocol
 {
-    var media: LGMediaProtocol? {
+    public var media: LGMediaProtocol? {
         didSet {
-            setupDefault()
-            if self.contentView != nil {
-//                self.contentView.me
+            if self.contentView == nil {
+                setupDefault()
+            } else {
+                refreshLayout()
             }
         }
     }
@@ -29,6 +30,7 @@ open class LGZoomingScrollView<ContentViewType>: UIScrollView, UIScrollViewDeleg
     public convenience init(frame: CGRect, media: LGMediaProtocol) {
         self.init(frame: frame)
         self.media = media
+        setupDefault()
     }
     
     override init(frame: CGRect) {
@@ -37,6 +39,10 @@ open class LGZoomingScrollView<ContentViewType>: UIScrollView, UIScrollViewDeleg
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    func refreshLayout() {
+        
     }
     
     func setupDefault() {
@@ -80,6 +86,10 @@ open class LGZoomingScrollView<ContentViewType>: UIScrollView, UIScrollViewDeleg
                                  .flexibleBottomMargin,
                                  .flexibleRightMargin,
                                  .flexibleLeftMargin]
+        self.isMultipleTouchEnabled = true
+        self.delaysContentTouches = false
+        self.canCancelContentTouches = true
+        self.alwaysBounceVertical = false
         
         
         let singleTap = UITapGestureRecognizer(target: self, action: #selector(handleSingleTap(_:)))
@@ -169,6 +179,8 @@ open class LGZoomingScrollView<ContentViewType>: UIScrollView, UIScrollViewDeleg
             contentView.frame = frameToCenter
         }
         self.progressView.center = contentView.center
+        self.contentView?.frame = self.bounds
+        self.progressView.center = self.center
     }
     
     open func setMaxMinZoomScalesForCurrentBounds() {

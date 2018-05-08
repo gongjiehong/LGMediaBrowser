@@ -80,6 +80,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     /// - Parameter player: 初始化完成的AVPlayer
     private func constructPlayerAndPlay(_ player: LGPlayer) {
         self.player = player
+        self.layer.contentsGravity = kCAGravityResizeAspectFill
         if let playerLayer = self.layer as? AVPlayerLayer {
             playerLayer.player = player
         }
