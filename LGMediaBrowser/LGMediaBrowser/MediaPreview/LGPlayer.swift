@@ -9,6 +9,7 @@
 import UIKit
 import AVFoundation
 
+/// 播放器播放的相关状态回调
 public protocol LGPlayerDelegate: NSObjectProtocol {
     func player(_ palyer: LGPlayer, didPlay currentTime: CMTime, loopsCount: Int)
     
@@ -26,7 +27,9 @@ public protocol LGPlayerDelegate: NSObjectProtocol {
 }
 
 
+/// 视频和音频播放器
 open class LGPlayer: AVPlayer {
+    /// KVO相关context定义
     fileprivate struct KVOContext {
         static var statusChanged = "StatusContext"
         static var itemChanged = "CurrentItemContext"
@@ -35,21 +38,27 @@ open class LGPlayer: AVPlayer {
         static var rateChanged = "RateContext"
     }
     
+    /// 用于存储上一个AVPlayerItem
     fileprivate var _oldItem: AVPlayerItem?
     fileprivate var _itemsLoopLength: Float64 = 1.0
     fileprivate var _timeObserver: Any?
     
+    /// 是否正在播放
     public var isPlaying: Bool {
         return self.rate > 0.0
     }
     
-    
+    /// 回调
     public weak var delegate: LGPlayerDelegate?
-    public var isLoopEnabled: Bool = false {
+    
+    /// 是否开启了循环播放，开启后播放结束将自动循环
+    public var isLoopEnabled: Bool = true {
         didSet {
             self.actionAtItemEnd = isLoopEnabled ? .none : .pause
         }
     }
+    
+    /// 是否打开了播放时间回调
     public var isSendingPlayMessages: Bool {
         return _timeObserver != nil
     }
@@ -82,19 +91,28 @@ open class LGPlayer: AVPlayer {
         }
     }
     
+    /// 初始化并开启播放时间回调
     override public init() {
         super.init()
         addCurrentItemObserver()
     }
     
+    /// 通过AVPlayerItem舒适化
+    ///
+    /// - Parameter item: AVPlayerItem
     override public init(playerItem item: AVPlayerItem?) {
         super.init(playerItem: item)
     }
     
+    
+    /// 通过URL初始化，支持本地和网络文件
+    ///
+    /// - Parameter URL: 文件URL
     override public init(url URL: URL) {
         super.init(url: URL)
     }
     
+    /// 添加currentItem和rateKVO监听
     func addCurrentItemObserver() {
         self.addObserver(self,
                          forKeyPath: "currentItem",
@@ -106,6 +124,7 @@ open class LGPlayer: AVPlayer {
                          context: &KVOContext.rateChanged)
     }
     
+    /// 在currentItem生效后添加status，playbackBufferEmpty，loadedTimeRangesKVO监听和播放结束通知监听
     func initObserver() {
         removeOldObserver()
         if let currentItem = self.currentItem {
@@ -133,6 +152,7 @@ open class LGPlayer: AVPlayer {
         delegate?.player(self, didChange: self.currentItem)
     }
     
+    /// 移除KVO监听和播放结束监听
     func removeOldObserver() {
         NotificationCenter.default.removeObserver(self)
         if let oldItem = _oldItem {
@@ -210,6 +230,7 @@ open class LGPlayer: AVPlayer {
         }
     }
     
+    /// 开始播放过程中的播放时间监听，每秒回调24次
     func beginSendingPlayMessages() {
         if !isSendingPlayMessages {
             _timeObserver = self.addPeriodicTimeObserver(forInterval: CMTime(value: 1,
@@ -239,6 +260,7 @@ open class LGPlayer: AVPlayer {
         }
     }
     
+    /// 关闭播放时间监听
     public func endSendingPlayMessages() {
         if let timeObserver = _timeObserver {
             self.removeTimeObserver(timeObserver)
@@ -246,7 +268,7 @@ open class LGPlayer: AVPlayer {
         }
     }
     
-    
+    // MARK: -  设置AVPlayerItem
     public func setItemBy(_ stringPath: String?) {
         if let path = stringPath {
             if  let _ = path.range(of: "://") {
@@ -282,6 +304,7 @@ open class LGPlayer: AVPlayer {
         self.replaceCurrentItem(with: item)
     }
     
+    // MARK: -  平滑的循环播放，自动时移到开始位置
     public func setSmoothLoopItemByStringPath(_ stringPath: String?, smoothLoopCount loopCount: Int) {
         guard let path = stringPath else {
             return
@@ -318,6 +341,9 @@ open class LGPlayer: AVPlayer {
         _itemsLoopLength = Float64(loopCount)
     }
     
+    /// 播放结束处理
+    ///
+    /// - Parameter noti: 播放结束Notification
     @objc func playReachedEnd(_ noti: Notification) {
         if let object = noti.object as? AVPlayerItem, self.currentItem == object {
             if self.isLoopEnabled {

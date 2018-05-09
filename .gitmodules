@@ -1,0 +1,3 @@
+[submodule "LGWebImage"]
+	path = LGWebImage
+	url = https://github.com/gongjiehong/LGWebImage.git

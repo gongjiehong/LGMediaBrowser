@@ -9,6 +9,44 @@
 import UIKit
 import AVFoundation
 
+open class LGPlayToolGradientView: UIView {
+    public enum Mode {
+        case topToBottom
+        case center
+    }
+    
+    open override class var layerClass: Swift.AnyClass {
+        return CAGradientLayer.self
+    }
+    
+    public var mode: Mode = .topToBottom
+    
+    override open func layoutSubviews() {
+        super.layoutSubviews()
+        if let layer = self.layer as? CAGradientLayer {
+            switch self.mode {
+            case .topToBottom:
+                layer.colors = [UIColor.clear.cgColor,
+                                UIColor.black.withAlphaComponent(0.1).cgColor,
+                                UIColor.black.withAlphaComponent(0.2).cgColor]
+                layer.locations = [NSNumber(value: 0.0), NSNumber(value: 0.5), NSNumber(value: 1.0)]
+                layer.startPoint = CGPoint(x: 0.5, y: 0)
+                layer.endPoint = CGPoint(x: 0.5, y: 1)
+                break
+            case .center:
+                layer.colors = [UIColor.black.withAlphaComponent(0.05).cgColor,
+                                UIColor.black.withAlphaComponent(0.2).cgColor,
+                                UIColor.black.withAlphaComponent(0.05).cgColor]
+                layer.locations = [NSNumber(value: 0.0), NSNumber(value: 0.5), NSNumber(value: 1.0)]
+                layer.startPoint = CGPoint(x: 0.5, y: 0)
+                layer.endPoint = CGPoint(x: 0.5, y: 1)
+                break
+            }
+        }
+    }
+}
+
+
 open class LGPlayerControlView: LGPlayerView {
     fileprivate struct ControlsConfig {
         static var labelWidth: CGFloat = 50.0
@@ -20,6 +58,7 @@ open class LGPlayerControlView: LGPlayerView {
         static var bigPlayButtonWidth: CGFloat = 60.0
         static var bigPlayButtonHeight: CGFloat = 60.0
         static var sliderHeight: CGFloat = 20.0
+        static var toolbarHeight: CGFloat = ControlsConfig.sliderHeight + ControlsConfig.padding * 2
     }
     
     lazy var centerPlayButton: UIButton = {
@@ -91,11 +130,27 @@ open class LGPlayerControlView: LGPlayerView {
         return label
     }()
 
+    var isHiddenTools: Bool = false
+    var isAnimating: Bool = false
+    
+    lazy var tapGesture: UITapGestureRecognizer = {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(showOrHideControls))
+        return tap
+    }()
+    
+    lazy var toolBackgroundView: LGPlayToolGradientView = {
+        let toolView = LGPlayToolGradientView(frame: CGRect.zero)
+        return toolView
+    }()
+    
     public override init(frame: CGRect, mediaPlayerItem: AVPlayerItem, isMuted: Bool) {
         super.init(frame: frame, mediaPlayerItem: mediaPlayerItem, isMuted: isMuted)
         self.player?.delegate = self
         self.player?.beginSendingPlayMessages()
+        self.addGestureRecognizer(tapGesture)
     }
+    
+    
 
     /// 通过媒体类型和数据类型进行初始化
     ///
@@ -112,11 +167,16 @@ open class LGPlayerControlView: LGPlayerView {
                                      isLocalFile: Bool,
                                      placeholderImage: UIImage?) throws
     {
-        let url = try mediaLocation.asURL()
-        self.init(frame: frame, mediaURL: url, isMuted: false)
-        self.layer.contents = placeholderImage?.cgImage
-        self.mediaType = mediaType
-        layoutControlsIfNeeded()
+        if let url = mediaLocation.toURL() {
+            let asset = AVURLAsset(url: url)
+            let item = AVPlayerItem(asset: asset)
+            self.init(frame: frame, mediaPlayerItem: item, isMuted: false)
+            self.layer.contents = placeholderImage?.cgImage
+            self.mediaType = mediaType
+            layoutControlsIfNeeded()
+        } else {
+            throw LGMediaBrowserError.cannotConvertToURL
+        }
     }
     
     required public init?(coder aDecoder: NSCoder) {
@@ -144,18 +204,20 @@ open class LGPlayerControlView: LGPlayerView {
     }
 
     private func constructAudioPlayerControls() {
-        self.addSubview(playOrPauseButton)
-        self.addSubview(progressSlider)
-        self.addSubview(totalTimeLabel)
-        self.addSubview(currentTimeLabel)
+        self.addSubview(toolBackgroundView)
+        toolBackgroundView.addSubview(playOrPauseButton)
+        toolBackgroundView.addSubview(progressSlider)
+        toolBackgroundView.addSubview(totalTimeLabel)
+        toolBackgroundView.addSubview(currentTimeLabel)
     }
 
     private func constructVideoPlayerControls() {
+        self.addSubview(toolBackgroundView)
         self.addSubview(centerPlayButton)
-        self.addSubview(playOrPauseButton)
-        self.addSubview(progressSlider)
-        self.addSubview(totalTimeLabel)
-        self.addSubview(currentTimeLabel)
+        toolBackgroundView.addSubview(playOrPauseButton)
+        toolBackgroundView.addSubview(progressSlider)
+        toolBackgroundView.addSubview(totalTimeLabel)
+        toolBackgroundView.addSubview(currentTimeLabel)
         progressSlider.maximumValue = 0.0
         progressSlider.minimumValue = 0.0
     }
@@ -173,17 +235,20 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     func layoutAudioControls() {
-        let labelOriginY = (self.bounds.height - ControlsConfig.labelHeight) / 2.0
-        let buttonOriginY = (self.bounds.height - ControlsConfig.smallPlayButtonHeight) / 2.0
-        let sliderOriginY = (self.bounds.height - ControlsConfig.sliderHeight) / 2.0
+        toolBackgroundView.mode = .center
+        toolBackgroundView.frame = CGRect(x: 0,
+                                          y: (self.lg_height - ControlsConfig.toolbarHeight) / 2,
+                                          width: self.lg_width,
+                                          height: ControlsConfig.toolbarHeight)
+
         
         self.playOrPauseButton.frame = CGRect(x: ControlsConfig.padding,
-                                              y: buttonOriginY,
+                                              y: ControlsConfig.padding,
                                               width:  ControlsConfig.smallPlayButtonWidth,
                                               height:  ControlsConfig.smallPlayButtonHeight)
         
         self.currentTimeLabel.frame = CGRect(x: ControlsConfig.padding * 2 + ControlsConfig.smallPlayButtonWidth,
-                                             y: labelOriginY,
+                                             y: ControlsConfig.padding,
                                              width: ControlsConfig.labelWidth,
                                              height: ControlsConfig.labelHeight)
         
@@ -196,12 +261,12 @@ open class LGPlayerControlView: LGPlayerView {
         progressSliderWidth -= (ControlsConfig.labelWidth * 2.0)
         
         self.progressSlider.frame = CGRect(x: progressSliderOriginX,
-                                           y: sliderOriginY,
+                                           y: ControlsConfig.padding,
                                            width: progressSliderWidth,
                                            height: ControlsConfig.sliderHeight)
         
         self.totalTimeLabel.frame = CGRect(x: self.bounds.width - ControlsConfig.padding - ControlsConfig.labelWidth,
-                                           y: labelOriginY,
+                                           y: ControlsConfig.padding,
                                            width: ControlsConfig.labelWidth,
                                            height: ControlsConfig.labelHeight)
     }
@@ -209,19 +274,22 @@ open class LGPlayerControlView: LGPlayerView {
     func layoutVideoControls() {
         self.centerPlayButton.center = self.center
         
-        let smallButtonOriginY = self.bounds.size.height - ControlsConfig.padding - ControlsConfig.smallPlayButtonHeight
+        toolBackgroundView.mode = .topToBottom
+        toolBackgroundView.frame = CGRect(x: 0,
+                                          y: self.lg_height - ControlsConfig.toolbarHeight,
+                                          width: self.lg_width,
+                                          height: ControlsConfig.toolbarHeight)
+        
         self.playOrPauseButton.frame = CGRect(x: ControlsConfig.padding,
-                                              y: smallButtonOriginY,
+                                              y: ControlsConfig.padding,
                                               width:  ControlsConfig.smallPlayButtonWidth,
                                               height:  ControlsConfig.smallPlayButtonHeight)
         
-        let currentTimeLabelOriginY = self.bounds.height - ControlsConfig.padding - ControlsConfig.labelHeight
         self.currentTimeLabel.frame = CGRect(x: ControlsConfig.padding * 2 + ControlsConfig.smallPlayButtonWidth,
-                                             y: currentTimeLabelOriginY,
+                                             y: ControlsConfig.padding,
                                              width: ControlsConfig.labelWidth,
                                              height: ControlsConfig.labelHeight)
         
-        let progressSliderOriginY = self.bounds.height - ControlsConfig.padding - ControlsConfig.sliderHeight
         var progressSliderOriginX = ControlsConfig.padding * 3
         progressSliderOriginX += ControlsConfig.smallPlayButtonWidth
         progressSliderOriginX += ControlsConfig.labelWidth
@@ -231,12 +299,12 @@ open class LGPlayerControlView: LGPlayerView {
         progressSliderWidth -= (ControlsConfig.labelWidth * 2.0)
         
         self.progressSlider.frame = CGRect(x: progressSliderOriginX,
-                                           y: progressSliderOriginY,
+                                           y: ControlsConfig.padding,
                                            width: progressSliderWidth,
                                            height: ControlsConfig.sliderHeight)
         
         self.totalTimeLabel.frame = CGRect(x: self.bounds.width - ControlsConfig.padding - ControlsConfig.labelWidth,
-                                           y: currentTimeLabelOriginY,
+                                           y: ControlsConfig.padding,
                                            width: ControlsConfig.labelWidth,
                                            height: ControlsConfig.labelHeight)
     }
@@ -292,7 +360,45 @@ open class LGPlayerControlView: LGPlayerView {
         let formatTime = String(format: "%02d:%02d", minutes, seconds)
         self.currentTimeLabel.text = formatTime
     }
+    
+    @objc func showOrHideControls() {
+        if isAnimating { return }
+        if isHiddenTools {
+            isAnimating = true
+            self.toolBackgroundView.alpha = 0.0
+            self.toolBackgroundView.isHidden = false
+            UIView.animate(withDuration: 0.3,
+                           animations:
+                {
+                            self.toolBackgroundView.alpha = 1.0
+            }) { (isFinished) in
+                self.isAnimating = false
+                self.isHiddenTools = false
+            }
+        } else {
+            isAnimating = true
+            self.toolBackgroundView.alpha = 1.0
+            self.toolBackgroundView.isHidden = false
+            UIView.animate(withDuration: 0.3,
+                           animations:
+                {
+                    self.toolBackgroundView.alpha = 0.0
+            }) { (isFinished) in
+                self.isAnimating = false
+                self.toolBackgroundView.isHidden = true
+                self.isHiddenTools = true
+            }
+        }
+        NotificationCenter.default.post(name: kTapedScreenNotification, object: nil)
+    }
 
+    func stopPlay() {
+        self.player?.pause()
+        self.player?.seek(to: kCMTimeZero)
+        self.progressSlider.value = 0.0
+        self.currentTimeLabel.text = "00:00"
+    }
+    
     // MARK: -  KVO监听
 
 }
@@ -349,13 +455,19 @@ extension LGPlayerControlView: LGPlayerDelegate {
     }
     
     public func player(_ player: LGPlayer, itemReadyToPlay item: AVPlayerItem?) {
-        player.play()
         guard let duration = item?.duration else {
             return
         }
+        
         if duration.seconds.isNaN {
             return
         }
+        if isAutoPlay {
+            player.play()
+        }
+        
+
+        
         let totalSeconds = Int(duration.seconds)
         let minutes = totalSeconds / 60
         let seconds = totalSeconds % 60

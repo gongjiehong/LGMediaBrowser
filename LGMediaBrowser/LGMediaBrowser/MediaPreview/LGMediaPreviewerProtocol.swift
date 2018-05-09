@@ -9,10 +9,5 @@
 import Foundation
 
 public protocol LGMediaPreviewerProtocol {
-    
-    init(frame: CGRect,
-         mediaLocation: LGMediaLocation,
-         mediaType: LGMediaType,
-         isLocalFile: Bool,
-         placeholderImage: UIImage?) throws
+    init(frame: CGRect, mediaModel: LGMediaModel) throws
 }

@@ -35,13 +35,23 @@ class ViewController: UIViewController {
         let media = LGMediaBrowser()
         media.targetView = self.imageView
         media.animationImage = UIImage(named: "1510480481")
-        media.mediaArray = [LGVideo(mediaLocation: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8",
-                                    mediaType: LGMediaType.video,
-                                    isLocalFile: false,
-                                    placeholderImage: nil),LGVideo(mediaLocation: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8",
-                                                                   mediaType: LGMediaType.video,
-                                                                   isLocalFile: false,
-                                                                   placeholderImage: nil)]
+//        let audioPath = Bundle.main.path(forResource: "Lenka - Trouble Is a Friend.", ofType: <#T##String?#>)
+        media.mediaArray = [LGMediaModel(mediaLocation: "http://staticfile.cxylg.com/94NWfqRSWgta-SCVideo.2.mp4",
+                                         mediaType: LGMediaType.video,
+                                         isLocalFile: false,
+                                         placeholderImage: UIImage(named: "1510480481")),
+                            LGMediaModel(mediaLocation: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8",
+                                         mediaType: LGMediaType.video,
+                                         isLocalFile: false,
+                                         placeholderImage: UIImage(named: "1510480481")),
+                            LGMediaModel(mediaLocation: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
+                                         mediaType: LGMediaType.generalPhoto,
+                                         isLocalFile: false,
+                                         placeholderImage: UIImage(named: "1510480481")),
+                            LGMediaModel(mediaLocation: "http://staticfile.cxylg.com/Lenka%20-%20Trouble%20Is%20a%20Friend.mp3",
+                                         mediaType: LGMediaType.audio,
+                                         isLocalFile: false,
+                                         placeholderImage: nil)]
         self.present(media, animated: true) {
             
         }

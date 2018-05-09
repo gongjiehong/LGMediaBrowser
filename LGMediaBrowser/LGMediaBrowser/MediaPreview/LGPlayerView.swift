@@ -12,6 +12,16 @@ import AVFoundation
 /// 播放视频和音频的视图
 open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     
+    public var mediaModel: LGMediaModel? {
+        didSet {
+            if let media = mediaModel {
+                let url = media.mediaLocation.toURL()
+                self.player?.setItemBy(url)
+            }
+        }
+    }
+    
+    
     /// 播放器对象
     open weak var player: LGPlayer?
     
@@ -20,8 +30,8 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         return AVPlayerLayer.self
     }
     
-    /// 是否自动播放，默认是
-    open var isAutoPlay: Bool = true
+    /// 是否自动播放，默认否
+    open var isAutoPlay: Bool = false
     
     /// 通过frame和媒体文件URL进行初始化，可选静音播放
     ///
@@ -55,24 +65,14 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         }
     }
     
-    /// 通过媒体类型和数据类型进行初始化
-    ///
-    /// - Parameters:
-    ///   - frame: 视图位置和大小
-    ///   - mediaLocation: 媒体文件位置
-    ///   - mediaType: 媒体文件类型
-    ///   - isLocalFile: 是否为本地文件
-    ///   - placeholderImage: 占位图
-    /// - Throws: 转换URL时出现异常
-    public required convenience init(frame: CGRect,
-                                     mediaLocation: LGMediaLocation,
-                                     mediaType: LGMediaType,
-                                     isLocalFile: Bool,
-                                     placeholderImage: UIImage?) throws
-    {
-        let url = try mediaLocation.asURL()
-        self.init(frame: frame, mediaURL: url, isMuted: false)
-        self.layer.contents = placeholderImage?.cgImage
+    public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
+        if let url = mediaModel.mediaLocation.toURL() {
+            self.init(frame: frame, mediaURL: url, isMuted: false)
+            self.layer.contents = mediaModel.placeholderImage?.cgImage
+            self.mediaModel = mediaModel
+        } else {
+            throw LGMediaBrowserError.cannotConvertToURL
+        }
     }
     
     /// 设置player并播放
@@ -80,7 +80,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     /// - Parameter player: 初始化完成的AVPlayer
     private func constructPlayerAndPlay(_ player: LGPlayer) {
         self.player = player
-        self.layer.contentsGravity = kCAGravityResizeAspectFill
+        self.layer.contentsGravity = kCAGravityResizeAspect
         if let playerLayer = self.layer as? AVPlayerLayer {
             playerLayer.player = player
         }

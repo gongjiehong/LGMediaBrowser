@@ -14,7 +14,11 @@ public protocol LGTapDetectingImageViewDelegate: NSObjectProtocol {
     func doubleTapDetected(_ touch: UITouch, targetView: UIImageView)
 }
 
-open class LGTapDetectingImageView: UIImageView {
+open class LGTapDetectingImageView: UIImageView, LGMediaPreviewerProtocol {
+    public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
+        self.init(frame: frame)
+    }
+    
     public weak var detectingDelegate: LGTapDetectingImageViewDelegate?
     
     override public init(frame: CGRect) {
@@ -30,6 +34,15 @@ open class LGTapDetectingImageView: UIImageView {
     override public init(image: UIImage?, highlightedImage: UIImage?) {
         super.init(image: image, highlightedImage: highlightedImage)
         self.isUserInteractionEnabled = true
+    }
+    
+    public required init(frame: CGRect,
+                         mediaLocation: LGMediaLocation,
+                         mediaType: LGMediaType,
+                         isLocalFile: Bool,
+                         placeholderImage: UIImage?) throws
+    {
+        super.init(frame: frame)
     }
     
     public required init?(coder aDecoder: NSCoder) {

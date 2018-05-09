@@ -17,6 +17,21 @@ public protocol LGMediaBrowserDataSource: NSObjectProtocol {
     
 }
 
+/// override hitTest 解决slider滑动问题
+fileprivate class LGCollectionView: UICollectionView {
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let view = super.hitTest(point, with: event)
+        if let view = view, view.isKind(of: UISlider.self) {
+            self.isScrollEnabled = false
+        } else {
+            self.isScrollEnabled = true
+        }
+        return view
+    }
+}
+
+var globalConfigs: LGMediaBrowserOptions = LGMediaBrowserOptions()
+
 
 public class LGMediaBrowser: UIViewController {
     
@@ -27,10 +42,12 @@ public class LGMediaBrowser: UIViewController {
         static var LivePhotoCell = "LGMediaBrowserLivePhotoCell"
         static var Other = "UICollectionViewCell"
     }
+    
+    private let itemPadding: CGFloat = 10.0
 
     public weak var collectionView: UICollectionView!
     
-    public var mediaArray: [LGMediaProtocol] = []
+    public var mediaArray: [LGMediaModel] = []
     
     weak var delegate: LGMediaBrowserDelegate?
     weak var dataSource: LGMediaBrowserDataSource?
@@ -42,9 +59,10 @@ public class LGMediaBrowser: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 0.0
         layout.scrollDirection = UICollectionViewScrollDirection.horizontal
-        layout.sectionInset = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 10)
+        layout.sectionInset = UIEdgeInsets(top: 0.0, left: itemPadding, bottom: 0.0, right: itemPadding)
         return layout
     }()
+    
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -60,7 +78,12 @@ public class LGMediaBrowser: UIViewController {
     }
     
     func setupCollectionView() {
-        let collection = UICollectionView(frame: self.view.bounds, collectionViewLayout: flowLayout)
+        let frame = CGRect(x: -itemPadding,
+                            y: UIDevice.topSafeMargin,
+                            width: self.view.lg_width + itemPadding * 2.0,
+                            height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+        let collection = LGCollectionView(frame: frame,
+                                          collectionViewLayout: flowLayout)
         self.collectionView = collection
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
@@ -75,6 +98,8 @@ public class LGMediaBrowser: UIViewController {
         
         self.collectionView.register(LGMediaBrowserVideoCell.self, forCellWithReuseIdentifier: Reuse.VideoCell)
         self.collectionView.register(LGMediaBrowserAudioCell.self, forCellWithReuseIdentifier: Reuse.AudioCell)
+        self.collectionView.register(LGMediaBrowserGeneralPhotoCell.self,
+                                     forCellWithReuseIdentifier: Reuse.GeneralPhotoCell)
         self.collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: Reuse.Other)
         
         self.collectionView.isMultipleTouchEnabled = true
@@ -86,7 +111,11 @@ public class LGMediaBrowser: UIViewController {
 
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        self.collectionView.frame = self.view.bounds
+        let frame = CGRect(x: -itemPadding,
+                           y: UIDevice.topSafeMargin,
+                           width: self.view.lg_width + itemPadding * 2.0,
+                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+        self.collectionView.frame = frame
         self.collectionView.reloadData()
     }
     
@@ -202,12 +231,12 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
     public func listView(_ collectionView: UICollectionView,
                                audioCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        var result: LGMediaBrowserAudioCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.AudioCell, for: indexPath)
+        if let temp = cell as? LGMediaBrowserAudioCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMediaBrowserAudioCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaArray[indexPath.row]
         return result
@@ -216,12 +245,12 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
     public func listView(_ collectionView: UICollectionView,
                                generalPhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        var result: LGMediaBrowserGeneralPhotoCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.GeneralPhotoCell, for: indexPath)
+        if let temp = cell as? LGMediaBrowserGeneralPhotoCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMediaBrowserGeneralPhotoCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaArray[indexPath.row]
         return result
@@ -254,6 +283,25 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         result.mediaModel = mediaArray[indexPath.row]
         return result
     }
+    
+    public func collectionView(_ collectionView: UICollectionView,
+                               willDisplay cell: UICollectionViewCell,
+                               forItemAt indexPath: IndexPath)
+    {
+        if let temp = cell as? LGMediaBrowserPreviewCell {
+            temp.willDisplay()
+        }
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView,
+                               didEndDisplaying cell: UICollectionViewCell,
+                               forItemAt indexPath: IndexPath)
+    {
+        if let temp = cell as? LGMediaBrowserPreviewCell {
+            temp.didEndDisplay()
+        }
+    }
+    
     
     // MARK: UICollectionViewDelegate
     

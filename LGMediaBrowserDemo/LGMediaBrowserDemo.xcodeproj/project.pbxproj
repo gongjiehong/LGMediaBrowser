@@ -16,6 +16,11 @@
 		FE0980FF2099B953006B6D8C /* LGMediaBrowser.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FE5B9DD5209B1AF700F5826C /* SnapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE5B9DD2209B1AEE00F5826C /* SnapKit.framework */; };
 		FE5B9DD6209B1AF700F5826C /* SnapKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FE5B9DD2209B1AEE00F5826C /* SnapKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FEF8976020A2A07C005E4880 /* LGWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975F20A2A07C005E4880 /* LGWebImage.framework */; };
+		FEF8976120A2A07C005E4880 /* LGWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975F20A2A07C005E4880 /* LGWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FEF8976420A2A0F0005E4880 /* LGHTTPRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */; };
+		FEF8976520A2A0F0005E4880 /* LGHTTPRequest.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FEF8979220A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -51,6 +56,8 @@
 			files = (
 				FE0980FF2099B953006B6D8C /* LGMediaBrowser.framework in Embed Frameworks */,
 				FE5B9DD6209B1AF700F5826C /* SnapKit.framework in Embed Frameworks */,
+				FEF8976120A2A07C005E4880 /* LGWebImage.framework in Embed Frameworks */,
+				FEF8976520A2A0F0005E4880 /* LGHTTPRequest.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -67,6 +74,9 @@
 		FE0980F72099B88B006B6D8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGMediaBrowser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE5B9DCC209B1AEE00F5826C /* SnapKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = SnapKit.xcodeproj; path = ../../../Sudy/SnapKit/SnapKit.xcodeproj; sourceTree = "<group>"; };
+		FEF8975F20A2A07C005E4880 /* LGWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGHTTPRequest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Lenka - Trouble Is a Friend.mp3"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -76,6 +86,8 @@
 			files = (
 				FE0980FE2099B953006B6D8C /* LGMediaBrowser.framework in Frameworks */,
 				FE5B9DD5209B1AF700F5826C /* SnapKit.framework in Frameworks */,
+				FEF8976020A2A07C005E4880 /* LGWebImage.framework in Frameworks */,
+				FEF8976420A2A0F0005E4880 /* LGHTTPRequest.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -85,6 +97,8 @@
 		FE0980DF2099B889006B6D8C = {
 			isa = PBXGroup;
 			children = (
+				FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */,
+				FEF8975F20A2A07C005E4880 /* LGWebImage.framework */,
 				FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */,
 				FE0980EA2099B88A006B6D8C /* LGMediaBrowserDemo */,
 				FE0980E92099B88A006B6D8C /* Products */,
@@ -105,6 +119,7 @@
 				FE5B9DCC209B1AEE00F5826C /* SnapKit.xcodeproj */,
 				FE0980EB2099B88A006B6D8C /* AppDelegate.swift */,
 				FE0980ED2099B88A006B6D8C /* ViewController.swift */,
+				FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */,
 				FE0980EF2099B88A006B6D8C /* Main.storyboard */,
 				FE0980F22099B88B006B6D8C /* Assets.xcassets */,
 				FE0980F42099B88B006B6D8C /* LaunchScreen.storyboard */,
@@ -208,6 +223,7 @@
 				FE0980F62099B88B006B6D8C /* LaunchScreen.storyboard in Resources */,
 				FE0980F32099B88B006B6D8C /* Assets.xcassets in Resources */,
 				FE0980F12099B88A006B6D8C /* Main.storyboard in Resources */,
+				FEF8979220A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
