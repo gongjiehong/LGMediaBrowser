@@ -362,6 +362,11 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     @objc func showOrHideControls() {
+        NotificationCenter.default.post(name: kTapedScreenNotification, object: nil)
+        if self.mediaType == LGMediaType.audio {
+            return
+        }
+        
         if isAnimating { return }
         if isHiddenTools {
             isAnimating = true
@@ -389,7 +394,7 @@ open class LGPlayerControlView: LGPlayerView {
                 self.isHiddenTools = true
             }
         }
-        NotificationCenter.default.post(name: kTapedScreenNotification, object: nil)
+        
     }
 
     func stopPlay() {
@@ -447,7 +452,9 @@ extension LGPlayerControlView: LGPlayerDelegate {
     }
     
     public func player(_ player: LGPlayer, didChange item: AVPlayerItem?) {
-        self.centerPlayButton.isHidden = false
+        if self.mediaType == LGMediaType.video {
+            self.centerPlayButton.isHidden = false
+        }
     }
     
     public func player(_ player: LGPlayer, didReachEndFor item: AVPlayerItem?) {

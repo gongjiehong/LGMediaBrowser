@@ -142,7 +142,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         tempImageView.frame = containerView.bounds
         containerView.addSubview(tempImageView)
         
-//        tempImageView.frame = calcfinalImageSize()
+        tempImageView.lg_size = calcfinalImageSize()
         
         guard let targetView = self.targetView else {
             assert(false, "targetView can not be nil")

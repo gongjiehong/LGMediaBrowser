@@ -27,6 +27,8 @@
 		FEF8975E20A2A060005E4880 /* LGWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975C20A2A058005E4880 /* LGWebImage.framework */; };
 		FEF8976A20A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
 		FEF8978A20A2ED84005E4880 /* LGMesurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8978920A2ED84005E4880 /* LGMesurement.swift */; };
+		FEF8979520A30721005E4880 /* LGButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8979320A30721005E4880 /* LGButtons.swift */; };
+		FEF8979620A30721005E4880 /* LGActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8979420A30721005E4880 /* LGActionView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -62,6 +64,8 @@
 		FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LGWebImage.xcodeproj; path = ../LGWebImage/LGWebImage.xcodeproj; sourceTree = "<group>"; };
 		FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMediaBrowserInteractiveTransition.swift; sourceTree = "<group>"; };
 		FEF8978920A2ED84005E4880 /* LGMesurement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGMesurement.swift; sourceTree = "<group>"; };
+		FEF8979320A30721005E4880 /* LGButtons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGButtons.swift; sourceTree = "<group>"; };
+		FEF8979420A30721005E4880 /* LGActionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGActionView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,8 +103,10 @@
 			children = (
 				FE9521D42092B41A0097600A /* LGMediaBrowser.h */,
 				FE9521DC2092B4410097600A /* LGMediaBrowser.swift */,
-				FEF8978920A2ED84005E4880 /* LGMesurement.swift */,
 				FE96C47020A15C5E00FC8F0A /* LGMediaBrowserDefines.swift */,
+				FEF8978920A2ED84005E4880 /* LGMesurement.swift */,
+				FEF8979420A30721005E4880 /* LGActionView.swift */,
+				FEF8979320A30721005E4880 /* LGButtons.swift */,
 				FE96C46D20A158FD00FC8F0A /* Extensions */,
 				FE96C46220A14C7700FC8F0A /* Animations */,
 				FE9521FA2092C9AE0097600A /* MediaPreview */,
@@ -282,6 +288,7 @@
 			files = (
 				FEE0CA76209C482200A657B0 /* LGPlayerControlView.swift in Sources */,
 				FE9521F52092B6210097600A /* LGMediaModel.swift in Sources */,
+				FEF8979620A30721005E4880 /* LGActionView.swift in Sources */,
 				FE96C46A20A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift in Sources */,
 				FE0980D82099A2C0006B6D8C /* LGZoomingScrollView.swift in Sources */,
 				FE0980DA2099A2FF006B6D8C /* LGPlayerView.swift in Sources */,
@@ -296,6 +303,7 @@
 				FE9521DD2092B4410097600A /* LGMediaBrowser.swift in Sources */,
 				FEF8978A20A2ED84005E4880 /* LGMesurement.swift in Sources */,
 				FE70E31620A0571A00554854 /* LGMediaPreviewerProtocol.swift in Sources */,
+				FEF8979520A30721005E4880 /* LGButtons.swift in Sources */,
 				FE0980D620999C6D006B6D8C /* LGTapDetectingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

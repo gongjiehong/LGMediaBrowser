@@ -55,9 +55,15 @@ public class LGMediaBrowser: UIViewController {
     public var targetView: UIView?
     public var animationImage: UIImage!
     
+    public weak var pageControl: UIPageControl!
+    weak var actionView: LGActionView!
+    
+    var currentIndex: Int = 0
+    
     lazy var flowLayout: UICollectionViewFlowLayout  = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 0.0
+        layout.minimumLineSpacing = itemPadding * 2
         layout.scrollDirection = UICollectionViewScrollDirection.horizontal
         layout.sectionInset = UIEdgeInsets(top: 0.0, left: itemPadding, bottom: 0.0, right: itemPadding)
         return layout
@@ -70,6 +76,10 @@ public class LGMediaBrowser: UIViewController {
         setupTransition()
         
         setupCollectionView()
+        
+        setupActionView()
+        
+        setupPageControl()
     }
     
     func setupTransition() {
@@ -108,6 +118,23 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.alwaysBounceVertical = false
         self.collectionView.isPagingEnabled = true
     }
+    
+    func setupActionView() {
+        let temp = LGActionView(frame: CGRect(x: 0, y: 0, width: self.view.lg_width, height: 100))
+        temp.delegate = self
+        self.actionView = temp
+        self.view.addSubview(temp)
+    }
+    
+    func setupPageControl() {
+        let originY = self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 85
+        let temp = UIPageControl(frame: CGRect(x: self.view.lg_width - 200.0,
+                                                  y: originY,
+                                                  width: 200,
+                                                  height: 20.0))
+        pageControl = temp
+        self.view.addSubview(pageControl)
+    }
 
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -117,6 +144,7 @@ public class LGMediaBrowser: UIViewController {
                            height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
         self.collectionView.frame = frame
         self.collectionView.reloadData()
+        self.actionView.animate(hidden: false)
     }
     
     override public func didReceiveMemoryWarning() {
@@ -341,8 +369,19 @@ extension LGMediaBrowser: UICollectionViewDelegateFlowLayout {
                                layout collectionViewLayout: UICollectionViewLayout,
                                sizeForItemAt indexPath: IndexPath) -> CGSize
     {
-        return self.view.bounds.size
+        return CGSize(width: self.view.lg_width,
+                      height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
     }
 }
 
+
+extension LGMediaBrowser: LGActionViewDelegate {
+    func closeButtonPressed() {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
+    func deleteButtonPressed() {
+        
+    }
+}
 
