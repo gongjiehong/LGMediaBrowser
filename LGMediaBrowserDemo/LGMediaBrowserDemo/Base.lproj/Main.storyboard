@@ -20,7 +20,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="1510480481" translatesAutoresizingMaskIntoConstraints="NO" id="6eN-xt-86R">
-                                <rect key="frame" x="100" y="245.5" width="175" height="176"/>
+                                <rect key="frame" x="100" y="461" width="175" height="176"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="6eN-xt-86R" secondAttribute="height" multiplier="249:250" id="lDX-qo-LBg"/>
                                 </constraints>
@@ -29,8 +29,8 @@
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstAttribute="trailing" secondItem="6eN-xt-86R" secondAttribute="trailing" constant="100" id="FdP-iN-3bA"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="6eN-xt-86R" secondAttribute="bottom" constant="30" id="Hga-Cu-har"/>
                             <constraint firstItem="6eN-xt-86R" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="qqa-vL-CV9"/>
-                            <constraint firstItem="6eN-xt-86R" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" id="sB3-Mg-7O0"/>
                             <constraint firstItem="6eN-xt-86R" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" constant="100" id="wrU-S7-Y3r"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>

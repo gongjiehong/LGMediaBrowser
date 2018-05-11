@@ -59,49 +59,50 @@ open class LGZoomingScrollView: UIScrollView {
             self.progressView.isShowError = true
             return
         }
-        if let image = media.placeholderImage {
-            self.imageView.image = image
-            self.displayImage(complete: true)
-        } else {
-            if let photoURL = media.mediaLocation.toURL() {
-                progressView.isShowError = false
-                if photoURL.isFileURL {
-                    DispatchQueue.utility.async {
-                        do {
-                            let data = try Data(contentsOf: photoURL)
-                            let image = LGImage.imageWith(data: data)
-                            DispatchQueue.main.async {
-                                self.imageView.image = image
-                                self.displayImage(complete: true)
-                            }
-                        } catch {
-                            DispatchQueue.main.async {
-                                self.progressView.isShowError = true
-                            }
-                        }
-                    }
-                } else {
-                    self.progressView.isHidden = false
-                    imageView.lg_setImageWithURL(photoURL,
-                                                 placeholder: media.placeholderImage,
-                                                 options: LGWebImageOptions.default,
-                                                 progressBlock:
-                        { (progressModel) in
-                            self.progressView.progress = CGFloat(progressModel.fractionCompleted)
-                    }, transformBlock: nil) { (resultImage, _, _, imageStage, error) in
-                        if error != nil {
-                            self.progressView.isShowError = true
-                        } else {
-                            self.mediaModel?.placeholderImage = resultImage
-                            self.progressView.isHidden = imageStage == LGWebImageStage.finished
-                            self.displayImage(complete: imageStage == LGWebImageStage.finished)
-                        }
-                    }
-                }
-            } else {
-                progressView.isShowError = true
-            }
-        }
+        
+        let image = media.thumbnailImage
+        self.imageView.image = image
+        self.displayImage(complete: true)
+//   
+//            if let photoURL = media.mediaLocation.toURL() {
+//                progressView.isShowError = false
+//                if photoURL.isFileURL {
+//                    DispatchQueue.utility.async {
+//                        do {
+//                            let data = try Data(contentsOf: photoURL)
+//                            let image = LGImage.imageWith(data: data)
+//                            DispatchQueue.main.async {
+//                                self.imageView.image = image
+//                                self.displayImage(complete: true)
+//                            }
+//                        } catch {
+//                            DispatchQueue.main.async {
+//                                self.progressView.isShowError = true
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    self.progressView.isHidden = false
+//                    imageView.lg_setImageWithURL(photoURL,
+//                                                 placeholder: media.thumbnailImage,
+//                                                 options: LGWebImageOptions.default,
+//                                                 progressBlock:
+//                        { (progressModel) in
+//                            self.progressView.progress = CGFloat(progressModel.fractionCompleted)
+//                    }, transformBlock: nil) { (resultImage, _, _, imageStage, error) in
+//                        guard error == nil, let image = resultImage else {
+//                            self.progressView.isShowError = true
+//                            return
+//                        }
+//                        self.mediaModel?.placeholderImage = image
+//                        self.progressView.isHidden = imageStage == LGWebImageStage.finished
+//                        self.displayImage(complete: imageStage == LGWebImageStage.finished)
+//                    }
+//                }
+//            } else {
+//                progressView.isShowError = true
+//            }
+//        }
     }
     
     open override func layoutSubviews() {
@@ -198,28 +199,24 @@ open class LGZoomingScrollView: UIScrollView {
             progressView.isHidden = true
         }
         
-        if let image = media.placeholderImage {
-            // image
-            imageView.image = image
-            
-            var imageViewFrame: CGRect = .zero
-            imageViewFrame.origin = .zero
-            // long photo
-            if globalConfigs.longPhotoWidthMatchScreen && image.size.height >= image.size.width
-            {
-                let imageHeight = LGMesurement.screenWidth / image.size.width * image.size.height
-                imageViewFrame.size = CGSize(width: LGMesurement.screenWidth, height: imageHeight)
-            } else {
-                imageViewFrame.size = image.size
-            }
-            imageView.frame = imageViewFrame
-            
-            contentSize = imageViewFrame.size
-            setMaxMinZoomScalesForCurrentBounds()
+        let image = media.thumbnailImage
+        // image
+        imageView.image = image
+        
+        var imageViewFrame: CGRect = .zero
+        imageViewFrame.origin = .zero
+        // long photo
+        if globalConfigs.longPhotoWidthMatchScreen && image.size.height >= image.size.width
+        {
+            let imageHeight = LGMesurement.screenWidth / image.size.width * image.size.height
+            imageViewFrame.size = CGSize(width: LGMesurement.screenWidth, height: imageHeight)
         } else {
-            // change contentSize will reset contentOffset, so only set the contentsize zero when the image is nil
-            contentSize = CGSize.zero
+            imageViewFrame.size = image.size
         }
+        imageView.frame = imageViewFrame
+        
+        contentSize = imageViewFrame.size
+        setMaxMinZoomScalesForCurrentBounds()
         setNeedsLayout()
     }
     

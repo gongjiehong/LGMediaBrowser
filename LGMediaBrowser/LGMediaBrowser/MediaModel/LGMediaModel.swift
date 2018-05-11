@@ -9,6 +9,8 @@
 import Foundation
 import Photos
 import AVFoundation
+import LGWebImage
+import LGHTTPRequest
 
 public enum LGMediaType {
     case generalPhoto
@@ -62,20 +64,53 @@ public class LGMediaModel {
     public private(set) var mediaType: LGMediaType
     public private(set) var isLocalFile: Bool
     
-    public var thumbnailImage: UIImage
-    public var thumbnailImageURL: 
+    private var _thumbnailImage: UIImage
+    private var _lock: NSLock = NSLock()
+    
+    public var thumbnailImage: UIImage {
+        set {
+            _lock.lock()
+            defer {
+                _lock.unlock()
+            }
+            _thumbnailImage = newValue
+        } get {
+            _lock.lock()
+            defer {
+                _lock.unlock()
+            }
+            return _thumbnailImage
+        }
+    }
+    public var thumbnailImageURL: LGURLConvertible?
     
     public init(mediaLocation: LGMediaLocation,
                 mediaType: LGMediaType,
                 isLocalFile: Bool,
-                placeholderImage: UIImage)
+                thumbnailImage: UIImage,
+                thumbnailImageURL: LGURLConvertible? = nil)
     {
         self.mediaLocation = mediaLocation
         self.mediaType = mediaType
         self.isLocalFile = isLocalFile
-        self.thumbnailImage = placeholderImage
+        _thumbnailImage = thumbnailImage
+        self.thumbnailImageURL = thumbnailImageURL
     }
     
-    public func fetch
+    public func fetchThumbnailImage() {
+        guard let url = self.thumbnailImageURL else {
+            return
+        }
+        LGWebImageManager.default.downloadImageWith(url: url,
+                                                    options: LGWebImageOptions.default,
+                                                    progress: nil,
+                                                    transform: nil)
+        { (resultImage, imageURL, sourceType, imageStage, error) in
+            guard error == nil, let image = resultImage else {
+                return
+            }
+            self.thumbnailImage = image
+        }
+    }
     
 }

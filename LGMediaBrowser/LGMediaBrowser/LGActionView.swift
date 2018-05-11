@@ -55,34 +55,26 @@ class LGActionView: UIView {
     func animate(hidden: Bool) {
         let closeFrame: CGRect = hidden ? closeButton.hideFrame : closeButton.showFrame
         let deleteFrame: CGRect = hidden ? deleteButton.hideFrame : deleteButton.showFrame
+        
+        let closeBtnHidden = !globalConfigs.displayCloseButton
+        let deleteBtnHidden = !globalConfigs.displayDeleteButton
+        
         if hidden == false {
-            self.closeButton.isHidden = hidden
-            self.deleteButton.isHidden = hidden
+            self.closeButton.isHidden = closeBtnHidden
+            self.deleteButton.isHidden = deleteBtnHidden
         }
         UIView.animate(withDuration: 0.35,
                        animations: {
                         let alpha: CGFloat = hidden ? 0.0 : 1.0
-                        
-                        if globalConfigs.displayCloseButton {
-                            self.closeButton.alpha = alpha
-                            self.closeButton.frame = closeFrame
-                        }
-                        if globalConfigs.displayDeleteButton {
-                            self.deleteButton.alpha = alpha
-                            self.deleteButton.frame = deleteFrame
-                        }
+                        self.closeButton.alpha = alpha
+                        self.closeButton.frame = closeFrame
+                        self.deleteButton.alpha = alpha
+                        self.deleteButton.frame = deleteFrame
         }) { (finished) in
             if finished {
-                if !hidden && !globalConfigs.displayCloseButton {
-                    self.closeButton.isHidden = true
-                } else {
-                    self.closeButton.isHidden = hidden
-                }
-                
-                if !hidden && !globalConfigs.displayDeleteButton {
-                    self.deleteButton.isHidden = true
-                } else {
-                    self.deleteButton.isHidden = hidden
+                if !hidden {
+                    self.closeButton.isHidden = closeBtnHidden
+                    self.deleteButton.isHidden = deleteBtnHidden
                 }
             }
         }

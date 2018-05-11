@@ -9,14 +9,6 @@
 import UIKit
 import Photos
 
-public protocol LGMediaBrowserDelegate: NSObjectProtocol {
-    
-}
-
-public protocol LGMediaBrowserDataSource: NSObjectProtocol {
-    
-}
-
 /// override hitTest 解决slider滑动问题
 fileprivate class LGCollectionView: UICollectionView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -30,8 +22,7 @@ fileprivate class LGCollectionView: UICollectionView {
     }
 }
 
-var globalConfigs: LGMediaBrowserOptions = LGMediaBrowserOptions()
-
+var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
 
 public class LGMediaBrowser: UIViewController {
     
@@ -49,8 +40,8 @@ public class LGMediaBrowser: UIViewController {
     
     public var mediaArray: [LGMediaModel] = []
     
-    weak var delegate: LGMediaBrowserDelegate?
-    weak var dataSource: LGMediaBrowserDataSource?
+    public weak var delegate: LGMediaBrowserDelegate?
+    public weak var dataSource: LGMediaBrowserDataSource?
     
     public weak var targetView: UIView?
     public weak var animationImage: UIImage!
@@ -58,7 +49,14 @@ public class LGMediaBrowser: UIViewController {
     public weak var pageControl: UIPageControl!
     weak var actionView: LGActionView!
     
-    var currentIndex: Int = 0
+    public var status: LGMediaBrowserStatus = .browsing
+    
+    var currentIndex: Int = 0 {
+        didSet {
+            self.pageControl.numberOfPages = self.mediaArray.count
+            self.pageControl.currentPage = currentIndex
+        }
+    }
     
     lazy var flowLayout: UICollectionViewFlowLayout  = {
         let layout = UICollectionViewFlowLayout()
@@ -68,6 +66,23 @@ public class LGMediaBrowser: UIViewController {
         layout.sectionInset = UIEdgeInsets(top: 0.0, left: itemPadding, bottom: 0.0, right: itemPadding)
         return layout
     }()
+    
+    override public init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    public convenience init(configs: LGMediaBrowserSettings, status: LGMediaBrowserStatus = .browsing) {
+        self.init(nibName: nil, bundle: nil)
+        globalConfigs = configs
+        self.status = status
+        if self.status == .browsingAndEditing {
+            globalConfigs.displayDeleteButton = true
+        }
+    }
     
     
     override public func viewDidLoad() {
@@ -80,6 +95,17 @@ public class LGMediaBrowser: UIViewController {
         setupActionView()
         
         setupPageControl()
+        
+        installNotifications()
+        
+        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+    }
+    
+    func installNotifications() {
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(deviceOrientationDidChange(_:)),
+                                               name: NSNotification.Name.UIDeviceOrientationDidChange,
+                                               object: nil)
     }
     
     func setupTransition() {
@@ -124,27 +150,68 @@ public class LGMediaBrowser: UIViewController {
         temp.delegate = self
         self.actionView = temp
         self.view.addSubview(temp)
+        self.actionView.animate(hidden: false)
     }
     
     func setupPageControl() {
         let originY = self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 85
-        let temp = UIPageControl(frame: CGRect(x: self.view.lg_width - 200.0,
-                                                  y: originY,
-                                                  width: 200,
-                                                  height: 20.0))
+        let temp = UIPageControl(frame: CGRect(x: 0,
+                                               y: originY,
+                                               width: self.view.lg_width,
+                                               height: 20.0))
+        temp.hidesForSinglePage = true
+        temp.isUserInteractionEnabled = false
         pageControl = temp
         self.view.addSubview(pageControl)
     }
 
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+    }
+    
+    func refreshFrames() {
         let frame = CGRect(x: -itemPadding,
                            y: UIDevice.topSafeMargin,
                            width: self.view.lg_width + itemPadding * 2.0,
                            height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
         self.collectionView.frame = frame
         self.collectionView.reloadData()
-        self.actionView.animate(hidden: false)
+        
+        if self.currentIndex != 0 {
+            self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex, section: 0),
+                                             at: UICollectionViewScrollPosition.left,
+                                             animated: true)
+        }
+        
+        self.actionView.frame = CGRect(x: 0, y: 0, width: self.view.lg_width, height: 100)
+        
+        let originY = self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 85
+        self.pageControl.frame = CGRect(x: 0,
+                                        y: originY,
+                                        width: self.view.lg_width,
+                                        height: 20.0)
+        
+        self.pageControl.numberOfPages = self.mediaArray.count
+        self.pageControl.currentPage = currentIndex
+        
+        if self.currentIndex != 0 {
+            self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
+                                                           section: 0),
+                                             at: UICollectionViewScrollPosition.left,
+                                             animated: false)
+        }
+    }
+    
+
+    
+    // MARK: -  旋转方向处理
+    private var lastOrientation: UIDeviceOrientation = UIDevice.current.orientation
+    @objc func deviceOrientationDidChange(_ noti: Notification) {
+        if UIDevice.current.orientation == lastOrientation {
+        } else {
+            lastOrientation = UIDevice.current.orientation
+            self.refreshFrames()
+        }
     }
     
     override public func didReceiveMemoryWarning() {
@@ -152,12 +219,13 @@ public class LGMediaBrowser: UIViewController {
         // Dispose of any resources that can be recreated.
     }
 
+    // MARK: -  状态栏显示与隐藏处理
     override public var preferredStatusBarStyle: UIStatusBarStyle {
         return UIStatusBarStyle.lightContent
     }
     
     override public var prefersStatusBarHidden: Bool {
-        return false
+        return !globalConfigs.displayStatusbar
     } 
     
     /*
@@ -169,9 +237,11 @@ public class LGMediaBrowser: UIViewController {
         // Pass the selected object to the new view controller.
     }
     */
-
     
-
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+        UIDevice.current.endGeneratingDeviceOrientationNotifications()
+    }
 }
 
 extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
@@ -189,6 +259,9 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     public func animationController(forDismissed dismissed: UIViewController) ->
         UIViewControllerAnimatedTransitioning?
     {
+        if self.currentIndex == 0 {
+            self.animationImage = self.mediaArray[0].thumbnailImage
+        }
         return LGMediaBrowserPresentTransition(direction: .dismiss,
                                                targetView: self.targetView,
                                                finalImageSize: animationImage.size,
@@ -330,6 +403,12 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         }
     }
     
+    public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        let index = Int(scrollView.contentOffset.x / scrollView.lg_width)
+        self.currentIndex = index
+        self.animationImage = self.mediaArray[index].thumbnailImage
+    }
+    
     
     // MARK: UICollectionViewDelegate
     
@@ -381,7 +460,34 @@ extension LGMediaBrowser: LGActionViewDelegate {
     }
     
     func deleteButtonPressed() {
+        func deleteItemRefresh() {
+            self.mediaArray.remove(at: self.currentIndex)
+            self.collectionView.performBatchUpdates({
+                self.collectionView.deleteItems(at: [IndexPath(row: self.currentIndex, section: 0)])
+            }) { (isFinished) in
+                let tempIndex = self.currentIndex - 1
+                
+                if tempIndex < 0 {
+                    if self.mediaArray.count > 0 {
+                        self.currentIndex = 0
+                    } else {
+                        self.dismiss(animated: true, completion: nil)
+                    }
+                } else {
+                    self.currentIndex = tempIndex
+                }
+            }
+        }
         
+        if let delegate = self.delegate,
+            delegate.responds(to: #selector(LGMediaBrowserDelegate.removeMedia(_:index:reload:)))
+        {
+            delegate.removeMedia!(self,
+                                  index: self.currentIndex,
+                                  reload: {
+                                    deleteItemRefresh()
+            })
+        }
     }
 }
 

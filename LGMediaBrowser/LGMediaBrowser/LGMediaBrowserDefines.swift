@@ -22,7 +22,7 @@ public enum LGMediaBrowserStatus {
     case browsingAndEditing
 }
 
-public struct LGMediaBrowserOptions {
+public struct LGMediaBrowserSettings {
     public var displayStatusbar: Bool = true
     public var displayCloseButton: Bool = true
     public var displayDeleteButton: Bool = false
@@ -42,3 +42,34 @@ public struct LGButtonOptions {
     public static var closeButtonPadding: CGPoint = CGPoint(x: 5, y: 20)
     public static var deleteButtonPadding: CGPoint = CGPoint(x: 5, y: 20)
 }
+
+@objc public protocol LGMediaBrowserDelegate: NSObjectProtocol {
+    @objc optional
+    func didShowMediaAtIndex(_ browser: LGMediaBrowser, index: Int)
+    
+    @objc optional
+    func willDismissAtPageIndex(_ index: Int)
+    
+    @objc optional
+    func didDismissAtPageIndex(_ index: Int)
+    
+    @objc optional
+    func didScrollToIndex(_ browser: LGMediaBrowser, index: Int)
+    
+    @objc optional
+    func removeMedia(_ browser: LGMediaBrowser, index: Int, reload: @escaping (() -> Void))
+    
+    @objc optional
+    func viewForMedia(_ browser: LGMediaBrowser, index: Int) -> UIView?
+    
+    @objc optional
+    func controlsVisibilityToggled(_ browser: LGMediaBrowser, hidden: Bool)
+}
+
+public protocol LGMediaBrowserDataSource: NSObjectProtocol {
+    func numberOfPhotosInPhotoBrowser(_ photoBrowser: LGMediaBrowser) -> Int
+    func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel
+}
+
+
+

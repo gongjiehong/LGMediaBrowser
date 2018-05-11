@@ -68,7 +68,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
         if let url = mediaModel.mediaLocation.toURL() {
             self.init(frame: frame, mediaURL: url, isMuted: false)
-            self.layer.contents = mediaModel.placeholderImage?.cgImage
+            self.layer.contents = mediaModel.thumbnailImage.cgImage
             self.mediaModel = mediaModel
         } else {
             throw LGMediaBrowserError.cannotConvertToURL

@@ -32,13 +32,11 @@ class ViewController: UIViewController {
     }
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
-        print("1")
-        let media = LGMediaBrowser()
+        let media = LGMediaBrowser(configs: LGMediaBrowserSettings(), status: LGMediaBrowserStatus.browsingAndEditing)
         media.targetView = self.imageView
         media.animationImage = UIImage(named: "1510480481")
         
         var dataArray = [String]()
-        print("2")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/mew_interlaced.png")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480450.jp2")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg")
@@ -60,39 +58,33 @@ class ViewController: UIViewController {
         
         
         var modelArray = [LGMediaModel]()
-        print("3")
         dataArray.forEach { (stringResult) in
             modelArray.append(LGMediaModel(mediaLocation: stringResult,
                                            mediaType: LGMediaType.generalPhoto,
                                            isLocalFile: false,
-                                           placeholderImage: UIImage(named: "1510480481")))
+                                           thumbnailImage: UIImage(named: "1510480481")!))
         }
-        print("4")
         modelArray += [LGMediaModel(mediaLocation: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
                                     mediaType: LGMediaType.generalPhoto,
                                     isLocalFile: false,
-                                    placeholderImage: UIImage(named: "1510480481")),
+                                    thumbnailImage: UIImage(named: "1510480481")!),
                        LGMediaModel(mediaLocation: "http://staticfile.cxylg.com/Lenka%20-%20Trouble%20Is%20a%20Friend.mp3",
                                     mediaType: LGMediaType.audio,
                                     isLocalFile: false,
-                                    placeholderImage: nil),
+                                    thumbnailImage: UIImage(named: "1510480481")!),
                        LGMediaModel(mediaLocation: "http://staticfile.cxylg.com/94NWfqRSWgta-SCVideo.2.mp4",
                                     mediaType: LGMediaType.video,
                                     isLocalFile: false,
-                                    placeholderImage: UIImage(named: "1510480481")),
+                                    thumbnailImage: UIImage(named: "1510480481")!),
                        LGMediaModel(mediaLocation: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8",
                                     mediaType: LGMediaType.video,
                                     isLocalFile: false,
-                                    placeholderImage: UIImage(named: "1510480481"))]
+                                    thumbnailImage: UIImage(named: "1510480481")!)]
         
         media.mediaArray = modelArray
-        print("5")
-        
-        print(media)
+        media.delegate = self
         self.present(media, animated: true) {
-            print("7")
         }
-        print("6")
     }
     
     override func viewDidLayoutSubviews() {
@@ -106,5 +98,11 @@ class ViewController: UIViewController {
     }
 
 
+}
+
+extension ViewController: LGMediaBrowserDelegate {
+    func removeMedia(_ browser: LGMediaBrowser, index: Int, reload: @escaping (() -> Void)) {
+        reload()
+    }
 }
 

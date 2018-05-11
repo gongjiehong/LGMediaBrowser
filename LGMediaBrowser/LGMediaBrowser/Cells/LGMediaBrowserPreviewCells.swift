@@ -67,7 +67,7 @@ open class LGMediaBrowserVideoCell: LGMediaBrowserPreviewCell {
                                                   mediaLocation: media.mediaLocation,
                                                   mediaType: media.mediaType,
                                                   isLocalFile: media.isLocalFile,
-                                                  placeholderImage: media.placeholderImage)
+                                                  placeholderImage: media.thumbnailImage)
             self.contentView.addSubview(previewView!)
         } catch {
             
