@@ -7,14 +7,14 @@
 //
 
 import UIKit
-//import LGWebImage
+import LGWebImage
 
 public protocol LGTapDetectingImageViewDelegate: NSObjectProtocol {
     func singleTapDetected(_ touch: UITouch, targetView: UIImageView)
     func doubleTapDetected(_ touch: UITouch, targetView: UIImageView)
 }
 
-open class LGTapDetectingImageView: UIImageView, LGMediaPreviewerProtocol {
+open class LGTapDetectingImageView: LGAnimatedImageView, LGMediaPreviewerProtocol {
     public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
         self.init(frame: frame)
     }

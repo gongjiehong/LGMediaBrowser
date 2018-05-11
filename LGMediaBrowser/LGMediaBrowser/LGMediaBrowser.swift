@@ -53,8 +53,7 @@ public class LGMediaBrowser: UIViewController {
     
     var currentIndex: Int = 0 {
         didSet {
-            self.pageControl.numberOfPages = self.mediaArray.count
-            self.pageControl.currentPage = currentIndex
+            refreshPageControl()
         }
     }
     
@@ -75,13 +74,18 @@ public class LGMediaBrowser: UIViewController {
         super.init(coder: aDecoder)
     }
     
-    public convenience init(configs: LGMediaBrowserSettings, status: LGMediaBrowserStatus = .browsing) {
+    public convenience init(mediaArray: [LGMediaModel],
+                            configs: LGMediaBrowserSettings,
+                            status: LGMediaBrowserStatus = .browsing,
+                            currentIndex: Int = 0) {
         self.init(nibName: nil, bundle: nil)
+        self.mediaArray = mediaArray
         globalConfigs = configs
         self.status = status
         if self.status == .browsingAndEditing {
             globalConfigs.displayDeleteButton = true
         }
+        self.currentIndex = currentIndex
     }
     
     
@@ -165,8 +169,21 @@ public class LGMediaBrowser: UIViewController {
         self.view.addSubview(pageControl)
     }
 
+    func refreshPageControl() {
+        self.pageControl.numberOfPages = self.mediaArray.count
+        self.pageControl.currentPage = currentIndex
+    }
+    
+    private var isFirstTimeLayout: Bool = true
+    
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        if isFirstTimeLayout {
+            refreshFrames()
+            isFirstTimeLayout = false
+        } else {
+            
+        }
     }
     
     func refreshFrames() {
@@ -191,8 +208,7 @@ public class LGMediaBrowser: UIViewController {
                                         width: self.view.lg_width,
                                         height: 20.0)
         
-        self.pageControl.numberOfPages = self.mediaArray.count
-        self.pageControl.currentPage = currentIndex
+        refreshPageControl()
         
         if self.currentIndex != 0 {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
@@ -465,16 +481,14 @@ extension LGMediaBrowser: LGActionViewDelegate {
             self.collectionView.performBatchUpdates({
                 self.collectionView.deleteItems(at: [IndexPath(row: self.currentIndex, section: 0)])
             }) { (isFinished) in
-                let tempIndex = self.currentIndex - 1
-                
-                if tempIndex < 0 {
-                    if self.mediaArray.count > 0 {
-                        self.currentIndex = 0
-                    } else {
-                        self.dismiss(animated: true, completion: nil)
-                    }
+                if self.currentIndex < self.mediaArray.count {
+                    self.refreshPageControl()
                 } else {
-                    self.currentIndex = tempIndex
+                    self.currentIndex -= 1
+                }
+                
+                if self.currentIndex < 0 {
+                    self.dismiss(animated: true, completion: nil)
                 }
             }
         }

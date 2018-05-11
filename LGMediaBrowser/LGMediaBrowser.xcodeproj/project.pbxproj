@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		FE0980D520999C6D006B6D8C /* LGTapDetectingImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D320999C6D006B6D8C /* LGTapDetectingImageView.swift */; };
-		FE0980D620999C6D006B6D8C /* LGTapDetectingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D420999C6D006B6D8C /* LGTapDetectingView.swift */; };
 		FE0980D82099A2C0006B6D8C /* LGZoomingScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D72099A2C0006B6D8C /* LGZoomingScrollView.swift */; };
 		FE0980DA2099A2FF006B6D8C /* LGPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */; };
 		FE0980DC2099A7E5006B6D8C /* LGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */; };
@@ -44,7 +43,6 @@
 
 /* Begin PBXFileReference section */
 		FE0980D320999C6D006B6D8C /* LGTapDetectingImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGTapDetectingImageView.swift; sourceTree = "<group>"; };
-		FE0980D420999C6D006B6D8C /* LGTapDetectingView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGTapDetectingView.swift; sourceTree = "<group>"; };
 		FE0980D72099A2C0006B6D8C /* LGZoomingScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGZoomingScrollView.swift; sourceTree = "<group>"; };
 		FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayerView.swift; sourceTree = "<group>"; };
 		FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayer.swift; sourceTree = "<group>"; };
@@ -148,12 +146,11 @@
 		FE9521FA2092C9AE0097600A /* MediaPreview */ = {
 			isa = PBXGroup;
 			children = (
-				FE0980D320999C6D006B6D8C /* LGTapDetectingImageView.swift */,
-				FE0980D420999C6D006B6D8C /* LGTapDetectingView.swift */,
 				FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */,
 				FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */,
 				FEE0CA75209C482200A657B0 /* LGPlayerControlView.swift */,
 				FE0980D72099A2C0006B6D8C /* LGZoomingScrollView.swift */,
+				FE0980D320999C6D006B6D8C /* LGTapDetectingImageView.swift */,
 				FE70E31520A0571A00554854 /* LGMediaPreviewerProtocol.swift */,
 			);
 			path = MediaPreview;
@@ -308,7 +305,6 @@
 				FEF8978A20A2ED84005E4880 /* LGMesurement.swift in Sources */,
 				FE70E31620A0571A00554854 /* LGMediaPreviewerProtocol.swift in Sources */,
 				FEF8979520A30721005E4880 /* LGButtons.swift in Sources */,
-				FE0980D620999C6D006B6D8C /* LGTapDetectingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

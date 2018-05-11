@@ -32,10 +32,6 @@ class ViewController: UIViewController {
     }
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
-        let media = LGMediaBrowser(configs: LGMediaBrowserSettings(), status: LGMediaBrowserStatus.browsingAndEditing)
-        media.targetView = self.imageView
-        media.animationImage = UIImage(named: "1510480481")
-        
         var dataArray = [String]()
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/mew_interlaced.png")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480450.jp2")
@@ -62,7 +58,7 @@ class ViewController: UIViewController {
             modelArray.append(LGMediaModel(mediaLocation: stringResult,
                                            mediaType: LGMediaType.generalPhoto,
                                            isLocalFile: false,
-                                           thumbnailImage: UIImage(named: "1510480481")!))
+                                           thumbnailImage: nil))
         }
         modelArray += [LGMediaModel(mediaLocation: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
                                     mediaType: LGMediaType.generalPhoto,
@@ -81,7 +77,12 @@ class ViewController: UIViewController {
                                     isLocalFile: false,
                                     thumbnailImage: UIImage(named: "1510480481")!)]
         
-        media.mediaArray = modelArray
+        let media = LGMediaBrowser(mediaArray: modelArray,
+                                   configs: LGMediaBrowserSettings(),
+                                   status: LGMediaBrowserStatus.browsingAndEditing,
+                                   currentIndex: 3)
+        media.targetView = self.imageView
+        media.animationImage = UIImage(named: "1510480481")
         media.delegate = self
         self.present(media, animated: true) {
         }

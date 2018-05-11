@@ -64,10 +64,10 @@ public class LGMediaModel {
     public private(set) var mediaType: LGMediaType
     public private(set) var isLocalFile: Bool
     
-    private var _thumbnailImage: UIImage
+    private var _thumbnailImage: UIImage?
     private var _lock: NSLock = NSLock()
     
-    public var thumbnailImage: UIImage {
+    public var thumbnailImage: UIImage? {
         set {
             _lock.lock()
             defer {
@@ -82,12 +82,13 @@ public class LGMediaModel {
             return _thumbnailImage
         }
     }
+        
     public var thumbnailImageURL: LGURLConvertible?
     
     public init(mediaLocation: LGMediaLocation,
                 mediaType: LGMediaType,
                 isLocalFile: Bool,
-                thumbnailImage: UIImage,
+                thumbnailImage: UIImage?,
                 thumbnailImageURL: LGURLConvertible? = nil)
     {
         self.mediaLocation = mediaLocation
@@ -95,6 +96,8 @@ public class LGMediaModel {
         self.isLocalFile = isLocalFile
         _thumbnailImage = thumbnailImage
         self.thumbnailImageURL = thumbnailImageURL
+        
+        fetchThumbnailImage()
     }
     
     public func fetchThumbnailImage() {
