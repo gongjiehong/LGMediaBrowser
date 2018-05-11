@@ -62,16 +62,20 @@ public class LGMediaModel {
     public private(set) var mediaType: LGMediaType
     public private(set) var isLocalFile: Bool
     
-    public var placeholderImage: UIImage?
+    public var thumbnailImage: UIImage
+    public var thumbnailImageURL: 
     
     public init(mediaLocation: LGMediaLocation,
                 mediaType: LGMediaType,
                 isLocalFile: Bool,
-                placeholderImage: UIImage?)
+                placeholderImage: UIImage)
     {
         self.mediaLocation = mediaLocation
         self.mediaType = mediaType
         self.isLocalFile = isLocalFile
-        self.placeholderImage = placeholderImage
+        self.thumbnailImage = placeholderImage
     }
+    
+    public func fetch
+    
 }

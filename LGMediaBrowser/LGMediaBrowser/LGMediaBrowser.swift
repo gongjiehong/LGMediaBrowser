@@ -52,8 +52,8 @@ public class LGMediaBrowser: UIViewController {
     weak var delegate: LGMediaBrowserDelegate?
     weak var dataSource: LGMediaBrowserDataSource?
     
-    public var targetView: UIView?
-    public var animationImage: UIImage!
+    public weak var targetView: UIView?
+    public weak var animationImage: UIImage!
     
     public weak var pageControl: UIPageControl!
     weak var actionView: LGActionView!

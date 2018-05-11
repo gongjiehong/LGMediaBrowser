@@ -20,7 +20,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
     var finalImageSize: CGSize = CGSize.zero
     var placeholderImage: UIImage?
     
-    public init(direction: Direction, targetView: UIView?, finalImageSize: CGSize, placeholderImage: UIImage) {
+    public init(direction: Direction, targetView: UIView?, finalImageSize: CGSize, placeholderImage: UIImage?) {
         super.init()
         self.direction = direction
         self.targetView = targetView
@@ -55,10 +55,12 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
     func presentAnimation(using transitionContext: UIViewControllerContextTransitioning) {
         guard let targetView = self.targetView else {
             assert(false, "targetView can not be nil")
+            return
         }
         
         guard let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) else {
             assert(false, "toVC is invalid")
+            return
         }
         
         let containerView = transitionContext.containerView
@@ -132,6 +134,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         guard let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from),
             let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) else {
             assert(false, "fromVC or toVC is invalid")
+                return
         }
         
         let tempImageView = UIImageView(image: self.placeholderImage)
@@ -142,15 +145,18 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         tempImageView.frame = containerView.bounds
         containerView.addSubview(tempImageView)
         
-        tempImageView.lg_size = calcfinalImageSize()
+        
         
         guard let targetView = self.targetView else {
             assert(false, "targetView can not be nil")
+            return
         }
         
         let rect = targetView.convert(targetView.bounds, to: containerView)
         targetView.isHidden = true
         fromVC.view.isHidden = true
+        tempImageView.lg_size = calcfinalImageSize()
+        tempImageView.lg_origin = CGPoint(x: 0, y: 160)
         
         UIView.animate(withDuration: transitionDuration(using: transitionContext),
                        animations:
