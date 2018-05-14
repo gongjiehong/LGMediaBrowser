@@ -17,7 +17,7 @@ open class LGZoomingScrollView: UIScrollView {
         }
     }
     
-    fileprivate(set) var imageView: LGTapDetectingImageView!
+    public private(set) var imageView: LGTapDetectingImageView!
     fileprivate var progressView: LGSectorProgressView!
     
     override init(frame: CGRect) {

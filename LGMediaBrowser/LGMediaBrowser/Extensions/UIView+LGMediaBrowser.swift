@@ -15,7 +15,7 @@ extension UIView {
                                   size: CGSize(width: newValue, height: self.frame.height))
             self.frame = newFrame
         } get {
-            return self.bounds.width
+            return self.frame.width
         }
     }
     
@@ -25,7 +25,7 @@ extension UIView {
                                   size: CGSize(width: self.frame.width, height: newValue))
             self.frame = newFrame
         } get {
-            return self.bounds.height
+            return self.frame.height
         }
     }
     
@@ -57,7 +57,7 @@ extension UIView {
                                   size: newValue)
             self.frame = newFrame
         } get {
-            return self.bounds.size
+            return self.frame.size
         }
     }
     

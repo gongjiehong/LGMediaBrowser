@@ -53,64 +53,95 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
     // MARK: - presentAnimation & dismissAnimation
     
     func presentAnimation(using transitionContext: UIViewControllerContextTransitioning) {
-        guard let targetView = self.targetView else {
-            assert(false, "targetView can not be nil")
-            return
-        }
         
-        guard let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) else {
-            assert(false, "toVC is invalid")
+        guard let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to),
+            let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from) else
+        {
+            assert(false, "fromVC or toVC is invalid")
             return
         }
         
         let containerView = transitionContext.containerView
-        let image = self.placeholderImage
-        let tempImageView = UIImageView(image: image)
-        let tempBgView = UIView(frame: containerView.bounds)
         
-        tempImageView.clipsToBounds = true
-        tempImageView.contentMode = UIViewContentMode.scaleAspectFill
-        tempImageView.frame = targetView.convert(targetView.bounds, to: containerView)
-        
-        tempBgView.addSubview(tempImageView)
-        containerView.addSubview(toVC.view)
-        toVC.view.frame = containerView.bounds
-        
-        toVC.view.insertSubview(tempBgView, at: 0)
-        if let temp = toVC as? LGMediaBrowser {
-            temp.collectionView?.isHidden = true
-        }
-        
-        let width: CGFloat = UIScreen.main.bounds.width
-        let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
-        
-        let imageWidth = self.calcfinalImageSize().width
-        let imageHeight = self.calcfinalImageSize().height
-        
-        UIView.animate(withDuration: transitionDuration(using: transitionContext),
-                       delay: 0.0,
-                       usingSpringWithDamping: 0.75,
-                       initialSpringVelocity: 0,
-                       options: UIViewAnimationOptions.curveEaseInOut,
-                       animations:
-            {
-                
-            tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
-                                         y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
-                                         width: imageWidth,
-                                         height: imageHeight)
-        }) { (isFinished) in
+        if let targetView = self.targetView {
+            let image = self.placeholderImage
+            let tempImageView = UIImageView(image: image)
+            let tempBgView = UIView(frame: containerView.bounds)
+            
+            tempImageView.clipsToBounds = true
+            tempImageView.contentMode = UIViewContentMode.scaleAspectFill
+            tempImageView.frame = targetView.convert(targetView.bounds, to: containerView)
+            
+            tempBgView.addSubview(tempImageView)
+            containerView.addSubview(toVC.view)
+            toVC.view.frame = containerView.bounds
+            toVC.view.alpha = 0.0
+            
+            toVC.view.insertSubview(tempBgView, at: 0)
             if let temp = toVC as? LGMediaBrowser {
-                temp.collectionView?.isHidden = false
+                temp.collectionView?.isHidden = true
             }
-            let isCanceled = transitionContext.transitionWasCancelled
-            tempImageView.removeFromSuperview()
-            tempBgView.removeFromSuperview()
-            transitionContext.completeTransition(!isCanceled)
+            
+            let width: CGFloat = UIScreen.main.bounds.width
+            let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+            
+            let imageSize = self.calcfinalImageSize()
+            let imageWidth = imageSize.width
+            let imageHeight = imageSize.height
+            
+            UIView.animate(withDuration: transitionDuration(using: transitionContext),
+                           delay: 0.0,
+                           usingSpringWithDamping: 0.75,
+                           initialSpringVelocity: 0,
+                           options: UIViewAnimationOptions.curveEaseInOut,
+                           animations:
+                {
+                    toVC.view.alpha = 1.0
+                    tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
+                                                 y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                                 width: imageWidth,
+                                                 height: imageHeight)
+            }) { (isFinished) in
+                if let temp = toVC as? LGMediaBrowser {
+                    temp.collectionView?.isHidden = false
+                }
+                let isCanceled = transitionContext.transitionWasCancelled
+                tempImageView.removeFromSuperview()
+                tempBgView.removeFromSuperview()
+                transitionContext.completeTransition(!isCanceled)
+            }
+        } else {
+            let fromView = fromVC.view
+            let toView = toVC.view
+            let duration = self.transitionDuration(using: transitionContext)
+            containerView.insertSubview(toView!, aboveSubview: fromView!)
+            let screenBounds = UIScreen.main.bounds
+            let finalFrame = CGRect(x: 0,
+                                    y: 0,
+                                    width: screenBounds.width,
+                                    height: screenBounds.height)
+            toView?.frame = CGRect(x: 0,
+                                   y: screenBounds.height,
+                                   width: screenBounds.width,
+                                   height: screenBounds.height)
+            UIView.animate(withDuration: duration,
+                           animations:
+                {
+                    toView?.frame = finalFrame
+            }) { (isFinished) in
+                let isCanceled = transitionContext.transitionWasCancelled
+                transitionContext.completeTransition(!isCanceled)
+            }
         }
     }
     
     func calcfinalImageSize() -> CGSize {
+        if self.direction == .dismiss {
+            return self.finalImageSize
+        }
+        if finalImageSize == CGSize.zero {
+            return CGSize.zero
+        }
         let kNavigationBarHeight: CGFloat = UIDevice.deviceIsiPhoneX ? 88.0 : 64.0
         let width = UIScreen.main.bounds.width
         let height = UIScreen.main.bounds.height - kNavigationBarHeight
@@ -131,42 +162,67 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
     }
     
     func dismissAnimation(using transitionContext: UIViewControllerContextTransitioning) {
-        guard let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from),
-            let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) else {
+        guard let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to),
+            let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from) else
+        {
             assert(false, "fromVC or toVC is invalid")
-                return
-        }
-        
-        let tempImageView = UIImageView(image: self.placeholderImage)
-        tempImageView.clipsToBounds = true
-        tempImageView.contentMode = UIViewContentMode.scaleAspectFill
-        
-        let containerView = transitionContext.containerView
-        tempImageView.frame = containerView.bounds
-        containerView.addSubview(tempImageView)
-        
-        
-        
-        guard let targetView = self.targetView else {
-            assert(false, "targetView can not be nil")
             return
         }
         
-        let rect = targetView.convert(targetView.bounds, to: containerView)
-        targetView.isHidden = true
-        fromVC.view.isHidden = true
-        tempImageView.lg_size = calcfinalImageSize()
-        tempImageView.lg_origin = CGPoint(x: 0, y: 160)
+        let containerView = transitionContext.containerView
         
-        UIView.animate(withDuration: transitionDuration(using: transitionContext),
-                       animations:
-            {
-                tempImageView.frame = rect
-        }) { (finished) in
-            let isCanceled = transitionContext.transitionWasCancelled
-            targetView.isHidden = false
-            tempImageView.removeFromSuperview()
-            transitionContext.completeTransition(!isCanceled)
+        if let targetView = self.targetView {
+            let tempImageView = UIImageView(image: self.placeholderImage)
+            tempImageView.clipsToBounds = true
+            tempImageView.contentMode = UIViewContentMode.scaleAspectFill
+            
+            let containerView = transitionContext.containerView
+            tempImageView.frame = containerView.bounds
+            containerView.addSubview(tempImageView)
+            
+            let rect = targetView.convert(targetView.bounds, to: containerView)
+            targetView.isHidden = true
+            fromVC.view.isHidden = true
+            
+            let width: CGFloat = UIScreen.main.bounds.width
+            let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+            
+            let imageSize = self.calcfinalImageSize()
+            let imageWidth = imageSize.width
+            let imageHeight = imageSize.height
+            tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
+                                         y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                         width: imageWidth,
+                                         height: imageHeight)
+            
+            UIView.animate(withDuration: transitionDuration(using: transitionContext),
+                           animations:
+                {
+                    tempImageView.frame = rect
+            }) { (finished) in
+                let isCanceled = transitionContext.transitionWasCancelled
+                targetView.isHidden = false
+                tempImageView.removeFromSuperview()
+                transitionContext.completeTransition(!isCanceled)
+            }
+        } else {
+            let fromView = fromVC.view
+            let toView = toVC.view
+            let duration = self.transitionDuration(using: transitionContext)
+            containerView.insertSubview(toView!, belowSubview: fromView!)
+            let screenBounds = UIScreen.main.bounds
+            let finalFrame = CGRect(x: 0,
+                                   y: screenBounds.height,
+                                   width: screenBounds.width,
+                                   height: screenBounds.height)
+            UIView.animate(withDuration: duration,
+                           animations:
+                {
+                    fromView?.frame = finalFrame
+            }) { (isFinished) in
+                let isCanceled = transitionContext.transitionWasCancelled
+                transitionContext.completeTransition(!isCanceled)
+            }
         }
     }
     

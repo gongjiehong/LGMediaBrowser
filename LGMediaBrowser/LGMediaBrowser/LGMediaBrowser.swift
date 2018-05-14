@@ -24,6 +24,8 @@ fileprivate class LGCollectionView: UICollectionView {
 
 var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
 
+var panDismissGesture: UIPanGestureRecognizer = UIPanGestureRecognizer()
+
 public class LGMediaBrowser: UIViewController {
     
     private struct Reuse {
@@ -35,7 +37,8 @@ public class LGMediaBrowser: UIViewController {
     }
     
     private let itemPadding: CGFloat = 10.0
-
+    private var interactiveTransition: LGMediaBrowserInteractiveTransition!
+    
     public weak var collectionView: UICollectionView!
     
     public var mediaArray: [LGMediaModel] = []
@@ -44,7 +47,13 @@ public class LGMediaBrowser: UIViewController {
     public weak var dataSource: LGMediaBrowserDataSource?
     
     public weak var targetView: UIView?
-    public weak var animationImage: UIImage!
+    public weak var animationImage: UIImage? {
+        if self.mediaArray.count == 0 {
+            return nil
+        }
+        let model = self.mediaArray[currentIndex]
+        return model.thumbnailImage
+    }
     
     public weak var pageControl: UIPageControl!
     weak var actionView: LGActionView!
@@ -92,6 +101,8 @@ public class LGMediaBrowser: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
 
+        self.view.backgroundColor = UIColor.black
+        
         setupTransition()
         
         setupCollectionView()
@@ -103,7 +114,14 @@ public class LGMediaBrowser: UIViewController {
         installNotifications()
         
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
+        
+        self.interactiveTransition = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView!,
+                                                                         toTargetView: self.targetView,
+                                                                         targetController: self)
+        self.interactiveTransition.addPanGestureFor(viewController: self)
+
     }
+
     
     func installNotifications() {
         NotificationCenter.default.addObserver(self,
@@ -114,7 +132,7 @@ public class LGMediaBrowser: UIViewController {
     
     func setupTransition() {
         self.transitioningDelegate = self
-        self.modalPresentationStyle = .custom
+        self.modalPresentationStyle = .currentContext
     }
     
     func setupCollectionView() {
@@ -147,6 +165,7 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.canCancelContentTouches = true
         self.collectionView.alwaysBounceVertical = false
         self.collectionView.isPagingEnabled = true
+        self.collectionView.backgroundColor = UIColor.clear
     }
     
     func setupActionView() {
@@ -262,40 +281,67 @@ public class LGMediaBrowser: UIViewController {
 
 extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     
+    func getCurrentLayoutView() -> UIView? {
+        if let cell = self.collectionView.cellForItem(at: IndexPath(row: self.currentIndex, section: 0)) {
+            if cell.isKind(of: LGMediaBrowserGeneralPhotoCell.self) == true {
+                let generalPhotoCell = cell as! LGMediaBrowserGeneralPhotoCell
+                let zoomView = generalPhotoCell.previewView as? LGZoomingScrollView
+                return zoomView?.imageView
+            } else if cell.isKind(of: LGMediaBrowserAudioCell.self) == true ||
+                cell.isKind(of: LGMediaBrowserVideoCell.self) == true {
+                return (cell as? LGMediaBrowserPreviewCell)?.previewView
+            } else {
+                return nil
+            }
+        } else {
+            return nil
+        }
+    }
+    
+    
     public func animationController(forPresented presented: UIViewController,
                                              presenting: UIViewController,
                                              source: UIViewController) -> UIViewControllerAnimatedTransitioning?
     {
+        var finalImageSize: CGSize = CGSize.zero
+        if let image = self.animationImage {
+            finalImageSize = image.size
+        } else if let layoutView = getCurrentLayoutView() {
+            finalImageSize = layoutView.lg_size
+        }
+        
         return LGMediaBrowserPresentTransition(direction: .present,
                                                targetView: self.targetView,
-                                               finalImageSize: animationImage.size,
+                                               finalImageSize: finalImageSize,
                                                placeholderImage: animationImage)
     }
     
     public func animationController(forDismissed dismissed: UIViewController) ->
         UIViewControllerAnimatedTransitioning?
     {
-        if self.currentIndex == 0 {
-            self.animationImage = self.mediaArray[0].thumbnailImage
+        var finalImageSize: CGSize = CGSize.zero
+        
+        if let layoutView = getCurrentLayoutView() {
+            finalImageSize = layoutView.lg_size
+        } else if let image = self.animationImage {
+            finalImageSize = image.size
         }
         return LGMediaBrowserPresentTransition(direction: .dismiss,
                                                targetView: self.targetView,
-                                               finalImageSize: animationImage.size,
+                                               finalImageSize: finalImageSize,
                                                placeholderImage: animationImage)
+
     }
-    
-//    public func interactionControllerForPresentation(using animator: UIViewControllerAnimatedTransitioning) ->
-//        UIViewControllerInteractiveTransitioning?
-//    {
-//        return self
-//    }
-//
-//
-//    public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) ->
-//        UIViewControllerInteractiveTransitioning?
-//    {
-//
-//    }
+
+    public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) ->
+        UIViewControllerInteractiveTransitioning?
+    {
+        self.interactiveTransition.targetController = self
+        self.interactiveTransition.toTargetView = self.targetView
+        self.interactiveTransition.fromTargetView = getCurrentLayoutView()
+        self.interactiveTransition.targetImage = self.animationImage
+        return self.interactiveTransition
+    }
 //
 //
 //    public func presentationController(forPresented presented: UIViewController,
@@ -422,7 +468,6 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let index = Int(scrollView.contentOffset.x / scrollView.lg_width)
         self.currentIndex = index
-        self.animationImage = self.mediaArray[index].thumbnailImage
     }
     
     

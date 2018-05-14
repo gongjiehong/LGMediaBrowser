@@ -22,10 +22,10 @@
 		FE96C46F20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE96C46E20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift */; };
 		FE96C47120A15C5E00FC8F0A /* LGMediaBrowserDefines.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE96C47020A15C5E00FC8F0A /* LGMediaBrowserDefines.swift */; };
 		FEABD5D220A546F700E24585 /* UIScreen+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEABD5D120A546F700E24585 /* UIScreen+LGMediaBrowser.swift */; };
+		FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
 		FEE0CA76209C482200A657B0 /* LGPlayerControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE0CA75209C482200A657B0 /* LGPlayerControlView.swift */; };
 		FEF8975120A2960B005E4880 /* UIView+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8975020A2960B005E4880 /* UIView+LGMediaBrowser.swift */; };
 		FEF8975E20A2A060005E4880 /* LGWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975C20A2A058005E4880 /* LGWebImage.framework */; };
-		FEF8976A20A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
 		FEF8978A20A2ED84005E4880 /* LGMesurement.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8978920A2ED84005E4880 /* LGMesurement.swift */; };
 		FEF8979520A30721005E4880 /* LGButtons.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8979320A30721005E4880 /* LGButtons.swift */; };
 		FEF8979620A30721005E4880 /* LGActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8979420A30721005E4880 /* LGActionView.swift */; };
@@ -295,8 +295,8 @@
 				FE9521F92092C8D50097600A /* LGMediaBrowserPreviewCells.swift in Sources */,
 				FE0980DC2099A7E5006B6D8C /* LGPlayer.swift in Sources */,
 				FEABD5D220A546F700E24585 /* UIScreen+LGMediaBrowser.swift in Sources */,
+				FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */,
 				FE96C47120A15C5E00FC8F0A /* LGMediaBrowserDefines.swift in Sources */,
-				FEF8976A20A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift in Sources */,
 				FE70E30E20A0363200554854 /* LGSectorProgressView.swift in Sources */,
 				FEF8975120A2960B005E4880 /* UIView+LGMediaBrowser.swift in Sources */,
 				FE96C46F20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift in Sources */,

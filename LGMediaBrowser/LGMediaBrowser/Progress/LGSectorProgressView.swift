@@ -49,6 +49,8 @@ open class LGSectorProgressView: UIView {
                                  blue: 0.0 / 255.0,
                                  alpha: 0.2).cgColor
         layer.path = circlePath.cgPath
+        layer.contentsScale = UIScreen.main.scale
+        layer.allowsEdgeAntialiasing = true
         return layer
     }()
     
@@ -70,6 +72,8 @@ open class LGSectorProgressView: UIView {
                                   green: 255.0 / 255.0,
                                   blue: 255.0 / 255.0,
                                   alpha: 0.8).cgColor
+        layer.contentsScale = UIScreen.main.scale
+        layer.allowsEdgeAntialiasing = true
         return layer
     }()
     
@@ -83,6 +87,8 @@ open class LGSectorProgressView: UIView {
                                   blue: 255.0 / 255.0,
                                   alpha: 0.8).cgColor
         layer.path = errorPath.cgPath
+        layer.contentsScale = UIScreen.main.scale
+        layer.allowsEdgeAntialiasing = true
         return layer
     }()
     

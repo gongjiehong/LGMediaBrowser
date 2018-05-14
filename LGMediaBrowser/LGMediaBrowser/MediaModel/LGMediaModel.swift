@@ -101,18 +101,40 @@ public class LGMediaModel {
     }
     
     public func fetchThumbnailImage() {
-        guard let url = self.thumbnailImageURL else {
-            return
-        }
-        LGWebImageManager.default.downloadImageWith(url: url,
-                                                    options: LGWebImageOptions.default,
-                                                    progress: nil,
-                                                    transform: nil)
-        { (resultImage, imageURL, sourceType, imageStage, error) in
-            guard error == nil, let image = resultImage else {
+        switch self.mediaType {
+        case .generalPhoto:
+            if let url = self.mediaLocation.toURL() {
+                LGWebImageManager.default.downloadImageWith(url: url,
+                                                            options: LGWebImageOptions.default,
+                                                            progress: nil,
+                                                            transform: nil)
+                { (resultImage, imageURL, sourceType, imageStage, error) in
+                    guard error == nil, let image = resultImage else {
+                        return
+                    }
+                    self.thumbnailImage = image
+                }
+            }
+            break
+        case .livePhoto:
+            break
+        case .audio, .video:
+            guard let url = self.thumbnailImageURL else {
                 return
             }
-            self.thumbnailImage = image
+            LGWebImageManager.default.downloadImageWith(url: url,
+                                                        options: LGWebImageOptions.default,
+                                                        progress: nil,
+                                                        transform: nil)
+            { (resultImage, imageURL, sourceType, imageStage, error) in
+                guard error == nil, let image = resultImage else {
+                    return
+                }
+                self.thumbnailImage = image
+            }
+            break
+        default:
+            break
         }
     }
     
