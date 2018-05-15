@@ -75,7 +75,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             tempBgView.addSubview(tempImageView)
             containerView.addSubview(toVC.view)
             toVC.view.frame = containerView.bounds
-            toVC.view.alpha = 0.0
+//            toVC.view.alpha = 0.0
             
             toVC.view.insertSubview(tempBgView, at: 0)
             if let temp = toVC as? LGMediaBrowser {
@@ -96,7 +96,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                            options: UIViewAnimationOptions.curveEaseInOut,
                            animations:
                 {
-                    toVC.view.alpha = 1.0
+//                    toVC.view.alpha = 1.0
                     tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
                                                  y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
                                                  width: imageWidth,
@@ -195,6 +195,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                                          width: imageWidth,
                                          height: imageHeight)
             
+            
             UIView.animate(withDuration: transitionDuration(using: transitionContext),
                            animations:
                 {
@@ -203,6 +204,12 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 let isCanceled = transitionContext.transitionWasCancelled
                 targetView.isHidden = false
                 tempImageView.removeFromSuperview()
+                if isCanceled {
+                    fromVC.view.isHidden = false
+                    fromVC.view.backgroundColor = UIColor.black
+                } else {
+                    
+                }
                 transitionContext.completeTransition(!isCanceled)
             }
         } else {

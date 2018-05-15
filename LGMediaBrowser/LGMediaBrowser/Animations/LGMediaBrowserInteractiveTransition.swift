@@ -11,7 +11,7 @@ import UIKit
 public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTransition {
     public var isInteration: Bool = false
     public weak var targetController: UIViewController?
-    private var transitionContext: UIViewControllerContextTransitioning?
+    private weak var transitionContext: UIViewControllerContextTransitioning?
     
     public weak var fromTargetView: UIView!
     public weak var toTargetView: UIView?
@@ -63,8 +63,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             let location = sender.location(in: sender.view)
             beginX = location.x
             beginY = location.y
-            self.targetController?.dismiss(animated: true, completion: nil)
             isInteration = true
+            self.targetController?.dismiss(animated: true, completion: nil)
             break
         case .changed:
             if self.isInteration {
@@ -78,8 +78,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
                 tempImageView?.center = CGPoint(x: self.transitionImageViewCenter.x + translation.x,
                                                    y: self.transitionImageViewCenter.y + translation.y)
                 tempImageView?.transform = CGAffineTransform(scaleX: imageViewScale, y: imageViewScale)
-                self.updateInteractivePercent(1 - scale * scale)
                 self.update(scale)
+                self.updateInteractivePercent(1 - scale * scale)
             }
             break
         case .ended:
@@ -88,7 +88,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
                     scale = 0.0
                 }
                 self.isInteration = false
-                if scale < 0.15 {
+                if abs(transitionY) < 100 {
                     self.cancel()
                     self.interactivePercentCancel()
                 } else {
@@ -168,7 +168,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         
         fromVC.view.backgroundColor = UIColor.clear
         if let toTargetView = self.toTargetView {
-            let rect = toTargetView.convert(toTargetView.frame, to: containerView)
+            let rect = toTargetView.convert(toTargetView.bounds, to: containerView)
         }
     }
     
@@ -184,17 +184,15 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     
     func interactivePercentCancel() {
         guard let transitionContext = transitionContext else {
-            assert(false, "transitionContext is invalid")
             return
         }
-        guard let fromVC = transitionContext.viewController(forKey: .from),
-            let toVC = transitionContext.viewController(forKey: .to) else
+        guard let fromVC = transitionContext.viewController(forKey: .from) else
         {
             assert(false, "fromVC or toVC is invalid")
             return
         }
         
-        UIView.animate(withDuration: 0.2,
+        UIView.animate(withDuration: TimeInterval(duration),
                        animations:
             {
                 fromVC.view.alpha = 1.0
@@ -202,8 +200,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
                 self.tempImageView?.center = self.transitionImageViewCenter
                 self.backgroundView?.alpha = 1.0
         }) { (isFinished) in
-            self.tempImageView?.removeFromSuperview()
             self.tempImageView?.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
             self.backgroundView = nil
             let isCanceled = transitionContext.transitionWasCancelled
@@ -213,26 +211,22 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     
     func interactivePercentFinished() {
         guard let transitionContext = transitionContext else {
-            assert(false, "transitionContext is invalid")
             return
         }
-        guard let fromVC = transitionContext.viewController(forKey: .from),
-            let toVC = transitionContext.viewController(forKey: .to) else
-        {
-            assert(false, "fromVC or toVC is invalid")
+        
+        guard let fromVC = transitionContext.viewController(forKey: .from) else {
             return
         }
         
         let containerView = transitionContext.containerView
         
-        let duration = 0.5
         let options = UIViewAnimationOptions.curveEaseOut
         let tempImageViewFrame = self.tempImageView?.frame ?? CGRect.zero
         self.tempImageView?.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.tempImageView?.transform = CGAffineTransform.identity
         self.tempImageView?.frame = tempImageViewFrame
         
-        UIView.animate(withDuration: duration,
+        UIView.animate(withDuration: TimeInterval(duration),
                        delay: 0.0,
                        usingSpringWithDamping: 0.8,
                        initialSpringVelocity: 0.1,
@@ -246,17 +240,15 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
                     self.tempImageView?.alpha = 0.0
                     self.tempImageView?.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
                 }
-                fromVC.view.alpha = 0.0
+//                fromVC.view.alpha = 0.0
                 self.backgroundView?.alpha = 0.0
         }) { (isFinished) in
-            
-            let isCanceled = transitionContext.transitionWasCancelled
-            
-            transitionContext.completeTransition(!isCanceled)
-
             self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
             
+            let isCanceled = transitionContext.transitionWasCancelled
+            
+//            transitionContext.completeTransition(!isCanceled)
         }
 
     }

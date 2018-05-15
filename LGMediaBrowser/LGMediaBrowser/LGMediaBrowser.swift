@@ -166,6 +166,7 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.alwaysBounceVertical = false
         self.collectionView.isPagingEnabled = true
         self.collectionView.backgroundColor = UIColor.clear
+        self.collectionView.keyboardDismissMode = .interactive
     }
     
     func setupActionView() {
@@ -336,6 +337,9 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) ->
         UIViewControllerInteractiveTransitioning?
     {
+        if !self.interactiveTransition.isInteration {
+            return nil
+        }
         self.interactiveTransition.targetController = self
         self.interactiveTransition.toTargetView = self.targetView
         self.interactiveTransition.fromTargetView = getCurrentLayoutView()
