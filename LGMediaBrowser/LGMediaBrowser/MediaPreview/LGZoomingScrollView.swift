@@ -51,6 +51,8 @@ open class LGZoomingScrollView: UIScrollView {
                                  .flexibleBottomMargin,
                                  .flexibleRightMargin,
                                  .flexibleLeftMargin]
+        
+        self.panGestureRecognizer.delegate = self
     }
     
     func layoutImageIfNeeded() {
@@ -314,5 +316,14 @@ private extension LGZoomingScrollView {
         let y = touchPoint.y - (w / max(UIScreen.main.scale, 2.0))
         
         return CGRect(x: x, y: y, width: w, height: h)
+    }
+}
+
+extension LGZoomingScrollView: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                                  shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    {
+        print(self.imageView.frame)
+        return false
     }
 }

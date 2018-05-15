@@ -24,6 +24,9 @@ fileprivate class LGCollectionView: UICollectionView {
 
 var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
 
+
+weak var panDissmissGesture: UIPanGestureRecognizer?
+
 public class LGMediaBrowser: UIViewController {
     
     private struct Reuse {
@@ -121,6 +124,8 @@ public class LGMediaBrowser: UIViewController {
                                                                          toTargetView: self.targetView,
                                                                          targetController: self)
         self.interactiveTransition.addPanGestureFor(viewController: self)
+        
+        panDissmissGesture = self.interactiveTransition.panGesture
     }
 
     
@@ -246,6 +251,19 @@ public class LGMediaBrowser: UIViewController {
         }
     }
     
+    // MARK: -  退出当前页面
+    
+    func dismissSelf() {
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.willDismissAtPageIndex(_:))) == true {
+            self.delegate?.willDismissAtPageIndex!(self.currentIndex)
+        }
+        self.dismiss(animated: true) {
+            if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didDismissAtPageIndex(_:))) == true {
+                self.delegate?.didDismissAtPageIndex!(self.currentIndex)
+            }
+        }
+    }
+    
 
     
     // MARK: -  旋转方向处理
@@ -288,6 +306,7 @@ public class LGMediaBrowser: UIViewController {
     }
 }
 
+// MARK: - UIViewControllerTransitioningDelegate
 extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     
     func getCurrentLayoutView() -> UIView? {
@@ -312,6 +331,12 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
                                              presenting: UIViewController,
                                              source: UIViewController) -> UIViewControllerAnimatedTransitioning?
     {
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
+        
         var finalImageSize: CGSize = CGSize.zero
         if let image = self.animationImage {
             finalImageSize = image.size
@@ -328,6 +353,12 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     public func animationController(forDismissed dismissed: UIViewController) ->
         UIViewControllerAnimatedTransitioning?
     {
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
+        
         var finalImageSize: CGSize = CGSize.zero
         
         if let layoutView = getCurrentLayoutView() {
@@ -345,6 +376,12 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) ->
         UIViewControllerInteractiveTransitioning?
     {
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
+        
         if !self.interactiveTransition.isInteration {
             return nil
         }
@@ -356,8 +393,9 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     }
 }
 
+// MARK: UICollectionViewDataSource & UICollectionViewDelegate
 extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
-    // MARK: UICollectionViewDataSource
+    
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return mediaArray.count
@@ -472,42 +510,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let index = Int(scrollView.contentOffset.x / scrollView.lg_width)
         self.currentIndex = index
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didScrollToIndex(_:index:))) == true {
+            self.delegate?.didScrollToIndex!(self, index: self.currentIndex)
+        }
     }
-    
-    
-    // MARK: UICollectionViewDelegate
-    
-    
-    /*
-     // Uncomment this method to specify if the specified item should be highlighted during tracking
-     override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
-     return true
-     }
-     */
-    
-    /*
-     // Uncomment this method to specify if the specified item should be selected
-     override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-     return true
-     }
-     */
-    
-    /*
-     // Uncomment these methods to specify if an action menu should be displayed for the specified item, and react to actions performed on the item
-     override func collectionView(_ collectionView: UICollectionView, shouldShowMenuForItemAt indexPath: IndexPath) -> Bool {
-     return false
-     }
-     
-     override func collectionView(_ collectionView: UICollectionView, canPerformAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) -> Bool {
-     return false
-     }
-     
-     override func collectionView(_ collectionView: UICollectionView, performAction action: Selector, forItemAt indexPath: IndexPath, withSender sender: Any?) {
-     
-     }
-     */
 }
 
+// MARK: - UICollectionViewDelegateFlowLayout
 extension LGMediaBrowser: UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView,
                                layout collectionViewLayout: UICollectionViewLayout,
@@ -518,10 +527,10 @@ extension LGMediaBrowser: UICollectionViewDelegateFlowLayout {
     }
 }
 
-
+// MARK: -  LGActionViewDelegate
 extension LGMediaBrowser: LGActionViewDelegate {
     func closeButtonPressed() {
-        self.dismiss(animated: true, completion: nil)
+        dismissSelf()
     }
     
     func deleteButtonPressed() {
@@ -537,7 +546,7 @@ extension LGMediaBrowser: LGActionViewDelegate {
                 }
                 
                 if self.currentIndex < 0 {
-                    self.dismiss(animated: true, completion: nil)
+                    self.dismissSelf()
                 }
             }
         }
