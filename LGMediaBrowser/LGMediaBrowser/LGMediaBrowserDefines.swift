@@ -71,5 +71,7 @@ public protocol LGMediaBrowserDataSource: NSObjectProtocol {
     func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel
 }
 
+let kPanDissmissGestureName = "lg_panDissmiss"
+
 
 

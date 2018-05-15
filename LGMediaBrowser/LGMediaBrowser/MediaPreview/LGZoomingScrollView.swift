@@ -51,8 +51,16 @@ open class LGZoomingScrollView: UIScrollView {
                                  .flexibleBottomMargin,
                                  .flexibleRightMargin,
                                  .flexibleLeftMargin]
+        self.alwaysBounceVertical = false
+        self.alwaysBounceHorizontal = false
         
         self.panGestureRecognizer.delegate = self
+        self.panGestureRecognizer.addTarget(self, action: #selector(handlePanGesture(_:)))
+    }
+    
+    @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: UIApplication.shared.keyWindow)
+        print(translation)
     }
     
     func layoutImageIfNeeded() {
@@ -320,10 +328,26 @@ private extension LGZoomingScrollView {
 }
 
 extension LGZoomingScrollView: UIGestureRecognizerDelegate {
+    
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
-                                  shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool
+                                  shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
     {
-        print(self.imageView.frame)
+        if #available(iOS 11.0, *) {
+            if gestureRecognizer == self.panGestureRecognizer &&
+                otherGestureRecognizer.lg_name == kPanDissmissGestureName &&
+                self.contentOffset.y <= -10
+            {
+                return true
+            }
+        } else {
+            if gestureRecognizer == self.panGestureRecognizer &&
+                otherGestureRecognizer.lg_name == kPanDissmissGestureName &&
+                self.contentOffset.y <= 0.0
+            {
+                return true
+            }
+        }
+
         return false
     }
 }

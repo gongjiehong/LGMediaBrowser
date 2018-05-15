@@ -24,9 +24,6 @@ fileprivate class LGCollectionView: UICollectionView {
 
 var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
 
-
-weak var panDissmissGesture: UIPanGestureRecognizer?
-
 public class LGMediaBrowser: UIViewController {
     
     private struct Reuse {
@@ -124,8 +121,6 @@ public class LGMediaBrowser: UIViewController {
                                                                          toTargetView: self.targetView,
                                                                          targetController: self)
         self.interactiveTransition.addPanGestureFor(viewController: self)
-        
-        panDissmissGesture = self.interactiveTransition.panGesture
     }
 
     
