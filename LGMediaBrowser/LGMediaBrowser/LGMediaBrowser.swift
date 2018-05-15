@@ -24,8 +24,6 @@ fileprivate class LGCollectionView: UICollectionView {
 
 var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
 
-var panDismissGesture: UIPanGestureRecognizer = UIPanGestureRecognizer()
-
 public class LGMediaBrowser: UIViewController {
     
     private struct Reuse {
@@ -115,11 +113,14 @@ public class LGMediaBrowser: UIViewController {
         
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         
+        addPanDissmissGesture()
+    }
+    
+    func addPanDissmissGesture() {
         self.interactiveTransition = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView!,
                                                                          toTargetView: self.targetView,
                                                                          targetController: self)
         self.interactiveTransition.addPanGestureFor(viewController: self)
-
     }
 
     
@@ -128,6 +129,9 @@ public class LGMediaBrowser: UIViewController {
                                                selector: #selector(deviceOrientationDidChange(_:)),
                                                name: NSNotification.Name.UIDeviceOrientationDidChange,
                                                object: nil)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(tapedScreen(_:)),
+                                               name: kTapedScreenNotification, object: nil)
     }
     
     func setupTransition() {
@@ -166,7 +170,7 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.alwaysBounceVertical = false
         self.collectionView.isPagingEnabled = true
         self.collectionView.backgroundColor = UIColor.clear
-        self.collectionView.keyboardDismissMode = .interactive
+        self.collectionView.keyboardDismissMode = .onDrag
     }
     
     func setupActionView() {
@@ -192,6 +196,10 @@ public class LGMediaBrowser: UIViewController {
     func refreshPageControl() {
         self.pageControl.numberOfPages = self.mediaArray.count
         self.pageControl.currentPage = currentIndex
+    }
+    
+    @objc func tapedScreen(_ noti: Notification) {
+        
     }
     
     private var isFirstTimeLayout: Bool = true
@@ -346,14 +354,6 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         self.interactiveTransition.targetImage = self.animationImage
         return self.interactiveTransition
     }
-//
-//
-//    public func presentationController(forPresented presented: UIViewController,
-//                                                presenting: UIViewController?,
-//                                                source: UIViewController) -> UIPresentationController?
-//    {
-//
-//    }
 }
 
 extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {

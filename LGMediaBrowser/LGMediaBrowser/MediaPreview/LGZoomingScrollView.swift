@@ -261,7 +261,7 @@ open class LGZoomingScrollView: UIScrollView {
 
 extension LGZoomingScrollView: LGTapDetectingImageViewDelegate {
     public func singleTapDetected(_ touch: UITouch, targetView: UIImageView) {
-        self.perform(#selector(postNotification), with: nil)
+        self.perform(#selector(postNotification), with: nil, afterDelay: 0.2)
     }
     
     public func doubleTapDetected(_ touch: UITouch, targetView: UIImageView) {
@@ -277,7 +277,7 @@ extension LGZoomingScrollView: UIScrollViewDelegate {
     }
     
     public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-        self.perform(#selector(postNotification), with: nil)
+        self.perform(#selector(postNotification), with: nil, afterDelay: 0.2)
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
