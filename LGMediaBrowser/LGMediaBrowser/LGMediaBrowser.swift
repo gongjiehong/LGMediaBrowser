@@ -117,7 +117,7 @@ public class LGMediaBrowser: UIViewController {
     }
     
     func addPanDissmissGesture() {
-        self.interactiveTransition = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView!,
+        self.interactiveTransition = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView,
                                                                          toTargetView: self.targetView,
                                                                          targetController: self)
         self.interactiveTransition.addPanGestureFor(viewController: self)

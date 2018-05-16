@@ -59,6 +59,16 @@ extension AVURLAsset: LGMediaLocation {
     }
 }
 
+extension URL: LGMediaLocation {
+    public func toURL() -> URL? {
+        return self
+    }
+    
+    public func toAsset() -> PHAsset? {
+        return nil
+    }
+}
+
 public class LGMediaModel {
     public private(set) var mediaLocation: LGMediaLocation
     public private(set) var mediaType: LGMediaType
@@ -104,15 +114,27 @@ public class LGMediaModel {
         switch self.mediaType {
         case .generalPhoto:
             if let url = self.mediaLocation.toURL() {
-                LGWebImageManager.default.downloadImageWith(url: url,
-                                                            options: LGWebImageOptions.default,
-                                                            progress: nil,
-                                                            transform: nil)
-                { (resultImage, imageURL, sourceType, imageStage, error) in
-                    guard error == nil, let image = resultImage else {
-                        return
+                if isLocalFile  {
+                    if self.thumbnailImage != nil {
+                        
+                    } else {
+                        do {
+                            let data = try Data(contentsOf: url)
+                            self.thumbnailImage = LGImage.imageWith(data: data)
+                        } catch {
+                        }
                     }
-                    self.thumbnailImage = image
+                } else {
+                    LGWebImageManager.default.downloadImageWith(url: url,
+                                                                options: LGWebImageOptions.default,
+                                                                progress: nil,
+                                                                transform: nil)
+                    { (resultImage, imageURL, sourceType, imageStage, error) in
+                        guard error == nil, let image = resultImage else {
+                            return
+                        }
+                        self.thumbnailImage = image
+                    }
                 }
             }
             break

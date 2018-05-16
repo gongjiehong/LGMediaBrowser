@@ -15,7 +15,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     public weak var targetController: UIViewController?
     private weak var transitionContext: UIViewControllerContextTransitioning?
     
-    public weak var fromTargetView: UIView!
+    public weak var fromTargetView: UIView?
     public weak var toTargetView: UIView?
     public weak var targetImage: UIImage?
     private var transitionImageViewCenter: CGPoint = CGPoint.zero
@@ -24,7 +24,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     private var tempImageView: UIImageView?
     private var backgroundView: UIView?
     
-    public init(fromTargetView: UIView, toTargetView: UIView?, targetController: UIViewController) {
+    public init(fromTargetView: UIView?, toTargetView: UIView?, targetController: UIViewController?) {
         super.init()
         self.fromTargetView = fromTargetView
         self.toTargetView = toTargetView
@@ -126,7 +126,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         
         
         
-        tempImageViewFrame = fromTargetView.convert(fromTargetView.bounds, to: containerView)
+        tempImageViewFrame = fromTargetView!.convert(fromTargetView!.bounds, to: containerView)
         
         let imageView = UIImageView()
         tempImageView = imageView
