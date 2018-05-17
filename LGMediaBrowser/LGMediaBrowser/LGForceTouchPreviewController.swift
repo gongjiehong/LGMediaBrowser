@@ -60,6 +60,31 @@ open class LGForceTouchPreviewController: UIViewController {
         self.init(nibName: nil, bundle: nil)
         self.mediaModel = mediaModel
         self.currentIndex = currentIndex
+        
+        if let image = self.mediaModel?.thumbnailImage {
+            self.preferredContentSize = calcfinalImageSize(image.size)
+        }
+    }
+    
+    func calcfinalImageSize(_ finalImageSize: CGSize) -> CGSize {
+
+        let kNavigationBarHeight: CGFloat = UIDevice.deviceIsiPhoneX ? 88.0 : 64.0
+        let width = UIScreen.main.bounds.width
+        let height = UIScreen.main.bounds.height - kNavigationBarHeight
+        let imageWidth = finalImageSize.width
+        var imageHeight = finalImageSize.height
+        
+        var resultWidth: CGFloat
+        var resultHeight: CGFloat
+        imageHeight = width / imageWidth * imageHeight
+        if imageHeight > height {
+            resultWidth = height / finalImageSize.height * imageWidth
+            resultHeight = height
+        } else {
+            resultWidth = width
+            resultHeight = imageHeight
+        }
+        return CGSize(width: resultWidth, height: resultHeight)
     }
     
     override open func viewDidLoad() {
@@ -98,7 +123,8 @@ open class LGForceTouchPreviewController: UIViewController {
     func setupGeneralPhotoView() {
         self.view.addSubview(self.imageView)
         self.view.bringSubview(toFront: self.progressView)
-        self.imageView.frame = self.view.bounds
+        
+        
         if let url = self.mediaModel?.mediaLocation.toURL() {
             self.imageView.lg_setImageWithURL(url,
                                               placeholder: nil,
@@ -108,10 +134,12 @@ open class LGForceTouchPreviewController: UIViewController {
                     self?.progressView.progress = CGFloat(progress.fractionCompleted)
             }, transformBlock: nil)
             {[weak self] (resultImage, imageURL, sourceType, imageStage, error) in
-                if error == nil {
-                    self?.progressView.isHidden = true
+                guard let weakSelf = self else { return }
+                if error == nil, let resultImage = resultImage {
+                    weakSelf.progressView.isHidden = true
+                    weakSelf.preferredContentSize = weakSelf.calcfinalImageSize(resultImage.size)
                 } else {
-                    self?.progressView.isShowError = true
+                    weakSelf.progressView.isShowError = true
                 }
             }
         } else {
@@ -129,5 +157,48 @@ open class LGForceTouchPreviewController: UIViewController {
     
     func setupAudioView() {
         
+    }
+    
+    override open func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        if let model = self.mediaModel {
+            switch model.mediaType {
+            case .generalPhoto:
+                fixGeneralPhotoViewFrame()
+                break
+            case .livePhoto:
+                fixLivePhotoViewFrame()
+                break
+            case .video:
+                fixVideoViewFrame()
+                break
+            case .audio:
+                fixAudioViewFrame()
+                break
+            default:
+                break
+            }
+        }
+        
+    }
+    
+    func fixGeneralPhotoViewFrame() {
+        self.imageView.frame = self.view.bounds
+        self.progressView.center = self.view.center
+    }
+    
+    func fixLivePhotoViewFrame() {
+        self.imageView.frame = self.view.bounds
+        self.progressView.center = self.view.center
+    }
+    
+    func fixVideoViewFrame() {
+        self.imageView.frame = self.view.bounds
+        self.progressView.center = self.view.center
+    }
+    
+    func fixAudioViewFrame() {
+        self.imageView.frame = self.view.bounds
+        self.progressView.center = self.view.center
     }
 }

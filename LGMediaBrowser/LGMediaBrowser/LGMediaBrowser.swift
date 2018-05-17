@@ -99,7 +99,7 @@ public class LGMediaBrowser: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
 
-        self.view.backgroundColor = UIColor.black
+        self.view.backgroundColor = globalConfigs.backgroundColor
         
         setupTransition()
         

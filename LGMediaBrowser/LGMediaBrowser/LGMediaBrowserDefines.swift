@@ -23,7 +23,7 @@ public enum LGMediaBrowserStatus {
 }
 
 public struct LGMediaBrowserSettings {
-    public var displayStatusbar: Bool = true
+    public var displayStatusbar: Bool = false
     public var displayCloseButton: Bool = true
     public var displayDeleteButton: Bool = false
     public var longPhotoWidthMatchScreen: Bool = true

@@ -44,12 +44,13 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         self.targetController = viewController
     }
     
+    var scale: CGFloat = 0.0
+    
     @objc func handlePanGesture(_ sender: UIPanGestureRecognizer) {
         guard let gestureView = sender.view else {
             return
         }
-        var scale: CGFloat = 0.0
-        
+    
         let translation = sender.translation(in: gestureView)
         let transitionY = translation.y
         scale = transitionY / ((gestureView.lg_height - 50.0) / 2.0)
@@ -112,21 +113,21 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         
     func beginInteractivePercent() {
         guard let transitionContext = transitionContext else {
-            assert(false, "transitionContext is invalid")
             return
         }
         guard let fromVC = transitionContext.viewController(forKey: .from),
             let toVC = transitionContext.viewController(forKey: .to) else
         {
-            assert(false, "fromVC or toVC is invalid")
             return
         }
         let containerView = transitionContext.containerView
         var tempImageViewFrame: CGRect = CGRect.zero
         
+        guard let fromTargetView = fromTargetView else {
+            return
+        }
         
-        
-        tempImageViewFrame = fromTargetView!.convert(fromTargetView!.bounds, to: containerView)
+        tempImageViewFrame = fromTargetView.convert(fromTargetView.bounds, to: containerView)
         
         let imageView = UIImageView()
         tempImageView = imageView
@@ -136,11 +137,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         
         tempImageView?.image = targetImage
         
-
-        var contains = true
-        
         let bgView = UIView(frame: containerView.bounds)
-        bgView.backgroundColor = UIColor.white
+        bgView.backgroundColor = UIColor.black
         self.backgroundView = bgView
         
         var scaleX: CGFloat
@@ -168,16 +166,10 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         containerView.addSubview(fromVC.view)
         toVC.view.addSubview(self.backgroundView!)
         toVC.view.addSubview(self.tempImageView!)
-        
-        fromVC.view.backgroundColor = UIColor.clear
-        if let toTargetView = self.toTargetView {
-            let rect = toTargetView.convert(toTargetView.bounds, to: containerView)
-        }
     }
     
     func updateInteractivePercent(_ scale: CGFloat) {
         guard let fromVC = transitionContext?.viewController(forKey: .from) else {
-//            assert(false, "fromVC is invalid")
             return
         }
     
@@ -217,10 +209,6 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             return
         }
         
-        guard let fromVC = transitionContext.viewController(forKey: .from) else {
-            return
-        }
-        
         let containerView = transitionContext.containerView
         
         let options = UIViewAnimationOptions.curveEaseOut
@@ -243,22 +231,20 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
                     self.tempImageView?.alpha = 0.0
                     self.tempImageView?.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
                 }
-//                fromVC.view.alpha = 0.0
                 self.backgroundView?.alpha = 0.0
         }) { (isFinished) in
             self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
-            
-            let isCanceled = transitionContext.transitionWasCancelled
-            
-//            transitionContext.completeTransition(!isCanceled)
         }
-
     }
     
     public override func startInteractiveTransition(_ transitionContext: UIViewControllerContextTransitioning) {
         super.startInteractiveTransition(transitionContext)
         self.transitionContext = transitionContext
         self.beginInteractivePercent()
+    }
+    
+    public override var percentComplete: CGFloat {
+        return 1.0 - self.scale
     }
 }
