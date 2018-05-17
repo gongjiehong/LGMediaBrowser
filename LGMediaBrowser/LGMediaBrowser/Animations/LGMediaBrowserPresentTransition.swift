@@ -142,9 +142,8 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         if finalImageSize == CGSize.zero {
             return CGSize.zero
         }
-        let kNavigationBarHeight: CGFloat = UIDevice.deviceIsiPhoneX ? 88.0 : 64.0
         let width = UIScreen.main.bounds.width
-        let height = UIScreen.main.bounds.height - kNavigationBarHeight
+        let height = UIScreen.main.bounds.height
         let imageWidth = finalImageSize.width
         var imageHeight = finalImageSize.height
         
@@ -195,7 +194,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                                          width: imageWidth,
                                          height: imageHeight)
             
-            
+            let isInteractive = transitionContext.isInteractive
             UIView.animate(withDuration: transitionDuration(using: transitionContext),
                            animations:
                 {
@@ -207,10 +206,13 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 if isCanceled {
                     fromVC.view.isHidden = false
                     fromVC.view.backgroundColor = UIColor.black
+                    
                 } else {
                     
                 }
-                transitionContext.completeTransition(!isCanceled)
+                if !isInteractive {
+                    transitionContext.completeTransition(!isCanceled)
+                }
             }
         } else {
             let fromView = fromVC.view
@@ -232,6 +234,4 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             }
         }
     }
-    
-    
 }

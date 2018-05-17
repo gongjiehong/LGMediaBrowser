@@ -67,10 +67,8 @@ open class LGForceTouchPreviewController: UIViewController {
     }
     
     func calcfinalImageSize(_ finalImageSize: CGSize) -> CGSize {
-
-        let kNavigationBarHeight: CGFloat = UIDevice.deviceIsiPhoneX ? 88.0 : 64.0
         let width = UIScreen.main.bounds.width
-        let height = UIScreen.main.bounds.height - kNavigationBarHeight
+        let height = UIScreen.main.bounds.height
         let imageWidth = finalImageSize.width
         var imageHeight = finalImageSize.height
         

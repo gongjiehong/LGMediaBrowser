@@ -222,12 +222,6 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.frame = frame
         self.collectionView.reloadData()
         
-        if self.currentIndex != 0 {
-            self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex, section: 0),
-                                             at: UICollectionViewScrollPosition.left,
-                                             animated: true)
-        }
-        
         self.actionView.frame = CGRect(x: 0, y: 0, width: self.view.lg_width, height: 100)
         
         let originY = self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 85
@@ -241,7 +235,7 @@ public class LGMediaBrowser: UIViewController {
         if self.currentIndex != 0 {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
                                                            section: 0),
-                                             at: UICollectionViewScrollPosition.left,
+                                             at: UICollectionViewScrollPosition.centeredHorizontally,
                                              animated: false)
         }
     }

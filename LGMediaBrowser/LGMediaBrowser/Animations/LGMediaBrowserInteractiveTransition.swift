@@ -8,8 +8,6 @@
 
 import UIKit
 
-weak var panDismissGesture: UIPanGestureRecognizer?
-
 public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTransition {
     public var isInteration: Bool = false
     public weak var targetController: UIViewController?
@@ -40,7 +38,6 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
         viewController.view.addGestureRecognizer(pan)
         pan.lg_name = kPanDissmissGestureName
-        panDismissGesture = pan
         self.targetController = viewController
     }
     
@@ -235,6 +232,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         }) { (isFinished) in
             self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
+            let isCanceled = transitionContext.transitionWasCancelled
+            transitionContext.completeTransition(!isCanceled)
         }
     }
     
