@@ -22,10 +22,13 @@ fileprivate class LGCollectionView: UICollectionView {
     }
 }
 
+/// 全局设置
 var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
 
+/// 媒体文件浏览器，支持视频，音频（需要系统支持的格式）；普通图片，LivePhoto等
 public class LGMediaBrowser: UIViewController {
     
+    /// 重用标识定义
     private struct Reuse {
         static var VideoCell = "LGMediaBrowserVideoCell"
         static var AudioCell = "LGMediaBrowserAudioCell"
@@ -34,17 +37,29 @@ public class LGMediaBrowser: UIViewController {
         static var Other = "UICollectionViewCell"
     }
     
+    /// 左右元素的间距
     private let itemPadding: CGFloat = 10.0
+    
+    /// 自定义滑动dismiss Transition
     private var interactiveTransition: LGMediaBrowserInteractiveTransition!
     
+    /// 显示各种媒体文件的UICollectionView
     public weak var collectionView: UICollectionView!
     
+    /// 媒体文件模型LGMediaModel array
     public var mediaArray: [LGMediaModel] = []
     
+    /// 回调
     public weak var delegate: LGMediaBrowserDelegate?
+    
+    /// 数据源
     public weak var dataSource: LGMediaBrowserDataSource?
     
+    
+    /// 从哪个视图present上来的
     public weak var targetView: UIView?
+    
+    /// 动画用到的图片
     public weak var animationImage: UIImage? {
         if self.mediaArray.count == 0 {
             return nil
@@ -53,17 +68,23 @@ public class LGMediaBrowser: UIViewController {
         return model.thumbnailImage
     }
     
+    /// 分页标记
     public weak var pageControl: UIPageControl!
+    
+    /// 关闭和删除按钮视图
     weak var actionView: LGActionView!
     
+    /// 浏览器的当前状态，分为纯浏览和浏览并删除，浏览并删除时显示删除按钮
     public var status: LGMediaBrowserStatus = .browsing
     
+    /// 当前显示的页码
     var currentIndex: Int = 0 {
         didSet {
             refreshPageControl()
         }
     }
     
+    /// UICollectionView显示设置
     lazy var flowLayout: UICollectionViewFlowLayout  = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 0.0
@@ -73,6 +94,7 @@ public class LGMediaBrowser: UIViewController {
         return layout
     }()
     
+    // MARK: -  初始化
     override public init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
     }
@@ -95,7 +117,7 @@ public class LGMediaBrowser: UIViewController {
         self.currentIndex = currentIndex
     }
     
-    
+    // MARK: -  视图load后进行一系列初始化操作
     override public func viewDidLoad() {
         super.viewDidLoad()
 
@@ -116,29 +138,38 @@ public class LGMediaBrowser: UIViewController {
         addPanDissmissGesture()
     }
     
+    /// 添加下拉关闭手势
     func addPanDissmissGesture() {
         self.interactiveTransition = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView,
                                                                          toTargetView: self.targetView,
                                                                          targetController: self)
         self.interactiveTransition.addPanGestureFor(viewController: self)
     }
-
     
+    /// 添加通知
     func installNotifications() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(deviceOrientationDidChange(_:)),
                                                name: NSNotification.Name.UIDeviceOrientationDidChange,
                                                object: nil)
+        
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(tapedScreen(_:)),
                                                name: kTapedScreenNotification, object: nil)
+        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(needHideControls(_:)),
+                                               name: kNeedHideControlsNotification,
+                                               object: nil)
     }
     
+    /// 设置自定义动画
     func setupTransition() {
         self.transitioningDelegate = self
         self.modalPresentationStyle = .currentContext
     }
     
+    /// 设置collectionView
     func setupCollectionView() {
         let frame = CGRect(x: -itemPadding,
                             y: UIDevice.topSafeMargin,
@@ -198,10 +229,49 @@ public class LGMediaBrowser: UIViewController {
         self.pageControl.currentPage = currentIndex
     }
     
+    // MARK: -  点击屏幕关闭，或者显示控件
     @objc func tapedScreen(_ noti: Notification) {
-        
+        if globalConfigs.enableTapToClose && self.status == .browsing {
+            self.dismissSelf()
+        } else {
+            showOrHideControls(!isShowingControls)
+        }
     }
     
+    @objc func needHideControls(_ noti: Notification) {
+        showOrHideControls(false)
+    }
+    
+    private var isShowingControls: Bool = true
+    private var isAnimating: Bool = false
+    func showOrHideControls(_ show: Bool) {
+        if isAnimating {
+            return
+        }
+        isShowingControls = show
+        if show {
+            self.actionView.animate(hidden: false)
+            isAnimating = true
+            UIView.animate(withDuration: 0.25,
+                           animations:
+                {
+                    self.pageControl.alpha = 1.0
+            }) { (isFinished) in
+                self.isAnimating = false
+            }
+        } else {
+            self.actionView.animate(hidden: true)
+            UIView.animate(withDuration: 0.25,
+                           animations:
+                {
+                    self.pageControl.alpha = 0.0
+            }) { (isFinished) in
+                self.isAnimating = false
+            }
+        }
+    }
+    
+    // MARK: -  视图简要显示，处理frame
     private var isFirstTimeLayout: Bool = true
     
     override public func viewDidLayoutSubviews() {

@@ -55,12 +55,6 @@ open class LGZoomingScrollView: UIScrollView {
         self.alwaysBounceHorizontal = false
         
         self.panGestureRecognizer.delegate = self
-        self.panGestureRecognizer.addTarget(self, action: #selector(handlePanGesture(_:)))
-    }
-    
-    @objc func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
-        let translation = gesture.translation(in: UIApplication.shared.keyWindow)
-        print(translation)
     }
     
     func layoutImageIfNeeded() {
@@ -161,7 +155,7 @@ open class LGZoomingScrollView: UIScrollView {
         var minScale: CGFloat = min(xScale, yScale)
         var maxScale: CGFloat = 1.0
         
-        let scale = max(UIScreen.main.scale, 2.0)
+        let scale = max(UIScreen.main.scale, 1.5)
         // width in pixels. scale needs to remove if to use the old algorithm
         let deviceScreenWidth = UIScreen.main.bounds.width * scale
         // height in pixels. scale needs to remove if to use the old algorithm
@@ -170,7 +164,7 @@ open class LGZoomingScrollView: UIScrollView {
         if globalConfigs.longPhotoWidthMatchScreen && imageView.frame.height >= imageView.frame.width
         {
             minScale = 1.0
-            maxScale = 2.0
+            maxScale = 1.5
         } else if imageView.frame.width < deviceScreenWidth {
             if UIApplication.shared.statusBarOrientation.isPortrait {
                 maxScale = deviceScreenHeight / imageView.frame.width
@@ -180,7 +174,7 @@ open class LGZoomingScrollView: UIScrollView {
         } else if imageView.frame.width > deviceScreenWidth {
             maxScale = 1.0
         } else {
-            maxScale = 2.0
+            maxScale = 1.5
         }
         
         self.maximumZoomScale = maxScale
@@ -247,22 +241,19 @@ open class LGZoomingScrollView: UIScrollView {
             // zoom out
             setZoomScale(minimumZoomScale, animated: true)
         } else {
-            // zoom in
-            // I think that the result should be the same after double touch or pinch
-            /* var newZoom: CGFloat = zoomScale * 3.13
-             if newZoom >= maximumZoomScale {
-             newZoom = maximumZoomScale
-             }
-             */
             let zoomRect = zoomRectForScrollViewWith(maximumZoomScale, touchPoint: touchPoint)
             zoom(to: zoomRect, animated: true)
         }
         
-        postNotification()
+        postDoubleTapNotification()
     }
     
     @objc func postNotification() {
         NotificationCenter.default.post(name: kTapedScreenNotification, object: nil)
+    }
+    
+    @objc func postDoubleTapNotification() {
+        NotificationCenter.default.post(name: kNeedHideControlsNotification, object: nil)
     }
     
     deinit {
@@ -287,7 +278,7 @@ extension LGZoomingScrollView: UIScrollViewDelegate {
     }
     
     public func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-        self.perform(#selector(postNotification), with: nil, afterDelay: 0.2)
+        self.perform(#selector(postDoubleTapNotification), with: nil, afterDelay: 0.2)
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -332,20 +323,11 @@ extension LGZoomingScrollView: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                                   shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
     {
-        if #available(iOS 11.0, *) {
-            if gestureRecognizer == self.panGestureRecognizer &&
-                otherGestureRecognizer.lg_name == kPanDissmissGestureName &&
-                self.contentOffset.y <= -10
-            {
-                return true
-            }
-        } else {
-            if gestureRecognizer == self.panGestureRecognizer &&
-                otherGestureRecognizer.lg_name == kPanDissmissGestureName &&
-                self.contentOffset.y <= 0.0
-            {
-                return true
-            }
+        if gestureRecognizer == self.panGestureRecognizer &&
+            otherGestureRecognizer.lg_name == kPanDissmissGestureName &&
+            self.contentOffset.y <= 0.0
+        {
+            return true
         }
 
         return false

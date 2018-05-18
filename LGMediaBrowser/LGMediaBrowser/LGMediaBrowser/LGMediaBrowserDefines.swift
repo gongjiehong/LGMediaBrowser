@@ -30,6 +30,8 @@ public struct LGMediaBrowserSettings {
     public var backgroundColor: UIColor = UIColor.black
     public var browserStatus: LGMediaBrowserStatus = .browsing
     public var swapCloseAndDeleteButtons: Bool = false
+    public var enableTapToClose: Bool = true
+    public var playVideoAfterDownloadOrExport: Bool = true
     
     public init() {
         
@@ -37,6 +39,7 @@ public struct LGMediaBrowserSettings {
 }
 
 public let kTapedScreenNotification = Notification.Name("TapedScreenNotification")
+public let kNeedHideControlsNotification = Notification.Name("NeedHideControlsNotification")
 
 public struct LGButtonOptions {
     public static var closeButtonPadding: CGPoint = CGPoint(x: 5, y: 20)
