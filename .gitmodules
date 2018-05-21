@@ -1,3 +1,6 @@
 [submodule "LGWebImage"]
 	path = LGWebImage
 	url = https://github.com/gongjiehong/LGWebImage.git
+[submodule "GPUImage"]
+	path = GPUImage
+	url = https://github.com/BradLarson/GPUImage.git
