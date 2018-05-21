@@ -31,11 +31,26 @@
 		FEABD5D220A546F700E24585 /* UIScreen+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEABD5D120A546F700E24585 /* UIScreen+LGMediaBrowser.swift */; };
 		FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
 		FEE0CA76209C482200A657B0 /* LGPlayerControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE0CA75209C482200A657B0 /* LGPlayerControlView.swift */; };
+		FEED4BE420B2E207005E51EE /* GPUImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEED4BDA20B2E1BE005E51EE /* GPUImage.framework */; };
 		FEF8975120A2960B005E4880 /* UIView+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8975020A2960B005E4880 /* UIView+LGMediaBrowser.swift */; };
 		FEF8975E20A2A060005E4880 /* LGWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975C20A2A058005E4880 /* LGWebImage.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		FEED4BD720B2E1BE005E51EE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FEED4BD120B2E1BE005E51EE /* GPUImage.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = BCF1A33414DDB1EC00852800;
+			remoteInfo = GPUImage;
+		};
+		FEED4BD920B2E1BE005E51EE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FEED4BD120B2E1BE005E51EE /* GPUImage.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = BCE209E51943F20C002FEED8;
+			remoteInfo = GPUImageFramework;
+		};
 		FEF8975B20A2A058005E4880 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */;
@@ -71,6 +86,7 @@
 		FE96C46E20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+LGMediaBrowser.swift"; sourceTree = "<group>"; };
 		FEABD5D120A546F700E24585 /* UIScreen+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIScreen+LGMediaBrowser.swift"; sourceTree = "<group>"; };
 		FEE0CA75209C482200A657B0 /* LGPlayerControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayerControlView.swift; sourceTree = "<group>"; };
+		FEED4BD120B2E1BE005E51EE /* GPUImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GPUImage.xcodeproj; path = ../GPUImage/framework/GPUImage.xcodeproj; sourceTree = "<group>"; };
 		FEF8975020A2960B005E4880 /* UIView+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+LGMediaBrowser.swift"; sourceTree = "<group>"; };
 		FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LGWebImage.xcodeproj; path = ../LGWebImage/LGWebImage.xcodeproj; sourceTree = "<group>"; };
 		FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMediaBrowserInteractiveTransition.swift; sourceTree = "<group>"; };
@@ -81,6 +97,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEED4BE420B2E207005E51EE /* GPUImage.framework in Frameworks */,
 				FEF8975E20A2A060005E4880 /* LGWebImage.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -120,6 +137,7 @@
 		FE9521C72092B4190097600A = {
 			isa = PBXGroup;
 			children = (
+				FEED4BD120B2E1BE005E51EE /* GPUImage.xcodeproj */,
 				FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */,
 				FE9521D32092B41A0097600A /* LGMediaBrowser */,
 				FE9521D22092B41A0097600A /* Products */,
@@ -211,6 +229,15 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		FEED4BD220B2E1BE005E51EE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FEED4BD820B2E1BE005E51EE /* libGPUImage.a */,
+				FEED4BDA20B2E1BE005E51EE /* GPUImage.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		FEF8975620A2A058005E4880 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -285,6 +312,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = FEED4BD220B2E1BE005E51EE /* Products */;
+					ProjectRef = FEED4BD120B2E1BE005E51EE /* GPUImage.xcodeproj */;
+				},
+				{
 					ProductGroup = FEF8975620A2A058005E4880 /* Products */;
 					ProjectRef = FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */;
 				},
@@ -297,6 +328,20 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		FEED4BD820B2E1BE005E51EE /* libGPUImage.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libGPUImage.a;
+			remoteRef = FEED4BD720B2E1BE005E51EE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FEED4BDA20B2E1BE005E51EE /* GPUImage.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = GPUImage.framework;
+			remoteRef = FEED4BD920B2E1BE005E51EE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		FEF8975C20A2A058005E4880 /* LGWebImage.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
