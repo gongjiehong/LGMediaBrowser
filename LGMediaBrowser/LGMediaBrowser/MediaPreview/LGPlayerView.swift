@@ -21,9 +21,17 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         }
     }
     
-    
     /// 播放器对象
     open weak var player: LGPlayer?
+    
+    /// 是否静音，默认不静音
+    open var isMuted: Bool {
+        get {
+            return self.player?.isMuted ?? false
+        } set {
+            self.player?.isMuted = newValue
+        }
+    }
     
     /// 指定当前视图的layerclass，方便播放
     open override class var layerClass: Swift.AnyClass {
@@ -53,16 +61,9 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     public init(frame: CGRect, mediaPlayerItem: AVPlayerItem, isMuted: Bool = false) {
         super.init(frame: frame)
         let player = LGPlayer(playerItem: mediaPlayerItem)
-        player.isMuted = isMuted
+        self.isMuted = isMuted
         constructPlayerAndPlay(player)
-        if !isMuted {
-            do {
-                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayback,
-                                                                with: [])
-            } catch {
-                
-            }
-        }
+        
     }
     
     public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
@@ -85,6 +86,15 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
             playerLayer.player = player
         }
         self.backgroundColor = UIColor.black
+        
+        if !isMuted {
+            do {
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionModeMoviePlayback,
+                                                                with: [])
+            } catch {
+                
+            }
+        }
     }
     
     

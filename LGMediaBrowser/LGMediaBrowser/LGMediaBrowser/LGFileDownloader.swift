@@ -9,86 +9,114 @@
 import LGHTTPRequest
 import LGWebImage
 
-open class LGFileManager {
-    public init() {
-    }
+open class LGFileDownloader {
     
-    public static var tempFilesDirectory: String {
-        let tempDirSuffix = "LGFileManager/TempFile/"
-        let tempDir = NSTemporaryDirectory() + tempDirSuffix
-        return tempDir
-    }
-    
-    public static var downloadedFilesDirectory: String {
-        let cahceDir = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.cachesDirectory,
-                                                           FileManager.SearchPathDomainMask.userDomainMask,
-                                                           true)[0]
-        let downloadedFileDir = cahceDir + "/LGFileManager/"
-        return downloadedFileDir
-    }
-    
-    public static func isFileExist(_ filePath: String) -> Bool {
-        let fileManager = FileManager.default
-        return fileManager.fileExists(atPath: filePath)
-    }
-    
-    public static func isFileExist(withURLString urlString: String) -> Bool {
-        if let md5 = urlString.md5Hash() {
-            let path = self.downloadedFilesDirectory + md5
-            return isFileExist(path)
-        } else {
-            return false
+    private struct Helper {
+        static var downloaderTempFilesDirectory: String {
+            let tempDirSuffix = "LGFileDownloader/TempFile/"
+            let tempDir = NSTemporaryDirectory() + tempDirSuffix
+            createDirectory(tempDir)
+            return tempDir
         }
-    }
-    
-    public static func filePath(withURLString url: String) -> String {
-        let md5 = url.md5Hash() ?? ""
-        return self.downloadedFilesDirectory + md5
-    }
-    
-    public static func filePath(withURL url: URL) -> String {
-        if url.isFileURL {
-            return url.absoluteString
-        } else {
-            let md5 = url.absoluteString.md5Hash() ?? ""
-            return self.downloadedFilesDirectory + md5
+        
+        static var downloaderFilesDirectory: String {
+            let cahceDir = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.cachesDirectory,
+                                                               FileManager.SearchPathDomainMask.userDomainMask,
+                                                               true)[0]
+            let downloaderFilesDir = cahceDir + "/LGFileDownloader/"
+            createDirectory(downloaderFilesDir)
+            return downloaderFilesDir
         }
-    }
-    
-    /// 根据文件URL删除文件
-    ///
-    /// - Parameters:
-    ///   - url: 文件URL
-    ///   - block: 完成回调，返回是否删除成功
-    public static func removeFile(byURL url: URL, completedBlock block: ((Bool) -> Void)?) {
-        if url.isFileURL {
-            DispatchQueue.background.async {
+        
+        static func createDirectory(_ dir: String) {
+            if FileManager.default.fileExists(atPath: dir) {
+            } else {
                 do {
-                    try FileManager.default.removeItem(at: url)
-                    block?(true)
+                    let url = URL(fileURLWithPath: dir, isDirectory: true)
+                    try FileManager.default.createDirectory(at: url,
+                                                            withIntermediateDirectories: true,
+                                                            attributes: nil)
                 } catch {
-                    block?(false)
+                    println(error)
                 }
             }
-        } else {
-            block?(false)
+        }
+        
+        static func isFileExist(withRemoteURLString urlString: String) -> Bool {
+            let path = filePath(withURLString: urlString)
+            return FileManager.default.fileExists(atPath: path)
+        }
+        
+        
+        static func filePath(withURLString urlString: String) -> String {
+            if let url = URL(string: urlString) {
+                return filePath(withURL: url)
+            } else {
+                return ""
+            }
+        }
+        
+        static func filePath(withURL url: URL) -> String {
+            if url.isFileURL {
+                return url.absoluteString
+            } else {
+                let md5 = url.absoluteString.md5Hash() ?? ""
+                return self.downloaderFilesDirectory + md5 + "." + url.pathExtension
+            }
+        }
+        
+        
+        static func tempFilePath(withURLString urlString: String) -> String {
+            if let url = URL(string: urlString) {
+                return tempFilePath(withURL: url)
+            } else {
+                return ""
+            }
+        }
+        
+        static func tempFilePath(withURL url: URL) -> String {
+            if url.isFileURL {
+                return url.absoluteString
+            } else {
+                let md5 = url.absoluteString.md5Hash() ?? ""
+                return self.downloaderTempFilesDirectory + md5 + "." + url.pathExtension
+            }
+        }
+        
+        /// 根据文件URL删除文件
+        ///
+        /// - Parameters:
+        ///   - url: 文件URL
+        ///   - block: 完成回调，返回是否删除成功
+        static func removeFile(byURL url: URL, completedBlock block: ((Bool) -> Void)?) {
+            if url.isFileURL {
+                DispatchQueue.background.async {
+                    do {
+                        try FileManager.default.removeItem(at: url)
+                        block?(true)
+                    } catch {
+                        block?(false)
+                    }
+                }
+            } else {
+                block?(false)
+            }
+        }
+        
+        static func fileData(fromURL url: URL) -> Data? {
+            if !url.isFileURL {
+                return nil
+            }
+            do {
+                let data = try Data(contentsOf: url)
+                return data
+            } catch {
+                return nil
+            }
         }
     }
-
-    public static func fileData(fromURL url: URL) -> Data? {
-        if !url.isFileURL {
-            return nil
-        }
-        do {
-            let data = try Data(contentsOf: url)
-            return data
-        } catch {
-            return nil
-        }
-    }
-}
-
-open class LGFileDownloader {
+    
+    
     public init() {
     }
     
@@ -106,35 +134,166 @@ open class LGFileDownloader {
     
     public static let `default`: LGFileDownloader = {
         return LGFileDownloader()
-    }
+    }()
     
     public func downloadFile(_ fileURL: LGURLConvertible, progress: ProgressBlock?, completion: CompletionBlock?) {
-        do {
-            let urlString = try fileURL.asURL().absoluteString
-            if let request = requestContainer[urlString] {
-            } else {
+        workQueue.async {
+            do {
+                let urlString = try fileURL.asURL().absoluteString
+                let downloadTempPath = Helper.tempFilePath(withURLString: urlString)
+                let destinationPath = Helper.filePath(withURLString: urlString)
                 
+                if FileManager.default.fileExists(atPath: destinationPath) {
+                    completion?(URL(fileURLWithPath: destinationPath), true, nil)
+                    return
+                }
+                
+                let downloadTempURL = URL(fileURLWithPath: downloadTempPath)
+                let destinationURL = URL(fileURLWithPath: destinationPath)
+                
+                var targetRequest: LGDataRequest?
+                if let request = self.requestContainer[urlString] {
+                    targetRequest = request
+                    
+                    targetRequest?.downloadProgress(queue: self.workQueue,
+                                                    closure:
+                        { (pro) in
+                            progress?(pro)
+                    })
+                    
+                    targetRequest?.validate().delegate.queue.cancelAllOperations()
+                    
+                    targetRequest?.validate().response(queue: self.workQueue,
+                                                       completionHandler:
+                        { (response) in
+                            if response.error == nil {
+                                do {
+                                    try FileManager.default.moveItem(at: downloadTempURL,
+                                                                     to: destinationURL)
+                                    completion?(destinationURL, true, nil)
+                                } catch {
+                                    completion?(nil, false, error)
+                                }
+                            } else {
+                                completion?(nil, false, response.error)
+                            }
+                            self.requestContainer[urlString] = nil
+                            targetRequest = nil
+                    })
+                } else {
+                    var receivedData = Data()
+                    let breakPointPath = downloadTempPath
+                    let breakPointURL = URL(fileURLWithPath: breakPointPath)
+                    if FileManager.default.fileExists(atPath: breakPointPath) {
+                        let breakPointData = try Data(contentsOf: breakPointURL)
+                        receivedData.append(breakPointData)
+                    }
+                    
+                    var header = LGHTTPHeaders()
+                    
+                    if receivedData.count > 0 {
+                        header["Range"] = "bytes=\(receivedData.count)-"
+                    }
+                    
+                    targetRequest = LGURLSessionManager.default.request(fileURL,
+                                                                        method: LGHTTPMethod.get,
+                                                                        parameters: nil,
+                                                                        encoding: LGURLEncoding.default,
+                                                                        headers: header)
+                    self.requestContainer[urlString] = targetRequest
+                    
+                    targetRequest?.downloadProgress(queue: self.workQueue,
+                                                    closure:
+                        { (pro) in
+                        progress?(pro)
+                    })
+                    
+                    targetRequest?.stream(closure: { (data) in
+                        receivedData.append(data)
+                        
+                        // Write Data
+                        let inputStream = InputStream(data: data)
+                        guard let outputStream = OutputStream(url: downloadTempURL,
+                                                              append: true) else { return }
+                        
+                        inputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+                        outputStream.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+                        inputStream.open()
+                        outputStream.open()
+                        
+                        while inputStream.hasBytesAvailable && outputStream.hasSpaceAvailable {
+                            var buffer = [UInt8](repeating: 0, count: 1024)
+                            
+                            let bytesRead = inputStream.read(&buffer, maxLength: 1024)
+                            if inputStream.streamError != nil || bytesRead < 0 {
+                                break
+                            }
+                            
+                            let bytesWritten = outputStream.write(&buffer, maxLength: bytesRead)
+                            if outputStream.streamError != nil || bytesWritten < 0 {
+                                break
+                            }
+                            
+                            if bytesRead == 0 && bytesWritten == 0 {
+                                break
+                            }
+                        }
+                        
+                        inputStream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+                        outputStream.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+                        
+                        inputStream.close()
+                        outputStream.close()
+                    })
+                    
+                    targetRequest?.validate().response(queue: self.workQueue,
+                                                       completionHandler:
+                        { (response) in
+                            if response.error == nil {
+                                do {
+                                    try FileManager.default.moveItem(at: downloadTempURL,
+                                                                     to: destinationURL)
+                                    completion?(destinationURL, true, nil)
+                                } catch {
+                                    completion?(nil, false, error)
+                                }
+                            } else {
+                                completion?(nil, false, response.error)
+                            }
+                            self.requestContainer[urlString] = nil
+                            targetRequest = nil
+                    })
+                }
+            } catch {
+                completion?(nil, false, error)
             }
-        } catch {
         }
-        
-        
-        
-        var receivedData: Data = Data()
-        let request = LGURLSessionManager.default.request(fileURL,
-                                            method: LGHTTPMethod.get,
-                                            parameters: nil,
-                                            encoding: LGURLEncoding.default,
-                                            headers: nil)
-        request.stream { (data) in
-            receivedData.append(data)
-        }
-        
-        request.response { (response) in
-            
-        }
-        }
-
     }
     
+    public func remoteURLIsDownloaded(_ url: URL) -> Bool {
+        return FileManager.default.fileExists(atPath: Helper.filePath(withURL: url))
+    }
+    
+    public func remoteURLIsDownloaded(_ urlString: String) -> Bool {
+        if let url = URL(string: urlString) {
+            return remoteURLIsDownloaded(url)
+        } else {
+            return false
+        }
+    }
+    
+    public func clearAllFiles(completion block: ((Bool) -> Void)?) {
+        workQueue.async {
+            do {
+                try FileManager.default.removeItem(at: URL(fileURLWithPath: Helper.downloaderTempFilesDirectory,
+                                                           isDirectory: true))
+                try FileManager.default.removeItem(at: URL(fileURLWithPath: Helper.downloaderFilesDirectory,
+                                                           isDirectory: true))
+                block?(true)
+            } catch {
+                println(error)
+                block?(false)
+            }
+        }
+    }
 }

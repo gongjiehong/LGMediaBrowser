@@ -63,14 +63,11 @@ open class LGMediaBrowserVideoCell: LGMediaBrowserPreviewCell {
     
     func initPlayerView(_ media: LGMediaModel) {
         do {
-            previewView = try LGPlayerControlView(frame: self.contentView.frame,
-                                                  mediaLocation: media.mediaLocation,
-                                                  mediaType: media.mediaType,
-                                                  isLocalFile: media.isLocalFile,
-                                                  placeholderImage: media.thumbnailImage)
+            previewView = try LGPlayerControlView(frame: self.contentView.bounds,
+                                                  mediaModel: media)
             self.contentView.addSubview(previewView!)
         } catch {
-            
+            println(error)
         }
     }
 }
