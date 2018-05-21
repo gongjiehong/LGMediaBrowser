@@ -224,13 +224,16 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                                    y: screenBounds.height,
                                    width: screenBounds.width,
                                    height: screenBounds.height)
+            let isInteractive = transitionContext.isInteractive
             UIView.animate(withDuration: duration,
                            animations:
                 {
                     fromView?.frame = finalFrame
             }) { (isFinished) in
                 let isCanceled = transitionContext.transitionWasCancelled
-                transitionContext.completeTransition(!isCanceled)
+                if !isInteractive {
+                    transitionContext.completeTransition(!isCanceled)
+                }
             }
         }
     }

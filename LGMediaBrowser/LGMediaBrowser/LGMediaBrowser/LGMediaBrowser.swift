@@ -144,6 +144,7 @@ public class LGMediaBrowser: UIViewController {
                                                                          toTargetView: self.targetView,
                                                                          targetController: self)
         self.interactiveTransition.addPanGestureFor(viewController: self)
+        self.interactiveTransition.panDismissGesture?.delegate = self
     }
     
     /// 添加通知
@@ -239,7 +240,12 @@ public class LGMediaBrowser: UIViewController {
     }
     
     @objc func needHideControls(_ noti: Notification) {
-        showOrHideControls(false)
+        if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
+            self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+            showOrHideControls(!isShowingControls)
+        } else {
+            showOrHideControls(false)
+        }
     }
     
     private var isShowingControls: Bool = true
@@ -421,7 +427,14 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         var finalImageSize: CGSize = CGSize.zero
         
         if let layoutView = getCurrentLayoutView() {
-            finalImageSize = layoutView.lg_size
+            if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
+                self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+                if let image = self.animationImage {
+                    finalImageSize = image.size
+                }
+            } else {
+                finalImageSize = layoutView.lg_size
+            }
         } else if let image = self.animationImage {
             finalImageSize = image.size
         }
@@ -444,10 +457,28 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         if !self.interactiveTransition.isInteration {
             return nil
         }
+        
+        var finalImageSize: CGSize = CGSize.zero
+        var fromTargetView: UIView?
+        if let layoutView = getCurrentLayoutView() {
+            fromTargetView = layoutView
+            if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
+                self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+                if let image = self.animationImage {
+                    finalImageSize = image.size
+                }
+            } else {
+                finalImageSize = layoutView.lg_size
+            }
+        } else if let image = self.animationImage {
+            finalImageSize = image.size
+        }
+        
         self.interactiveTransition.targetController = self
         self.interactiveTransition.toTargetView = self.targetView
-        self.interactiveTransition.fromTargetView = getCurrentLayoutView()
+        self.interactiveTransition.fromTargetView = fromTargetView
         self.interactiveTransition.targetImage = self.animationImage
+        self.interactiveTransition.finalImageSize = finalImageSize
         return self.interactiveTransition
     }
 }
@@ -619,6 +650,15 @@ extension LGMediaBrowser: LGActionViewDelegate {
                                     deleteItemRefresh()
             })
         }
+    }
+}
+
+extension LGMediaBrowser: UIGestureRecognizerDelegate {
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        if touch.view?.isKind(of: UISlider.self) == true {
+            return false
+        }
+        return true
     }
 }
 

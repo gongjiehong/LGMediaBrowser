@@ -16,11 +16,14 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     public weak var fromTargetView: UIView?
     public weak var toTargetView: UIView?
     public weak var targetImage: UIImage?
+    public var finalImageSize: CGSize = CGSize.zero
     private var transitionImageViewCenter: CGPoint = CGPoint.zero
     private var beginX: CGFloat = 0
     private var beginY: CGFloat = 0
     private var tempImageView: UIImageView?
     private var backgroundView: UIView?
+    
+    weak var panDismissGesture: UIPanGestureRecognizer?
     
     public init(fromTargetView: UIView?, toTargetView: UIView?, targetController: UIViewController?) {
         super.init()
@@ -38,6 +41,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
         viewController.view.addGestureRecognizer(pan)
         pan.lg_name = kPanDissmissGestureName
+        panDismissGesture = pan
         self.targetController = viewController
     }
     
@@ -120,11 +124,21 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         let containerView = transitionContext.containerView
         var tempImageViewFrame: CGRect = CGRect.zero
         
-        guard let fromTargetView = fromTargetView else {
+        guard let _ = fromTargetView else {
             return
         }
         
-        tempImageViewFrame = fromTargetView.convert(fromTargetView.bounds, to: containerView)
+        let width: CGFloat = UIScreen.main.bounds.width
+        let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+        
+        let imageSize = self.calcfinalImageSize()
+        let imageWidth = imageSize.width
+        let imageHeight = imageSize.height
+        
+        tempImageViewFrame = CGRect(x: (width - imageWidth) / 2.0,
+                                    y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                    width: imageWidth,
+                                    height: imageHeight)
         
         let imageView = UIImageView()
         tempImageView = imageView
@@ -245,5 +259,27 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     
     public override var percentComplete: CGFloat {
         return 1.0 - self.scale
+    }
+    
+    func calcfinalImageSize() -> CGSize {
+        if finalImageSize == CGSize.zero {
+            return CGSize.zero
+        }
+        let width = UIScreen.main.bounds.width
+        let height = UIScreen.main.bounds.height
+        let imageWidth = finalImageSize.width
+        var imageHeight = finalImageSize.height
+        
+        var resultWidth: CGFloat
+        var resultHeight: CGFloat
+        imageHeight = width / imageWidth * imageHeight
+        if imageHeight > height {
+            resultWidth = height / self.finalImageSize.height * imageWidth
+            resultHeight = height
+        } else {
+            resultWidth = width
+            resultHeight = imageHeight
+        }
+        return CGSize(width: resultWidth, height: resultHeight)
     }
 }
