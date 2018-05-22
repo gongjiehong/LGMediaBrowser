@@ -76,5 +76,3 @@ public protocol LGMediaBrowserDataSource: NSObjectProtocol {
 
 let kPanDissmissGestureName = "lg_panDissmiss"
 
-
-

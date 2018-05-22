@@ -32,6 +32,12 @@ class ViewController: UIViewController {
     }
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
+        let picker = LGCameraCapture()
+        self.present(picker, animated: true) {
+            
+        }
+        return
+        
         var dataArray = [String]()
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/mew_interlaced.png")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480450.jp2")
