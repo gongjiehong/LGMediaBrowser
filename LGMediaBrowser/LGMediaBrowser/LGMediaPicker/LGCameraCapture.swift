@@ -9,6 +9,8 @@
 import Foundation
 import AVFoundation
 import CoreMotion
+import CoreVideo
+import LGWebImage
 
 /// 拍照或录像完成的回调
 public protocol LGCameraCaptureDelegate: NSObjectProtocol {
@@ -58,6 +60,9 @@ public class LGCameraCapture: UIViewController {
     /// 最大视频录制时长，默认一分钟
     public var maximumVideoRecordingDuration: CFTimeInterval = 60.0
     
+    /// 每秒帧数
+    public var framePerSecond: Int = 30
+    
     /// 是否允许拍照
     public var allowTakePhoto: Bool = true
     
@@ -71,6 +76,8 @@ public class LGCameraCapture: UIViewController {
     public var devicePosition: AVCaptureDevice.Position = AVCaptureDevice.Position.unspecified
     
     /// 输出文件大小
+    /// 可以是相对坐标（(1.0, 0.5), (ScreenSize.width * 1.0 px, ScreenSize.height * 0.5 px)）
+    /// 也可以是绝对坐标 ((320, 320) 所有设备都输出320px * 320px的视频)
     public var outputSize: CGSize = UIScreen.main.bounds.size
     
     /// 输出视频格式
@@ -85,9 +92,25 @@ public class LGCameraCapture: UIViewController {
     var toolView: LGCameraCaptureToolView!
     var session: AVCaptureSession = AVCaptureSession()
     var videoInput: AVCaptureDeviceInput?
+    
     var imageOutPut: AVCaptureStillImageOutput = AVCaptureStillImageOutput()
-    var videoFileOutPut: AVCaptureMovieFileOutput = AVCaptureMovieFileOutput()
-    var previewLayer: AVCaptureVideoPreviewLayer!
+    
+    var outputQueue = DispatchQueue(label: "com.LGCameraCapture.output",
+                                    qos: DispatchQoS.userInteractive,
+                                    attributes: DispatchQueue.Attributes.concurrent,
+                                    autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.inherit,
+                                    target: DispatchQueue.userInteractive)
+    
+    lazy var videoDataOutPut: AVCaptureVideoDataOutput = {
+        let temp = AVCaptureVideoDataOutput()
+        let settings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
+        temp.videoSettings = settings
+        temp.alwaysDiscardsLateVideoFrames = true
+        temp.setSampleBufferDelegate(self, queue: outputQueue)
+        return temp
+    }()
+    
+    var previewLayer: CALayer!
     
     lazy var toggleCameraBtn: UIButton = {
         let tempBtn = UIButton(type: UIButtonType.custom)
@@ -105,7 +128,35 @@ public class LGCameraCapture: UIViewController {
         return temp
     }()
     
-    var videoUrl: URL?
+    lazy var videoWritePath: String = {
+        let tempDir = NSTemporaryDirectory()
+        var pathExtension: String
+        switch self.videoType {
+        case .mov:
+            pathExtension = ".mov"
+            break
+        case .mp4:
+            pathExtension = ".mp4"
+            break
+//        default:
+//            pathExtension = ".mp4"
+//            break
+        }
+        let dirPath = tempDir + "LGCameraCapture/"
+        let filePath = dirPath + NSUUID().uuidString + pathExtension
+        do {
+            if !FileManager.default.fileExists(atPath: dirPath) {
+                try FileManager.default.createDirectory(atPath: dirPath,
+                                                        withIntermediateDirectories: true,
+                                                        attributes: nil)
+            }
+        } catch {
+            println(error)
+        }
+        return filePath
+    }()
+    
+    var videoEncoder: LGVideoEncoder?
     var takedImageView: UIImageView!
     var takedImage: UIImage?
     var playerView: LGPlayerView?
@@ -165,7 +216,7 @@ public class LGCameraCapture: UIViewController {
             let pan = UIPanGestureRecognizer(target: self, action: #selector(adjustCameraFocus(_:)))
             self.view.addGestureRecognizer(pan)
             focusPanGesture = pan
-            pan.isEnabled = false
+//            pan.isEnabled = false
         }
         
         if self.allowSwitchDevicePosition {
@@ -183,10 +234,8 @@ public class LGCameraCapture: UIViewController {
                                      width: self.view.lg_width,
                                      height: toolViewHeight)
         
-        self.previewLayer.frame = CGRect(x: 0,
-                                         y: (self.view.lg_height - outputSize.height) / 2.0,
-                                         width: outputSize.width,
-                                         height: outputSize.height)
+        self.previewLayer.frame = self.view.bounds
+        self.previewLayer.position = CGPoint(x: self.view.lg_width / 2.0, y: self.view.lg_height / 2.0)
         
         if allowSwitchDevicePosition {
             let toggleCameraBtnSize = CGSize(width: 30.0, height: 30.0)
@@ -247,13 +296,15 @@ public class LGCameraCapture: UIViewController {
             self.session.addOutput(self.imageOutPut)
         }
         
-        if self.session.canAddOutput(self.videoFileOutPut) {
-            self.session.addOutput(self.videoFileOutPut)
+        if self.session.canAddOutput(self.videoDataOutPut) {
+            self.session.addOutput(self.videoDataOutPut)
         }
 
-        self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
-        self.previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-        self.view.layer.masksToBounds = true
+        self.previewLayer = CALayer()
+        self.previewLayer.frame = self.view.bounds
+        self.previewLayer.position = CGPoint(x: self.view.lg_width / 2.0, y: self.view.lg_height / 2.0)
+        self.previewLayer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat.pi / 2.0))
+        self.previewLayer.contentsGravity = kCAGravityResizeAspect
         self.view.layer.insertSublayer(self.previewLayer, at: 0)
     }
     
@@ -341,10 +392,10 @@ public class LGCameraCapture: UIViewController {
             self.focusCursorImageView.alpha = 0.0
         }
         
-        let cameraPoint = self.previewLayer.captureDevicePointConverted(fromLayerPoint: point)
-        focusWithMode(AVCaptureDevice.FocusMode.autoFocus,
-                      exposureMode: AVCaptureDevice.ExposureMode.autoExpose,
-                      atPoint: cameraPoint)
+//        let cameraPoint = self.previewLayer.captureDevicePointConverted(fromLayerPoint: point)
+//        focusWithMode(AVCaptureDevice.FocusMode.autoFocus,
+//                      exposureMode: AVCaptureDevice.ExposureMode.autoExpose,
+//                      atPoint: cameraPoint)
     }
     
     func focusWithMode(_ focusMode: AVCaptureDevice.FocusMode,
@@ -478,19 +529,67 @@ public class LGCameraCapture: UIViewController {
 
 extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     public func onTakePicture() {
-        
+        if let videoConnection = self.imageOutPut.connection(with: AVMediaType.video) {
+            videoConnection.videoOrientation = self.orientation
+            if takedImageView == nil {
+                takedImageView = UIImageView(frame: self.view.bounds)
+                takedImageView.backgroundColor = UIColor.black
+                takedImageView.isHidden = true
+                takedImageView.contentMode = UIViewContentMode.scaleAspectFill
+                self.view.insertSubview(takedImageView, belowSubview: toolView)
+            }
+            
+            self.imageOutPut.captureStillImageAsynchronously(from: videoConnection) { [weak self] (buffer, error) in
+                guard let weakSelf = self else { return }
+                if let buffer = buffer {
+                    guard let data = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(buffer) else {
+                        println("读取照片data失败")
+                        return
+                    }
+                    let image = UIImage(data: data)
+                    
+                    weakSelf.takedImage = image
+                    weakSelf.takedImageView.image = image
+                    weakSelf.takedImageView.isHidden = false
+                    weakSelf.session.stopRunning()
+                    
+                } else {
+                    println("读取照片buffer失败")
+                }
+            }
+            
+        } else {
+            println("拍照失败")
+        }
     }
     
     public func onStartRecord() {
         focusPanGesture?.isEnabled = true
+        videoEncoder = nil
+        do {
+            videoEncoder = try LGVideoEncoder(writePath: self.videoWritePath,
+                                              videoHeight: getFinalOutputSize(self.view.lg_size).height,
+                                              videoWidth: getFinalOutputSize(self.view.lg_size).width,
+                                              videoType: self.videoType)
+        } catch {
+            println(error)
+        }
+        
+        let movieConnection = self.videoDataOutPut.connection(with: AVMediaType.video)
+        movieConnection?.videoOrientation = self.orientation
+        movieConnection?.videoScaleAndCropFactor = 1.0
     }
     
     public func onFinishedRecord() {
         focusPanGesture?.isEnabled = false
+        self.session.stopRunning()
+        self.setVideoZoomFactor(1)
     }
     
     public func onRetake() {
-        
+        self.session.startRunning()
+        self.setFocusCursorWithPoint(self.view.center)
+        self.takedImageView.isHidden = true
     }
     
     public func onDoneClick() {
@@ -498,338 +597,125 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     }
     
     public func onDismiss() {
-        
-    }
-}
-
-
-// MARK: - LGCameraCaptureToolViewDelegate
-protocol LGCameraCaptureToolViewDelegate: NSObjectProtocol {
-    func onTakePicture()
-    func onStartRecord()
-    func onFinishedRecord()
-    func onRetake()
-    func onDoneClick()
-    func onDismiss()
-}
-
-// MARK: - LGCameraCaptureToolView
-class LGCameraCaptureToolView: UIView {
-    
-    /// 相关设置
-    struct Settings {
-        static var TopViewScale: CGFloat = 0.5
-        static var BottomViewScale: CGFloat = 0.7
-        static var AnimateDuration: TimeInterval = 0.1
-    }
-    
-    /// 是否允许拍照
-    var allowTakePhoto: Bool = true {
-        didSet {
-            setupTapGesture()
-        }
-    }
-    
-    /// 是否允许录制视频
-    var allowRecordVideo: Bool = true {
-        didSet {
-            setupLongPressGesture()
-        }
-    }
-    
-    /// 是否允许切换摄像头，需配合devicePosition使用
-    var allowSwitchDevicePosition: Bool = true {
-        didSet {
+        self.dismiss(animated: true) {
             
         }
     }
-    
-    lazy var singleTapGes: UITapGestureRecognizer = {
-        let tap = UITapGestureRecognizer()
-        return tap
-    }()
-    
-    lazy var longPressGes: UILongPressGestureRecognizer = {
-        let longPress = UILongPressGestureRecognizer()
-        longPress.minimumPressDuration = 0.3
-        longPress.delegate = self
-        return longPress
-    }()
-    
-    
-    /// 进度条颜色
-    var circleProgressColor: UIColor?
-    
-    /// 最大录制长度
-    var maximumVideoRecordingDuration: CFTimeInterval = 60.0
-    
-    weak var delegate: LGCameraCaptureToolViewDelegate?
-    
-    lazy var dismissBtn: UIButton = {
-        let dismissBtn = UIButton(type: UIButtonType.custom)
-        dismissBtn.frame = CGRect(x: 60, y: self.lg_height / 2 - 25.0 / 2, width: 25.0, height: 25.0)
-        dismissBtn.setImage(UIImage(namedFromThisBundle: "btn_arrow_down"),
-                            for: UIControlState.normal)
-        dismissBtn.addTarget(self, action: #selector(dismissBtnPressed(_:)), for: UIControlEvents.touchUpInside)
-        return dismissBtn
-    }()
-    
-    lazy var cancelBtn: UIButton = {
-        let cancelBtn = UIButton(type: UIButtonType.custom)
-        cancelBtn.backgroundColor = UIColor(red: 244 / 255.0,
-                                            green: 244 / 255.0,
-                                            blue: 244 / 255.0,
-                                            alpha: 0.9)
-        cancelBtn.setImage(UIImage(namedFromThisBundle: "btn_retake"), for: UIControlState.normal)
-        cancelBtn.addTarget(self, action: #selector(retakeBtnPressed(_:)), for: UIControlEvents.touchUpInside)
-        cancelBtn.layer.masksToBounds = true
-        cancelBtn.isHidden = true
-        return cancelBtn
-    }()
-    
-    lazy var doneBtn: UIButton = {
-        let doneBtn = UIButton(type: UIButtonType.custom)
-        doneBtn.frame = self.bottomView.frame
-        doneBtn.backgroundColor = UIColor.white
-        doneBtn.setImage(UIImage(namedFromThisBundle: "btn_take_done"), for: UIControlState.normal)
-        doneBtn.addTarget(self, action: #selector(doneBtnPressed(_:)), for: UIControlEvents.touchUpInside)
-        doneBtn.layer.masksToBounds = true
-        doneBtn.isHidden = true
-        return doneBtn
-    }()
-    
-    lazy var topView: UIView = {
-        let topView = UIView(frame: CGRect.zero)
-        topView.layer.masksToBounds = true
-        topView.backgroundColor = UIColor.white
-        topView.isUserInteractionEnabled = false
-        return topView
-    }()
-    
-    lazy var bottomView: UIView = {
-        let bottomView = UIView(frame: CGRect.zero)
-        bottomView.layer.masksToBounds = true
-        bottomView.backgroundColor = UIColor(red: 244 / 255.0,
-                                             green: 244 / 255.0,
-                                             blue: 244 / 255.0,
-                                             alpha: 0.9)
-        return bottomView
-    }()
-    
-    var duration: CGFloat = 0.0
-
-
-    
-    /// 圆环动画Layer
-    lazy var animateLayer: CAShapeLayer = {
-        let temp = CAShapeLayer()
-        let width = self.bottomView.lg_height * Settings.BottomViewScale
-        let path = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: width, height: width),
-                                cornerRadius: width / 2.0)
-        
-        temp.strokeColor = self.circleProgressColor?.cgColor
-        temp.fillColor = UIColor.clear.cgColor
-        temp.path = path.cgPath
-        temp.lineWidth = 8.0
-        return temp
-    }()
-    
-    // MARK: -  初始化
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupControls()
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        setupControls()
-    }
-    
-    func setupControls() {
-        self.addSubview(bottomView)
-        self.addSubview(topView)
-        self.addSubview(doneBtn)
-        self.addSubview(cancelBtn)
-        self.addSubview(dismissBtn)
-    }
-    private var isSubiewsLayout: Bool = false
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        if isSubiewsLayout {
-            return
-        }
-        
-        isSubiewsLayout = true
-        
-        let height = self.lg_height
-        self.bottomView.frame = CGRect(x: 0,
-                                       y: 0,
-                                       width: height * Settings.BottomViewScale,
-                                       height: height * Settings.BottomViewScale)
-        self.bottomView.center = CGPoint(x: self.bounds.midX, y: self.bounds.midY)
-        self.bottomView.layer.cornerRadius = (height * Settings.BottomViewScale) / 2.0
-
-        self.topView.frame = CGRect(x: 0,
-                                    y: 0,
-                                    width: height * Settings.TopViewScale,
-                                    height: height * Settings.TopViewScale)
-        self.topView.center = self.bottomView.center
-        self.topView.layer.cornerRadius = (height * Settings.TopViewScale) / 2.0
-
-        self.dismissBtn.frame = CGRect(x: 60.0, y: self.lg_height / 2.0 - 25 / 2.0, width: 25, height: 25)
-        
-        
-        
-        self.cancelBtn.frame = self.bottomView.frame
-        self.cancelBtn.layer.cornerRadius = (height * Settings.BottomViewScale) / 2.0
-        
-        self.doneBtn.frame = self.bottomView.frame
-        self.doneBtn.layer.cornerRadius = (height * Settings.BottomViewScale) / 2.0
-    }
-    
-    // MARK: -  controls actions
-    @objc func dismissBtnPressed(_ sender: UIButton) {
-        delegate?.onDismiss()
-    }
-    
-    @objc func retakeBtnPressed(_ sender: UIButton) {
-        delegate?.onRetake()
-    }
-    
-    @objc func doneBtnPressed(_ sender: UIButton) {
-        delegate?.onDoneClick()
-    }
-    
-    
-    // MARK: -  手势控制
-    
-    func setupTapGesture() {
-        if self.allowTakePhoto {
-            singleTapGes.addTarget(self, action: #selector(tapAction(_:)))
-        } else {
-            singleTapGes.removeTarget(self, action: #selector(tapAction(_:)))
-        }
-    }
-    
-    func setupLongPressGesture() {
-        if self.allowRecordVideo {
-            longPressGes.addTarget(self, action: #selector(longPressAction(_:)))
-        } else {
-            longPressGes.removeTarget(self, action: #selector(longPressAction(_:)))
-        }
-    }
-    
-    
-    @objc func tapAction(_ ges: UITapGestureRecognizer) {
-        delegate?.onTakePicture()
-        stopAnimate()
-    }
-    
-    private var isStopedpRecord: Bool = false
-    @objc func longPressAction(_ ges: UILongPressGestureRecognizer) {
-        switch ges.state {
-        case .began:
-            isStopedpRecord = false
-            delegate?.onStartRecord()
-            break
-        case .cancelled, .ended:
-            if isStopedpRecord { return }
-            isStopedpRecord = true
-            stopAnimate()
-            delegate?.onFinishedRecord()
-            break
-        default:
-            break
-        }
-    }
-    
-    // MARK: -  animations
-    func startAnimate() {
-        self.dismissBtn.isHidden = true
-        UIView.animate(withDuration: Settings.AnimateDuration,
-                       animations:
-            {
-                self.bottomView.layer.transform = CATransform3DScale(CATransform3DIdentity,
-                                                                     1.0 / Settings.BottomViewScale,
-                                                                     1.0 / Settings.BottomViewScale,
-                                                                     1.0)
-                self.topView.layer.transform = CATransform3DScale(CATransform3DIdentity, 0.7, 0.7, 1);
-        }) { (isFinished) in
-            let animation = CABasicAnimation(keyPath: "strokeEnd")
-            animation.fromValue = 0.0
-            animation.toValue = 1.0
-            animation.duration = self.maximumVideoRecordingDuration
-            animation.isRemovedOnCompletion = true
-            animation.delegate = self
-            self.animateLayer.add(animation, forKey: nil)
-        }
-    }
-    
-    func stopAnimate() {
-        animateLayer.removeFromSuperlayer()
-        animateLayer.removeAllAnimations()
-        
-        self.bottomView.isHidden = true
-        self.topView.isHidden = true
-        self.dismissBtn.isHidden = true
-        
-        self.bottomView.layer.transform = CATransform3DIdentity
-        self.topView.layer.transform = CATransform3DIdentity
-        showCancelAndDoneBtn()
-    }
-    
-    func showCancelAndDoneBtn() {
-        self.cancelBtn.isHidden = false
-        self.doneBtn.isHidden = false
-        
-        var cancelRect = self.cancelBtn.frame
-        cancelRect.origin.x = 40
-        
-        var doneRect = self.doneBtn.frame
-        doneRect.origin.x = self.lg_width - doneRect.width - 40.0
-
-        UIView.animate(withDuration: Settings.AnimateDuration) {
-            self.cancelBtn.frame = cancelRect
-            self.doneBtn.frame = doneRect
-        }
-    }
-    
-    /// 重置坐标
-    func resutLayout() {
-        animateLayer.removeFromSuperlayer()
-        animateLayer.removeAllAnimations()
-        self.dismissBtn.isHidden = false
-        self.bottomView.isHidden = false
-        self.topView.isHidden = false
-        self.cancelBtn.isHidden = true
-        
-        self.doneBtn.isHidden = true
-        self.cancelBtn.frame = self.bottomView.frame
-        self.doneBtn.frame = self.bottomView.frame
-    }
 }
 
-// MARK: - 动画结束后完成视频录制
-extension LGCameraCaptureToolView: CAAnimationDelegate {
-    func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
-        if isStopedpRecord { return }
-        stopAnimate()
-        delegate?.onFinishedRecord()
-    }
-}
 
-// MARK: - 设置手势同时生效
-extension LGCameraCaptureToolView: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
-                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+extension LGCameraCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
+    public func captureOutput(_ output: AVCaptureOutput,
+                              didOutput sampleBuffer: CMSampleBuffer,
+                              from connection: AVCaptureConnection)
     {
-        if otherGestureRecognizer.isKind(of: UILongPressGestureRecognizer.self) ||
-            otherGestureRecognizer.isKind(of: UIPanGestureRecognizer.self)
-        {
-            return true
+        println(CMSampleBufferGetDecodeTimeStamp(sampleBuffer))
+        if let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
+            let image = getImageFromImageBuffer(imageBuffer)
+            
+            DispatchQueue.main.sync {
+                self.previewLayer.contents = image
+            }
+            if let image = image, let pixelBuffer = pixelBufferFromCGImage(image: image) {
+                let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+                videoEncoder?.encodePixelBuffer(pixelBuffer, frameTime: time)
+            }
+            
         } else {
-            return false
+            videoEncoder?.encodeFrame(sampleBuffer)
+        }
+    }
+
+    func pixelBufferFromCGImage(image: CGImage) -> CVPixelBuffer? {
+        let width = image.width
+        let height = image.height
+        
+        let options = [kCVPixelBufferCGImageCompatibilityKey: true,
+                       kCVPixelBufferCGBitmapContextCompatibilityKey: true]
+        
+        var pixelBuffer: CVPixelBuffer?
+        let status = CVPixelBufferCreate(kCFAllocatorDefault,
+                                         width,
+                                         height,
+                                         kCVPixelFormatType_32ARGB,
+                                         options as CFDictionary,
+                                         &pixelBuffer)
+        if status != kCVReturnSuccess || pixelBuffer == nil {
+            println("failed to create CVPixelBuffer ")
+            return nil
+        }
+        
+        CVPixelBufferLockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
+        let pixelData = CVPixelBufferGetBaseAddress(pixelBuffer!)
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = LGCGBitmapByteOrder32Host.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
+        let context = CGContext(data: pixelData,
+                                width: width,
+                                height: height,
+                                bitsPerComponent: 8,
+                                bytesPerRow: 4 * width,
+                                space: colorSpace,
+                                bitmapInfo: bitmapInfo)
+        
+        context?.concatenate(CGAffineTransform(rotationAngle: 0))
+        context?.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
+        
+        CVPixelBufferUnlockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
+        
+        return pixelBuffer
+    }
+    
+    func getImageFromImageBuffer(_ imageBuffer: CVImageBuffer) -> CGImage? {
+        CVPixelBufferLockBaseAddress(imageBuffer, CVPixelBufferLockFlags.readOnly)
+        
+        let width = CVPixelBufferGetWidth(imageBuffer)
+        let height = CVPixelBufferGetHeight(imageBuffer)
+        let bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer)
+        
+        let lumaBuffer = CVPixelBufferGetBaseAddress(imageBuffer)
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = LGCGBitmapByteOrder32Host.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
+        let context = CGContext(data: lumaBuffer,
+                                width: width,
+                                height: height,
+                                bitsPerComponent: 8,
+                                bytesPerRow: bytesPerRow,
+                                space: colorSpace,
+                                bitmapInfo: bitmapInfo)
+        var dstImage = context?.makeImage()
+        let size = getFinalOutputSize(CGSize(width: width, height: height))
+        let rect = CGRect(origin: CGPoint(x: (CGFloat(width) - size.width) / 2.0,
+                                          y: (CGFloat(height) - size.height) / 2.0),
+                          size: size)
+        dstImage = dstImage?.cropping(to: rect)
+        CVPixelBufferUnlockBaseAddress(imageBuffer, CVPixelBufferLockFlags.readOnly)
+        return dstImage
+    }
+    
+    func getFinalOutputSize(_ originSize: CGSize) -> CGSize {
+        if  self.outputSize.width > 0.0,
+            self.outputSize.width <= 1.0,
+            self.outputSize.height > 0.0,
+            self.outputSize.height <= 1.0
+        {
+            /// 正常的相对大小
+            return CGSize(width: originSize.width * self.outputSize.width,
+                          height: originSize.height * self.outputSize.height)
+        } else if self.outputSize.width > 1.0, self.outputSize.height > 1.0 {
+            /// 正常的绝对大小
+            if originSize.width * self.outputSize.height <= originSize.height * self.outputSize.width {
+                let width = originSize.width
+                let height = originSize.height * self.outputSize.height / originSize.width
+                return CGSize(width: width, height: height)
+            } else {
+                let width  = originSize.height * self.outputSize.width / self.outputSize.height
+                let height = originSize.height
+                return CGSize(width: width, height: height)
+            }
+        } else {
+            /// 异常
+            return originSize
         }
     }
 }
+
