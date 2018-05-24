@@ -313,7 +313,7 @@ class LGCameraCaptureToolView: UIView {
     }
     
     /// 重置坐标
-    func resutLayout() {
+    func resetLayout() {
         animateLayer.removeFromSuperlayer()
         animateLayer.removeAllAnimations()
         self.dismissBtn.isHidden = false

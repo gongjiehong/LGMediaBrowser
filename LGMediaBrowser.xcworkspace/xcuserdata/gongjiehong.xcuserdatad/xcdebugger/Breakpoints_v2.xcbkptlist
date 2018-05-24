@@ -132,17 +132,49 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGVideoEncoder.swift"
-            timestampString = "548768029.968472"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGCameraCapture.swift"
+            timestampString = "548853135.836816"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "98"
-            endingLineNumber = "98"
-            landmarkName = "encodePixelBuffer(_:frameTime:)"
+            startingLineNumber = "588"
+            endingLineNumber = "588"
+            landmarkName = "onTakePicture()"
             landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;__ObjC.CMSampleBuffer&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in LGMediaBrowser.LGCameraCapture.onTakePicture() -&gt; ()"
+                  moduleName = "LGMediaBrowser"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/gongjiehong/Documents/%E6%88%91%E7%9A%84GIT/Sudy/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGCameraCapture.swift"
+                  timestampString = "548853080.664739"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "588"
+                  endingLineNumber = "588"
+                  offsetFromSymbolStart = "1044">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;__ObjC.CMSampleBuffer&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in LGMediaBrowser.LGCameraCapture.onTakePicture() -&gt; ()"
+                  moduleName = "LGMediaBrowser"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/gongjiehong/Documents/%E6%88%91%E7%9A%84GIT/Sudy/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGCameraCapture.swift"
+                  timestampString = "548853081.008146"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "588"
+                  endingLineNumber = "588"
+                  offsetFromSymbolStart = "1012">
+               </Location>
+            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
