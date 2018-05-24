@@ -95,22 +95,9 @@ public class LGCameraCapture: UIViewController {
     
     var imageOutPut: AVCaptureStillImageOutput = AVCaptureStillImageOutput()
     
-    var outputQueue = DispatchQueue(label: "com.LGCameraCapture.output",
-                                    qos: DispatchQoS.userInteractive,
-                                    attributes: DispatchQueue.Attributes.concurrent,
-                                    autoreleaseFrequency: DispatchQueue.AutoreleaseFrequency.inherit,
-                                    target: DispatchQueue.userInteractive)
+    var videoFileOutput: AVCaptureMovieFileOutput = AVCaptureMovieFileOutput()
     
-    lazy var videoDataOutPut: AVCaptureVideoDataOutput = {
-        let temp = AVCaptureVideoDataOutput()
-        let settings = [kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA]
-        temp.videoSettings = settings
-        temp.alwaysDiscardsLateVideoFrames = true
-        temp.setSampleBufferDelegate(self, queue: outputQueue)
-        return temp
-    }()
-    
-    var previewLayer: CALayer!
+    var previewLayer: AVCaptureVideoPreviewLayer!
     
     lazy var toggleCameraBtn: UIButton = {
         let tempBtn = UIButton(type: UIButtonType.custom)
@@ -177,7 +164,7 @@ public class LGCameraCapture: UIViewController {
         self.observeDeviceMotion()
         
         if self.allowTakePhoto == false && self.allowRecordVideo == false {
-            fatalError("拍摄视频和拍照必须选一个")
+            fatalError("拍摄视频和拍照必须支持一个")
         }
     }
     
@@ -216,7 +203,6 @@ public class LGCameraCapture: UIViewController {
             let pan = UIPanGestureRecognizer(target: self, action: #selector(adjustCameraFocus(_:)))
             self.view.addGestureRecognizer(pan)
             focusPanGesture = pan
-//            pan.isEnabled = false
         }
         
         if self.allowSwitchDevicePosition {
@@ -296,15 +282,14 @@ public class LGCameraCapture: UIViewController {
             self.session.addOutput(self.imageOutPut)
         }
         
-        if self.session.canAddOutput(self.videoDataOutPut) {
-            self.session.addOutput(self.videoDataOutPut)
+        if self.session.canAddOutput(self.videoFileOutput) {
+            self.session.addOutput(self.videoFileOutput)
         }
 
-        self.previewLayer = CALayer()
+        self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
         self.previewLayer.frame = self.view.bounds
-        self.previewLayer.position = CGPoint(x: self.view.lg_width / 2.0, y: self.view.lg_height / 2.0)
-        self.previewLayer.setAffineTransform(CGAffineTransform(rotationAngle: CGFloat.pi / 2.0))
-        self.previewLayer.contentsGravity = kCAGravityResizeAspect
+        self.previewLayer.masksToBounds = true
+        self.previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         self.view.layer.insertSublayer(self.previewLayer, at: 0)
     }
     
@@ -565,19 +550,15 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     
     public func onStartRecord() {
         focusPanGesture?.isEnabled = true
-        videoEncoder = nil
-        do {
-            videoEncoder = try LGVideoEncoder(writePath: self.videoWritePath,
-                                              videoHeight: getFinalOutputSize(self.view.lg_size).height,
-                                              videoWidth: getFinalOutputSize(self.view.lg_size).width,
-                                              videoType: self.videoType)
-        } catch {
-            println(error)
-        }
         
-        let movieConnection = self.videoDataOutPut.connection(with: AVMediaType.video)
+        let movieConnection = self.videoFileOutput.connection(with: AVMediaType.video)
         movieConnection?.videoOrientation = self.orientation
         movieConnection?.videoScaleAndCropFactor = 1.0
+        
+        if !videoFileOutput.isRecording {
+            let url = URL(fileURLWithPath: self.videoWritePath)
+            self.videoFileOutput.startRecording(to: url, recordingDelegate: self)
+        }
     }
     
     public func onFinishedRecord() {
@@ -604,118 +585,122 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
 }
 
 
-extension LGCameraCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
-    public func captureOutput(_ output: AVCaptureOutput,
-                              didOutput sampleBuffer: CMSampleBuffer,
-                              from connection: AVCaptureConnection)
+extension LGCameraCapture: AVCaptureFileOutputRecordingDelegate {
+    public func fileOutput(_ output: AVCaptureFileOutput,
+                                    didStartRecordingTo fileURL: URL,
+                                    from connections: [AVCaptureConnection])
     {
-        println(CMSampleBufferGetDecodeTimeStamp(sampleBuffer))
-        if let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
-            let image = getImageFromImageBuffer(imageBuffer)
+        self.toolView.startAnimate()
+    }
+    
+
+    public func fileOutput(_ output: AVCaptureFileOutput,
+                           didFinishRecordingTo outputFileURL: URL,
+                           from connections: [AVCaptureConnection],
+                           error: Error?)
+    {
+        if output.recordedDuration.seconds < 1 {
+            self.onRetake()
+            return
+        }
+        
+    }
+    
+    func croppedVideo(_ videoURL: URL, completed: (URL) -> Void) {
+        let videoAsset = AVAsset(url: videoURL)
+        
+        let mixComposition = AVMutableComposition()
+        
+        guard   let videoTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.video,
+                                                              preferredTrackID: kCMPersistentTrackID_Invalid),
+                let audioTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio,
+                                                            preferredTrackID: kCMPersistentTrackID_Invalid)
+                else { return }
+        
+        guard   let videoAssetTrack = videoAsset.tracks(withMediaType: AVMediaType.video).first,
+                let audioAssertTrack = videoAsset.tracks(withMediaType: AVMediaType.audio).first
+                else { return }
+        
+        do {
+            try videoTrack.insertTimeRange(CMTimeRangeMake(kCMTimeZero, videoAsset.duration),
+                                           of: videoAssetTrack,
+                                           at: kCMTimeZero)
+            try audioTrack.insertTimeRange(CMTimeRangeMake(kCMTimeZero, videoAsset.duration),
+                                           of: audioAssertTrack,
+                                           at: kCMTimeZero)
             
-            DispatchQueue.main.sync {
-                self.previewLayer.contents = image
-            }
-            if let image = image, let pixelBuffer = pixelBufferFromCGImage(image: image) {
-                let time = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-                videoEncoder?.encodePixelBuffer(pixelBuffer, frameTime: time)
+            let mainInstruction = AVMutableVideoCompositionInstruction()
+            mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, videoAsset.duration)
+            
+            let videolayerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
+            
+            var isVideoAssetPortrait = false
+            
+            let videoTransform = videoAssetTrack.preferredTransform
+            
+            if videoTransform.a == 0 && videoTransform.b == 1.0 && videoTransform.c == -1.0 && videoTransform.d == 0 {
+                isVideoAssetPortrait = true
             }
             
-        } else {
-            videoEncoder?.encodeFrame(sampleBuffer)
+            if videoTransform.a == 0 && videoTransform.b == -1.0 && videoTransform.c == 1.0 && videoTransform.d == 0 {
+                isVideoAssetPortrait = true
+            }
+            
+            videolayerInstruction.setTransform(videoTransform, at: kCMTimeZero)
+            videolayerInstruction.setOpacity(0.0, at: videoAsset.duration)
+            
+            mainInstruction.layerInstructions = [videolayerInstruction]
+            
+            let mainCompositionInst = AVMutableVideoComposition()
+            var naturalSize: CGSize
+            if isVideoAssetPortrait {
+                naturalSize = CGSize(width: videoAssetTrack.naturalSize.height,
+                                     height: videoAssetTrack.naturalSize.width)
+            } else {
+                naturalSize = videoAssetTrack.naturalSize
+            }
+            
+            var renderWidth = naturalSize.width
+            var renderHeight = naturalSize.height
+            
+            let value = (renderWidth > renderHeight) ? renderHeight : renderWidth
+            mainCompositionInst.renderSize = CGSize(width: value, height: value)
+            
+        } catch {
+            
         }
     }
 
-    func pixelBufferFromCGImage(image: CGImage) -> CVPixelBuffer? {
-        let width = image.width
-        let height = image.height
-        
-        let options = [kCVPixelBufferCGImageCompatibilityKey: true,
-                       kCVPixelBufferCGBitmapContextCompatibilityKey: true]
-        
-        var pixelBuffer: CVPixelBuffer?
-        let status = CVPixelBufferCreate(kCFAllocatorDefault,
-                                         width,
-                                         height,
-                                         kCVPixelFormatType_32ARGB,
-                                         options as CFDictionary,
-                                         &pixelBuffer)
-        if status != kCVReturnSuccess || pixelBuffer == nil {
-            println("failed to create CVPixelBuffer ")
-            return nil
-        }
-        
-        CVPixelBufferLockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
-        let pixelData = CVPixelBufferGetBaseAddress(pixelBuffer!)
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo = LGCGBitmapByteOrder32Host.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
-        let context = CGContext(data: pixelData,
-                                width: width,
-                                height: height,
-                                bitsPerComponent: 8,
-                                bytesPerRow: 4 * width,
-                                space: colorSpace,
-                                bitmapInfo: bitmapInfo)
-        
-        context?.concatenate(CGAffineTransform(rotationAngle: 0))
-        context?.draw(image, in: CGRect(x: 0, y: 0, width: width, height: height))
-        
-        CVPixelBufferUnlockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: CVOptionFlags(0)))
-        
-        return pixelBuffer
-    }
+
+//    float renderWidth, renderHeight;
+//    renderWidth = naturalSize.width;
+//    renderHeight = naturalSize.height;
+//    float value = renderWidth>renderHeight?renderHeight:renderWidth;
+//    mainCompositionInst.renderSize = CGSizeMake(value, value);
+//    mainCompositionInst.instructions = [NSArray arrayWithObject:mainInstruction];
+//    mainCompositionInst.frameDuration = CMTimeMake(1, 30);
+//
+//    // 4 - Get path
+//    AVAssetExportSession *exporter = [[AVAssetExportSession alloc] initWithAsset:mixComposition presetName:AVAssetExportPresetHighestQuality];
+//    NSString *tempDir = NSTemporaryDirectory();
+//    NSString *temppath = [tempDir stringByAppendingFormat:@"%@", @"123456.mp4"];
+//
+//    [[NSFileManager defaultManager] removeItemAtPath:temppath
+//    error:nil];
+//    exporter.outputURL = [NSURL fileURLWithPath:temppath];
+//    exporter.outputFileType = AVFileTypeMPEG4;
+//    exporter.shouldOptimizeForNetworkUse = YES;
+//    exporter.videoComposition = mainCompositionInst;
+//
+//    [exporter exportAsynchronouslyWithCompletionHandler:^{
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//    if (exporter.status == AVAssetExportSessionStatusCompleted) {
+//    NSLog(@"%@", exporter.outputURL);
+//    NSLog(@"%lf", CACurrentMediaTime());
+//    }
+//    });
+//    }];
+//    }
     
-    func getImageFromImageBuffer(_ imageBuffer: CVImageBuffer) -> CGImage? {
-        CVPixelBufferLockBaseAddress(imageBuffer, CVPixelBufferLockFlags.readOnly)
-        
-        let width = CVPixelBufferGetWidth(imageBuffer)
-        let height = CVPixelBufferGetHeight(imageBuffer)
-        let bytesPerRow = CVPixelBufferGetBytesPerRow(imageBuffer)
-        
-        let lumaBuffer = CVPixelBufferGetBaseAddress(imageBuffer)
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let bitmapInfo = LGCGBitmapByteOrder32Host.rawValue | CGImageAlphaInfo.premultipliedFirst.rawValue
-        let context = CGContext(data: lumaBuffer,
-                                width: width,
-                                height: height,
-                                bitsPerComponent: 8,
-                                bytesPerRow: bytesPerRow,
-                                space: colorSpace,
-                                bitmapInfo: bitmapInfo)
-        var dstImage = context?.makeImage()
-        let size = getFinalOutputSize(CGSize(width: width, height: height))
-        let rect = CGRect(origin: CGPoint(x: (CGFloat(width) - size.width) / 2.0,
-                                          y: (CGFloat(height) - size.height) / 2.0),
-                          size: size)
-        dstImage = dstImage?.cropping(to: rect)
-        CVPixelBufferUnlockBaseAddress(imageBuffer, CVPixelBufferLockFlags.readOnly)
-        return dstImage
-    }
-    
-    func getFinalOutputSize(_ originSize: CGSize) -> CGSize {
-        if  self.outputSize.width > 0.0,
-            self.outputSize.width <= 1.0,
-            self.outputSize.height > 0.0,
-            self.outputSize.height <= 1.0
-        {
-            /// 正常的相对大小
-            return CGSize(width: originSize.width * self.outputSize.width,
-                          height: originSize.height * self.outputSize.height)
-        } else if self.outputSize.width > 1.0, self.outputSize.height > 1.0 {
-            /// 正常的绝对大小
-            if originSize.width * self.outputSize.height <= originSize.height * self.outputSize.width {
-                let width = originSize.width
-                let height = originSize.height * self.outputSize.height / originSize.width
-                return CGSize(width: width, height: height)
-            } else {
-                let width  = originSize.height * self.outputSize.width / self.outputSize.height
-                let height = originSize.height
-                return CGSize(width: width, height: height)
-            }
-        } else {
-            /// 异常
-            return originSize
-        }
-    }
 }
 
