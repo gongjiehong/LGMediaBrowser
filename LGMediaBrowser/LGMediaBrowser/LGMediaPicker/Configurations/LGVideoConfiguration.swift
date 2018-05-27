@@ -11,8 +11,9 @@ import AVFoundation
 import CoreVideo
 import GPUImage
 
-public @objc protocol LGVideoOverlay {
-    @optional func requiresUpdateOnMainThread(atVideoTime time: TimeInterval, videoSize: CGSize) -> Bool
+@objc public protocol LGVideoOverlay {
+    @objc optional
+    func requiresUpdateOnMainThread(atVideoTime time: TimeInterval, videoSize: CGSize) -> Bool
     func update(withVideoTime time: TimeInterval)
 }
 
