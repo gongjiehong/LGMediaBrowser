@@ -193,8 +193,10 @@ public class LGCameraCapture: UIViewController {
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.session.startRunning()
-        self.setFocusCursorWithPoint(self.view.center)
+        DispatchQueue.main.after(0.1) {
+            self.session.startRunning()
+            self.setFocusCursorWithPoint(self.view.center)
+        }
     }
     
     public override func viewDidDisappear(_ animated: Bool) {
@@ -224,6 +226,7 @@ public class LGCameraCapture: UIViewController {
         if self.allowRecordVideo {
             self.view.addSubview(focusCursorImageView)
             let pan = UIPanGestureRecognizer(target: self, action: #selector(adjustCameraFocus(_:)))
+            pan.maximumNumberOfTouches = 1
             self.view.addGestureRecognizer(pan)
             focusPanGesture = pan
         }
@@ -452,7 +455,7 @@ public class LGCameraCapture: UIViewController {
         let point = pan.location(in: self.view)
         switch pan.state {
         case .began:
-            if cameraViewRect.contains(point) { return }
+            if !cameraViewRect.contains(point) { return }
             isDragStart = true
             onStartRecord()
             break
@@ -598,8 +601,6 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     }
     
     public func onStartRecord() {
-        focusPanGesture?.isEnabled = true
-        
         let movieConnection = self.videoFileOutput.connection(with: AVMediaType.video)
         movieConnection?.videoOrientation = self.orientation
         movieConnection?.videoScaleAndCropFactor = 1.0
@@ -611,7 +612,6 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     }
     
     public func onFinishedRecord() {
-        focusPanGesture?.isEnabled = false
         self.session.stopRunning()
         self.setVideoZoomFactor(1)
     }
@@ -722,11 +722,14 @@ extension LGCameraCapture: AVCaptureFileOutputRecordingDelegate {
                 naturalSize = videoAssetTrack.naturalSize
             }
             
-//            var renderWidth = naturalSize.width
-//            var renderHeight = naturalSize.height
-//
-//            let value = (renderWidth > renderHeight) ? renderHeight : renderWidth
-            mainCompositionInst.renderSize = getFinalOutputSize(naturalSize)
+//            var finalOutputSize = getFinalOutputSize(naturalSize)
+//            if self.outputSize.width > 1.0 && self.outputSize.height > 1.0 {
+//                finalOutputSize = self.outpu
+//                let ratio = finalOutputSize.width / outputSize.width
+//                finalOutputSize = CGSize(width: outputSize.width, height: outputSize.height * ratio)
+//            }
+            
+            mainCompositionInst.renderSize =  getFinalOutputSize(naturalSize)
             mainCompositionInst.instructions = [mainInstruction]
             mainCompositionInst.frameDuration = CMTimeMake(1, framePerSecond)
             
@@ -737,8 +740,8 @@ extension LGCameraCapture: AVCaptureFileOutputRecordingDelegate {
                 completed(nil)
                 return
             }
-            let tempDir = NSTemporaryDirectory() + "LGCameraCapture"
-            let tempPath = tempDir + UUID().uuidString + videoURL.pathExtension
+            let tempDir = NSTemporaryDirectory() + "LGCameraCapture/"
+            let tempPath = tempDir + UUID().uuidString + "." + videoURL.pathExtension
             
             exporter.outputURL = URL(fileURLWithPath: tempPath)
             if self.videoType == .mov {
@@ -752,6 +755,7 @@ extension LGCameraCapture: AVCaptureFileOutputRecordingDelegate {
                 switch exporter.status {
                 case .completed:
                     completed(exporter.outputURL)
+                    try? FileManager.default.removeItem(at: videoURL)
                     break
                 case .cancelled, .failed:
                     completed(nil)
@@ -783,7 +787,7 @@ extension LGCameraCapture: AVCaptureFileOutputRecordingDelegate {
             } else if originSize.width / originSize.height == ratio {
                 return originSize
             } else {
-                return CGSize(width: originSize.width, height: originSize.width * ratio)
+                return CGSize(width: originSize.width, height: originSize.width / ratio)
             }
         } else {
             /// 异常

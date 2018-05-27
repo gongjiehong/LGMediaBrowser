@@ -8,15 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		FE0332F720B26C1C00573193 /* DebugLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0332F620B26C1B00573193 /* DebugLog.swift */; };
-		FE03B0A120B57AE2007D9F89 /* LGCameraCaptureToolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE03B0A020B57AE2007D9F89 /* LGCameraCaptureToolView.swift */; };
 		FE0980D520999C6D006B6D8C /* LGTapDetectingImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D320999C6D006B6D8C /* LGTapDetectingImageView.swift */; };
 		FE0980D82099A2C0006B6D8C /* LGZoomingScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D72099A2C0006B6D8C /* LGZoomingScrollView.swift */; };
 		FE0980DA2099A2FF006B6D8C /* LGPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */; };
 		FE0980DC2099A7E5006B6D8C /* LGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */; };
 		FE0980DE2099AF34006B6D8C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FE0980DD2099AF34006B6D8C /* Images.xcassets */; };
-		FE15384820B6593800FA9E0A /* LGMediaTypeConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE15384720B6593800FA9E0A /* LGMediaTypeConfiguration.swift */; };
-		FE15384E20B65D3500FA9E0A /* LGAudioConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE15384D20B65D3500FA9E0A /* LGAudioConfiguration.swift */; };
-		FE15385020B663FA00FA9E0A /* LGVideoConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE15384F20B663FA00FA9E0A /* LGVideoConfiguration.swift */; };
 		FE2C9A5920B5696F00BD0327 /* LGVideoEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE2C9A5820B5696F00BD0327 /* LGVideoEncoder.swift */; };
 		FE4574F820AE853300CFF847 /* LGActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4574F120AE853300CFF847 /* LGActionView.swift */; };
 		FE4574F920AE853300CFF847 /* LGMediaBrowserDefines.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4574F220AE853300CFF847 /* LGMediaBrowserDefines.swift */; };
@@ -37,6 +33,13 @@
 		FE96C46A20A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE96C46920A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift */; };
 		FE96C46F20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE96C46E20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift */; };
 		FEABD5D220A546F700E24585 /* UIScreen+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEABD5D120A546F700E24585 /* UIScreen+LGMediaBrowser.swift */; };
+		FEB546D220BA981C00839967 /* LGVideoConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546CE20BA981C00839967 /* LGVideoConfiguration.swift */; };
+		FEB546D320BA981C00839967 /* LGMediaTypeConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546CF20BA981C00839967 /* LGMediaTypeConfiguration.swift */; };
+		FEB546D420BA981C00839967 /* LGAudioConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546D020BA981C00839967 /* LGAudioConfiguration.swift */; };
+		FEB546D620BA984100839967 /* LGPhotoConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546D520BA984100839967 /* LGPhotoConfiguration.swift */; };
+		FEB546D920BAB42F00839967 /* LGCameraCaptureToolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546D820BAB42F00839967 /* LGCameraCaptureToolView.swift */; };
+		FEB546DE20BAB98800839967 /* LGSampleBufferHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546DD20BAB98800839967 /* LGSampleBufferHolder.swift */; };
+		FEB546E020BABE8A00839967 /* LGAudioTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546DF20BABE8A00839967 /* LGAudioTools.swift */; };
 		FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
 		FEE0CA76209C482200A657B0 /* LGPlayerControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE0CA75209C482200A657B0 /* LGPlayerControlView.swift */; };
 		FEED4BE420B2E207005E51EE /* GPUImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEED4BDA20B2E1BE005E51EE /* GPUImage.framework */; };
@@ -70,15 +73,11 @@
 
 /* Begin PBXFileReference section */
 		FE0332F620B26C1B00573193 /* DebugLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DebugLog.swift; sourceTree = "<group>"; };
-		FE03B0A020B57AE2007D9F89 /* LGCameraCaptureToolView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGCameraCaptureToolView.swift; sourceTree = "<group>"; };
 		FE0980D320999C6D006B6D8C /* LGTapDetectingImageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGTapDetectingImageView.swift; sourceTree = "<group>"; };
 		FE0980D72099A2C0006B6D8C /* LGZoomingScrollView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGZoomingScrollView.swift; sourceTree = "<group>"; };
 		FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayerView.swift; sourceTree = "<group>"; };
 		FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayer.swift; sourceTree = "<group>"; };
 		FE0980DD2099AF34006B6D8C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		FE15384720B6593800FA9E0A /* LGMediaTypeConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMediaTypeConfiguration.swift; sourceTree = "<group>"; };
-		FE15384D20B65D3500FA9E0A /* LGAudioConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGAudioConfiguration.swift; sourceTree = "<group>"; };
-		FE15384F20B663FA00FA9E0A /* LGVideoConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGVideoConfiguration.swift; sourceTree = "<group>"; };
 		FE2C9A5820B5696F00BD0327 /* LGVideoEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGVideoEncoder.swift; sourceTree = "<group>"; };
 		FE4574F120AE853300CFF847 /* LGActionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGActionView.swift; sourceTree = "<group>"; };
 		FE4574F220AE853300CFF847 /* LGMediaBrowserDefines.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGMediaBrowserDefines.swift; sourceTree = "<group>"; };
@@ -102,6 +101,13 @@
 		FE96C46920A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMediaBrowserPresentTransition.swift; sourceTree = "<group>"; };
 		FE96C46E20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+LGMediaBrowser.swift"; sourceTree = "<group>"; };
 		FEABD5D120A546F700E24585 /* UIScreen+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIScreen+LGMediaBrowser.swift"; sourceTree = "<group>"; };
+		FEB546CE20BA981C00839967 /* LGVideoConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGVideoConfiguration.swift; sourceTree = "<group>"; };
+		FEB546CF20BA981C00839967 /* LGMediaTypeConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGMediaTypeConfiguration.swift; sourceTree = "<group>"; };
+		FEB546D020BA981C00839967 /* LGAudioConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGAudioConfiguration.swift; sourceTree = "<group>"; };
+		FEB546D520BA984100839967 /* LGPhotoConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPhotoConfiguration.swift; sourceTree = "<group>"; };
+		FEB546D820BAB42F00839967 /* LGCameraCaptureToolView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGCameraCaptureToolView.swift; sourceTree = "<group>"; };
+		FEB546DD20BAB98800839967 /* LGSampleBufferHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGSampleBufferHolder.swift; sourceTree = "<group>"; };
+		FEB546DF20BABE8A00839967 /* LGAudioTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGAudioTools.swift; sourceTree = "<group>"; };
 		FEE0CA75209C482200A657B0 /* LGPlayerControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayerControlView.swift; sourceTree = "<group>"; };
 		FEED4BD120B2E1BE005E51EE /* GPUImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = GPUImage.xcodeproj; path = ../GPUImage/framework/GPUImage.xcodeproj; sourceTree = "<group>"; };
 		FEF8975020A2960B005E4880 /* UIView+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+LGMediaBrowser.swift"; sourceTree = "<group>"; };
@@ -147,12 +153,12 @@
 		FE4574FF20AE854B00CFF847 /* LGMediaPicker */ = {
 			isa = PBXGroup;
 			children = (
+				FEB546DC20BAB96900839967 /* Tools */,
+				FEB546DA20BAB58600839967 /* Recorder */,
+				FEB546D720BAB42F00839967 /* ToolViews */,
+				FEB546CC20BA981C00839967 /* Configurations */,
 				FE4A252A20B3BD2E00955857 /* LGCameraCapture.swift */,
 				FE2C9A5820B5696F00BD0327 /* LGVideoEncoder.swift */,
-				FE15384720B6593800FA9E0A /* LGMediaTypeConfiguration.swift */,
-				FE15384D20B65D3500FA9E0A /* LGAudioConfiguration.swift */,
-				FE15384F20B663FA00FA9E0A /* LGVideoConfiguration.swift */,
-				FE03B0A020B57AE2007D9F89 /* LGCameraCaptureToolView.swift */,
 				FE4A253420B3C4B700955857 /* LGPhotoManager.swift */,
 				FE473BA220B400E500EC02F5 /* ViewController.swift */,
 			);
@@ -253,6 +259,41 @@
 				FE4A253620B3D06A00955857 /* UIColor+LGMediaBrowser.swift */,
 			);
 			path = Extensions;
+			sourceTree = "<group>";
+		};
+		FEB546CC20BA981C00839967 /* Configurations */ = {
+			isa = PBXGroup;
+			children = (
+				FEB546CE20BA981C00839967 /* LGVideoConfiguration.swift */,
+				FEB546CF20BA981C00839967 /* LGMediaTypeConfiguration.swift */,
+				FEB546D020BA981C00839967 /* LGAudioConfiguration.swift */,
+				FEB546D520BA984100839967 /* LGPhotoConfiguration.swift */,
+			);
+			path = Configurations;
+			sourceTree = "<group>";
+		};
+		FEB546D720BAB42F00839967 /* ToolViews */ = {
+			isa = PBXGroup;
+			children = (
+				FEB546D820BAB42F00839967 /* LGCameraCaptureToolView.swift */,
+			);
+			path = ToolViews;
+			sourceTree = "<group>";
+		};
+		FEB546DA20BAB58600839967 /* Recorder */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Recorder;
+			sourceTree = "<group>";
+		};
+		FEB546DC20BAB96900839967 /* Tools */ = {
+			isa = PBXGroup;
+			children = (
+				FEB546DD20BAB98800839967 /* LGSampleBufferHolder.swift */,
+				FEB546DF20BABE8A00839967 /* LGAudioTools.swift */,
+			);
+			path = Tools;
 			sourceTree = "<group>";
 		};
 		FEED4BD220B2E1BE005E51EE /* Products */ = {
@@ -394,20 +435,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				FEE0CA76209C482200A657B0 /* LGPlayerControlView.swift in Sources */,
-				FE03B0A120B57AE2007D9F89 /* LGCameraCaptureToolView.swift in Sources */,
-				FE15385020B663FA00FA9E0A /* LGVideoConfiguration.swift in Sources */,
 				FE9521F52092B6210097600A /* LGMediaModel.swift in Sources */,
 				FE2C9A5920B5696F00BD0327 /* LGVideoEncoder.swift in Sources */,
+				FEB546D320BA981C00839967 /* LGMediaTypeConfiguration.swift in Sources */,
 				FE4574FB20AE853300CFF847 /* LGMediaBrowser.swift in Sources */,
 				FE4A253720B3D06A00955857 /* UIColor+LGMediaBrowser.swift in Sources */,
 				FE4A253520B3C4B700955857 /* LGPhotoManager.swift in Sources */,
 				FE96C46A20A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift in Sources */,
-				FE15384820B6593800FA9E0A /* LGMediaTypeConfiguration.swift in Sources */,
 				FE0980D82099A2C0006B6D8C /* LGZoomingScrollView.swift in Sources */,
-				FE15384E20B65D3500FA9E0A /* LGAudioConfiguration.swift in Sources */,
+				FEB546D620BA984100839967 /* LGPhotoConfiguration.swift in Sources */,
 				FE4574F920AE853300CFF847 /* LGMediaBrowserDefines.swift in Sources */,
 				FE0980DA2099A2FF006B6D8C /* LGPlayerView.swift in Sources */,
 				FE4574FD20AE853300CFF847 /* LGButtons.swift in Sources */,
+				FEB546DE20BAB98800839967 /* LGSampleBufferHolder.swift in Sources */,
 				FE96482B20AAC9C6001738AB /* UIGestureRecognizer+LGMediaBrowser.swift in Sources */,
 				FE4574FA20AE853300CFF847 /* LGForceTouchPreviewController.swift in Sources */,
 				FE9521F92092C8D50097600A /* LGMediaBrowserPreviewCells.swift in Sources */,
@@ -417,9 +457,13 @@
 				FE4574FC20AE853300CFF847 /* LGMesurement.swift in Sources */,
 				FE45750120AE859A00CFF847 /* LGFileDownloader.swift in Sources */,
 				FE4A252B20B3BD2E00955857 /* LGCameraCapture.swift in Sources */,
+				FEB546D220BA981C00839967 /* LGVideoConfiguration.swift in Sources */,
 				FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */,
 				FE70E30E20A0363200554854 /* LGSectorProgressView.swift in Sources */,
+				FEB546D920BAB42F00839967 /* LGCameraCaptureToolView.swift in Sources */,
+				FEB546D420BA981C00839967 /* LGAudioConfiguration.swift in Sources */,
 				FEF8975120A2960B005E4880 /* UIView+LGMediaBrowser.swift in Sources */,
+				FEB546E020BABE8A00839967 /* LGAudioTools.swift in Sources */,
 				FE96C46F20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift in Sources */,
 				FE0980D520999C6D006B6D8C /* LGTapDetectingImageView.swift in Sources */,
 				FE70E31620A0571A00554854 /* LGMediaPreviewerProtocol.swift in Sources */,

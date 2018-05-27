@@ -280,6 +280,8 @@ class LGCameraCaptureToolView: UIView {
             animation.isRemovedOnCompletion = true
             animation.delegate = self
             self.animateLayer.add(animation, forKey: nil)
+            
+            self.bottomView.layer.addSublayer(self.animateLayer)
         }
     }
     
@@ -331,6 +333,7 @@ class LGCameraCaptureToolView: UIView {
 extension LGCameraCaptureToolView: CAAnimationDelegate {
     func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
         if isStopedpRecord { return }
+        isStopedpRecord = true
         stopAnimate()
         delegate?.onFinishedRecord()
     }
@@ -341,7 +344,7 @@ extension LGCameraCaptureToolView: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                            shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
     {
-        if otherGestureRecognizer.isKind(of: UILongPressGestureRecognizer.self) ||
+        if gestureRecognizer.isKind(of: UILongPressGestureRecognizer.self),
             otherGestureRecognizer.isKind(of: UIPanGestureRecognizer.self)
         {
             return true
