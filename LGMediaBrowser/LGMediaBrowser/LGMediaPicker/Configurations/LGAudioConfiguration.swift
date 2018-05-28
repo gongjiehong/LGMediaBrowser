@@ -34,7 +34,7 @@ open class LGAudioConfiguration: LGMediaTypeConfiguration {
         self.channelsCount = DefaultSettings.numberOfChannels
     }
     
-    override open func createAssetWriterOptions(using sampleBuffer: CMSampleBuffer?) -> LGOptionsDictionary? {
+    override open func createAssetWriterOptions(using sampleBuffer: CMSampleBuffer?) -> LGOptionsDictionary {
         if let options = self.options {
             return options
         }

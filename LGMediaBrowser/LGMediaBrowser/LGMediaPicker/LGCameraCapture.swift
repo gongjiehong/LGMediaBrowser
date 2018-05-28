@@ -11,6 +11,7 @@ import AVFoundation
 import CoreMotion
 import CoreVideo
 import LGWebImage
+import GPUImage
 
 /// 拍照或录像完成的回调
 public protocol LGCameraCaptureDelegate: NSObjectProtocol {
@@ -20,6 +21,14 @@ public protocol LGCameraCaptureDelegate: NSObjectProtocol {
 
 /// 拍照和录制视频自定义类
 public class LGCameraCapture: UIViewController {
+    private var _view: GPUImageView = GPUImageView(frame: CGRect.zero)
+    
+    override open func loadView() {
+        super.loadView()
+        self.view = _view
+        self.view.frame = UIScreen.main.bounds
+    }
+    
     /// 视频格式定义
     ///
     /// - mp4: mp4
@@ -73,7 +82,7 @@ public class LGCameraCapture: UIViewController {
     public var allowSwitchDevicePosition: Bool = true
     
     /// 指定使用前置还是后置摄像头
-    public var devicePosition: AVCaptureDevice.Position = AVCaptureDevice.Position.unspecified
+    public var devicePosition: AVCaptureDevice.Position = AVCaptureDevice.Position.back
     
     /// 输出文件大小
     /// 可以是相对坐标（(1.0, 0.5), (ScreenSize.width * 1.0 px, ScreenSize.height * 0.5 px)）
@@ -92,20 +101,13 @@ public class LGCameraCapture: UIViewController {
     /// 录制，返回，完成等按钮的工具条
     var toolView: LGCameraCaptureToolView!
     
-    /// 录制Session
-    var session: AVCaptureSession = AVCaptureSession()
+    var videoCamera: GPUImageVideoCamera!
     
-    /// 输入设备
-    var videoInput: AVCaptureDeviceInput?
+    var filter: GPUImageFilter?
     
-    /// 图片输出
-    var imageOutPut: AVCaptureStillImageOutput = AVCaptureStillImageOutput()
+    var cropFilter: GPUImageFilter!
     
-    /// 录制好的视频写入磁盘相关
-    var videoFileOutput: AVCaptureMovieFileOutput = AVCaptureMovieFileOutput()
-    
-    /// 显示录制过程的Layer
-    var previewLayer: AVCaptureVideoPreviewLayer!
+    var movieWriter: GPUImageMovieWriter!
     
     /// 切换前后摄像头的按钮
     lazy var toggleCameraBtn: UIButton = {
@@ -163,9 +165,6 @@ public class LGCameraCapture: UIViewController {
     /// 拍摄到的照片
     var takedImage: UIImage?
     
-    /// 拍摄到的视频播放器
-    var playerView: LGPlayerView?
-    
     /// 视频最终路径
     var destinationVideoURL: URL?
     
@@ -175,9 +174,8 @@ public class LGCameraCapture: UIViewController {
         temp.deviceMotionUpdateInterval = 0.5
         return temp
     }()
+
     
-    /// 视频方向
-    var orientation: AVCaptureVideoOrientation = .portraitUpsideDown
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -194,14 +192,13 @@ public class LGCameraCapture: UIViewController {
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         DispatchQueue.main.after(0.1) {
-            self.session.startRunning()
-            self.setFocusCursorWithPoint(self.view.center)
+            self.videoCamera.startCapture()
         }
     }
     
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        self.session.stopRunning()
+        self.videoCamera.stopCapture()
     }
     
     public override func viewWillDisappear(_ animated: Bool) {
@@ -245,22 +242,12 @@ public class LGCameraCapture: UIViewController {
                                      y: self.view.lg_height - toolViewHeight - UIDevice.bottomSafeMargin,
                                      width: self.view.lg_width,
                                      height: toolViewHeight)
-        var finalSize = getFinalOutputSize(self.view.lg_size)
-        if finalSize.width > self.view.lg_width {
-            let ratio = finalSize.width / self.view.lg_width
-            finalSize = CGSize(width: self.view.lg_width, height: finalSize.height / ratio)
-        } else if finalSize.height > self.view.lg_height {
-            let ratio = finalSize.height / self.view.lg_height
-            finalSize = CGSize(width: finalSize.width / ratio, height: self.view.lg_height)
-        }
-        let previewFrame = CGRect(x: (self.view.lg_width - finalSize.width) / 2.0,
-                                  y: (self.view.lg_height - finalSize.height) / 2.0,
-                                  width: finalSize.width,
-                                  height: finalSize.height)
-        
-        previewLayer.frame = previewFrame
 
-        
+        let cropSize = getCropSize()
+        let previewFrame = CGRect(x: (self.view.lg_width - cropSize.width * self.view.lg_width) / 2.0,
+                                  y: (self.view.lg_height - cropSize.height * self.view.lg_height) / 2.0,
+                                  width: cropSize.width * self.view.lg_width,
+                                  height: cropSize.height * self.view.lg_height)
         takedImageView.frame = previewFrame
         
         
@@ -290,53 +277,77 @@ public class LGCameraCapture: UIViewController {
         }
         return nil
     }
-    
+
+ 
     // MARK: -  设置摄像头
     func setupCamera() {
-        if let device = self.backCamera {
-            do {
-                self.videoInput = try AVCaptureDeviceInput(device: device)
-                if self.session.canAddInput(self.videoInput!) {
-                    self.session.addInput(self.videoInput!)
-                }
-            } catch {
-                println(error)
-            }
+        let preset = LGRecorderTools.bestCaptureSessionPresetCompatibleWithAllDevices
+        
+        videoCamera = GPUImageVideoCamera(sessionPreset: preset.rawValue,
+                                          cameraPosition: self.devicePosition)
+        videoCamera.outputImageOrientation = self.preferredInterfaceOrientationForPresentation
+        videoCamera.horizontallyMirrorFrontFacingCamera = false
+        videoCamera.horizontallyMirrorRearFacingCamera = false
+
+        var fileType: AVFileType
+        if self.videoType == .mov {
+            fileType = AVFileType.mov
+        } else {
+            fileType = AVFileType.mp4
         }
         
-        let outputSetting = [AVVideoCodecKey: AVVideoCodecJPEG]
-        self.imageOutPut.outputSettings = outputSetting
+        var outputSize = CGSize.zero
         
-        if let device = AVCaptureDevice.devices(for: AVMediaType.audio).first {
-            do {
-                let audioInput = try AVCaptureDeviceInput(device: device)
+        if let output = self.videoCamera.captureSession.outputs.last as? AVCaptureVideoDataOutput {
+            if let outputSettings = output.videoSettings {
+                var width = outputSettings["Width"] as? Int
+                var height = outputSettings["Height"] as? Int
                 
-                if self.session.canAddInput(audioInput) {
-                    self.session.addInput(audioInput)
+                if self.videoCamera.outputImageOrientation.isPortrait {
+                    let temp = width
+                    width = height
+                    height = temp
                 }
-            } catch {
-                println(error)
+                if let width = width, let height = height {
+                    outputSize = CGSize(width: width, height: height)
+                }
             }
         }
         
-        if self.session.canAddOutput(self.imageOutPut) {
-            self.session.addOutput(self.imageOutPut)
+        movieWriter = GPUImageMovieWriter(movieURL: URL(fileURLWithPath: videoWritePath),
+                                          size: getFinalOutputSize(self.view.lg_size),
+                                          fileType: fileType.rawValue,
+                                          outputSettings: nil)
+        movieWriter.encodingLiveVideo = true
+        
+        let cropSize = getCropSize()
+        let cropRatio = cropSize.width / cropSize.height
+        var cropFilterRect: CGRect
+        if !outputSize.equalTo(CGSize.zero) {
+            let outputRatio = outputSize.width / outputSize.height
+            if outputRatio > cropRatio {
+                cropFilterRect = CGRect(x: (1 - 1.0 * outputRatio) / 2.0, y: 0.0, width: 1.0 * outputRatio, height: 1.0)
+            } else if outputRatio == cropRatio {
+                cropFilterRect = CGRect(x: 0, y: 0, width: 1.0, height: 1.0)
+            } else {
+                cropFilterRect = CGRect(x: 0, y: (1 - 1.0 * outputRatio) / 2.0, width: 1.0, height: 1.0 * outputRatio)
+            }
+        } else {
+            cropFilterRect = CGRect(x: 0, y: 0, width: 1.0, height: 1.0)
         }
         
-        if self.session.canAddOutput(self.videoFileOutput) {
-            self.session.addOutput(self.videoFileOutput)
-        }
         
-        if self.session.canSetSessionPreset(AVCaptureSession.Preset.high) {
-            self.session.sessionPreset = AVCaptureSession.Preset.high
-        }
         
-        self.previewLayer = AVCaptureVideoPreviewLayer(session: self.session)
-        self.previewLayer.frame = self.view.bounds
-        self.previewLayer.masksToBounds = true
-        self.previewLayer.videoGravity = AVLayerVideoGravity.resizeAspectFill
-        self.view.layer.insertSublayer(self.previewLayer, at: 0)
+        cropFilter = GPUImageCropFilter(cropRegion: cropFilterRect)
+        
+        videoCamera.addTarget(cropFilter)
+
+        cropFilter.addTarget(movieWriter)
+        if let filterView = self.view as? GPUImageView {
+            cropFilter.addTarget(filterView)
+        }
     }
+    
     
     // MARK: -  监控设备方向，处理视频和图片的方向
     func observeDeviceMotion() {
@@ -350,24 +361,27 @@ public class LGCameraCapture: UIViewController {
             motionManager.stopDeviceMotionUpdates()
         }
     }
+
     
     func handleDeviceMotion(_ motion: CMDeviceMotion) {
         let x = motion.gravity.x
         let y = motion.gravity.y
-        
-        if fabs(y) >= fabs(x) {
-            if y >= 0 {
-                self.orientation = AVCaptureVideoOrientation.portraitUpsideDown
+        if self.videoCamera != nil {
+            if fabs(y) >= fabs(x) {
+                if y >= 0 {
+                    self.videoCamera.outputImageOrientation = UIInterfaceOrientation.portraitUpsideDown
+                }
             } else {
-                self.orientation = AVCaptureVideoOrientation.portrait
+                self.videoCamera.outputImageOrientation = UIInterfaceOrientation.portrait
             }
         } else {
             if x >= 0 {
-                self.orientation = AVCaptureVideoOrientation.landscapeLeft
+                self.videoCamera.outputImageOrientation = UIInterfaceOrientation.landscapeLeft
             } else {
-                self.orientation = AVCaptureVideoOrientation.landscapeRight
+                self.videoCamera.outputImageOrientation = UIInterfaceOrientation.landscapeRight
             }
         }
+        
     }
     
     // MARK: -  获取权限
@@ -401,7 +415,7 @@ public class LGCameraCapture: UIViewController {
     // MARK: -  焦距相关
     
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        if !self.session.isRunning { return }
+        if !self.videoCamera.isRunning { return }
         if let point = touches.first?.location(in: self.view) {
             if point.y > self.view.lg_height - 150.0 - UIDevice.bottomSafeMargin {
                 return
@@ -422,31 +436,30 @@ public class LGCameraCapture: UIViewController {
             self.focusCursorImageView.alpha = 0.0
         }
         
-        let cameraPoint = self.previewLayer.captureDevicePointConverted(fromLayerPoint: point)
-        focusWithMode(AVCaptureDevice.FocusMode.autoFocus,
-                      exposureMode: AVCaptureDevice.ExposureMode.autoExpose,
-                      atPoint: cameraPoint)
+//        let cameraPoint = self.previewLayer.captureDevicePointConverted(fromLayerPoint: point)
+//        focusWithMode(AVCaptureDevice.FocusMode.autoFocus,
+//                      exposureMode: AVCaptureDevice.ExposureMode.autoExpose,
+//                      atPoint: cameraPoint)
     }
     
     func focusWithMode(_ focusMode: AVCaptureDevice.FocusMode,
                        exposureMode: AVCaptureDevice.ExposureMode,
                        atPoint point: CGPoint)
     {
-        if let captureDevice = self.videoInput?.device {
-            do {
-                try captureDevice.lockForConfiguration()
-                if captureDevice.isFocusModeSupported(focusMode) {
-                    captureDevice.focusMode = focusMode
-                }
-                
-                if captureDevice.isFocusPointOfInterestSupported {
-                    captureDevice.focusPointOfInterest = point
-                }
-                captureDevice.unlockForConfiguration()
-            } catch {
-                println(error)
-            }
-        }
+//        let captureDevice = self.videoCamera.inputCamera
+//        do {
+//            try captureDevice.lockForConfiguration()
+//            if captureDevice.isFocusModeSupported(focusMode) {
+//                captureDevice.focusMode = focusMode
+//            }
+//
+//            if captureDevice.isFocusPointOfInterestSupported {
+//                captureDevice.focusPointOfInterest = point
+//            }
+//            captureDevice.unlockForConfiguration()
+//        } catch {
+//            println(error)
+//        }
     }
     
     private var isDragStart: Bool = false
@@ -476,64 +489,63 @@ public class LGCameraCapture: UIViewController {
     }
     
     func setVideoZoomFactor(_ zoomFactor: CGFloat) {
-        if let captureDevice = self.videoInput?.device {
-            do {
-                try captureDevice.lockForConfiguration()
-                captureDevice.videoZoomFactor = zoomFactor
-                captureDevice.unlockForConfiguration()
-            } catch {
-                println(error)
-            }
-        }
+//         let captureDevice = self.videoCamera.inputCamera
+//            do {
+//                try captureDevice.lockForConfiguration()
+//                captureDevice.videoZoomFactor = zoomFactor
+//                captureDevice.unlockForConfiguration()
+//            } catch {
+//                println(error)
+//            }
+        
     }
     
     // MARK: - 切换前后摄像头
     @objc func toggleCameraBtnPressed(_ sender: UIButton) {
-        let cameraCount = AVCaptureDevice.devices(for: AVMediaType.video).count
-        if cameraCount > 1 {
-            var newVideoInput: AVCaptureDeviceInput?
-            do {
-                if let position = self.videoInput?.device.position {
-                    switch position {
-                    case .back:
-                        if let frontCamera = self.frontCamera {
-                            newVideoInput = try AVCaptureDeviceInput(device: frontCamera)
-                        }
-                        break
-                    case .front:
-                        if let backCamera = self.backCamera {
-                            newVideoInput = try AVCaptureDeviceInput(device: backCamera)
-                        }
-                        break
-                    default:
-                        break
-                    }
-                    
-                }
-            } catch {
-                println(error)
-            }
-            if let newVideoInput = newVideoInput, let originInput = self.videoInput {
-                self.session.beginConfiguration()
-                self.session.removeInput(originInput)
-                if self.session.canAddInput(newVideoInput) {
-                    self.session.addInput(newVideoInput)
-                    self.videoInput = newVideoInput
-                } else {
-                    self.session.addInput(originInput)
-                }
-                self.session.commitConfiguration()
-            } else {
-                println("originInput 或 newVideoInput 异常")
-            }
-        } else {
-            println("摄像头数量不足")
-        }
+//        let cameraCount = AVCaptureDevice.devices(for: AVMediaType.video).count
+//        if cameraCount > 1 {
+//            var newVideoInput: AVCaptureDeviceInput?
+//            do {
+//                 let position = self.videoCamera.inputCamera.position
+//                    switch position {
+//                    case .back:
+//                        if let frontCamera = self.frontCamera {
+//                            newVideoInput = try AVCaptureDeviceInput(device: frontCamera)
+//                        }
+//                        break
+//                    case .front:
+//                        if let backCamera = self.backCamera {
+//                            newVideoInput = try AVCaptureDeviceInput(device: backCamera)
+//                        }
+//                        break
+//                    default:
+//                        break
+//                    }
+//
+//            } catch {
+//                println(error)
+//            }
+//            if let newVideoInput = newVideoInput, let originInput = self.videoInput {
+//                self.session.beginConfiguration()
+//                self.session.removeInput(originInput)
+//                if self.session.canAddInput(newVideoInput) {
+//                    self.session.addInput(newVideoInput)
+//                    self.videoInput = newVideoInput
+//                } else {
+//                    self.session.addInput(originInput)
+//                }
+//                self.session.commitConfiguration()
+//            } else {
+//                println("originInput 或 newVideoInput 异常")
+//            }
+//        } else {
+//            println("摄像头数量不足")
+//        }
     }
     
     // MARK: - 程序将要不活跃的时候关闭本页面
     @objc func willResignActive(_ noti: Notification) {
-        if self.session.isRunning {
+        if self.videoCamera.isRunning {
             self.dismiss(animated: true, completion: nil)
         }
     }
@@ -544,8 +556,8 @@ public class LGCameraCapture: UIViewController {
     
     ///析构
     deinit {
-        if session.isRunning {
-            session.stopRunning()
+        if videoCamera.isRunning {
+            videoCamera.stopCapture()
         }
         do {
             try AVAudioSession.sharedInstance().setActive(false,
@@ -559,68 +571,68 @@ public class LGCameraCapture: UIViewController {
 
 extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     public func onTakePicture() {
-        if let videoConnection = self.imageOutPut.connection(with: AVMediaType.video) {
-            videoConnection.videoOrientation = self.orientation
-            if takedImageView.superview == nil {
-                takedImageView.frame = self.view.bounds
-                self.view.insertSubview(takedImageView, belowSubview: toolView)
-            }
-            
-            
-            
-            self.imageOutPut.captureStillImageAsynchronously(from: videoConnection) { [weak self] (buffer, error) in
-                guard let weakSelf = self else { return }
-                if let buffer = buffer {
-                    weakSelf.session.stopRunning()
-                    guard let data = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(buffer) else {
-                        println("读取照片data失败")
-                        return
-                    }
-                    
-                    var image = UIImage(data: data)
-                    
-                    if let tempImage = image, let imageSize = image?.size {
-                        let finalSize = weakSelf.getFinalOutputSize(imageSize)
-                        image = tempImage.lg_imageByCropToRect(CGRect(x: (imageSize.height - finalSize.height) / 2.0,
-                                                                      y: (imageSize.width - finalSize.width) / 2.0,
-                                                                      width: finalSize.height,
-                                                                      height: finalSize.width))
-                    }
-                    
-                    weakSelf.takedImage = image
-                    weakSelf.takedImageView.image = image
-                    weakSelf.takedImageView.isHidden = false
-                } else {
-                    println("读取照片buffer失败")
-                }
-            }
-            
-        } else {
-            println("拍照失败")
-        }
+//        if let videoConnection = self.imageOutPut.connection(with: AVMediaType.video) {
+//            videoConnection.videoOrientation = self.orientation
+//            if takedImageView.superview == nil {
+//                takedImageView.frame = self.view.bounds
+//                self.view.insertSubview(takedImageView, belowSubview: toolView)
+//            }
+//
+//
+//
+//            self.imageOutPut.captureStillImageAsynchronously(from: videoConnection) { [weak self] (buffer, error) in
+//                guard let weakSelf = self else { return }
+//                if let buffer = buffer {
+//                    weakSelf.session.stopRunning()
+//                    guard let data = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(buffer) else {
+//                        println("读取照片data失败")
+//                        return
+//                    }
+//
+//                    var image = UIImage(data: data)
+//
+//                    if let tempImage = image, let imageSize = image?.size {
+//                        let finalSize = weakSelf.getFinalOutputSize(imageSize)
+//                        image = tempImage.lg_imageByCropToRect(CGRect(x: (imageSize.height - finalSize.height) / 2.0,
+//                                                                      y: (imageSize.width - finalSize.width) / 2.0,
+//                                                                      width: finalSize.height,
+//                                                                      height: finalSize.width))
+//                    }
+//
+//                    weakSelf.takedImage = image
+//                    weakSelf.takedImageView.image = image
+//                    weakSelf.takedImageView.isHidden = false
+//                } else {
+//                    println("读取照片buffer失败")
+//                }
+//            }
+//
+//        } else {
+//            println("拍照失败")
+//        }
     }
     
     public func onStartRecord() {
-        let movieConnection = self.videoFileOutput.connection(with: AVMediaType.video)
-        movieConnection?.videoOrientation = self.orientation
-        movieConnection?.videoScaleAndCropFactor = 1.0
-        
-        if !videoFileOutput.isRecording {
-            let url = URL(fileURLWithPath: self.videoWritePath)
-            self.videoFileOutput.startRecording(to: url, recordingDelegate: self)
-        }
+//        let movieConnection = self.videoFileOutput.connection(with: AVMediaType.video)
+//        movieConnection?.videoOrientation = self.orientation
+//        movieConnection?.videoScaleAndCropFactor = 1.0
+//
+//        if !videoFileOutput.isRecording {
+//            let url = URL(fileURLWithPath: self.videoWritePath)
+//            self.videoFileOutput.startRecording(to: url, recordingDelegate: self)
+//        }
     }
     
     public func onFinishedRecord() {
-        self.session.stopRunning()
-        self.setVideoZoomFactor(1)
+//        self.session.stopRunning()
+//        self.setVideoZoomFactor(1)
     }
     
     public func onRetake() {
-        self.toolView.resetLayout()
-        self.session.startRunning()
-        self.setFocusCursorWithPoint(self.view.center)
-        self.takedImageView.isHidden = true
+//        self.toolView.resetLayout()
+//        self.session.startRunning()
+//        self.setFocusCursorWithPoint(self.view.center)
+//        self.takedImageView.isHidden = true
     }
     
     public func onDoneClick() {
@@ -636,139 +648,27 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
 }
 
 
-extension LGCameraCapture: AVCaptureFileOutputRecordingDelegate {
-    public func fileOutput(_ output: AVCaptureFileOutput,
-                           didStartRecordingTo fileURL: URL,
-                           from connections: [AVCaptureConnection])
-    {
-        self.toolView.startAnimate()
-    }
-    
-    
-    public func fileOutput(_ output: AVCaptureFileOutput,
-                           didFinishRecordingTo outputFileURL: URL,
-                           from connections: [AVCaptureConnection],
-                           error: Error?)
-    {
-        if output.recordedDuration.seconds < 1 {
-            self.onRetake()
-            return
-        }
-        
-        croppedVideo(outputFileURL) { (videoURL) in
-            
-        }
-    }
-    
-    func croppedVideo(_ videoURL: URL, completed: @escaping (URL?) -> Void) {
-        let videoAsset = AVAsset(url: videoURL)
-        
-        let mixComposition = AVMutableComposition()
-        
-        guard   let videoTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.video,
-                                                                preferredTrackID: kCMPersistentTrackID_Invalid),
-            let audioTrack = mixComposition.addMutableTrack(withMediaType: AVMediaType.audio,
-                                                            preferredTrackID: kCMPersistentTrackID_Invalid)
-            else
+extension LGCameraCapture {
+    func getCropSize() -> CGSize {
+        if  self.outputSize.width > 0.0,
+            self.outputSize.width <= 1.0,
+            self.outputSize.height > 0.0,
+            self.outputSize.height <= 1.0
         {
-            completed(nil)
-            return
-        }
-        
-        guard   let videoAssetTrack = videoAsset.tracks(withMediaType: AVMediaType.video).first,
-            let audioAssertTrack = videoAsset.tracks(withMediaType: AVMediaType.audio).first
-            else
-        {
-            completed(nil)
-            return
-        }
-        
-        do {
-            try videoTrack.insertTimeRange(CMTimeRangeMake(kCMTimeZero, videoAsset.duration),
-                                           of: videoAssetTrack,
-                                           at: kCMTimeZero)
-            try audioTrack.insertTimeRange(CMTimeRangeMake(kCMTimeZero, videoAsset.duration),
-                                           of: audioAssertTrack,
-                                           at: kCMTimeZero)
-            
-            let mainInstruction = AVMutableVideoCompositionInstruction()
-            mainInstruction.timeRange = CMTimeRangeMake(kCMTimeZero, videoAsset.duration)
-            
-            let videolayerInstruction = AVMutableVideoCompositionLayerInstruction(assetTrack: videoTrack)
-            
-            var isVideoAssetPortrait = false
-            
-            let videoTransform = videoAssetTrack.preferredTransform
-            
-            if videoTransform.a == 0 && videoTransform.b == 1.0 && videoTransform.c == -1.0 && videoTransform.d == 0 {
-                isVideoAssetPortrait = true
-            }
-            
-            if videoTransform.a == 0 && videoTransform.b == -1.0 && videoTransform.c == 1.0 && videoTransform.d == 0 {
-                isVideoAssetPortrait = true
-            }
-            
-            videolayerInstruction.setTransform(videoTransform, at: kCMTimeZero)
-            videolayerInstruction.setOpacity(0.0, at: videoAsset.duration)
-            
-            mainInstruction.layerInstructions = [videolayerInstruction]
-            
-            let mainCompositionInst = AVMutableVideoComposition()
-            var naturalSize: CGSize
-            if isVideoAssetPortrait {
-                naturalSize = CGSize(width: videoAssetTrack.naturalSize.height,
-                                     height: videoAssetTrack.naturalSize.width)
+            /// 正常的相对大小
+            return self.outputSize
+        } else if self.outputSize.width > 1.0, self.outputSize.height > 1.0 {
+            let ratio = self.outputSize.width / self.outputSize.height
+            if ratio >= 1 {
+                return CGSize(width: 1, height: 1.0 / ratio)
             } else {
-                naturalSize = videoAssetTrack.naturalSize
+                return CGSize(width: ratio, height: 1)
             }
-            
-//            var finalOutputSize = getFinalOutputSize(naturalSize)
-//            if self.outputSize.width > 1.0 && self.outputSize.height > 1.0 {
-//                finalOutputSize = self.outpu
-//                let ratio = finalOutputSize.width / outputSize.width
-//                finalOutputSize = CGSize(width: outputSize.width, height: outputSize.height * ratio)
-//            }
-            
-            mainCompositionInst.renderSize =  getFinalOutputSize(naturalSize)
-            mainCompositionInst.instructions = [mainInstruction]
-            mainCompositionInst.frameDuration = CMTimeMake(1, framePerSecond)
-            
-            guard   let exporter = AVAssetExportSession(asset: mixComposition,
-                                                        presetName: AVAssetExportPresetHighestQuality)
-                else
-            {
-                completed(nil)
-                return
-            }
-            let tempDir = NSTemporaryDirectory() + "LGCameraCapture/"
-            let tempPath = tempDir + UUID().uuidString + "." + videoURL.pathExtension
-            
-            exporter.outputURL = URL(fileURLWithPath: tempPath)
-            if self.videoType == .mov {
-                exporter.outputFileType = AVFileType.mov
-            } else {
-                exporter.outputFileType = AVFileType.mp4
-            }
-            exporter.shouldOptimizeForNetworkUse = true
-            exporter.videoComposition = mainCompositionInst
-            exporter.exportAsynchronously {
-                switch exporter.status {
-                case .completed:
-                    completed(exporter.outputURL)
-                    try? FileManager.default.removeItem(at: videoURL)
-                    break
-                case .cancelled, .failed:
-                    completed(nil)
-                    break
-                default:
-                    break
-                }
-            }
-            
-        } catch {
-            completed(nil)
+        } else {
+            return CGSize(width: 1.0, height: 1.0)
         }
     }
+    
 
     func getFinalOutputSize(_ originSize: CGSize) -> CGSize {
         if  self.outputSize.width > 0.0,
@@ -779,7 +679,8 @@ extension LGCameraCapture: AVCaptureFileOutputRecordingDelegate {
             /// 正常的相对大小
             return CGSize(width: originSize.width * self.outputSize.width,
                           height: originSize.height * self.outputSize.height)
-        } else if self.outputSize.width > 1.0, self.outputSize.height > 1.0 {
+        }
+        /*else if self.outputSize.width > 1.0, self.outputSize.height > 1.0 {
             /// 正常的绝对大小
             let ratio = self.outputSize.width / self.outputSize.height
             if originSize.width / originSize.height > ratio {
@@ -789,7 +690,8 @@ extension LGCameraCapture: AVCaptureFileOutputRecordingDelegate {
             } else {
                 return CGSize(width: originSize.width, height: originSize.width / ratio)
             }
-        } else {
+        }*/
+        else {
             /// 异常
             return originSize
         }
