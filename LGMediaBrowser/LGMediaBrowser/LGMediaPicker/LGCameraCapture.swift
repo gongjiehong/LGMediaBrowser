@@ -95,6 +95,9 @@ public class LGCameraCapture: UIViewController {
     /// 视频进度条颜色
     public var circleProgressColor: UIColor = UIColor.blue
     
+    /// 拍照时是否播放快门音，默认开启
+    public var isShutterSoundEnabled: Bool = true
+    
     /// 回调
     public weak var delegate: LGCameraCaptureDelegate?
     
@@ -168,21 +171,11 @@ public class LGCameraCapture: UIViewController {
     /// 视频最终路径
     var destinationVideoURL: URL?
     
-    /// 方向感应
-    lazy var motionManager: CMMotionManager = {
-        let temp = CMMotionManager()
-        temp.deviceMotionUpdateInterval = 0.5
-        return temp
-    }()
-
-    
-    
     override public func viewDidLoad() {
         super.viewDidLoad()
         
         self.setupSubviewsAndLayout()
         self.setupCamera()
-        self.observeDeviceMotion()
         
         if self.allowTakePhoto == false && self.allowRecordVideo == false {
             fatalError("拍摄视频和拍照必须支持一个")
@@ -198,12 +191,11 @@ public class LGCameraCapture: UIViewController {
     
     public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
-        self.videoCamera.stopCapture()
     }
     
     public override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        self.motionManager.stopDeviceMotionUpdates()
+        self.videoCamera.stopCapture()
     }
     
     weak var focusPanGesture: UIPanGestureRecognizer?
@@ -243,11 +235,11 @@ public class LGCameraCapture: UIViewController {
                                      width: self.view.lg_width,
                                      height: toolViewHeight)
 
-        let cropSize = getCropSize()
-        let previewFrame = CGRect(x: (self.view.lg_width - cropSize.width * self.view.lg_width) / 2.0,
-                                  y: (self.view.lg_height - cropSize.height * self.view.lg_height) / 2.0,
-                                  width: cropSize.width * self.view.lg_width,
-                                  height: cropSize.height * self.view.lg_height)
+        let cropSize = getCropSize(self.view.lg_size)
+        let previewFrame = CGRect(x: (self.view.lg_width - cropSize.width) / 2.0,
+                                  y: (self.view.lg_height - cropSize.height) / 2.0,
+                                  width: cropSize.width,
+                                  height: cropSize.height)
         takedImageView.frame = previewFrame
         
         
@@ -285,7 +277,7 @@ public class LGCameraCapture: UIViewController {
         
         videoCamera = GPUImageVideoCamera(sessionPreset: preset.rawValue,
                                           cameraPosition: self.devicePosition)
-        videoCamera.outputImageOrientation = self.preferredInterfaceOrientationForPresentation
+        videoCamera.outputImageOrientation = UIInterfaceOrientation.portrait
         videoCamera.horizontallyMirrorFrontFacingCamera = false
         videoCamera.horizontallyMirrorRearFacingCamera = false
 
@@ -314,31 +306,24 @@ public class LGCameraCapture: UIViewController {
             }
         }
         
+        
+        
+        
         movieWriter = GPUImageMovieWriter(movieURL: URL(fileURLWithPath: videoWritePath),
-                                          size: getFinalOutputSize(self.view.lg_size),
+                                          size: getFinalOutputSize(outputSize),
                                           fileType: fileType.rawValue,
                                           outputSettings: nil)
         movieWriter.encodingLiveVideo = true
         
-        let cropSize = getCropSize()
-        let cropRatio = cropSize.width / cropSize.height
-        var cropFilterRect: CGRect
-        if !outputSize.equalTo(CGSize.zero) {
-            let outputRatio = outputSize.width / outputSize.height
-            if outputRatio > cropRatio {
-                cropFilterRect = CGRect(x: (1 - 1.0 * outputRatio) / 2.0, y: 0.0, width: 1.0 * outputRatio, height: 1.0)
-            } else if outputRatio == cropRatio {
-                cropFilterRect = CGRect(x: 0, y: 0, width: 1.0, height: 1.0)
-            } else {
-                cropFilterRect = CGRect(x: 0, y: (1 - 1.0 * outputRatio) / 2.0, width: 1.0, height: 1.0 * outputRatio)
-            }
-        } else {
-            cropFilterRect = CGRect(x: 0, y: 0, width: 1.0, height: 1.0)
-        }
         
+        let finalSize = getCropSize(outputSize)
         
+        let cropedRect = CGRect(origin: CGPoint(x: ((outputSize.width - finalSize.width) / 2.0) / outputSize.width,
+                                                y: ((outputSize.height - finalSize.height) / 2.0) / outputSize.height),
+                                size: CGSize(width: finalSize.width / outputSize.width,
+                                             height: finalSize.height / outputSize.height))
         
-        cropFilter = GPUImageCropFilter(cropRegion: cropFilterRect)
+        cropFilter = GPUImageCropFilter(cropRegion: cropedRect)
         
         videoCamera.addTarget(cropFilter)
 
@@ -346,42 +331,6 @@ public class LGCameraCapture: UIViewController {
         if let filterView = self.view as? GPUImageView {
             cropFilter.addTarget(filterView)
         }
-    }
-    
-    
-    // MARK: -  监控设备方向，处理视频和图片的方向
-    func observeDeviceMotion() {
-        if motionManager.isDeviceMotionAvailable {
-            motionManager.startDeviceMotionUpdates(to: OperationQueue.main) { [weak self] (motion, error) in
-                if let motion = motion, error == nil {
-                    self?.handleDeviceMotion(motion)
-                }
-            }
-        } else {
-            motionManager.stopDeviceMotionUpdates()
-        }
-    }
-
-    
-    func handleDeviceMotion(_ motion: CMDeviceMotion) {
-        let x = motion.gravity.x
-        let y = motion.gravity.y
-        if self.videoCamera != nil {
-            if fabs(y) >= fabs(x) {
-                if y >= 0 {
-                    self.videoCamera.outputImageOrientation = UIInterfaceOrientation.portraitUpsideDown
-                }
-            } else {
-                self.videoCamera.outputImageOrientation = UIInterfaceOrientation.portrait
-            }
-        } else {
-            if x >= 0 {
-                self.videoCamera.outputImageOrientation = UIInterfaceOrientation.landscapeLeft
-            } else {
-                self.videoCamera.outputImageOrientation = UIInterfaceOrientation.landscapeRight
-            }
-        }
-        
     }
     
     // MARK: -  获取权限
@@ -436,30 +385,31 @@ public class LGCameraCapture: UIViewController {
             self.focusCursorImageView.alpha = 0.0
         }
         
-//        let cameraPoint = self.previewLayer.captureDevicePointConverted(fromLayerPoint: point)
-//        focusWithMode(AVCaptureDevice.FocusMode.autoFocus,
-//                      exposureMode: AVCaptureDevice.ExposureMode.autoExpose,
-//                      atPoint: cameraPoint)
+        let cameraPoint = CGPoint(x: point.x / self.view.lg_width, y: point.y / self.view.lg_height)
+        focusWithMode(AVCaptureDevice.FocusMode.autoFocus,
+                      exposureMode: AVCaptureDevice.ExposureMode.autoExpose,
+                      atPoint: cameraPoint)
     }
     
     func focusWithMode(_ focusMode: AVCaptureDevice.FocusMode,
                        exposureMode: AVCaptureDevice.ExposureMode,
                        atPoint point: CGPoint)
     {
-//        let captureDevice = self.videoCamera.inputCamera
-//        do {
-//            try captureDevice.lockForConfiguration()
-//            if captureDevice.isFocusModeSupported(focusMode) {
-//                captureDevice.focusMode = focusMode
-//            }
-//
-//            if captureDevice.isFocusPointOfInterestSupported {
-//                captureDevice.focusPointOfInterest = point
-//            }
-//            captureDevice.unlockForConfiguration()
-//        } catch {
-//            println(error)
-//        }
+        if let captureDevice = self.videoCamera.inputCamera {
+            do {
+                try captureDevice.lockForConfiguration()
+                if captureDevice.isFocusModeSupported(focusMode) {
+                    captureDevice.focusMode = focusMode
+                }
+                
+                if captureDevice.isFocusPointOfInterestSupported {
+                    captureDevice.focusPointOfInterest = point
+                }
+                captureDevice.unlockForConfiguration()
+            } catch {
+                println(error)
+            }
+        }
     }
     
     private var isDragStart: Bool = false
@@ -489,58 +439,25 @@ public class LGCameraCapture: UIViewController {
     }
     
     func setVideoZoomFactor(_ zoomFactor: CGFloat) {
-//         let captureDevice = self.videoCamera.inputCamera
-//            do {
-//                try captureDevice.lockForConfiguration()
-//                captureDevice.videoZoomFactor = zoomFactor
-//                captureDevice.unlockForConfiguration()
-//            } catch {
-//                println(error)
-//            }
-        
+        if let captureDevice = self.videoCamera.inputCamera{
+            do {
+                try captureDevice.lockForConfiguration()
+                captureDevice.videoZoomFactor = zoomFactor
+                captureDevice.unlockForConfiguration()
+            } catch {
+                println(error)
+            }
+        }
     }
     
     // MARK: - 切换前后摄像头
     @objc func toggleCameraBtnPressed(_ sender: UIButton) {
-//        let cameraCount = AVCaptureDevice.devices(for: AVMediaType.video).count
-//        if cameraCount > 1 {
-//            var newVideoInput: AVCaptureDeviceInput?
-//            do {
-//                 let position = self.videoCamera.inputCamera.position
-//                    switch position {
-//                    case .back:
-//                        if let frontCamera = self.frontCamera {
-//                            newVideoInput = try AVCaptureDeviceInput(device: frontCamera)
-//                        }
-//                        break
-//                    case .front:
-//                        if let backCamera = self.backCamera {
-//                            newVideoInput = try AVCaptureDeviceInput(device: backCamera)
-//                        }
-//                        break
-//                    default:
-//                        break
-//                    }
-//
-//            } catch {
-//                println(error)
-//            }
-//            if let newVideoInput = newVideoInput, let originInput = self.videoInput {
-//                self.session.beginConfiguration()
-//                self.session.removeInput(originInput)
-//                if self.session.canAddInput(newVideoInput) {
-//                    self.session.addInput(newVideoInput)
-//                    self.videoInput = newVideoInput
-//                } else {
-//                    self.session.addInput(originInput)
-//                }
-//                self.session.commitConfiguration()
-//            } else {
-//                println("originInput 或 newVideoInput 异常")
-//            }
-//        } else {
-//            println("摄像头数量不足")
-//        }
+        let cameraCount = AVCaptureDevice.devices(for: AVMediaType.video).count
+        if cameraCount > 1 {
+            self.videoCamera.rotateCamera()
+        } else {
+            println("摄像头数量不足")
+        }
     }
     
     // MARK: - 程序将要不活跃的时候关闭本页面
@@ -552,6 +469,10 @@ public class LGCameraCapture: UIViewController {
     
     override open var prefersStatusBarHidden: Bool {
         return true
+    }
+    
+    override open var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return UIInterfaceOrientationMask.portrait
     }
     
     ///析构
@@ -571,48 +492,22 @@ public class LGCameraCapture: UIViewController {
 
 extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     public func onTakePicture() {
-//        if let videoConnection = self.imageOutPut.connection(with: AVMediaType.video) {
-//            videoConnection.videoOrientation = self.orientation
-//            if takedImageView.superview == nil {
-//                takedImageView.frame = self.view.bounds
-//                self.view.insertSubview(takedImageView, belowSubview: toolView)
-//            }
-//
-//
-//
-//            self.imageOutPut.captureStillImageAsynchronously(from: videoConnection) { [weak self] (buffer, error) in
-//                guard let weakSelf = self else { return }
-//                if let buffer = buffer {
-//                    weakSelf.session.stopRunning()
-//                    guard let data = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(buffer) else {
-//                        println("读取照片data失败")
-//                        return
-//                    }
-//
-//                    var image = UIImage(data: data)
-//
-//                    if let tempImage = image, let imageSize = image?.size {
-//                        let finalSize = weakSelf.getFinalOutputSize(imageSize)
-//                        image = tempImage.lg_imageByCropToRect(CGRect(x: (imageSize.height - finalSize.height) / 2.0,
-//                                                                      y: (imageSize.width - finalSize.width) / 2.0,
-//                                                                      width: finalSize.height,
-//                                                                      height: finalSize.width))
-//                    }
-//
-//                    weakSelf.takedImage = image
-//                    weakSelf.takedImageView.image = image
-//                    weakSelf.takedImageView.isHidden = false
-//                } else {
-//                    println("读取照片buffer失败")
-//                }
-//            }
-//
-//        } else {
-//            println("拍照失败")
-//        }
+        cropFilter.useNextFrameForImageCapture()
+        if let image = cropFilter.imageFromCurrentFramebuffer() {
+            self.videoCamera.stopCapture()
+            self.takedImage = image
+            self.takedImageView.image = image
+            self.takedImageView.isHidden = false
+            self.videoCamera.stopCapture()
+        }
+        
+        if isShutterSoundEnabled {
+            AudioServicesPlaySystemSound(1108)
+        }
     }
     
     public func onStartRecord() {
+//        if self.movieWriter.startRecording()
 //        let movieConnection = self.videoFileOutput.connection(with: AVMediaType.video)
 //        movieConnection?.videoOrientation = self.orientation
 //        movieConnection?.videoScaleAndCropFactor = 1.0
@@ -629,10 +524,10 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     }
     
     public func onRetake() {
-//        self.toolView.resetLayout()
-//        self.session.startRunning()
-//        self.setFocusCursorWithPoint(self.view.center)
-//        self.takedImageView.isHidden = true
+        self.toolView.resetLayout()
+        self.videoCamera.startCapture()
+        self.setFocusCursorWithPoint(self.view.center)
+        self.takedImageView.isHidden = true
     }
     
     public func onDoneClick() {
@@ -649,23 +544,28 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
 
 
 extension LGCameraCapture {
-    func getCropSize() -> CGSize {
+    func getCropSize(_ originSize: CGSize) -> CGSize {
         if  self.outputSize.width > 0.0,
             self.outputSize.width <= 1.0,
             self.outputSize.height > 0.0,
             self.outputSize.height <= 1.0
         {
             /// 正常的相对大小
-            return self.outputSize
+            return CGSize(width: originSize.width * self.outputSize.width,
+                          height: originSize.height * self.outputSize.height)
         } else if self.outputSize.width > 1.0, self.outputSize.height > 1.0 {
+            /// 正常的绝对大小
             let ratio = self.outputSize.width / self.outputSize.height
-            if ratio >= 1 {
-                return CGSize(width: 1, height: 1.0 / ratio)
+            if originSize.width / originSize.height > ratio {
+                return CGSize(width: originSize.height * ratio, height: originSize.height)
+            } else if originSize.width / originSize.height == ratio {
+                return originSize
             } else {
-                return CGSize(width: ratio, height: 1)
+                return CGSize(width: originSize.width, height: originSize.width / ratio)
             }
         } else {
-            return CGSize(width: 1.0, height: 1.0)
+            /// 异常
+            return originSize
         }
     }
     
@@ -679,21 +579,8 @@ extension LGCameraCapture {
             /// 正常的相对大小
             return CGSize(width: originSize.width * self.outputSize.width,
                           height: originSize.height * self.outputSize.height)
-        }
-        /*else if self.outputSize.width > 1.0, self.outputSize.height > 1.0 {
-            /// 正常的绝对大小
-            let ratio = self.outputSize.width / self.outputSize.height
-            if originSize.width / originSize.height > ratio {
-                return CGSize(width: originSize.height * ratio, height: originSize.height)
-            } else if originSize.width / originSize.height == ratio {
-                return originSize
-            } else {
-                return CGSize(width: originSize.width, height: originSize.width / ratio)
-            }
-        }*/
-        else {
-            /// 异常
-            return originSize
+        } else {
+            return self.outputSize
         }
     }
 }
