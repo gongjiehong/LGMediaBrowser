@@ -132,16 +132,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGCameraCapture.swift"
-            timestampString = "549269487.924741"
+            filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGPlayerView.swift"
+            timestampString = "549273161.355135"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "522"
-            endingLineNumber = "522"
-            landmarkName = "onStartRecord()"
+            startingLineNumber = "107"
+            endingLineNumber = "107"
+            landmarkName = "play()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

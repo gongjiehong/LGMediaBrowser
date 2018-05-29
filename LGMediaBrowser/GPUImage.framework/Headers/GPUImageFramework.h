@@ -29,6 +29,7 @@ FOUNDATION_EXPORT const unsigned char GPUImageFrameworkVersionString[];
 #import <GPUImage/GPUImageFramebufferCache.h>
 
 // Filters
+#import <GPUImage/GPUImageBeautifyFilter.h>
 #import <GPUImage/GPUImageFilter.h>
 #import <GPUImage/GPUImageTwoInputFilter.h>
 #import <GPUImage/GPUImagePixellateFilter.h>

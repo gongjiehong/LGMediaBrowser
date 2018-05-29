@@ -106,7 +106,7 @@ public class LGCameraCapture: UIViewController {
     
     var videoCamera: GPUImageVideoCamera!
     
-    var filter: GPUImageFilter?
+    var filter: GPUImageOutput?
     
     var cropFilter: GPUImageFilter!
     
@@ -187,6 +187,8 @@ public class LGCameraCapture: UIViewController {
         if self.allowTakePhoto == false && self.allowRecordVideo == false {
             fatalError("拍摄视频和拍照必须支持一个")
         }
+        
+        requestAccess()
     }
     
     public override func viewDidAppear(_ animated: Bool) {
@@ -253,7 +255,8 @@ public class LGCameraCapture: UIViewController {
         if allowSwitchDevicePosition {
             let toggleCameraBtnSize = CGSize(width: 30.0, height: 30.0)
             let toggleCameraBtnMargin: CGFloat = 20.0
-            self.toggleCameraBtn.frame = CGRect(x: self.view.lg_width - toggleCameraBtnMargin - toggleCameraBtnSize.width,
+            let originX = self.view.lg_width - toggleCameraBtnMargin - toggleCameraBtnSize.width
+            self.toggleCameraBtn.frame = CGRect(x: originX,
                                                 y: toggleCameraBtnMargin + UIDevice.topSafeMargin,
                                                 width: toggleCameraBtnSize.width,
                                                 height: toggleCameraBtnSize.height)
@@ -314,13 +317,18 @@ public class LGCameraCapture: UIViewController {
         }
         
         
+        let temp = GPUImageBilateralFilter()
+        temp.distanceNormalizationFactor = 4.0
+        self.filter = temp
         
         
         movieWriter = GPUImageMovieWriter(movieURL: URL(fileURLWithPath: videoWritePath),
                                           size: getFinalOutputSize(outputSize),
                                           fileType: fileType.rawValue,
                                           outputSettings: nil)
+        movieWriter.hasAudioTrack = true
         movieWriter.encodingLiveVideo = true
+        movieWriter.assetWriter.shouldOptimizeForNetworkUse = true
         
         
         let finalSize = getCropSize(outputSize)
@@ -335,9 +343,10 @@ public class LGCameraCapture: UIViewController {
         videoCamera.addTarget(cropFilter)
         videoCamera.audioEncodingTarget = movieWriter
 
+        cropFilter.addTarget(self.filter as! GPUImageInput)
         cropFilter.addTarget(movieWriter)
         if let filterView = self.view as? GPUImageView {
-            cropFilter.addTarget(filterView)
+            self.filter?.addTarget(filterView)
         }
     }
     
@@ -348,8 +357,9 @@ public class LGCameraCapture: UIViewController {
             if granted {
                 AVCaptureDevice.requestAccess(for: AVMediaType.audio, completionHandler: { [unowned self] (granted) in
                     if granted {
+                        let sel = #selector(LGCameraCapture.willResignActive(_:))
                         NotificationCenter.default.addObserver(self,
-                                                               selector: #selector(LGCameraCapture.willResignActive(_:)),
+                                                               selector: sel,
                                                                name: NSNotification.Name.UIApplicationWillResignActive,
                                                                object: nil)
                     } else {
@@ -422,6 +432,7 @@ public class LGCameraCapture: UIViewController {
     
     private var isDragStart: Bool = false
     @objc func adjustCameraFocus(_ pan: UIPanGestureRecognizer) {
+        return
         let cameraViewRect = self.toolView.convert(self.toolView.bottomView.frame, to: self.view)
         let point = pan.location(in: self.view)
         switch pan.state {
@@ -521,11 +532,11 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     public func onStartRecord() {
         if !isRecording {
             self.movieWriter.startRecording()
+            self.toolView.startAnimate()
         }
     }
     
     public func onFinishedRecord() {
-        self.movieWriter.startRecording()
         self.setVideoZoomFactor(1)
         movieWriter.finishRecording()
         isRecording = false
@@ -536,8 +547,10 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     func playVideo() {
         if self.playerView.superview == nil {
             self.playerView.frame = self.view.bounds
+            self.playerView.player?.isLoopEnabled = true
             self.view.insertSubview(playerView, belowSubview: self.toolView)
         }
+        self.playerView.isHidden = false
         self.playerView.play()
     }
     
@@ -549,9 +562,13 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         self.toolView.resetLayout()
         self.videoCamera.startCapture()
         self.setFocusCursorWithPoint(self.view.center)
+        
         self.takedImageView.isHidden = true
         self.takedImage = nil
+        
         self.toggleCameraBtn.isHidden = false
+        self.playerView.isHidden = true
+        
         DispatchQueue.utility.async {
             do {
                 try FileManager.default.removeItem(at: URL(fileURLWithPath: self.videoWritePath))
