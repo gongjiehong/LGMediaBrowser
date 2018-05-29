@@ -171,6 +171,13 @@ public class LGCameraCapture: UIViewController {
     /// 视频最终路径
     var destinationVideoURL: URL?
     
+    lazy var playerView: LGPlayerView = {
+        let playerView = LGPlayerView(frame: self.view.bounds,
+                                      mediaURL: URL(fileURLWithPath: videoWritePath),
+                                      isMuted: false)
+        return playerView
+    }()
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
         
@@ -326,6 +333,7 @@ public class LGCameraCapture: UIViewController {
         cropFilter = GPUImageCropFilter(cropRegion: cropedRect)
         
         videoCamera.addTarget(cropFilter)
+        videoCamera.audioEncodingTarget = movieWriter
 
         cropFilter.addTarget(movieWriter)
         if let filterView = self.view as? GPUImageView {
@@ -488,6 +496,9 @@ public class LGCameraCapture: UIViewController {
         }
         NotificationCenter.default.removeObserver(self)
     }
+    
+    /// 是否正在录制
+    private var isRecording: Bool = false
 }
 
 extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
@@ -498,8 +509,9 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
             self.takedImage = image
             self.takedImageView.image = image
             self.takedImageView.isHidden = false
-            self.videoCamera.stopCapture()
         }
+        
+        self.toggleCameraBtn.isHidden = true
         
         if isShutterSoundEnabled {
             AudioServicesPlaySystemSound(1108)
@@ -507,27 +519,46 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     }
     
     public func onStartRecord() {
-//        if self.movieWriter.startRecording()
-//        let movieConnection = self.videoFileOutput.connection(with: AVMediaType.video)
-//        movieConnection?.videoOrientation = self.orientation
-//        movieConnection?.videoScaleAndCropFactor = 1.0
-//
-//        if !videoFileOutput.isRecording {
-//            let url = URL(fileURLWithPath: self.videoWritePath)
-//            self.videoFileOutput.startRecording(to: url, recordingDelegate: self)
-//        }
+        if !isRecording {
+            self.movieWriter.startRecording()
+        }
     }
     
     public func onFinishedRecord() {
-//        self.session.stopRunning()
-//        self.setVideoZoomFactor(1)
+        self.movieWriter.startRecording()
+        self.setVideoZoomFactor(1)
+        movieWriter.finishRecording()
+        isRecording = false
+        self.toggleCameraBtn.isHidden = true
+        playVideo()
+    }
+    
+    func playVideo() {
+        if self.playerView.superview == nil {
+            self.playerView.frame = self.view.bounds
+            self.view.insertSubview(playerView, belowSubview: self.toolView)
+        }
+        self.playerView.play()
     }
     
     public func onRetake() {
+        reset()
+    }
+    
+    func reset() {
         self.toolView.resetLayout()
         self.videoCamera.startCapture()
         self.setFocusCursorWithPoint(self.view.center)
         self.takedImageView.isHidden = true
+        self.takedImage = nil
+        self.toggleCameraBtn.isHidden = false
+        DispatchQueue.utility.async {
+            do {
+                try FileManager.default.removeItem(at: URL(fileURLWithPath: self.videoWritePath))
+            } catch {
+                println(error)
+            }
+        }
     }
     
     public func onDoneClick() {

@@ -110,6 +110,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     /// 暂停播放
     public func pause() {
         self.player?.pause()
+        self.player?.seek(to: kCMTimeZero)
     }
     
     /// 自动播放和暂停
