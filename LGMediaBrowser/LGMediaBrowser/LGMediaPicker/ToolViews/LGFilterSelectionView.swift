@@ -7,64 +7,134 @@
 //
 
 import Foundation
+import GPUImage
 
-/// 滤镜类型
-///
-/// - original: 原图
-/// - beautify: 美颜
-/// - sepia: 怀旧
-/// - grayscale: 黑白
-/// - brightness: 高光
-/// - sketch: 素描
-/// - smoothToon: 卡通
-/// - gaussianBlur: 毛玻璃，模糊
-/// - vignette: 晕影
-/// - emboss: <#emboss description#>
-/// - //浮雕: <#//浮雕 description#>
-/// - gamma: <#gamma description#>
-/// - //伽马: <#//伽马 description#>
-/// - bulgeDistortion: <#bulgeDistortion description#>
-/// - //鱼眼: <#//鱼眼 description#>
-/// - stretchDistortion: <#stretchDistortion description#>
-/// - //哈哈镜: <#//哈哈镜 description#>
-/// - pinchDistortion: <#pinchDistortion description#>
-/// - //凹面镜: <#//凹面镜 description#>
-/// - colorInvert: <#colorInvert description#>
-/// - //反色: <#//反色 description#>
-public enum LGFilterType {
-    case original
-    case beautify
-    case sepia
-    case grayscale
-    case brightness
-    case sketch
-    case smoothToon
-    case gaussianBlur
-    case vignette
-    case emboss
-    case gamma
-    case bulgeDistortion
-    case stretchDistortion
-    case pinchDistortion
-    case colorInvert
+/// 滤镜数据模型
+public class LGFilterModel {
+    /// 滤镜
+    public var filter: GPUImageFilter
+    
+    /// 滤镜名字
+    public var filterName: String
+    
+    /// 滤镜示例图
+    public var iconImage: UIImage
+    
+    /// 滤镜描述
+    public var filterDescription: String?
+    
+    public init(filter: GPUImageFilter,
+                filterName: String,
+                iconImage: UIImage,
+                filterDescription: String? = nil)
+    {
+        self.filter = filter
+        self.filterName = filterName
+        self.iconImage = iconImage
+        self.filterDescription = filterDescription
+    }
+    
+    /// 获取滤镜处理后的图片
+    private var _filteredImage: UIImage?
+    public var filteredImage: UIImage? {
+        if let filteredImage = _filteredImage {
+            return filteredImage
+        } else {
+            let image = self.iconImage.imageWith(filter: self.filter)
+            _filteredImage = image
+            return image
+        }
+    }
 }
 
+/// 选择滤镜类型的视图选项Cell
+open class LGFilterSelectionViewCell: UICollectionViewCell {
+    
+    weak var iconView: UIImageView!
+    weak var titleLabel: UILabel!
+    
+    override public init(frame: CGRect) {
+        super.init(frame: frame)
+        setupDefaultViews()
+    }
+    
+    required public init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    func setupDefaultViews() {
+        let width = self.lg_width
+        let tempIconView = UIImageView(frame: CGRect(x: 10, y: 5, width: width - 20, height: width - 20))
+        iconView = tempIconView
+        iconView.clipsToBounds = true
+        iconView.layer.cornerRadius = 5.0
+        iconView.contentMode = UIViewContentMode.scaleAspectFill
+        self.addSubview(iconView)
+        
+        let tempTitleLabel = UILabel(frame: CGRect(x: 0, y: iconView.frame.maxY + 5, width: width, height: 15.0))
+        titleLabel = tempTitleLabel
+        titleLabel.backgroundColor = UIColor.clear
+        titleLabel.font = UIFont.systemFont(ofSize: 10.0)
+        titleLabel.textColor = UIColor.white
+        titleLabel.textAlignment = NSTextAlignment.center
+        self.addSubview(titleLabel)
+    }
+    
+    public var filterModel: LGFilterModel? {
+        didSet {
+            layout()
+        }
+    }
+    
+    func layout() {
+        if let filterModel = filterModel {
+            iconView.image = filterModel.filteredImage
+            titleLabel.text = LGLocalizedString(filterModel.filterName)
+        }
+    }
+    
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        let width = self.lg_width
+        iconView.frame = CGRect(x: 10, y: 5, width: width - 20, height: width - 20)
+        titleLabel.frame = CGRect(x: 0, y: iconView.frame.maxY + 5, width: width, height: 15.0)
+    }
+    
+}
+
+public protocol LGFilterSelectionViewDelegate: NSObjectProtocol {
+    func didSelectedFilter(_ filter: GPUImageFilter)
+}
+
+
+/// 选择滤镜类型的视图
 open class LGFilterSelectionView: UIView {
-    var collectionView: UICollectionView!
+    public var collectionView: UICollectionView!
+    
+    public var filtersArray: [LGFilterModel] = []
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
+        self.backgroundColor = UIColor.clear
         setupCollectionView()
     }
+    
+    weak var delegate: LGFilterSelectionViewDelegate?
     
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupCollectionView()
     }
     
+    private struct Resue {
+        static var FilterSelectionViewCell: String = "LGFilterSelectionViewCell"
+    }
+    
     func setupCollectionView() {
         let layout = UICollectionViewFlowLayout()
-        layout.itemSize = CGSize(width: 40.0, height: 40.0)
+        layout.minimumLineSpacing = 0.0
+        layout.itemSize = CGSize(width: 70.0, height: 80.0)
+        layout.scrollDirection = .horizontal
         
         self.collectionView = UICollectionView(frame: self.bounds,
                                                collectionViewLayout: layout)
@@ -72,10 +142,42 @@ open class LGFilterSelectionView: UIView {
         self.collectionView.showsVerticalScrollIndicator = false
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
+        self.collectionView.backgroundColor = UIColor.clear
         self.addSubview(collectionView)
+        
+        self.collectionView.register(LGFilterSelectionViewCell.self,
+                                     forCellWithReuseIdentifier: Resue.FilterSelectionViewCell)
+    }
+    
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        self.collectionView.frame = self.bounds
     }
 }
 
 extension LGFilterSelectionView: UICollectionViewDelegate, UICollectionViewDataSource {
+    public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return self.filtersArray.count
+    }
     
+    public func collectionView(_ collectionView: UICollectionView,
+                               cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+    {
+        var cell: LGFilterSelectionViewCell
+        if let tempCell = collectionView.dequeueReusableCell(withReuseIdentifier: Resue.FilterSelectionViewCell,
+                                                             for: indexPath) as? LGFilterSelectionViewCell {
+            cell = tempCell
+        } else {
+            cell = LGFilterSelectionViewCell(frame: CGRect.zero)
+        }
+        
+        cell.filterModel = self.filtersArray[indexPath.row]
+        return cell
+    }
+    
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let filterModel = self.filtersArray[indexPath.row]
+        self.delegate?.didSelectedFilter(filterModel.filter)
+    }
 }
+

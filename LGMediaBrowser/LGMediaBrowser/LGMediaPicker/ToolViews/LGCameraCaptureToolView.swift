@@ -109,6 +109,10 @@ class LGCameraCaptureToolView: UIView {
         return doneBtn
     }()
     
+//    lazy var filtersBtn: UIButton = {
+//        
+//    }
+    
     lazy var topView: UIView = {
         let topView = UIView(frame: CGRect.zero)
         topView.layer.masksToBounds = true

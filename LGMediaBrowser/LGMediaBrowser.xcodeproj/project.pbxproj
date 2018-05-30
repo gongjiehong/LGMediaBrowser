@@ -47,6 +47,8 @@
 		FEB546F020BBAF2100839967 /* LGAssetExportSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546EF20BBAF2100839967 /* LGAssetExportSession.swift */; };
 		FEBCB3B920BAF93300F8FAB8 /* LGRecorderTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBCB3B820BAF93300F8FAB8 /* LGRecorderTools.swift */; };
 		FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
+		FEDFAC8020BE9A4C00DBA1AF /* LGMediaBrowser.strings in Resources */ = {isa = PBXBuildFile; fileRef = FEDFAC8220BE9A4C00DBA1AF /* LGMediaBrowser.strings */; };
+		FEDFAC8820BE9D0400DBA1AF /* UIImage+LGMediaPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEDFAC8720BE9D0400DBA1AF /* UIImage+LGMediaPicker.swift */; };
 		FEE0CA76209C482200A657B0 /* LGPlayerControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEE0CA75209C482200A657B0 /* LGPlayerControlView.swift */; };
 		FEF8975120A2960B005E4880 /* UIView+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8975020A2960B005E4880 /* UIView+LGMediaBrowser.swift */; };
 		FEF8975E20A2A060005E4880 /* LGWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975C20A2A058005E4880 /* LGWebImage.framework */; };
@@ -106,6 +108,9 @@
 		FEB546ED20BBA3DE00839967 /* LGRecordSessionSegment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGRecordSessionSegment.swift; sourceTree = "<group>"; };
 		FEB546EF20BBAF2100839967 /* LGAssetExportSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGAssetExportSession.swift; sourceTree = "<group>"; };
 		FEBCB3B820BAF93300F8FAB8 /* LGRecorderTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGRecorderTools.swift; sourceTree = "<group>"; };
+		FEDFAC8120BE9A4C00DBA1AF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/LGMediaBrowser.strings; sourceTree = "<group>"; };
+		FEDFAC8320BE9A6200DBA1AF /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LGMediaBrowser.strings"; sourceTree = "<group>"; };
+		FEDFAC8720BE9D0400DBA1AF /* UIImage+LGMediaPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+LGMediaPicker.swift"; sourceTree = "<group>"; };
 		FEE0CA75209C482200A657B0 /* LGPlayerControlView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayerControlView.swift; sourceTree = "<group>"; };
 		FEF8975020A2960B005E4880 /* UIView+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+LGMediaBrowser.swift"; sourceTree = "<group>"; };
 		FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = LGWebImage.xcodeproj; path = ../LGWebImage/LGWebImage.xcodeproj; sourceTree = "<group>"; };
@@ -151,6 +156,7 @@
 		FE4574FF20AE854B00CFF847 /* LGMediaPicker */ = {
 			isa = PBXGroup;
 			children = (
+				FEDFAC8620BE9CD900DBA1AF /* Extensions */,
 				FEB546DC20BAB96900839967 /* Tools */,
 				FEB546DA20BAB58600839967 /* Recorder */,
 				FEB546D720BAB42F00839967 /* ToolViews */,
@@ -196,6 +202,7 @@
 				FE9521F62092C3700097600A /* Progress */,
 				FE9521EB2092B5FC0097600A /* MediaModel */,
 				FE9521D52092B41A0097600A /* Info.plist */,
+				FEDFAC8220BE9A4C00DBA1AF /* LGMediaBrowser.strings */,
 				FE0980DD2099AF34006B6D8C /* Images.xcassets */,
 			);
 			path = LGMediaBrowser;
@@ -300,6 +307,14 @@
 			path = Tools;
 			sourceTree = "<group>";
 		};
+		FEDFAC8620BE9CD900DBA1AF /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				FEDFAC8720BE9D0400DBA1AF /* UIImage+LGMediaPicker.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		FEF8975620A2A058005E4880 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -368,6 +383,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				"zh-Hans",
 			);
 			mainGroup = FE9521C72092B4190097600A;
 			productRefGroup = FE9521D22092B41A0097600A /* Products */;
@@ -401,6 +417,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE0980DE2099AF34006B6D8C /* Images.xcassets in Resources */,
+				FEDFAC8020BE9A4C00DBA1AF /* LGMediaBrowser.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -425,6 +442,7 @@
 				FEB546D620BA984100839967 /* LGPhotoConfiguration.swift in Sources */,
 				FE4574F920AE853300CFF847 /* LGMediaBrowserDefines.swift in Sources */,
 				FE0980DA2099A2FF006B6D8C /* LGPlayerView.swift in Sources */,
+				FEDFAC8820BE9D0400DBA1AF /* UIImage+LGMediaPicker.swift in Sources */,
 				FE4574FD20AE853300CFF847 /* LGButtons.swift in Sources */,
 				FEB546DE20BAB98800839967 /* LGSampleBufferHolder.swift in Sources */,
 				FE464F1420BCFCFC00C2D4D5 /* LGFilterSelectionView.swift in Sources */,
@@ -456,11 +474,24 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXVariantGroup section */
+		FEDFAC8220BE9A4C00DBA1AF /* LGMediaBrowser.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FEDFAC8120BE9A4C00DBA1AF /* en */,
+				FEDFAC8320BE9A6200DBA1AF /* zh-Hans */,
+			);
+			name = LGMediaBrowser.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
 		FE9521D72092B41A0097600A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -509,7 +540,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -524,6 +555,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -566,7 +598,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 11.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;

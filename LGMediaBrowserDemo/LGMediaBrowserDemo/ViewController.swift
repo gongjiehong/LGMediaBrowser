@@ -33,7 +33,7 @@ class ViewController: UIViewController {
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
         let picker = LGCameraCapture()
-        picker.outputSize = CGSize(width: 500, height: 500)
+        picker.outputSize = CGSize(width: 1, height: 1)
         picker.maximumVideoRecordingDuration = 10.0
         self.present(picker, animated: true) {
             

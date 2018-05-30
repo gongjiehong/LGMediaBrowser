@@ -101,8 +101,12 @@ public class LGCameraCapture: UIViewController {
     /// 回调
     public weak var delegate: LGCameraCaptureDelegate?
     
+    public var filtersArray: [LGFilterModel] = []
+    
     /// 录制，返回，完成等按钮的工具条
     var toolView: LGCameraCaptureToolView!
+    
+    var filterToolView: LGFilterSelectionView!
     
     var videoCamera: GPUImageVideoCamera!
     
@@ -111,6 +115,107 @@ public class LGCameraCapture: UIViewController {
     var cropFilter: GPUImageFilter!
     
     var movieWriter: GPUImageMovieWriter!
+    
+    private lazy var _filtersArray: [LGFilterModel] = {
+        var resultArray = [LGFilterModel]()
+        
+        let exampleImage = UIImage(namedFromThisBundle: "dousen")!
+        
+        /// 原始图片
+        let original = GPUImageFilter()
+        let originalModel = LGFilterModel(filter: original,
+                                          filterName: "Original",
+                                          iconImage: exampleImage)
+        resultArray.append(originalModel)
+        
+        /// 磨皮
+        let bilateralFilter = GPUImageBilateralFilter()
+        bilateralFilter.distanceNormalizationFactor = 4.0
+        let bilateralModel = LGFilterModel(filter: bilateralFilter,
+                                           filterName: "Beaytify",
+                                           iconImage: exampleImage)
+        resultArray.append(bilateralModel)
+        
+        /// 怀旧
+        let sepiaFilter = GPUImageSepiaFilter()
+        let sepiaModel = LGFilterModel(filter: sepiaFilter, filterName: "Nostalgia", iconImage: exampleImage)
+        resultArray.append(sepiaModel)
+
+        /// 黑白
+        let grayscaleFilter = GPUImageGrayscaleFilter()
+        let grayscaleModel = LGFilterModel(filter: grayscaleFilter, filterName: "Grayscale", iconImage: exampleImage)
+        resultArray.append(grayscaleModel)
+        
+        
+        /// 亮白
+        let brightnessFilter = GPUImageBrightnessFilter()
+        brightnessFilter.brightness = 0.1
+        let brightnessModel = LGFilterModel(filter: brightnessFilter,
+                                            filterName: "Brightness",
+                                            iconImage: exampleImage)
+        resultArray.append(brightnessModel)
+        
+        /// 素描
+        let sketchFilter = GPUImageSketchFilter()
+        let sketchModel = LGFilterModel(filter: sketchFilter, filterName: "Sketch", iconImage: exampleImage)
+        resultArray.append(sketchModel)
+        
+        /// 毛玻璃
+        let gaussianFilter = GPUImageGaussianBlurFilter()
+        gaussianFilter.blurRadiusInPixels = 5.0
+        let gaussianModel = LGFilterModel(filter: gaussianFilter, filterName: "GaussianBlur", iconImage: exampleImage)
+        resultArray.append(gaussianModel)
+
+        /// 晕影
+        let vignetteFilter = GPUImageVignetteFilter()
+        let vignetteModel = LGFilterModel(filter: vignetteFilter, filterName: "Vignette", iconImage: exampleImage)
+        resultArray.append(vignetteModel)
+
+        /// 浮雕
+        let embossFilter = GPUImageEmbossFilter()
+        embossFilter.intensity = 1.0
+        let embossModel = LGFilterModel(filter: embossFilter, filterName: "Emboss", iconImage: exampleImage)
+        resultArray.append(embossModel)
+        
+        /// 伽马
+        let gammaFilter = GPUImageGammaFilter()
+        gammaFilter.gamma = 1.5
+        let gammaModel = LGFilterModel(filter: gammaFilter, filterName: "Gamma", iconImage: exampleImage)
+        resultArray.append(gammaModel)
+        
+        /// 鱼眼
+        let bulgeDistortionFilter = GPUImageBulgeDistortionFilter()
+        bulgeDistortionFilter.radius = 0.5
+        let bulgeDistortionModel = LGFilterModel(filter: bulgeDistortionFilter,
+                                                 filterName: "Fisheye",
+                                                 iconImage: exampleImage)
+        resultArray.append(bulgeDistortionModel)
+        
+        
+        /// 哈哈镜
+        let stretchDistortionFilter = GPUImageStretchDistortionFilter()
+        let stretchDistortionModel = LGFilterModel(filter: stretchDistortionFilter,
+                                                   filterName: "StretchDistortion",
+                                                   iconImage: exampleImage)
+        resultArray.append(stretchDistortionModel)
+        
+        
+        /// 凹面镜
+        let pinchDistortionFilter = GPUImagePinchDistortionFilter()
+        let pinchDistortionModel = LGFilterModel(filter: pinchDistortionFilter,
+                                                 filterName: "Cartoon",
+                                                 iconImage: exampleImage)
+        resultArray.append(pinchDistortionModel)
+        
+        /// 反色
+        let colorInvertFilter = GPUImageColorInvertFilter()
+        let colorInvertModel = LGFilterModel(filter: colorInvertFilter,
+                                             filterName: "Cartoon",
+                                             iconImage: exampleImage)
+        resultArray.append(colorInvertModel)
+
+        return resultArray
+    }()
     
     /// 切换前后摄像头的按钮
     lazy var toggleCameraBtn: UIButton = {
@@ -181,6 +286,8 @@ public class LGCameraCapture: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
+        self.filtersArray = self._filtersArray
+        
         self.setupSubviewsAndLayout()
         self.setupCamera()
         
@@ -213,6 +320,20 @@ public class LGCameraCapture: UIViewController {
     func setupSubviewsAndLayout() {
         self.view.backgroundColor = UIColor.black
         
+        let filterToolViewHeight: CGFloat = 80.0
+        let toolViewHeight: CGFloat = 130.0
+        
+        let toolViewOriginY = self.view.lg_height - toolViewHeight - UIDevice.bottomSafeMargin
+        
+        
+        filterToolView = LGFilterSelectionView(frame: CGRect(x: 0,
+                                                             y: toolViewOriginY - filterToolViewHeight,
+                                                             width: self.view.lg_width,
+                                                             height: filterToolViewHeight))
+        filterToolView.filtersArray = self.filtersArray
+        filterToolView.delegate = self
+        self.view.addSubview(filterToolView)
+        
         toolView = LGCameraCaptureToolView(frame: CGRect.zero)
         toolView.delegate = self
         toolView.allowRecordVideo = self.allowRecordVideo
@@ -238,11 +359,24 @@ public class LGCameraCapture: UIViewController {
     public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
+        
+        let filterToolViewHeight: CGFloat = 80.0
         let toolViewHeight: CGFloat = 130.0
+        
+        let toolViewOriginY = self.view.lg_height - toolViewHeight - UIDevice.bottomSafeMargin
+        
+        filterToolView.frame = CGRect(x: 0,
+                                      y: toolViewOriginY - filterToolViewHeight,
+                                      width: self.view.lg_width,
+                                      height: filterToolViewHeight)
+        
         self.toolView.frame = CGRect(x: 0,
                                      y: self.view.lg_height - toolViewHeight - UIDevice.bottomSafeMargin,
                                      width: self.view.lg_width,
                                      height: toolViewHeight)
+        
+        
+        
 
         let cropSize = getCropSize(self.view.lg_size)
         let previewFrame = CGRect(x: (self.view.lg_width - cropSize.width) / 2.0,
@@ -629,6 +763,18 @@ extension LGCameraCapture {
                           height: originSize.height * self.outputSize.height)
         } else {
             return self.outputSize
+        }
+    }
+}
+
+extension LGCameraCapture: LGFilterSelectionViewDelegate {
+    public func didSelectedFilter(_ filter: GPUImageFilter) {
+        cropFilter.removeTarget(self.filter as! GPUImageInput)
+        self.filter?.removeAllTargets()
+        self.filter = filter
+        cropFilter.addTarget(filter)
+        if let filterView = self.view as? GPUImageView {
+            self.filter?.addTarget(filterView)
         }
     }
 }
