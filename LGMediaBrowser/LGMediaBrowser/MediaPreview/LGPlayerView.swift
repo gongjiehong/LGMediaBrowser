@@ -89,7 +89,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         
         if !isMuted {
             do {
-                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionModeMoviePlayback,
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord,
                                                                 with: [])
             } catch {
                 

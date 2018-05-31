@@ -43,14 +43,12 @@ public class LGRecorderTools {
     /// - Returns: AVCaptureSession.Preset 预设值
     class func captureSessionPresetForDimension(_ videoDimension: CMVideoDimensions) -> AVCaptureSession.Preset {
         if #available(iOS 9.0, *) {
-            if videoDimension.width >= 3840 && videoDimension.height > 2160 {
+            if videoDimension.width >= 3840 && videoDimension.height >= 2160 {
                 return AVCaptureSession.Preset.hd4K3840x2160
             }
-        } else {
-            return AVCaptureSession.Preset.hd1920x1080
         }
         
-        if videoDimension.width >= 1920 && videoDimension.height > 1080 {
+        if videoDimension.width >= 1920 && videoDimension.height >= 1080 {
             return AVCaptureSession.Preset.hd1920x1080
         }
         

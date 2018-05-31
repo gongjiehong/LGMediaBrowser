@@ -92,6 +92,17 @@ public class LGCameraCapture: UIViewController {
     /// 输出视频格式
     public var videoType: VideoType = .mp4
     
+    /// 输出视频格式 AVFileType
+    var videoAVFileType: AVFileType {
+        var fileType: AVFileType
+        if self.videoType == .mov {
+            fileType = AVFileType.mov
+        } else {
+            fileType = AVFileType.mp4
+        }
+        return fileType
+    }
+    
     /// 视频进度条颜色
     public var circleProgressColor: UIColor = UIColor.blue
     
@@ -274,11 +285,13 @@ public class LGCameraCapture: UIViewController {
     var takedImage: UIImage?
     
     /// 视频最终路径
-    var destinationVideoURL: URL?
+    var destinationVideoURL: URL {
+        return URL(fileURLWithPath: self.videoWritePath)
+    }
     
     lazy var playerView: LGPlayerView = {
         let playerView = LGPlayerView(frame: self.view.bounds,
-                                      mediaURL: URL(fileURLWithPath: videoWritePath),
+                                      mediaURL: destinationVideoURL,
                                       isMuted: false)
         return playerView
     }()
@@ -415,23 +428,7 @@ public class LGCameraCapture: UIViewController {
     }
 
  
-    // MARK: -  设置摄像头
-    func setupCamera() {
-        let preset = LGRecorderTools.bestCaptureSessionPresetCompatibleWithAllDevices
-        
-        videoCamera = GPUImageVideoCamera(sessionPreset: preset.rawValue,
-                                          cameraPosition: self.devicePosition)
-        videoCamera.outputImageOrientation = UIInterfaceOrientation.portrait
-        videoCamera.horizontallyMirrorFrontFacingCamera = false
-        videoCamera.horizontallyMirrorRearFacingCamera = false
-
-        var fileType: AVFileType
-        if self.videoType == .mov {
-            fileType = AVFileType.mov
-        } else {
-            fileType = AVFileType.mp4
-        }
-        
+    func getMovieRealOutputSize() -> CGSize {
         var outputSize = CGSize.zero
         
         if let output = self.videoCamera.captureSession.outputs.last as? AVCaptureVideoDataOutput {
@@ -449,28 +446,42 @@ public class LGCameraCapture: UIViewController {
                 }
             }
         }
+        return outputSize
+    }
+    
+    
+    
+    // MARK: -  设置摄像头
+    func setupCamera() {
+        let preset = LGRecorderTools.bestCaptureSessionPresetCompatibleWithAllDevices
+        
+        videoCamera = GPUImageVideoCamera(sessionPreset: preset.rawValue,
+                                          cameraPosition: self.devicePosition)
+        videoCamera.outputImageOrientation = UIInterfaceOrientation.portrait
+        videoCamera.horizontallyMirrorFrontFacingCamera = true
+        videoCamera.horizontallyMirrorRearFacingCamera = false
+        
+        let movieRealOutputSize = getMovieRealOutputSize()
         
         
-        let temp = GPUImageBilateralFilter()
-        temp.distanceNormalizationFactor = 4.0
+        let temp = GPUImageFilter()
         self.filter = temp
         
         
-        movieWriter = GPUImageMovieWriter(movieURL: URL(fileURLWithPath: videoWritePath),
-                                          size: getFinalOutputSize(outputSize),
-                                          fileType: fileType.rawValue,
+        movieWriter = GPUImageMovieWriter(movieURL: destinationVideoURL,
+                                          size: getFinalOutputSize(movieRealOutputSize),
+                                          fileType: videoAVFileType.rawValue,
                                           outputSettings: nil)
         movieWriter.hasAudioTrack = true
         movieWriter.encodingLiveVideo = true
-        movieWriter.assetWriter.shouldOptimizeForNetworkUse = true
         
         
-        let finalSize = getCropSize(outputSize)
+        let finalSize = getCropSize(movieRealOutputSize)
         
-        let cropedRect = CGRect(origin: CGPoint(x: ((outputSize.width - finalSize.width) / 2.0) / outputSize.width,
-                                                y: ((outputSize.height - finalSize.height) / 2.0) / outputSize.height),
-                                size: CGSize(width: finalSize.width / outputSize.width,
-                                             height: finalSize.height / outputSize.height))
+        let cropedRect = CGRect(origin: CGPoint(x: ((movieRealOutputSize.width - finalSize.width) / 2.0) / movieRealOutputSize.width,
+                                                y: ((movieRealOutputSize.height - finalSize.height) / 2.0) / movieRealOutputSize.height),
+                                size: CGSize(width: finalSize.width / movieRealOutputSize.width,
+                                             height: finalSize.height / movieRealOutputSize.height))
         
         cropFilter = GPUImageCropFilter(cropRegion: cropedRect)
         
@@ -478,7 +489,7 @@ public class LGCameraCapture: UIViewController {
         videoCamera.audioEncodingTarget = movieWriter
 
         cropFilter.addTarget(self.filter as! GPUImageInput)
-        cropFilter.addTarget(movieWriter)
+        self.filter?.addTarget(movieWriter)
         if let filterView = self.view as? GPUImageView {
             self.filter?.addTarget(filterView)
         }
@@ -672,10 +683,15 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     
     public func onFinishedRecord() {
         self.setVideoZoomFactor(1)
-        movieWriter.finishRecording()
-        isRecording = false
-        self.toggleCameraBtn.isHidden = true
-        playVideo()
+        self.videoCamera.stopCapture()
+        movieWriter.finishRecording {
+            DispatchQueue.main.async {
+                self.isRecording = false
+                self.toggleCameraBtn.isHidden = true
+                self.playVideo()
+            }
+        }
+
     }
     
     func playVideo() {
@@ -685,6 +701,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
             self.view.insertSubview(playerView, belowSubview: self.toolView)
         }
         self.playerView.isHidden = false
+        self.playerView.player?.setItemBy(destinationVideoURL)
         self.playerView.play()
     }
     
@@ -693,6 +710,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     }
     
     func reset() {
+        resetVideoCamera()
         self.toolView.resetLayout()
         self.videoCamera.startCapture()
         self.setFocusCursorWithPoint(self.view.center)
@@ -702,18 +720,60 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         
         self.toggleCameraBtn.isHidden = false
         self.playerView.isHidden = true
+        self.playerView.pause()
+        self.playerView.player?.replaceCurrentItem(with: nil)
         
-        DispatchQueue.utility.async {
-            do {
-                try FileManager.default.removeItem(at: URL(fileURLWithPath: self.videoWritePath))
-            } catch {
-                println(error)
+        do {
+            if FileManager.default.fileExists(atPath: self.videoWritePath) {
+                try FileManager.default.removeItem(at: destinationVideoURL)
+            }
+        } catch {
+            println(error)
+        }
+    }
+    
+    func resetVideoCamera() {
+        self.filter?.removeAllTargets()
+        self.videoCamera.removeAllTargets()
+        self.cropFilter.removeAllTargets()
+        self.videoCamera.audioEncodingTarget = nil
+        let outputSize = getMovieRealOutputSize()
+        self.movieWriter = GPUImageMovieWriter(movieURL: destinationVideoURL,
+                                          size: getFinalOutputSize(outputSize),
+                                          fileType: videoAVFileType.rawValue,
+                                          outputSettings: nil)
+        movieWriter.hasAudioTrack = true
+        movieWriter.encodingLiveVideo = true
+        
+        self.videoCamera.addTarget(self.cropFilter)
+        
+        self.videoCamera.audioEncodingTarget = movieWriter
+        
+        if let filter = self.filter {
+            self.cropFilter.addTarget(filter as! GPUImageInput)
+            filter.addTarget(movieWriter)
+            if let filterView = self.view as? GPUImageView {
+                filter.addTarget(filterView)
+            }
+        } else {
+            cropFilter.addTarget(movieWriter)
+            if let filterView = self.view as? GPUImageView {
+                cropFilter.addTarget(filterView)
             }
         }
     }
     
     public func onDoneClick() {
-        
+        var result: ResultModel
+        if let image = self.takedImage {
+            result = ResultModel(type: .photo, image: image, videoURL: nil)
+        } else {
+            result = ResultModel(type: .video, image: nil, videoURL: destinationVideoURL)
+        }
+        delegate?.captureDidCapturedResult(result, capture: self)
+        self.dismiss(animated: true) {
+            
+        }
     }
     
     public func onDismiss() {
@@ -770,9 +830,12 @@ extension LGCameraCapture {
 extension LGCameraCapture: LGFilterSelectionViewDelegate {
     public func didSelectedFilter(_ filter: GPUImageFilter) {
         cropFilter.removeTarget(self.filter as! GPUImageInput)
+        cropFilter.removeTarget(self.movieWriter)
         self.filter?.removeAllTargets()
+        filter.removeAllTargets()
         self.filter = filter
         cropFilter.addTarget(filter)
+        self.filter?.addTarget(self.movieWriter)
         if let filterView = self.view as? GPUImageView {
             self.filter?.addTarget(filterView)
         }
