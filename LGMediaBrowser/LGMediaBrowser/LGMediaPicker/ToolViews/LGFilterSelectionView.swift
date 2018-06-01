@@ -49,9 +49,15 @@ public class LGFilterModel {
 
 /// 选择滤镜类型的视图选项Cell
 open class LGFilterSelectionViewCell: UICollectionViewCell {
+    override open var isSelected: Bool {
+        didSet {
+            backgroundLayer.isHidden = !isSelected
+        }
+    }
     
     weak var iconView: UIImageView!
     weak var titleLabel: UILabel!
+    weak var backgroundLayer: CAShapeLayer!
     
     override public init(frame: CGRect) {
         super.init(frame: frame)
@@ -69,7 +75,7 @@ open class LGFilterSelectionViewCell: UICollectionViewCell {
         iconView.clipsToBounds = true
         iconView.layer.cornerRadius = 5.0
         iconView.contentMode = UIViewContentMode.scaleAspectFill
-        self.addSubview(iconView)
+        self.contentView.addSubview(iconView)
         
         let tempTitleLabel = UILabel(frame: CGRect(x: 0, y: iconView.frame.maxY + 5, width: width, height: 15.0))
         titleLabel = tempTitleLabel
@@ -77,7 +83,19 @@ open class LGFilterSelectionViewCell: UICollectionViewCell {
         titleLabel.font = UIFont.systemFont(ofSize: 10.0)
         titleLabel.textColor = UIColor.white
         titleLabel.textAlignment = NSTextAlignment.center
-        self.addSubview(titleLabel)
+        self.contentView.addSubview(titleLabel)
+        
+        let tempLayer = CAShapeLayer()
+        backgroundLayer = tempLayer
+        backgroundLayer.frame = self.contentView.bounds
+        backgroundLayer.isHidden = true
+        self.contentView.layer.insertSublayer(backgroundLayer, at: 0)
+        
+        let path = UIBezierPath(roundedRect: self.contentView.bounds, cornerRadius: 5.0)
+        backgroundLayer.path = path.cgPath
+        backgroundLayer.lineWidth = 1.0
+        backgroundLayer.fillColor = UIColor.black.withAlphaComponent(0.4).cgColor
+        backgroundLayer.strokeColor = UIColor.white.cgColor
     }
     
     public var filterModel: LGFilterModel? {
@@ -98,8 +116,8 @@ open class LGFilterSelectionViewCell: UICollectionViewCell {
         let width = self.lg_width
         iconView.frame = CGRect(x: 10, y: 5, width: width - 20, height: width - 20)
         titleLabel.frame = CGRect(x: 0, y: iconView.frame.maxY + 5, width: width, height: 15.0)
+        backgroundLayer.frame = self.contentView.bounds
     }
-    
 }
 
 public protocol LGFilterSelectionViewDelegate: NSObjectProtocol {
@@ -149,6 +167,8 @@ open class LGFilterSelectionView: UIView {
                                      forCellWithReuseIdentifier: Resue.FilterSelectionViewCell)
     }
     
+    private var isFirstLayout: Bool = true
+    private var isFirstSelected: Bool = true
     open override func layoutSubviews() {
         super.layoutSubviews()
         self.collectionView.frame = self.bounds
@@ -172,10 +192,20 @@ extension LGFilterSelectionView: UICollectionViewDelegate, UICollectionViewDataS
         }
         
         cell.filterModel = self.filtersArray[indexPath.row]
+        if isFirstLayout, indexPath.row == 0 {
+            cell.isSelected = true
+            isFirstLayout = false
+        }
         return cell
     }
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if isFirstSelected, indexPath.row != 0 {
+            if let cell = collectionView.cellForItem(at: IndexPath(row: 0, section: 0)) {
+                cell.isSelected = false
+            }
+            isFirstSelected = false
+        }
         let filterModel = self.filtersArray[indexPath.row]
         self.delegate?.didSelectedFilter(filterModel.filter)
     }
