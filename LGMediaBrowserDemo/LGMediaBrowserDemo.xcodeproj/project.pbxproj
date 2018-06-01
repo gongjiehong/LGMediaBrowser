@@ -46,6 +46,8 @@
 		FE0980F52099B88B006B6D8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FE0980F72099B88B006B6D8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGMediaBrowser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEA01DF520C14B9400947D59 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
+		FEA01DF620C14B9400947D59 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
 		FEF8975F20A2A07C005E4880 /* LGWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGHTTPRequest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Lenka - Trouble Is a Friend.mp3"; sourceTree = "<group>"; };
@@ -183,6 +185,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				FE0980F02099B88A006B6D8C /* Base */,
+				FEA01DF520C14B9400947D59 /* zh-Hans */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -191,6 +194,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				FE0980F52099B88B006B6D8C /* Base */,
+				FEA01DF620C14B9400947D59 /* zh-Hans */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -202,6 +206,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -262,6 +267,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

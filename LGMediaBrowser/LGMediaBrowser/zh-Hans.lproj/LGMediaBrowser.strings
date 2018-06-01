@@ -5,3 +5,18 @@
   Created by 龚杰洪 on 2018/5/30.
   Copyright © 2018年 龚杰洪. All rights reserved.
 */
+
+"Original" = "原图";
+"Beaytify" = "美颜";
+"Nostalgia" = "怀旧";
+"Grayscale" = "黑白";
+"Brightness" = "亮白";
+"Sketch" = "素描";
+"GaussianBlur" = "毛玻璃";
+"Vignette" = "晕影";
+"Emboss" = "浮雕";
+"Gamma" = "伽马";
+"Fisheye" = "鱼眼";
+"StretchDistortion" = "哈哈镜";
+"Cartoon" = "凹面镜";
+"ColorInvert" = "反色";

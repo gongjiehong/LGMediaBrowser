@@ -78,10 +78,10 @@ let kPanDissmissGestureName = "lg_panDissmiss"
 
 
 func LGLocalizedString(_ key: String, comment: String) -> String {
-    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: Bundle.main, value: "", comment: comment)
+    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: thisBundle(), value: "", comment: comment)
 }
 
 func LGLocalizedString(_ key: String) -> String {
-    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: Bundle.main, value: "", comment: key)
+    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: thisBundle(), value: "", comment: key)
 }
 

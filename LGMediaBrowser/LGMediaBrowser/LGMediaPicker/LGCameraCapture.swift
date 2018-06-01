@@ -227,7 +227,7 @@ public class LGCameraCapture: UIViewController {
         /// 反色
         let colorInvertFilter = GPUImageColorInvertFilter()
         let colorInvertModel = LGFilterModel(filter: colorInvertFilter,
-                                             filterName: "Cartoon",
+                                             filterName: "ColorInvert",
                                              iconImage: exampleImage)
         resultArray.append(colorInvertModel)
 
