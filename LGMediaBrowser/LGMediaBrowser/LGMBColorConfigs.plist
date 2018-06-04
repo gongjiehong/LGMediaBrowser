@@ -3,12 +3,20 @@
 <plist version="1.0">
 <dict>
 	<key>NavigationBarTitle</key>
-	<string></string>
+	<string>#000000</string>
 	<key>PromptText</key>
-	<string></string>
+	<string>#000000</string>
 	<key>OpenSettingsButtonTitle</key>
-	<string>FFFFFF</string>
-	<key>New item</key>
-	<string></string>
+	<string>#FFFFFF</string>
+	<key>NavigationBarBg</key>
+	<string>#FFFFFF</string>
+	<key>BottomViewBg</key>
+	<string>#FFFFFF</string>
+	<key>BottomButtonsNormalTitle</key>
+	<string>#000000</string>
+	<key>BottomButtonsDisableBg</key>
+	<string>#FFFFFF</string>
+	<key>SelectedImageMask</key>
+	<string>#FFFFFF</string>
 </dict>
 </plist>

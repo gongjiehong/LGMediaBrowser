@@ -12,173 +12,100 @@ import Photos
 public class LGMediaPicker: LGMPNavigationController {
 
     public struct Configuration {
-        
+        /// 状态栏显示方式，默认lightContent
         public var statusBarStyle: UIStatusBarStyle = .lightContent
         
+        /// 可选择的最大张数，默认9
         public var maxSelectCount: Int = 9
         
+        /// cell的圆角大小，默认0.0没有圆角
         public var cellCornerRadius: CGFloat = 0.0
         
-        public struct SelectMediaType: OptionSet {
-            public var rawValue: RawValue
-            
-            public typealias RawValue = Int
-            
-            public init(rawValue: Int) {
-                self.rawValue = rawValue
-            }
-            
-            public static var image: SelectMediaType = SelectMediaType(rawValue: 1 << 0)
-            public static var video: SelectMediaType = SelectMediaType(rawValue: 1 << 1)
-        }
+        /// 可选的数据类型，默认视频和图片都可选[.image, .video]
+        public var resultMediaTypes: LGPhotoManager.ResultMediaType = [.image, .video]
         
-        public var allowSelectMediaType: SelectMediaType = [SelectMediaType.image, SelectMediaType.video]
-        
+        /// 是否支持选择GIF和APNG，默认支持true
         public var allowSelectGif: Bool = true
         
+        /// 是否支持选择LivePhoto，默认支持true
         public var allowSelectLivePhoto: Bool = true
         
+        /// 是否允许在相册内部直接拍照，默认允许true
         public var allowTakePhotoInLibrary: Bool = true
         
+        /// 是否支持3Dtouch预览
         public var allowForceTouch: Bool = true
         
+        /// 是否允许编辑图片，单张图片时有效，默认允许true
         public var allowEditImage: Bool = true
         
+        /// 是否允许编辑视频，单张选择时有效，默认允许true
         public var allowEditVideo: Bool = true
         
+        /// 是否允许选择原图，默认允许，true
         public var allowSelectOriginal: Bool = true
 
+        /// 可编辑的视频最大长度，默认kCMTimeZero，表示不限制长度
         public var maxVideoEditDuration: CMTime = kCMTimeZero
         
+        /// 最大视频长度，默认kCMTimeZero，表示不限制
         public var maxVideoDuration: CMTime = kCMTimeZero
         
+        /// 是否允许滑动选择，默认允许true
         public var allowSlideSelect: Bool = true
         
+        /// 是否允许拖动选择，默认允许true
         public var allowDragSelect: Bool = true
         
-        public var hideClipRatiosToolBar: Bool = true
+        /// 是否隐藏图片裁切工具条
+        public var isHideClipRatiosToolBar: Bool = true
         
-        public var clipRatios: [CGSize] = []
+        /// 图片裁切比例数组，使用CGSize标示,预置1:1, 4:3, 3:2, 16:9四种
+        public var clipRatios: [CGSize] = [CGSize(width: 1, height: 1),
+                                           CGSize(width: 4, height: 3),
+                                           CGSize(width: 3, height: 2),
+                                           CGSize(width: 16, height: 9)]
+        
+        /// 是否在点击缩略图后马上进入编辑模式，只在single模式下有效
+        public var editAfterSelectingThumbnailImage: Bool = false
+        
+        /// 是否在编辑图像完成后将图像存储到相册中
+        public var saveNewImageAfterEdit: Bool = false
+        
+        /// 是否在拍照按钮上显示当前拍摄到的内容
+        public var showCaptureImageOnTakePhotoBtn: Bool = false
+        
+        /// 排序方式，升序还是降序
+        public var sortBy: LGPhotoManager.SortBy = .ascending
+        
+        /// 单选模式下是否显示选择按钮
+        public var isShowSelectBtnAtSingleMode: Bool = false
+        
+        /// 是否在选中的图片上显示蒙层，默认不显示，false
+        public var isShowSelectedMask: Bool = false
 
-        /**
-         根据需要设置自身需要的裁剪比例
-         
-         @discussion e.g.:1:1，请使用ZLDefine中所提供方法 GetClipRatio(NSInteger value1, NSInteger value2)，该数组可不设置，有默认比例，为（Custom, 1:1, 4:3, 3:2, 16:9），如果所设置比例只有一个且 为 Custom 或 1:1，则编辑图片界面隐藏下方比例工具条
-         */
-        @property (nonatomic, strong) NSArray<NSDictionary *> *clipRatios;
+        /// 是否允许录制视频，默认true，但resultMediaTypes.contains(.video) == false时不生效
+        public var allowRecordVideo: Bool = true
         
-        /**
-         在小图界面选择 图片/视频 后直接进入编辑界面，默认NO
-         
-         @discussion 编辑图片 仅在allowEditImage为YES 且 maxSelectCount为1 的情况下，置为YES有效，编辑视频则在 allowEditVideo为YES 且 maxSelectCount为1情况下，置为YES有效
-         */
-        @property (nonatomic, assign) BOOL editAfterSelectThumbnailImage;
+        /// 视频最大录制时长，默认60.0S
+        public var maximumVideoRecordingDuration: CFTimeInterval = 60.0
         
-        /**
-         编辑图片后是否保存编辑后的图片至相册，默认YES
-         */
-        @property (nonatomic, assign) BOOL saveNewImageAfterEdit;
+        /// 输出视频格式, 默认mp4，仅支持mp4和mov
+        public var videoExportType: LGCameraCapture.VideoType = .mp4
         
-        /**
-         是否在相册内部拍照按钮上面实时显示相机俘获的影像 默认 YES
-         */
-        @property (nonatomic, assign) BOOL showCaptureImageOnTakePhotoBtn;
+        public init() {
+        }
         
-        /**
-         是否升序排列，预览界面不受该参数影响，默认升序 YES
-         */
-        @property (nonatomic, assign) BOOL sortAscending;
-        
-        /**
-         控制单选模式下，是否显示选择按钮，默认 NO，多选模式不受控制
-         */
-        @property (nonatomic, assign) BOOL showSelectBtn;
-        
-        /**
-         导航条颜色，默认 rgb(19, 153, 231)
-         */
-        @property (nonatomic, strong) UIColor *navBarColor;
-        
-        /**
-         导航标题颜色，默认 rgb(255, 255, 255)
-         */
-        @property (nonatomic, strong) UIColor *navTitleColor;
-        
-        /**
-         底部工具条底色，默认 rgb(255, 255, 255)
-         */
-        @property (nonatomic, strong) UIColor *bottomViewBgColor;
-        
-        /**
-         底部工具栏按钮 可交互 状态标题颜色，底部 toolbar 按钮可交互状态title颜色均使用这个，确定按钮 可交互 的背景色为这个，默认rgb(80, 180, 234)
-         */
-        @property (nonatomic, strong) UIColor *bottomBtnsNormalTitleColor;
-        
-        /**
-         底部工具栏按钮 不可交互 状态标题颜色，底部 toolbar 按钮不可交互状态颜色均使用这个，确定按钮 不可交互 的背景色为这个，默认rgb(200, 200, 200)
-         */
-        @property (nonatomic, strong) UIColor *bottomBtnsDisableBgColor;
-        
-        /**
-         是否在已选择的图片上方覆盖一层已选中遮罩层，默认 NO
-         */
-        @property (nonatomic, assign) BOOL showSelectedMask;
-        
-        /**
-         遮罩层颜色，内部会默认调整颜色的透明度为0.2， 默认 blackColor
-         */
-        @property (nonatomic, strong) UIColor *selectedMaskColor;
-        
-        /**
-         支持开发者自定义图片，但是所自定义图片资源名称必须与被替换的bundle中的图片名称一致
-         @example: 开发者需要替换选中与未选中的图片资源，则需要传入的数组为 @[@"btn_selected", @"btn_unselected"]，则框架内会使用开发者项目中的图片资源，而其他图片则用框架bundle中的资源
-         */
-        @property (nonatomic, strong) NSArray<NSString *> *customImageNames;
-        
-        /**
-         回调时候是否允许框架解析图片，默认YES
-         
-         @discussion 如果选择了大量图片，框架一下解析大量图片会耗费一些内存，开发者此时可置为NO，拿到assets数组后使用 ZLPhotoManager 中提供的 "anialysisAssets:original:completion:" 方法进行逐个解析，以达到缓解内存瞬间暴涨的效果，该值为NO时，回调的图片数组为nil
-         */
-        @property (nonatomic, assign) BOOL shouldAnialysisAsset;
-        
-        /**
-         框架语言，默认 ZLLanguageSystem (跟随系统语言)
-         */
-        @property (nonatomic, assign) ZLLanguageType languageType;
-        
-        /**
-         支持开发者自定义多语言提示，但是所自定义多语言的key必须与原key一致
-         @example: 开发者需要替换 key: "ZLPhotoBrowserLoadingText"，value:"正在处理..." 的多语言，则需要传入的字典为 @{@"ZLPhotoBrowserLoadingText": @"需要替换的文字"}，而其他多语言则用框架中的（更改时请注意多语言中包含的占位符，如%ld、%@）
-         */
-        @property (nonatomic, strong) NSDictionary<NSString *, NSString *> *customLanguageKeyValue;
-        
-        /**
-         使用系统相机，默认NO
-         */
-        @property (nonatomic, assign) BOOL useSystemCamera;
-        
-        /**
-         是否允许录制视频，默认YES
-         */
-        @property (nonatomic, assign) BOOL allowRecordVideo;
-        
-        /**
-         最大录制时长，默认 10s，最小为 1s
-         */
-        @property (nonatomic, assign) NSInteger maxRecordDuration;
-        
-        /**
-         视频清晰度，默认ZLCaptureSessionPreset1280x720
-         */
-        @property (nonatomic, assign) ZLCaptureSessionPreset sessionPreset;
-        
-        /**
-         录制视频及编辑视频时候的视频导出格式，默认ZLExportVideoTypeMov
-         */
-        @property (nonatomic, assign) ZLExportVideoType exportVideoType;
+        /// 默认配置
+        public static var `default`: Configuration = {
+           return Configuration()
+        }()
     }
     
+    /// 配置，默认使用默认配置
+    public var config: Configuration = Configuration.default
+    
+//    publi
     
     public override func viewDidLoad() {
         super.viewDidLoad()
