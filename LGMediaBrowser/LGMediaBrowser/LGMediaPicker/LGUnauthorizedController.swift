@@ -8,20 +8,21 @@
 
 import UIKit
 
-class LGUnauthorizedController: UIViewController {
+public class LGUnauthorizedController: UIViewController {
     
     weak var markImageView: UIImageView!
     weak var promptLabel: UILabel!
+    weak var openSystemSettingButton: UIButton!
     
-    enum UnauthorizedType {
+    public enum UnauthorizedType {
         case camera
         case ablum
         case microphone
     }
     
-    var unauthorizedType: UnauthorizedType = .camera
+    public var unauthorizedType: UnauthorizedType = .camera
     
-    override func viewDidLoad() {
+    public override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         self.title = LGLocalizedString("Unauthorized")
@@ -52,23 +53,56 @@ class LGUnauthorizedController: UIViewController {
         tempLabel.textAlignment = NSTextAlignment.center
         self.view.addSubview(tempLabel)
         self.promptLabel = tempLabel
+        
+        let capInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
+        let normalBgImage = UIImage(namedFromThisBundle: "btn_open_settings_normal")
+        let resizedNormalImage = normalBgImage?.resizableImage(withCapInsets: capInsets)
+        let highlightedBgImage = UIImage(namedFromThisBundle: "btn_open_settings_highlited")
+        let resizedHighImage = highlightedBgImage?.resizableImage(withCapInsets: capInsets)
+        
+        let tempButton = UIButton(type: UIButtonType.custom)
+        tempButton.setBackgroundImage(resizedNormalImage, for: UIControlState.normal)
+        tempButton.setBackgroundImage(resizedHighImage, for: UIControlState.highlighted)
+        tempButton.setTitle(LGLocalizedString("Open Settings"), for: UIControlState.normal)
+        tempButton.setTitleColor(UIColor(colorName: "OpenSettingsButtonTitle"), for: UIControlState.normal)
+        tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 16.0)
+        tempButton.addTarget(self, action: #selector(openSettings), for: UIControlEvents.touchUpInside)
+        self.view.addSubview(tempButton)
+        self.openSystemSettingButton = tempButton
     }
     
     func layoutViews() {
+        var appname: String = "LGMediaPicker"
+        if let appInfoDic = Bundle.main.infoDictionary {
+            if let tempName = appInfoDic["CFBundleDisplayName"] as? String {
+                appname = tempName
+            } else if let tempName = appInfoDic["CFBundleName"] as? String {
+                appname = tempName
+            } else {
+            }
+        }
+
+        let formatStr = LGLocalizedString("Please Allow %@ Access\n1. Open Settings\n2. Tap Privacy \n3. Find %@ And Switch %@ On")
+        var resultStr: String = ""
         switch self.unauthorizedType {
         case .camera:
-            promptLabel.text = LGLocalizedString("")
+            let cameraStr = LGLocalizedString("Camera")
+            resultStr = String(format: formatStr, cameraStr, appname, cameraStr)
             break
         case .ablum:
-            promptLabel.text = LGLocalizedString("")
+            let photosStr = LGLocalizedString("Photos")
+            resultStr = String(format: formatStr, photosStr, appname, photosStr)
             break
         case .microphone:
-            promptLabel.text = LGLocalizedString("")
+            let microphoneStr = LGLocalizedString("Microphone")
+            resultStr = String(format: formatStr, microphoneStr, appname, microphoneStr)
             break
         }
+        promptLabel.text = resultStr
     }
     
-    override func viewDidLayoutSubviews() {
+    
+    public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         layoutViews()
         
@@ -77,17 +111,45 @@ class LGUnauthorizedController: UIViewController {
                                           width: iamgeWidth,
                                           height: iamgeWidth)
         
-        self.promptLabel.frame = CGRect(x: labelMagrin,
-                                        y: markImageView.frame.maxY,
-                                        width: self.view.lg_width - labelMagrin * 2.0,
-                                        height: labelHeight)
+        if let text = self.promptLabel.text {
+            let height = text.height(withConstrainedWidth: self.view.lg_width - labelMagrin * 2.0,
+                                     font: self.promptLabel.font)
+            self.promptLabel.frame = CGRect(x: labelMagrin,
+                                            y: markImageView.frame.maxY + 5.0,
+                                            width: self.view.lg_width - labelMagrin * 2.0,
+                                            height: height + 5.0)
+        } else {
+            self.promptLabel.frame = CGRect(x: labelMagrin,
+                                            y: markImageView.frame.maxY,
+                                            width: self.view.lg_width - labelMagrin * 2.0,
+                                            height: labelHeight)
+        }
+        
+        if let buttonTitle = self.openSystemSettingButton.title(for: UIControlState.normal) {
+            let width = buttonTitle.width(withConstrainedHeight: 30.0, font: UIFont.systemFont(ofSize: 16.0))
+            self.openSystemSettingButton.frame = CGRect(x: (self.view.lg_width - width - 20.0) / 2.0,
+                                                        y: self.promptLabel.frame.maxY + 5.0,
+                                                        width: width + 20.0,
+                                                        height: 30.0)
+        } else {
+            self.openSystemSettingButton.frame = CGRect(x: (self.view.lg_width - 200.0) / 2.0,
+                                                        y: self.promptLabel.frame.maxY,
+                                                        width: 200.0,
+                                                        height: 30.0)
+        }
+
     }
-    
-    override func didReceiveMemoryWarning() {
+
+    public override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
     
+    @objc func openSettings() {
+        if let url = URL(string: UIApplicationOpenSettingsURLString) {
+            UIApplication.shared.openURL(url)
+        }
+    }
     
     /*
      // MARK: - Navigation

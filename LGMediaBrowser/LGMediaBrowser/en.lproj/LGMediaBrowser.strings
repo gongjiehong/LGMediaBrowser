@@ -23,3 +23,12 @@
 
 
 "Unauthorized" = "Unauthorized";
+"Open Settings" = "Open Settings";
+
+"Please Allow %@ Access\n1. Open Settings\n2. Tap Privacy \n3. Find %@ And Switch %@ On" = "Please Allow %@ Access\n1. Open Settings\n2. Tap Privacy \n3. Find %@ And Switch %@ On";
+"Camera" = "Camera";
+"Photos" = "Photos";
+"Microphone" = "Microphone";
+"Location" = "Location";
+"Notifications" = "Notifications";
+

@@ -20,3 +20,12 @@
 "StretchDistortion" = "哈哈镜";
 "Cartoon" = "凹面镜";
 "ColorInvert" = "反色";
+
+"Unauthorized" = "未开启访问权限";
+"Open Settings" = "去设置";
+"Please Allow %@ Access\n1. Open Settings\n2. Tap Privacy \n3. Find %@ And Switch %@ On" = "请打开%@访问权限\n1. 打开系统设置\n 2. 点击隐私 \n 3. 找到%@然后打开%@开关";
+"Camera" = "摄像头";
+"Photos" = "照片";
+"Microphone" = "麦克风";
+"Location" = "定位";
+"Notifications" = "通知";

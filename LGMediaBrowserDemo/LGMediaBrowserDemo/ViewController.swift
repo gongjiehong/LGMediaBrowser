@@ -32,10 +32,19 @@ class ViewController: UIViewController {
     }
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
-        let picker = LGCameraCapture()
-        picker.outputSize = CGSize(width: 1, height: 1)
-        picker.maximumVideoRecordingDuration = 20.0
-        picker.videoType = .mp4
+//        let picker = LGCameraCapture()
+//        picker.outputSize = CGSize(width: 1, height: 1)
+//        picker.maximumVideoRecordingDuration = 20.0
+//        picker.videoType = .mp4
+//        self.present(picker, animated: true) {
+//
+//        }
+//        let auth = LGUnauthorizedController()
+//        self.present(auth, animated: true) {
+//
+//        }
+        
+        let picker = LGMediaPicker()
         self.present(picker, animated: true) {
             
         }
