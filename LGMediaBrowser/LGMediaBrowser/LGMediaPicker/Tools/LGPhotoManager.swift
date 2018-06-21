@@ -102,9 +102,9 @@ public class LGPhotoManager {
                                                      isCameraRoll: false,
                                                      result: result,
                                                      headImageAsset: head)
-                        model.models = self.fetchPhoto(inResult: result,
-                                                       supportMediaType: supportMediaType,
-                                                       allowSelectLivePhoto: <#T##Bool#>)
+//                        model.models = self.fetchPhoto(inResult: result,
+//                                                       supportMediaType: supportMediaType,
+//                                                       allowSelectLivePhoto: <#T##Bool#>)
                         resultAlbum.append(model)
                     }
                 }

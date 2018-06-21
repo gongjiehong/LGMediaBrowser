@@ -31,7 +31,6 @@
 		FE96482B20AAC9C6001738AB /* UIGestureRecognizer+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE96482A20AAC9C6001738AB /* UIGestureRecognizer+LGMediaBrowser.swift */; };
 		FE96C46A20A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE96C46920A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift */; };
 		FE96C46F20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE96C46E20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift */; };
-		FEA01DF220C1419200947D59 /* GPUImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEA01DF120C1419200947D59 /* GPUImage.framework */; };
 		FEA01DF420C147E400947D59 /* LGPhotoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEA01DF320C147E300947D59 /* LGPhotoManager.swift */; };
 		FEA01DF820C14CA100947D59 /* LGMPNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEA01DF720C14CA100947D59 /* LGMPNavigationController.swift */; };
 		FEA01DFD20C1529B00947D59 /* LGMediaPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEA01DFC20C1529B00947D59 /* LGMediaPicker.swift */; };
@@ -48,6 +47,7 @@
 		FEB546D920BAB42F00839967 /* LGCameraCaptureToolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546D820BAB42F00839967 /* LGCameraCaptureToolView.swift */; };
 		FEB546E020BABE8A00839967 /* LGAudioTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546DF20BABE8A00839967 /* LGAudioTools.swift */; };
 		FEBCB3B920BAF93300F8FAB8 /* LGRecorderTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBCB3B820BAF93300F8FAB8 /* LGRecorderTools.swift */; };
+		FEC1AA7A20DB83EB00E60543 /* GPUImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEC1AA7920DB83EB00E60543 /* GPUImage.framework */; };
 		FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
 		FEDFAC8020BE9A4C00DBA1AF /* LGMediaBrowser.strings in Resources */ = {isa = PBXBuildFile; fileRef = FEDFAC8220BE9A4C00DBA1AF /* LGMediaBrowser.strings */; };
 		FEDFAC8820BE9D0400DBA1AF /* UIImage+LGMediaPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEDFAC8720BE9D0400DBA1AF /* UIImage+LGMediaPicker.swift */; };
@@ -93,7 +93,6 @@
 		FE96482A20AAC9C6001738AB /* UIGestureRecognizer+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIGestureRecognizer+LGMediaBrowser.swift"; sourceTree = "<group>"; };
 		FE96C46920A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMediaBrowserPresentTransition.swift; sourceTree = "<group>"; };
 		FE96C46E20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+LGMediaBrowser.swift"; sourceTree = "<group>"; };
-		FEA01DF120C1419200947D59 /* GPUImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GPUImage.framework; sourceTree = "<group>"; };
 		FEA01DF320C147E300947D59 /* LGPhotoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGPhotoManager.swift; sourceTree = "<group>"; };
 		FEA01DF720C14CA100947D59 /* LGMPNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMPNavigationController.swift; sourceTree = "<group>"; };
 		FEA01DFC20C1529B00947D59 /* LGMediaPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMediaPicker.swift; sourceTree = "<group>"; };
@@ -110,6 +109,7 @@
 		FEB546D820BAB42F00839967 /* LGCameraCaptureToolView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGCameraCaptureToolView.swift; sourceTree = "<group>"; };
 		FEB546DF20BABE8A00839967 /* LGAudioTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGAudioTools.swift; sourceTree = "<group>"; };
 		FEBCB3B820BAF93300F8FAB8 /* LGRecorderTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGRecorderTools.swift; sourceTree = "<group>"; };
+		FEC1AA7920DB83EB00E60543 /* GPUImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GPUImage.framework; sourceTree = "<group>"; };
 		FEDFAC8120BE9A4C00DBA1AF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/LGMediaBrowser.strings; sourceTree = "<group>"; };
 		FEDFAC8320BE9A6200DBA1AF /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LGMediaBrowser.strings"; sourceTree = "<group>"; };
 		FEDFAC8720BE9D0400DBA1AF /* UIImage+LGMediaPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+LGMediaPicker.swift"; sourceTree = "<group>"; };
@@ -125,7 +125,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FEF8975E20A2A060005E4880 /* LGWebImage.framework in Frameworks */,
-				FEA01DF220C1419200947D59 /* GPUImage.framework in Frameworks */,
+				FEC1AA7A20DB83EB00E60543 /* GPUImage.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -172,7 +172,7 @@
 		FE9521C72092B4190097600A = {
 			isa = PBXGroup;
 			children = (
-				FEA01DF120C1419200947D59 /* GPUImage.framework */,
+				FEC1AA7920DB83EB00E60543 /* GPUImage.framework */,
 				FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */,
 				FE9521D32092B41A0097600A /* LGMediaBrowser */,
 				FE9521D22092B41A0097600A /* Products */,
