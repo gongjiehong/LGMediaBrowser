@@ -9,27 +9,11 @@
 import UIKit
 
 open class LGMPNavigationController: UINavigationController {
-    
-    open override var title: String? {
-        didSet {
-            if let titleLabel = self.navigationItem.titleView as? UILabel {
-                titleLabel.text = title
-                titleLabel.sizeToFit()
-            }
-        }
-    }
 
     open override func viewDidLoad() {
         super.viewDidLoad()
         
         self.interactivePopGestureRecognizer?.delegate = self
-        self.view.layer.masksToBounds = true
-        
-        let titleLabel = UILabel(frame: CGRect.zero)
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 18.0)
-        titleLabel.textColor = UIColor(colorName: "NavigationBarTitle")
-        titleLabel.backgroundColor = UIColor.clear
-        self.navigationItem.titleView = titleLabel
     }
     
     open override var preferredStatusBarStyle: UIStatusBarStyle {

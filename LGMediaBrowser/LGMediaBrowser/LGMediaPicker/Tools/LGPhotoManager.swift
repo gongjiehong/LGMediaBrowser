@@ -28,7 +28,9 @@ public class LGPhotoManager {
         public static var livePhoto: ResultMediaType = ResultMediaType(rawValue: 1 << 1)
         public static var animatedImage: ResultMediaType = ResultMediaType(rawValue: 1 << 2)
         public static var video: ResultMediaType = ResultMediaType(rawValue: 1 << 3)
-        public static var audid: ResultMediaType = ResultMediaType(rawValue: 1 << 4)
+        public static var audio: ResultMediaType = ResultMediaType(rawValue: 1 << 4)
+        
+        public static var all: ResultMediaType = [.image, .livePhoto, .animatedImage, .video, audio]
     }
     
     public static var sort: SortBy = .descending
@@ -77,7 +79,7 @@ public class LGPhotoManager {
         {
             var resultAlbum: [LGAlbumListModel] = []
             
-            for album in allAlbums where album.isKind(of: PHAssetCollection.self) {
+            for album in allAlbums {
                 album.enumerateObjects { (collection, index, stoped) in
                     if collection.assetCollectionSubtype.rawValue > 215 ||
                         collection.assetCollectionSubtype == .smartAlbumAllHidden {
@@ -103,12 +105,13 @@ public class LGPhotoManager {
                                                      result: result,
                                                      headImageAsset: head)
 //                        model.models = self.fetchPhoto(inResult: result,
-//                                                       supportMediaType: supportMediaType,
-//                                                       allowSelectLivePhoto: <#T##Bool#>)
+//                                                       supportMediaType: [.livePhoto, .image, .video])
                         resultAlbum.append(model)
                     }
                 }
             }
+            complete(resultAlbum)
+            return
         } else {
             complete([])
             return

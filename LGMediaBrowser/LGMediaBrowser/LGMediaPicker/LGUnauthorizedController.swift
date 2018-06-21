@@ -8,7 +8,7 @@
 
 import UIKit
 
-public class LGUnauthorizedController: UIViewController {
+public class LGUnauthorizedController: LGMPBaseViewController {
     
     weak var markImageView: UIImageView!
     weak var promptLabel: UILabel!
