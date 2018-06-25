@@ -18,5 +18,11 @@
 	<string>#FFFFFF</string>
 	<key>SelectedImageMask</key>
 	<string>#FFFFFF</string>
+	<key>AlbumListTitle</key>
+	<string>#FFFFFF</string>
+	<key>HUDBackground</key>
+	<string>00000066</string>
+	<key>HUDLoadingText</key>
+	<string>FFFFFF</string>
 </dict>
 </plist>

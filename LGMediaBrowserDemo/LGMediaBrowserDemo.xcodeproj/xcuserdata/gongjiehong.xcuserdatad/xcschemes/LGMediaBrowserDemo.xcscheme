@@ -61,6 +61,12 @@
             ReferencedContainer = "container:LGMediaBrowserDemo.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-AppleLanguages &quot;(en)&quot;"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

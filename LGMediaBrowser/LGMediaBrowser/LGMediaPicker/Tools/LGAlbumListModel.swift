@@ -39,7 +39,7 @@ public class LGPhotoModel {
 public class LGAlbumListModel {
     public var title: String?
     public var count: Int
-    public var isCameraRoll: Bool
+    public var isAllPhotos: Bool
     public var result: PHFetchResult<PHAsset>?
     public var headImageAsset: PHAsset?
     public var models: [LGPhotoModel] = []
@@ -48,13 +48,13 @@ public class LGAlbumListModel {
     
     public init(title: String?,
                 count: Int,
-                isCameraRoll: Bool,
+                isAllPhotos: Bool,
                 result: PHFetchResult<PHAsset>?,
                 headImageAsset: PHAsset?)
     {
         self.title = title
         self.count = count
-        self.isCameraRoll = isCameraRoll
+        self.isAllPhotos = isAllPhotos
         self.result = result
         self.headImageAsset = headImageAsset
     }

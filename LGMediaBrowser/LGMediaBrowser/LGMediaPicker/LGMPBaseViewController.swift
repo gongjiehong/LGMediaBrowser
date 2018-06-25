@@ -26,6 +26,8 @@ open class LGMPBaseViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         setupTitleLabel()
+        
+        setupBackButton()
     }
     
     func setupTitleLabel() {
@@ -34,6 +36,24 @@ open class LGMPBaseViewController: UIViewController {
         titleLabel.textColor = UIColor(colorName: "NavigationBarTitle")
         titleLabel.backgroundColor = UIColor.clear
         self.navigationItem.titleView = titleLabel
+    }
+    
+    func setupBackButton() {
+        let backBtn = UIButton(type: UIButtonType.custom)
+        backBtn.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
+        backBtn.setImage(UIImage(namedFromThisBundle: "btn_back_normal"), for: UIControlState.normal)
+        backBtn.addTarget(self, action: #selector(backButtonPressed(_:)), for: UIControlEvents.touchUpInside)
+        
+        let backItem = UIBarButtonItem(customView: backBtn)
+        self.navigationItem.leftBarButtonItem = backItem
+    }
+    
+    @objc func backButtonPressed(_ backBtn: UIButton) {
+        if self.navigationController?.topViewController == self {
+            self.dismiss(animated: true, completion: nil)
+        } else {
+            self.navigationController?.popViewController(animated: true)
+        }
     }
 
     override open func didReceiveMemoryWarning() {

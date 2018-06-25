@@ -93,7 +93,7 @@ public class LGPhotoManager {
                         let head = (self.sort == .ascending ? result.lastObject : result.firstObject)
                         let model = LGAlbumListModel(title: title,
                                                      count: result.count,
-                                                     isCameraRoll: true,
+                                                     isAllPhotos: true,
                                                      result: result,
                                                      headImageAsset: head)
                         resultAlbum.insert(model, at: 0)
@@ -101,7 +101,7 @@ public class LGPhotoManager {
                         let head = (self.sort == .ascending ? result.lastObject : result.firstObject)
                         let model = LGAlbumListModel(title: title,
                                                      count: result.count,
-                                                     isCameraRoll: false,
+                                                     isAllPhotos: false,
                                                      result: result,
                                                      headImageAsset: head)
 //                        model.models = self.fetchPhoto(inResult: result,
@@ -200,5 +200,80 @@ public class LGPhotoManager {
             return String(format: "%2d:%2d:%2d",hours , minutes, seconds)
         }
     }
+    
+    /// 根据图片ASSET，最终输出大小，缩放模式请求图片
+    ///
+    /// - Parameters:
+    ///   - asset: 图片PHAsset对象
+    ///   - outputSize: 需要的输出大小
+    ///   - resizeMode: 缩放模式，默认选最快速的
+    ///   - completion: 完成回调
+    /// - Returns: 请求ID PHImageRequestID
+    @discardableResult
+    public static func requestImage(forAsset asset: PHAsset,
+                                    outputSize: CGSize = CGSize.zero,
+                                    resizeMode: PHImageRequestOptionsResizeMode = PHImageRequestOptionsResizeMode.fast,
+                                    completion: @escaping (UIImage?, [AnyHashable: Any]?) -> Void) -> PHImageRequestID
+    {
+        let options = PHImageRequestOptions()
+        options.resizeMode = resizeMode
+        options.isNetworkAccessAllowed = true
+        
+        var realOutputSize: CGSize
+        if outputSize.equalTo(CGSize.zero) {
+            realOutputSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+        } else {
+            realOutputSize = outputSize
+        }
+        
+        return PHCachingImageManager.default().requestImage(for: asset,
+                                                            targetSize: realOutputSize,
+                                                            contentMode: PHImageContentMode.aspectFill,
+                                                            options: options,
+                                                            resultHandler:
+            { (resultImage, infoDic) in
+            
+                let isCancelled = infoDic?[PHImageCancelledKey] as? Bool
+                let hasError = (infoDic?[PHImageErrorKey] != nil)
+                if isCancelled != true && hasError == false {
+                    completion(resultImage, infoDic)
+                }
+        })
+    }
+    
+    public static func getAllPhotosAlbum(_ supportTypes: ResultMediaType = [.image, .video]) -> LGAlbumListModel {
+        let options = PHFetchOptions()
+        if !supportTypes.contains(.video) {
+            options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
+        }
+        
+        if !supportTypes.contains(.image) {
+            options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)
+        }
+        
+        if self.sort != .ascending {
+            options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: self.sort == .ascending)]
+        }
+        let smartAlbums = PHAssetCollection.fetchAssetCollections(with: PHAssetCollectionType.smartAlbum,
+                                                                  subtype: PHAssetCollectionSubtype.albumRegular,
+                                                                  options: nil)
+        var resultModel: LGAlbumListModel
+        smartAlbums.enumerateObjects { (assetCollection, index, stop) in
+            if assetCollection.assetCollectionSubtype == .smartAlbumUserLibrary {
+                let result = PHAsset.fetchAssets(in: assetCollection, options: options)
+                let headImageAsset = self.sort == .ascending ? result.lastObject : result.firstObject
+                resultModel = LGAlbumListModel(title: assetCollection.localizedTitle,
+                                               count: result.count,
+                                               isAllPhotos: true,
+                                               result: result,
+                                               headImageAsset: headImageAsset)
+                resultModel.models = self.fetchPhoto(inResult: result,
+                                     supportMediaType: supportTypes)
+                resultModel.isAllPhotos = true
+            }
+        }
 
+        return resultModel
+
+    }
 }

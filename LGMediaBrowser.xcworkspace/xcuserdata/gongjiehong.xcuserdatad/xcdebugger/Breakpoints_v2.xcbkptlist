@@ -196,16 +196,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGMediaPicker.swift"
-            timestampString = "551264532.876621"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGMPAlbumListController.swift"
+            timestampString = "551615289.024303"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "124"
-            endingLineNumber = "124"
-            landmarkName = "viewDidLoad()"
+            startingLineNumber = "177"
+            endingLineNumber = "177"
+            landmarkName = "tableView(_:didSelectRowAt:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

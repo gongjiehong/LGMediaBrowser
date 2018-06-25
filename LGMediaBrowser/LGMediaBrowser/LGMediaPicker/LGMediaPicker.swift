@@ -114,15 +114,6 @@ public class LGMediaPicker: LGMPNavigationController {
         requestAccessAndSetupLayout()
         
         self.title = LGLocalizedString("Albums")
-        
-        println(CACurrentMediaTime())
-        LGPhotoManager.fetchAlbumList(LGPhotoManager.ResultMediaType.all) { (modelArray) in
-//            modelArray.map({
-//                println($0.title, $0.count)
-//            })
-//            println(modelArray)
-            println(CACurrentMediaTime())
-        }
     }
 
     public override func didReceiveMemoryWarning() {
@@ -139,6 +130,8 @@ public class LGMediaPicker: LGMPNavigationController {
             DispatchQueue.main.async { [weak self] in
                 switch status {
                 case .authorized:
+                    let controller = LGMPAlbumListController()
+                    self?.viewControllers = [controller]
                     break
                 case .denied, .restricted:
                     let controller = LGUnauthorizedController()
