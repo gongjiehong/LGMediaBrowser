@@ -58,6 +58,8 @@ public class LGAlbumListCell: UITableViewCell {
                                           height: 20.0)
     }
     
+    private var lastRequestId: PHImageRequestID = PHInvalidImageRequestID
+    
     func layoutDataModel() {
         guard let listData = self.dataModel else { return }
         
@@ -75,9 +77,10 @@ public class LGAlbumListCell: UITableViewCell {
         
         if let headImageAsset = listData.headImageAsset {
             let outputSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
-            LGPhotoManager.requestImage(forAsset: headImageAsset,
-                                        outputSize: outputSize,
-                                        resizeMode: PHImageRequestOptionsResizeMode.exact)
+            LGPhotoManager.cancelImageRequest(lastRequestId)
+            lastRequestId = LGPhotoManager.requestImage(forAsset: headImageAsset,
+                                                        outputSize: outputSize,
+                                                        resizeMode: PHImageRequestOptionsResizeMode.exact)
             { [weak self] (resultImage, infoDic) in
                 if let resultImage = resultImage {
                     self?.thumbnailImageView.image = resultImage

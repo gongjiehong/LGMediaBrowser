@@ -274,6 +274,11 @@ public class LGPhotoManager {
         }
 
         return resultModel
-
+    }
+    
+    public static func cancelImageRequest(_ requestId: PHImageRequestID) {
+        if requestId != PHInvalidImageRequestID {
+            PHCachingImageManager.default().cancelImageRequest(requestId)
+        }
     }
 }

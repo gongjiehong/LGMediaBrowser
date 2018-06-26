@@ -22,10 +22,10 @@ public class LGMediaPicker: LGMPNavigationController {
         public var cellCornerRadius: CGFloat = 0.0
         
         /// 可选的数据类型，默认视频和图片都可选[.image, .video]
-        public var resultMediaTypes: LGPhotoManager.ResultMediaType = [.image, .video]
+        public var resultMediaTypes: LGPhotoManager.ResultMediaType = [.image, .video, .livePhoto, .animatedImage]
         
         /// 是否支持选择GIF和APNG，默认支持true
-        public var allowSelectGif: Bool = true
+        public var allowSelectAnimatedImage: Bool = true
         
         /// 是否支持选择LivePhoto，默认支持true
         public var allowSelectLivePhoto: Bool = true

@@ -12,7 +12,9 @@ import UIKit
 public class LGMPAlbumDetailController: LGMPBaseViewController {
     weak var listView: UICollectionView!
     
-    var albumListModel: LGAlbumListModel
+    var albumListModel: LGAlbumListModel?
+    
+    var dataArray: [LGPhotoModel] = []
     
     var configs: LGMediaPicker.Configuration!
     
@@ -50,6 +52,11 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     // MARK: -  初始化视图
     
+    private struct Reuse {
+        static var imageCell: String = "LGMPAlbumDetailImageCell"
+        static var cameraCell: String = "LGMPAlbumDetailCameraCell"
+    }
+    
     func setupListCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = Settings.itemLineSpacing
@@ -66,22 +73,34 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         self.view.addSubview(collectionView)
         self.listView = collectionView
         
+        self.listView.register(LGMPAlbumDetailImageCell.self, forCellWithReuseIdentifier: Reuse.imageCell)
+        self.listView.register(LGMPAlbumDetailCameraCell.self, forCellWithReuseIdentifier: Reuse.cameraCell)
+        
         if configs.allowForceTouch, isForceTouchAvailable {
             self.registerForPreviewing(with: self, sourceView: collectionView)
         }
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    public override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        
+        fetchDataIfNeeded()
     }
-    */
-
+    
+    func fetchDataIfNeeded() {
+        if self.dataArray.count == 0 {
+            let hud = LGLoadingHUD.show(inView: self.view)
+            if let albumListModel = albumListModel {
+                
+            } else {
+                DispatchQueue.userInteractive.async { [weak self] in
+                    guard let weakSelf = self else { return }
+                    let albumList = LGPhotoManager.getAllPhotosAlbum(configs.resultMediaTypes)
+                    weakSelf.albumListModel = albumList
+                }
+            }
+        }
+    }
 }
 
 extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionViewDelegate {

@@ -24,5 +24,7 @@
 	<string>00000066</string>
 	<key>HUDLoadingText</key>
 	<string>FFFFFF</string>
+	<key>TimeOrTypeMarkLabelText</key>
+	<string>FFFFFF</string>
 </dict>
 </plist>
