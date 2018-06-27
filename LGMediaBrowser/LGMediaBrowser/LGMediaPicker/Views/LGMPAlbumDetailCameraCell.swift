@@ -17,38 +17,45 @@ public class LGMPAlbumDetailCameraCell: UICollectionViewCell {
         return temp
     }()
     
-    var session: AVCaptureSession = {
+    lazy var session: AVCaptureSession = {
         return AVCaptureSession()
-    }
+    }()
     
-    var videoInput: AVCaptureDeviceInput? {
-        return LGRecorderTools.videoDeviceForPosition(AVCaptureDevice.Position.back)
-    }
+    lazy var videoInput: AVCaptureDeviceInput? = {
+        if let device = LGRecorderTools.videoDeviceForPosition(AVCaptureDevice.Position.back) {
+            return try? AVCaptureDeviceInput(device: device)
+        } else {
+            return nil
+        }
+    }()
     
-    var movieOutput: AVCaptureMovieFileOutput = {
+    lazy var movieOutput: AVCaptureMovieFileOutput = {
         return AVCaptureMovieFileOutput()
-    }
+    }()
     
-    var previewLayer: AVCaptureVideoPreviewLayer {
+    lazy var previewLayer: AVCaptureVideoPreviewLayer = {
         let layer = AVCaptureVideoPreviewLayer(session: self.session)
         layer.frame = self.contentView.bounds
         layer.videoGravity = AVLayerVideoGravity.resizeAspectFill
         return layer
-    }
+    }()
+    
+    /// 圆角大小，默认无圆角
+    public var cornerRadius: CGFloat = 0.0
 
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
+        setupDefaultViews()
     }
     
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        setupDefaultViews()
     }
     
     func setupDefaultViews() {
         self.contentView.addSubview(layoutImageView)
-        layoutImageView.sizeToFit()
-        layoutImageView.center = self.contentView.center
         
         self.contentView.layer.insertSublayer(previewLayer, at: 0)
         previewLayer.frame = self.contentView.bounds
@@ -57,6 +64,22 @@ public class LGMPAlbumDetailCameraCell: UICollectionViewCell {
         self.contentView.backgroundColor = UIColor.black
     }
     
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        layoutImageView.sizeToFit()
+        layoutImageView.center = self.contentView.center
+        
+        previewLayer.frame = self.contentView.bounds
+        
+        if cornerRadius > 0.0 {
+            self.layer.cornerRadius = cornerRadius
+            self.layer.masksToBounds = true
+        } else {
+            self.layer.cornerRadius = 0.0
+            self.layer.masksToBounds = false
+        }
+    }
     
     public func startCapture() {
         if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera) {

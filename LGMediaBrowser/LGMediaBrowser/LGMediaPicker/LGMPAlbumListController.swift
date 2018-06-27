@@ -104,6 +104,8 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     var dataArray: [LGAlbumListModel] = []
     
+    var configs: LGMediaPicker.Configuration!
+    
     public override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -178,5 +180,10 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        let listModel = self.dataArray[indexPath.row]
+        let detail = LGMPAlbumDetailController()
+        detail.configs = self.configs
+        detail.albumListModel = listModel
+        self.navigationController?.pushViewController(detail, animated: true)
     }
 }

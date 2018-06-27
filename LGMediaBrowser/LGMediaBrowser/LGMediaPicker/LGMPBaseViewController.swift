@@ -28,6 +28,8 @@ open class LGMPBaseViewController: UIViewController {
         setupTitleLabel()
         
         setupBackButton()
+        
+        self.view.backgroundColor = UIColor.white
     }
     
     func setupTitleLabel() {

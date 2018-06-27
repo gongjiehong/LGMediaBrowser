@@ -196,16 +196,48 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGMPAlbumListController.swift"
-            timestampString = "551615289.024303"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGMPAlbumDetailController.swift"
+            timestampString = "551789026.908015"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "177"
-            endingLineNumber = "177"
-            landmarkName = "tableView(_:cellForRowAt:)"
+            startingLineNumber = "47"
+            endingLineNumber = "47"
+            landmarkName = "itemInteritemSpacing"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Tools/LGPhotoManager.swift"
+            timestampString = "551789026.9081399"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "244"
+            endingLineNumber = "244"
+            landmarkName = "requestImage(forAsset:outputSize:resizeMode:completion:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Tools/LGPhotoManager.swift"
+            timestampString = "551789026.908213"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "234"
+            endingLineNumber = "234"
+            landmarkName = "requestImage(forAsset:outputSize:resizeMode:completion:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

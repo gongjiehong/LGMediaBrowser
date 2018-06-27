@@ -73,7 +73,7 @@ public class LGMediaPicker: LGMPNavigationController {
         public var saveNewImageAfterEdit: Bool = false
         
         /// 是否在拍照按钮上显示当前拍摄到的内容
-        public var showCaptureImageOnTakePhotoBtn: Bool = false
+        public var isShowCaptureImageOnTakePhotoBtn: Bool = true
         
         /// 排序方式，升序还是降序
         public var sortBy: LGPhotoManager.SortBy = .ascending
@@ -130,8 +130,12 @@ public class LGMediaPicker: LGMPNavigationController {
             DispatchQueue.main.async { [weak self] in
                 switch status {
                 case .authorized:
-                    let controller = LGMPAlbumListController()
-                    self?.viewControllers = [controller]
+                    let albumList = LGMPAlbumListController()
+                    albumList.configs = self?.config
+                    
+                    let allPhotosList = LGMPAlbumDetailController()
+                    allPhotosList.configs = self?.config
+                    self?.viewControllers = [albumList, allPhotosList]
                     break
                 case .denied, .restricted:
                     let controller = LGUnauthorizedController()

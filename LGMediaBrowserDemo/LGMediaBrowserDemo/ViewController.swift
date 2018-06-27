@@ -29,6 +29,8 @@ class ViewController: UIViewController {
 //        self.view.addSubview(player)
         let tap = UITapGestureRecognizer(target: self, action: #selector(imageTaped(_:)))
         self.imageView.addGestureRecognizer(tap)
+        
+        
     }
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
@@ -48,6 +50,9 @@ class ViewController: UIViewController {
         self.present(picker, animated: true) {
             
         }
+        
+        let fpsLabel = LGFPSLabel(frame: CGRect(x: UIScreen.main.bounds.width - 80, y: 20, width: 60, height: 20))
+        UIApplication.shared.keyWindow?.addSubview(fpsLabel)
         return
         
         var dataArray = [String]()

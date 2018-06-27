@@ -8,6 +8,7 @@
 
 import Foundation
 import Photos
+import LGWebImage
 
 public class LGPhotoManager {
     public enum SortBy {
@@ -34,6 +35,8 @@ public class LGPhotoManager {
     }
     
     public static var sort: SortBy = .descending
+    
+    public static var imageManager: PHCachingImageManager = PHCachingImageManager()
     
     /// 根据支持的媒体类型获取相册列表
     ///
@@ -96,6 +99,8 @@ public class LGPhotoManager {
                                                      isAllPhotos: true,
                                                      result: result,
                                                      headImageAsset: head)
+                        model.models = self.fetchPhoto(inResult: result,
+                                                       supportMediaType: supportMediaType)
                         resultAlbum.insert(model, at: 0)
                     } else {
                         let head = (self.sort == .ascending ? result.lastObject : result.firstObject)
@@ -104,8 +109,8 @@ public class LGPhotoManager {
                                                      isAllPhotos: false,
                                                      result: result,
                                                      headImageAsset: head)
-//                        model.models = self.fetchPhoto(inResult: result,
-//                                                       supportMediaType: [.livePhoto, .image, .video])
+                        model.models = self.fetchPhoto(inResult: result,
+                                                       supportMediaType: supportMediaType)
                         resultAlbum.append(model)
                     }
                 }
@@ -226,7 +231,7 @@ public class LGPhotoManager {
             realOutputSize = outputSize
         }
         
-        return PHCachingImageManager.default().requestImage(for: asset,
+        return imageManager.requestImage(for: asset,
                                                             targetSize: realOutputSize,
                                                             contentMode: PHImageContentMode.aspectFill,
                                                             options: options,
@@ -237,6 +242,12 @@ public class LGPhotoManager {
                 let hasError = (infoDic?[PHImageErrorKey] != nil)
                 if isCancelled != true && hasError == false {
                     completion(resultImage, infoDic)
+//                    DispatchQueue.background.async {
+//                        let result = resultImage?.lg_imageByDecoded
+//                        DispatchQueue.main.async {
+//                            completion(result, infoDic)
+//                        }
+//                    }
                 }
         })
     }
@@ -257,7 +268,7 @@ public class LGPhotoManager {
         let smartAlbums = PHAssetCollection.fetchAssetCollections(with: PHAssetCollectionType.smartAlbum,
                                                                   subtype: PHAssetCollectionSubtype.albumRegular,
                                                                   options: nil)
-        var resultModel: LGAlbumListModel
+        var resultModel: LGAlbumListModel?
         smartAlbums.enumerateObjects { (assetCollection, index, stop) in
             if assetCollection.assetCollectionSubtype == .smartAlbumUserLibrary {
                 let result = PHAsset.fetchAssets(in: assetCollection, options: options)
@@ -267,18 +278,35 @@ public class LGPhotoManager {
                                                isAllPhotos: true,
                                                result: result,
                                                headImageAsset: headImageAsset)
-                resultModel.models = self.fetchPhoto(inResult: result,
+                resultModel?.models = self.fetchPhoto(inResult: result,
                                      supportMediaType: supportTypes)
-                resultModel.isAllPhotos = true
+                resultModel?.isAllPhotos = true
             }
         }
 
-        return resultModel
+        return resultModel!
     }
     
     public static func cancelImageRequest(_ requestId: PHImageRequestID) {
         if requestId != PHInvalidImageRequestID {
-            PHCachingImageManager.default().cancelImageRequest(requestId)
+            imageManager.cancelImageRequest(requestId)
+        }
+    }
+    
+    public static func startCachingImages(for assets: [PHAsset],
+                                          targetSize: CGSize,
+                                          contentMode: PHImageContentMode,
+                                          options: PHImageRequestOptions? = nil)
+    {
+        let options = PHImageRequestOptions()
+        options.resizeMode = .fast
+        options.isNetworkAccessAllowed = true
+        
+        DispatchQueue.background.async {
+            imageManager.startCachingImages(for: assets,
+                                            targetSize: targetSize,
+                                            contentMode: contentMode,
+                                            options: options)
         }
     }
 }

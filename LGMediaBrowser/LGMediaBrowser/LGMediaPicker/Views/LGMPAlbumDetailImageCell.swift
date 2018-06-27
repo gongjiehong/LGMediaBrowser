@@ -31,6 +31,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     lazy var layoutImageView: UIImageView = {
         let tempImageView = UIImageView(frame: self.contentView.bounds)
         tempImageView.contentMode = UIViewContentMode.scaleAspectFill
+        tempImageView.clipsToBounds = true
         return tempImageView
     }()
     
@@ -234,7 +235,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
         
         self.imageRequestID = LGPhotoManager.requestImage(forAsset: model.asset,
                                                           outputSize: tempSize,
-                                                          resizeMode: PHImageRequestOptionsResizeMode.exact,
+                                                          resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                           completion:
             { [weak self] (resultImage, infoDic) in
                 guard let weakSelf = self else { return }
@@ -242,6 +243,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
                     weakSelf.layoutImageView.image = resultImage
                 }
         })
+
     }
     
 }

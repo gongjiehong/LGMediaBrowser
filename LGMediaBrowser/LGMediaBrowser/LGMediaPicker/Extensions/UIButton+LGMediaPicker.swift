@@ -18,7 +18,7 @@ public extension UIButton {
             objc_setAssociatedObject(self,
                                      &AssociatedKeys.enlargeOffset,
                                      newValue,
-                                     objc_AssociationPolicy.OBJC_ASSOCIATION_ASSIGN)
+                                     objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         } get {
             return objc_getAssociatedObject(self, &AssociatedKeys.enlargeOffset) as? UIEdgeInsets ?? UIEdgeInsets.zero
         }
@@ -35,7 +35,7 @@ public extension UIButton {
         }
     }
     
-    func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+    override open func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let enlargedRect = self.enlargedRect
         if enlargedRect == self.bounds {
             return super.hitTest(point, with: event)
