@@ -213,7 +213,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                 }
                 cell.cornerRadius = configs.cellCornerRadius
                 if configs.isShowCaptureImageOnTakePhotoBtn {
-                    cell.startCapture()
+//                    cell.startCapture()
                 }
                 return cell
             }
