@@ -64,6 +64,10 @@
       <CommandLineArguments>
          <CommandLineArgument
             argument = "-AppleLanguages &quot;(en)&quot;"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "-AppleLanguages &quot;(zh_cn)&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

@@ -43,7 +43,7 @@ public class LGLoadingHUD: UIView {
         let loadingLabel = UILabel()
         loadingLabel.textAlignment = NSTextAlignment.center
         loadingLabel.textColor = UIColor(colorName: "HUDLoadingText")
-        loadingLabel.font = UIFont.systemFont(ofSize: 14.0)
+        loadingLabel.font = UIFont.systemFont(ofSize: 12.0)
         loadingLabel.text = LGLocalizedString("Loading...")
         loadingLabel.frame = CGRect(x: 0,
                                     y: indicatorView.frame.maxY + 20,

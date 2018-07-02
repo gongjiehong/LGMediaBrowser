@@ -34,27 +34,25 @@ open class LGMPBaseViewController: UIViewController {
     
     func setupTitleLabel() {
         let titleLabel = UILabel(frame: CGRect.zero)
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 18.0)
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 17.0)
         titleLabel.textColor = UIColor(colorName: "NavigationBarTitle")
         titleLabel.backgroundColor = UIColor.clear
         self.navigationItem.titleView = titleLabel
     }
     
     func setupBackButton() {
-        let backBtn = UIButton(type: UIButtonType.custom)
-        backBtn.frame = CGRect(x: 0, y: 0, width: 20, height: 20)
-        backBtn.setImage(UIImage(namedFromThisBundle: "btn_back_normal"), for: UIControlState.normal)
-        backBtn.addTarget(self, action: #selector(backButtonPressed(_:)), for: UIControlEvents.touchUpInside)
-        
-        let backItem = UIBarButtonItem(customView: backBtn)
-        self.navigationItem.leftBarButtonItem = backItem
+        let backItem = UIBarButtonItem(title: LGLocalizedString("Back"),
+                                       style: UIBarButtonItemStyle.plain,
+                                       target: self,
+                                       action: #selector(backButtonPressed(_:)))
+        self.navigationItem.backBarButtonItem = backItem
     }
     
     @objc func backButtonPressed(_ backBtn: UIButton) {
-        if self.navigationController?.topViewController == self {
-            self.dismiss(animated: true, completion: nil)
-        } else {
+        if let viewControllers = self.navigationController?.viewControllers, viewControllers.count > 1 {
             self.navigationController?.popViewController(animated: true)
+        } else {
+            self.dismiss(animated: true, completion: nil)
         }
     }
 

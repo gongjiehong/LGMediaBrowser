@@ -37,7 +37,11 @@ public class LGAlbumListCell: UITableViewCell {
         
         
         let titleAndCountLabel = UILabel(frame: CGRect.zero)
-        titleAndCountLabel.font = UIFont.systemFont(ofSize: 16.0)
+        if #available(iOS 8.2, *) {
+            titleAndCountLabel.font = UIFont.systemFont(ofSize: 15.0, weight: UIFont.Weight.medium)
+        } else {
+            titleAndCountLabel.font = UIFont.boldSystemFont(ofSize: 14.0)
+        }
         titleAndCountLabel.textAlignment = NSTextAlignment.left
         titleAndCountLabel.textColor = UIColor(colorName: "AlbumListTitle")
         self.contentView.addSubview(titleAndCountLabel)
@@ -52,9 +56,9 @@ public class LGAlbumListCell: UITableViewCell {
                                           width: thumbnailImageViewSize,
                                           height: thumbnailImageViewSize)
         
-        titleAndCountLabel.frame = CGRect(x: 15 + thumbnailImageViewSize,
+        titleAndCountLabel.frame = CGRect(x: 20.0 + thumbnailImageViewSize,
                                           y: (self.contentView.lg_height - 20) / 2.0,
-                                          width: self.contentView.lg_width - thumbnailImageViewSize - 25.0,
+                                          width: self.contentView.lg_width - thumbnailImageViewSize - 30.0,
                                           height: 20.0)
     }
     
@@ -64,14 +68,21 @@ public class LGAlbumListCell: UITableViewCell {
         guard let listData = self.dataModel else { return }
         
         let albumTitle = listData.title ?? ""
-        let titleAndCountText = "\(albumTitle) (\(listData.count))"
+        let titleAndCountText = "\(albumTitle)  (\(listData.count))"
+        
+        var titleFont: UIFont
+        if #available(iOS 8.2, *) {
+            titleFont = UIFont.systemFont(ofSize: 15.0, weight: UIFont.Weight.medium)
+        } else {
+            titleFont = UIFont.boldSystemFont(ofSize: 14.0)
+        }
         
         let attrString = NSMutableAttributedString(string: titleAndCountText)
-        attrString.addAttributes([NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: 16.0),
-                                  NSAttributedStringKey.foregroundColor: UIColor.black],
+        attrString.addAttributes([NSAttributedStringKey.font: titleFont,
+                                  NSAttributedStringKey.foregroundColor: UIColor(colorName: "AlbumListTitle")],
                                  range: NSMakeRange(0, albumTitle.count))
         attrString.addAttributes([NSAttributedStringKey.font: UIFont.systemFont(ofSize: 12.0),
-                                  NSAttributedStringKey.foregroundColor: UIColor.gray],
+                                  NSAttributedStringKey.foregroundColor: UIColor(colorName: "AlbumListCount")],
                                  range: NSMakeRange(albumTitle.count, attrString.length - albumTitle.count))
         titleAndCountLabel.attributedText = attrString
         
@@ -112,6 +123,20 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         self.title = LGLocalizedString("Albums")
         
         setupTableView()
+        
+        setupCancel()
+    }
+    
+    func setupCancel() {
+        let rightItem = UIBarButtonItem(title: LGLocalizedString("Cancel"),
+                                        style: UIBarButtonItemStyle.plain,
+                                        target: self,
+                                        action: #selector(close))
+        self.navigationItem.rightBarButtonItem = rightItem
+    }
+    
+    @objc func close() {
+        self.dismiss(animated: true, completion: nil)
     }
     
     func setupTableView() {
@@ -149,9 +174,25 @@ public class LGMPAlbumListController: LGMPBaseViewController {
                     weakSelf.dataArray.removeAll()
                     weakSelf.dataArray += resultArray
                     weakSelf.listTable.reloadData()
+                    weakSelf.cachingImages()
                 }
             }
         }
+    }
+    
+    func cachingImages() {
+        var assetArray: [PHAsset] = []
+        for model in self.dataArray {
+            if let asset = model.headImageAsset {
+                assetArray.append(asset)
+            }
+        }
+        
+        let itemSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
+        
+        LGPhotoManager.startCachingImages(for: assetArray,
+                                          targetSize: itemSize,
+                                          contentMode: PHImageContentMode.aspectFill)
     }
     
 }
@@ -175,6 +216,7 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
             cell = LGAlbumListCell(style: UITableViewCellStyle.default, reuseIdentifier: Reuse.LGAlbumListCell)
         }
         cell.dataModel = self.dataArray[indexPath.row]
+        cell.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
         return cell
     }
     

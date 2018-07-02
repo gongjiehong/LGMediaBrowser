@@ -150,8 +150,8 @@ public class LGStatusBarTips: NSObject {
     // MARK: -  class method
     @discardableResult
     public static func show(withStatus status: String,
-                            dismissAfter delay: TimeInterval = 0.0,
-                            style: LGStatusBarConfig.Style = .default)  -> UIView?
+                            style: LGStatusBarConfig.Style = .default,
+                            dismissAfter delay: TimeInterval = 0.0)  -> UIView?
     {
         func displayDuration(forString string: String) -> TimeInterval {
             return max(TimeInterval(string.count) * 0.06 + 0.5, 2.5)

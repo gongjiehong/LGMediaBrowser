@@ -53,7 +53,7 @@ class ViewController: UIViewController {
 
         }
 
-        let fpsLabel = LGFPSLabel(frame: CGRect(x: UIScreen.main.bounds.width - 80, y: 20, width: 60, height: 20))
+        let fpsLabel = LGFPSLabel(frame: CGRect(x: UIScreen.main.bounds.width - 80, y: UIScreen.main.bounds.height - 20.0, width: 60, height: 20))
         UIApplication.shared.keyWindow?.addSubview(fpsLabel)
         return
         

@@ -28,6 +28,20 @@ public class LGUnauthorizedController: LGMPBaseViewController {
         self.title = LGLocalizedString("Unauthorized")
         
         setupDefaultViews()
+        
+        setupCancel()
+    }
+    
+    func setupCancel() {
+        let rightItem = UIBarButtonItem(title: LGLocalizedString("Cancel"),
+                                        style: UIBarButtonItemStyle.plain,
+                                        target: self,
+                                        action: #selector(close))
+        self.navigationItem.rightBarButtonItem = rightItem
+    }
+    
+    @objc func close() {
+        self.dismiss(animated: true, completion: nil)
     }
     
     let iamgeWidth: CGFloat = 128.0

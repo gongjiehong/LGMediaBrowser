@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NavigationBarTitle</key>
-	<string>#000000</string>
+	<string>3D3A4A</string>
 	<key>PromptText</key>
 	<string>#000000</string>
 	<key>OpenSettingsButtonTitle</key>
@@ -19,12 +19,16 @@
 	<key>SelectedImageMask</key>
 	<string>#FFFFFF</string>
 	<key>AlbumListTitle</key>
-	<string>#FFFFFF</string>
+	<string>3D3A4A</string>
+	<key>AlbumListCount</key>
+	<string>808080</string>
 	<key>HUDBackground</key>
 	<string>00000066</string>
 	<key>HUDLoadingText</key>
 	<string>FFFFFF</string>
 	<key>TimeOrTypeMarkLabelText</key>
 	<string>FFFFFF</string>
+	<key>CancelButtonText</key>
+	<string>F55257</string>
 </dict>
 </plist>

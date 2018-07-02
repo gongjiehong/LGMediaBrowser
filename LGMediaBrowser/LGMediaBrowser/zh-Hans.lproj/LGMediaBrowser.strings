@@ -30,5 +30,6 @@
 "Location" = "定位";
 "Notifications" = "通知";
 "Albums" = "相簿";
-"Loading..." = "正在加载";
+"Loading..." = "正在加载...";
 "Cancel" = "取消";
+"Back" = "返回";

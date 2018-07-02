@@ -8,6 +8,9 @@
 
 import UIKit
 
+/// 获取layoutMargins
+///
+/// - Returns: keywindow.rootViewController.view.layoutMargins
 func LGStatusBarRootVCLayoutMargin() -> UIEdgeInsets {
     if let layoutMargins = UIApplication.shared.keyWindow?.rootViewController?.view.layoutMargins {
         if layoutMargins.top > 8 && layoutMargins.bottom > 8 {
@@ -16,6 +19,7 @@ func LGStatusBarRootVCLayoutMargin() -> UIEdgeInsets {
     }
     return UIEdgeInsets.zero
 }
+
 
 open class LGStatusBarView: UIView {
     public private(set) lazy var textLabel: UILabel = {

@@ -110,6 +110,8 @@ public class LGMediaPicker: LGMPNavigationController {
     
     public override func viewDidLoad() {
         super.viewDidLoad()
+        
+        LGPhotoManager.sort = self.config.sortBy
 
         requestAccessAndSetupLayout()
         

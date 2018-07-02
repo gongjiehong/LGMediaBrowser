@@ -57,6 +57,20 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
 
         // Do any additional setup after loading the view.
         setupListCollectionView()
+        
+        setupCancel()
+    }
+    
+    func setupCancel() {
+        let rightItem = UIBarButtonItem(title: LGLocalizedString("Cancel"),
+                                        style: UIBarButtonItemStyle.plain,
+                                        target: self,
+                                        action: #selector(close))
+        self.navigationItem.rightBarButtonItem = rightItem
+    }
+    
+    @objc func close() {
+        self.dismiss(animated: true, completion: nil)
     }
 
     override public func didReceiveMemoryWarning() {
@@ -90,11 +104,8 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.backgroundColor = UIColor.white
-        if #available(iOS 11.0, *) {
-            collectionView.contentInsetAdjustmentBehavior = .never
-        } else {
-        }
         self.view.addSubview(collectionView)
+        
         self.listView = collectionView
         
         self.listView.register(LGMPAlbumDetailImageCell.self, forCellWithReuseIdentifier: Reuse.imageCell)
