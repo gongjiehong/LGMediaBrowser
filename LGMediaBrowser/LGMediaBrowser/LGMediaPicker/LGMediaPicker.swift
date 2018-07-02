@@ -9,6 +9,10 @@
 import UIKit
 import Photos
 
+public protocol LGMediaPickerDelegate: NSObjectProtocol {
+    
+}
+
 public class LGMediaPicker: LGMPNavigationController {
 
     public struct Configuration {
@@ -107,6 +111,7 @@ public class LGMediaPicker: LGMPNavigationController {
     
     /// 存储相册对象的素组
     private var albumsArray: [LGAlbumListModel] = []
+    
     
     public override func viewDidLoad() {
         super.viewDidLoad()
