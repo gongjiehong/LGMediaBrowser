@@ -24,35 +24,24 @@ public class LGStatusBarTips: NSObject {
         return temp
     }()
     
-    var overlayWindow: UIWindow!
-    
     /// 覆盖状态栏的window
-    lazy var defaultOverlayWindow: UIWindow = {
+    lazy var overlayWindow: UIWindow = {
         let temp = UIWindow(frame: UIScreen.main.bounds)
         temp.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         temp.backgroundColor = UIColor.clear
         temp.isUserInteractionEnabled = false
         temp.windowLevel = UIWindowLevelStatusBar
         temp.rootViewController = LGStatusBarNotificationViewController()
-        
-        updateWindowTransform()
-        updateTopBarFrame(withStatusBarFrame: UIApplication.shared.statusBarFrame)
-        
         return temp
     }()
     
     /// 进度条视图
-    var progressView: UIView!
-    
-    /// 进度条视图
-    lazy var defaultProgressView: UIView = {
+    lazy var progressView: UIView = {
         return UIView(frame: CGRect.zero)
     }()
     
-    var topBar: LGStatusBarView!
-    
     /// 顶部显示的条
-    lazy var defaultTopBar: LGStatusBarView = {
+    lazy var topBar: LGStatusBarView = {
         let temp = LGStatusBarView(frame: CGRect.zero)
         self.overlayWindow.rootViewController?.view.addSubview(temp)
         
@@ -65,13 +54,17 @@ public class LGStatusBarTips: NSObject {
         return temp
     }()
     
+    private var _progress: CGFloat = 0.0
     /// 进度数据
-    var progress: CGFloat = 0.0  {
-        didSet {
-            progressDidSet()
+    var progress: CGFloat {
+        set {
+            setProgress(newValue)
+        } get {
+            return _progress
         }
     }
     
+    /// dismiss当前显示的timer
     var dismissTimer: Timer?
     
     /// 更新window变换数据
@@ -82,6 +75,7 @@ public class LGStatusBarTips: NSObject {
         }
     }
     
+    /// 导航条高度
     var navigationBarHeight: CGFloat {
         var naviBarHeight: CGFloat
         if (UIDevice.current.orientation == .landscapeLeft ||
@@ -91,10 +85,6 @@ public class LGStatusBarTips: NSObject {
             naviBarHeight = 44.0
         }
         return naviBarHeight
-    }
-    
-    public var isVisible: Bool {
-        return self.topBar != nil
     }
     
     /// 更新显示条的frame
@@ -117,6 +107,7 @@ public class LGStatusBarTips: NSObject {
         topBar.frame = CGRect(x: 0, y: yPos, width: width, height: height)
     }
     
+    /// 初始化
     override public init() {
         super.init()
         
@@ -125,14 +116,20 @@ public class LGStatusBarTips: NSObject {
                                                object: nil)
     }
     
+    /// 默认对象
     public static var `default`: LGStatusBarTips = {
         return LGStatusBarTips()
     }()
     
+    // MARK: -  析构
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
     
+    
+    /// 屏幕旋转时进行frame变换操作
+    ///
+    /// - Parameter noti: 状态栏高度改变的通知
     @objc func willChangeStatusBarFrame(_ noti: Notification) {
         let newBarFrame = noti.userInfo?[UIApplicationStatusBarFrameUserInfoKey] as? CGRect ?? CGRect.zero
         let duration = UIApplication.shared.statusBarOrientationAnimationDuration
@@ -151,94 +148,72 @@ public class LGStatusBarTips: NSObject {
     }
     
     // MARK: -  class method
-//    public static func show(withStatus status: String) {
-//        self.default.show
-//    }
-//
-//    + (UIView*)showWithStatus:(NSString *)status;
-//    {
-//    return [[self sharedInstance] showWithStatus:status
-//    styleName:nil];
-//    }
-//
-//    + (UIView*)showWithStatus:(NSString *)status
-//    styleName:(NSString*)styleName;
-//    {
-//    return [[self sharedInstance] showWithStatus:status
-//    styleName:styleName];
-//    }
-//
-//    + (UIView*)showWithStatus:(NSString *)status
-//    dismissAfter:(NSTimeInterval)timeInterval;
-//    {
-//    UIView *view = [[self sharedInstance] showWithStatus:status
-//    styleName:nil];
-//    [self dismissAfter:timeInterval];
-//    return view;
-//    }
-//
-//    + (UIView*)showWithStatus:(NSString *)status
-//    dismissAfter:(NSTimeInterval)timeInterval
-//    styleName:(NSString*)styleName;
-//    {
-//    UIView *view = [[self sharedInstance] showWithStatus:status
-//    styleName:styleName];
-//    [self dismissAfter:timeInterval];
-//    return view;
-//    }
-//
-    
-    @objc class func dismiss() {
+    @discardableResult
+    public static func show(withStatus status: String,
+                            dismissAfter delay: TimeInterval = 0.0,
+                            style: LGStatusBarConfig.Style = .default)  -> UIView?
+    {
+        func displayDuration(forString string: String) -> TimeInterval {
+            return max(TimeInterval(string.count) * 0.06 + 0.5, 2.5)
+        }
         
+        let view = self.default.show(withStatus: status, style: style)
+        if delay == 0.0 {
+            self.dismissAfter(displayDuration(forString: status))
+        } else {
+            self.dismissAfter(delay)
+        }
+        return view
     }
     
-//    + (void)dismiss;
-//    {
-//    [self dismissAnimated:YES];
-//    }
-//
-//    + (void)dismissAnimated:(BOOL)animated;
-//    {
-//    [[self sharedInstance] dismissAnimated:animated];
-//    }
-//
-//    + (void)dismissAfter:(NSTimeInterval)delay;
-//    {
-//    [[self sharedInstance] setDismissTimerWithInterval:delay];
-//    }
-//
-//    + (void)setDefaultStyle:(JDPrepareStyleBlock)prepareBlock;
-//    {
-//    NSAssert(prepareBlock != nil, @"No prepareBlock provided");
-//
-//    JDStatusBarStyle *style = [[self sharedInstance].defaultStyle copy];
-//    [self sharedInstance].defaultStyle = prepareBlock(style);
-//    }
-//
-//    + (NSString*)addStyleNamed:(NSString*)identifier
-//    prepare:(JDPrepareStyleBlock)prepareBlock;
-//    {
-//    return [[self sharedInstance] addStyleNamed:identifier
-//    prepare:prepareBlock];
-//    }
-//
-//    + (void)showProgress:(CGFloat)progress;
-//    {
-//    [[self sharedInstance] setProgress:progress];
-//    }
-//
-//    + (void)showActivityIndicator:(BOOL)show indicatorStyle:(UIActivityIndicatorViewStyle)style;
-//    {
-//    [[self sharedInstance] showActivityIndicator:show indicatorStyle:style];
-//    }
+    @objc public class func dismiss() {
+        self.dismiss(animated: true)
+    }
+    
+    public class func dismiss(animated: Bool) {
+        self.default.dismiss(animated: animated)
+    }
+    
+    public class func dismissAfter(_ delay: TimeInterval) {
+        self.default.setupDismissTimer(withInterval: delay)
+    }
+    
+    
+    public class func updateProgress(_ progress: CGFloat) {
+        self.default.progress = progress
+    }
+    
+    public class func setActivityIndicator(isShow: Bool, indicatorStyle style: UIActivityIndicatorViewStyle) {
+        self.default.setActivityIndicator(isShow: isShow, indicatorStyle: style)
+    }
+    
+    
+    func setupInitStatus() {
+        self.overlayWindow.rootViewController?.view.addSubview(topBar)
+        topBar.frame = CGRect.zero
+        let config = self.activeConfig ?? self.defaultConfig
+        if config.animationType != .fade {
+            topBar.transform = CGAffineTransform(translationX: 0, y: -topBar.lg_height)
+        } else {
+            topBar.alpha = 0.0
+        }
+        
+        updateWindowTransform()
+        updateTopBarFrame(withStatusBarFrame: UIApplication.shared.statusBarFrame)
+    }
+    
     
     // MARK: -  instance method
+    @discardableResult
     func show(withStatus status: String, style: LGStatusBarConfig.Style) -> UIView? {
+        
+        setupInitStatus()
+        
         if UIApplication.shared.isStatusBarHidden { return nil }
         
         guard let config = self.allConfigs[style] else { return nil }
         
-        if let activeConfig = self.activeConfig, config !== activeConfig {
+        if self.activeConfig !== config {
             self.activeConfig = config
         }
         
@@ -250,9 +225,9 @@ public class LGStatusBarTips: NSObject {
             self.topBar.transform = CGAffineTransform(translationX: 0, y: -self.topBar.lg_height)
         }
         
-        RunLoop.current.cancelPerform(#selector(LGStatusBarTips.dismiss), target: self, argument: nil)
+        RunLoop.current.cancelPerform(#selector(dismiss(timer:)), target: self, argument: nil)
         self.topBar.layer.removeAllAnimations()
-        self.overlayWindow.isHidden = true
+        self.overlayWindow.isHidden = false
         
         topBar.backgroundColor = config.barColor
         topBar.textVerticalPositionAdjustment = config.textVerticalPositionAdjustment
@@ -276,94 +251,72 @@ public class LGStatusBarTips: NSObject {
         
         let isAnimationsEnabled = config.animationType != .none
         if isAnimationsEnabled && config.animationType == .bounce {
-            
+            self.animateInWithBounceAnimation()
         } else {
+            UIView.animate(withDuration: isAnimationsEnabled ? 0.2 : 0.0) {
+                self.topBar.alpha = 1.0
+                self.topBar.transform = CGAffineTransform.identity
+            }
+        }
+        
+        return self.topBar
+    }
+    
+    func setupDismissTimer(withInterval interval: TimeInterval) {
+        self.dismissTimer?.invalidate()
+        self.dismissTimer = nil
+        
+        self.dismissTimer = Timer(fireAt: Date(timeIntervalSinceNow: interval),
+                                  interval: 0,
+                                  target: self,
+                                  selector: #selector(dismiss(timer:)),
+                                  userInfo: nil,
+                                  repeats: false)
+        RunLoop.current.add(self.dismissTimer!, forMode: RunLoopMode.commonModes)
+    }
+    
+    @objc func dismiss(timer: Timer) {
+        self.dismiss(animated: true)
+    }
+    
+    func dismiss(animated: Bool) {
+        self.dismissTimer?.invalidate()
+        self.dismissTimer = nil
+        
+        guard let config = self.activeConfig else { return }
+        
+        let animationsEnabled = config.animationType != .none
+        
+        func animation() {
+            if config.animationType == .fade {
+                self.topBar.alpha = 0.0
+            } else {
+                self.topBar.transform = CGAffineTransform(translationX: 0, y: -self.topBar.lg_height)
+            }
+        }
+        
+        
+        func complete(_ isFinished: Bool) {
+            self.overlayWindow.removeFromSuperview()
+            self.overlayWindow.isHidden = true
             
+            self.topBar.removeFromSuperview()
+            
+            self.progressView.removeFromSuperview()
+        }
+        
+        if animationsEnabled && animated {
+            UIView.animate(withDuration: 0.2,
+                           animations: {
+                            animation()
+            }) { (isFinished) in
+                complete(isFinished)
+            }
         }
     }
-//    - (UIView*)showWithStatus:(NSString *)status
-//    styleName:(NSString*)styleName;
-//    {
-//    JDStatusBarStyle *style = nil;
-//    if (styleName != nil) {
-//    style = self.userStyles[styleName];
-//    }
-//
-//    if (style == nil) style = self.defaultStyle;
-//    return [self showWithStatus:status style:style];
-//    }
     
-
-//    // reset progress & activity
-//    self.progress = 0.0;
-//    [self showActivityIndicator:NO indicatorStyle:0];
-//
-//    // animate in
-//    BOOL animationsEnabled = (style.animationType != JDStatusBarAnimationTypeNone);
-//    if (animationsEnabled && style.animationType == JDStatusBarAnimationTypeBounce) {
-//    [self animateInWithBounceAnimation];
-//    } else {
-//    [UIView animateWithDuration:(animationsEnabled ? 0.4 : 0.0) animations:^{
-//    self.topBar.alpha = 1.0;
-//    self.topBar.transform = CGAffineTransformIdentity;
-//    }];
-//    }
-//
-//    return self.topBar;
-//    }
-//
-//    #pragma mark Dismissal
-//
-//    - (void)setDismissTimerWithInterval:(NSTimeInterval)interval;
-//    {
-//    [self.dismissTimer invalidate];
-//    self.dismissTimer = [[NSTimer alloc] initWithFireDate:[NSDate dateWithTimeIntervalSinceNow:interval]
-//    interval:0 target:self selector:@selector(dismiss:) userInfo:nil repeats:NO];
-//    [[NSRunLoop currentRunLoop] addTimer:self.dismissTimer forMode:NSRunLoopCommonModes];
-//    }
-//
-//    - (void)dismiss:(NSTimer*)timer;
-//    {
-//    [self dismissAnimated:YES];
-//    }
-//
-//    - (void)dismissAnimated:(BOOL)animated;
-//    {
-//    [self.dismissTimer invalidate];
-//    self.dismissTimer = nil;
-//
-//    // check animation type
-//    BOOL animationsEnabled = (self.activeStyle.animationType != JDStatusBarAnimationTypeNone);
-//    animated &= animationsEnabled;
-//
-//    dispatch_block_t animation = ^{
-//    if (self.activeStyle.animationType == JDStatusBarAnimationTypeFade) {
-//    self.topBar.alpha = 0.0;
-//    } else {
-//    self.topBar.transform = CGAffineTransformMakeTranslation(0, -self.topBar.frame.size.height);
-//    }
-//    };
-//
-//    void(^complete)(BOOL) = ^(BOOL finished) {
-//    [self.overlayWindow removeFromSuperview];
-//    [self.overlayWindow setHidden:YES];
-//    _overlayWindow.rootViewController = nil;
-//    _overlayWindow = nil;
-//    _progressView = nil;
-//    _topBar = nil;
-//    };
-//
-//    if (animated) {
-//    // animate out
-//    [UIView animateWithDuration:0.4 animations:animation completion:complete];
-//    } else {
-//    animation();
-//    complete(YES);
-//    }
-//    }
-//
-//    #pragma mark Bounce Animation
     
+    // MARK: -  bounce animation
     func animateInWithBounceAnimation() {
         if self.topBar.lg_originY >= 0 { return }
         
@@ -375,97 +328,89 @@ public class LGStatusBarTips: NSObject {
             return 63.0 / 64.0 + pow(11.0 / 4.0, 2) * pow(value - 21.0 / 22.0, 2)
         }
         
-        let fromCenterY: CGFloat = -20.0
+        let fromCenterY: CGFloat = -topBar.lg_height / 2.0
         let toCenterY: CGFloat = 0.0
         let animationSteps: Int = 100
-        var varlues: [CATransform3D] = [CATransform3D]()
+        var values: [CATransform3D] = [CATransform3D]()
         
         for index in 1...animationSteps {
             let easedTime = RBBEasingFunctionEaseOutBounce(value: CGFloat(index) / CGFloat(animationSteps))
             let easedValue = fromCenterY + easedTime * (toCenterY - fromCenterY)
-            varlues.append(CATransform3DMakeTranslation(0.0, easedValue, 0.0))
+            values.append(CATransform3DMakeTranslation(0.0, easedValue, 0.0))
         }
         
         let animation = CAKeyframeAnimation(keyPath: "transform")
         animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
         animation.duration = 0.3
-        animation.values = varlues
+        animation.values = values
         animation.isRemovedOnCompletion = false
         animation.fillMode = kCAFillModeForwards
         animation.delegate = self
-        self.topBar.layer.setValue(toCenterY, forKey: "transform")
         self.topBar.layer.add(animation, forKey: "LGBounceAnimation")
     }
-//
-//    #pragma mark Progress & Activity
-//
     
-    func progressDidSet() {
-        if self.topBar == nil { return }
+    
+    // MARK: - set progress value
+    func setProgress(_ newValue: CGFloat) {
+        _progress = newValue
+        
+        if newValue > 1.0 { _progress = 1.0 }
+        if newValue == 0.0 {
+            progressView.frame = CGRect.zero
+            return
+        }
+        
+        guard let config = self.activeConfig else { return }
+        switch config.progressBarPosition {
+        case .below:
+            self.topBar.superview?.addSubview(progressView)
+            break
+        default:
+            self.topBar.insertSubview(progressView, belowSubview: self.topBar.textLabel)
+            break
+        }
+        
+        var frame = self.topBar.bounds
+        var height = min(frame.height, max(0.5, config.progressBarHeight))
+        if height == 20.0 && frame.height > height {
+            height = frame.height
+        }
+        frame.size.height = height
+        frame.size.width = round((frame.width - 2.0 * config.progressBarHorizontalInsets) * progress)
+        frame.origin.x = config.progressBarHorizontalInsets
+        
+        let barHeight = self.topBar.lg_height
+        switch config.progressBarPosition {
+        case .top:
+            frame.origin.y = 0.0
+            break
+        case .center:
+            frame.origin.y = (barHeight - height) / 2.0
+            break
+        case .bottom:
+            frame.origin.y = barHeight - height
+            break
+        case .below:
+            frame.origin.y = barHeight
+            break
+        }
+        
+        progressView.backgroundColor = config.progressBarColor
+        
+        progressView.layer.cornerRadius = config.progressBarCornerRadius
+        
+        let animated = self.progressView.frame.equalTo(CGRect.zero)
+        UIView.animate(withDuration: animated ? 0.05 : 0.0,
+                       delay: 0.0,
+                       options: UIViewAnimationOptions.curveLinear,
+                       animations: {
+                        self.progressView.frame = frame
+        }) { (isFinished) in
+            
+        }
     }
     
-//    - (void)setProgress:(CGFloat)progress;
-//    {
-//    if (_topBar == nil) return;
-//
-//    // trim progress
-//    _progress = MIN(1.0, MAX(0.0,progress));
-//
-//    if (_progress == 0.0) {
-//    _progressView.frame = CGRectZero;
-//    return;
-//    }
-//
-//    // update superview
-//    if (self.activeStyle.progressBarPosition == JDStatusBarProgressBarPositionBelow ||
-//    self.activeStyle.progressBarPosition == JDStatusBarProgressBarPositionNavBar) {
-//    [self.topBar.superview addSubview:self.progressView];
-//    } else {
-//    [self.topBar insertSubview:self.progressView belowSubview:self.topBar.textLabel];
-//    }
-//
-//    // calculate progressView frame
-//    CGRect frame = self.topBar.bounds;
-//    CGFloat height = MIN(frame.size.height,MAX(0.5, self.activeStyle.progressBarHeight));
-//    if (height == 20.0 && frame.size.height > height) height = frame.size.height;
-//    frame.size.height = height;
-//    frame.size.width = round((frame.size.width - 2 * self.activeStyle.progressBarHorizontalInsets) * progress);
-//    frame.origin.x = self.activeStyle.progressBarHorizontalInsets;
-//
-//    // apply y-position from active style
-//    CGFloat barHeight = self.topBar.bounds.size.height;
-//    if (self.activeStyle.progressBarPosition == JDStatusBarProgressBarPositionBottom) {
-//    frame.origin.y = barHeight - height;
-//    } else if(self.activeStyle.progressBarPosition == JDStatusBarProgressBarPositionCenter) {
-//    frame.origin.y = round((barHeight - height)/2.0);
-//    } else if(self.activeStyle.progressBarPosition == JDStatusBarProgressBarPositionTop) {
-//    frame.origin.y = 0.0;
-//    } else if(self.activeStyle.progressBarPosition == JDStatusBarProgressBarPositionBelow) {
-//    frame.origin.y = barHeight;
-//    } else if(self.activeStyle.progressBarPosition == JDStatusBarProgressBarPositionNavBar) {
-//    CGFloat navBarHeight = 44.0;
-//    if (([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) &&
-//    UIInterfaceOrientationIsLandscape([[UIApplication sharedApplication] statusBarOrientation])) {
-//    navBarHeight = 32.0;
-//    }
-//    frame.origin.y = barHeight + navBarHeight;
-//    }
-//
-//    // apply color from active style
-//    self.progressView.backgroundColor = self.activeStyle.progressBarColor;
-//
-//    // apply corner radius
-//    self.progressView.layer.cornerRadius = self.activeStyle.progressBarCornerRadius;
-//
-//    // update progressView frame
-//    BOOL animated = !CGRectEqualToRect(self.progressView.frame, CGRectZero);
-//    [UIView animateWithDuration:animated ? 0.05 : 0.0 delay:0 options:UIViewAnimationOptionCurveLinear animations:^{
-//    self.progressView.frame = frame;
-//    } completion:nil];
-//    }
-    
     func setActivityIndicator(isShow: Bool, indicatorStyle style: UIActivityIndicatorViewStyle) {
-        if self.topBar == nil { return }
         if isShow {
             self.topBar.activityIndicatorView.startAnimating()
             self.topBar.activityIndicatorView.activityIndicatorViewStyle = style

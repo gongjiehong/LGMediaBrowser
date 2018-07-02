@@ -119,28 +119,33 @@ open class LGStatusBarConfig {
             config.textColor = UIColor(hexColor: "FFFFFF")
             config.progressBarColor = UIColor(hexColor: "FFFFFF")
             config.progressBarHeight = 2.0
+            config.animationType = .bounce
             break
         case .success:
             config.barColor = UIColor(hexColor: "3ACB6E")
             config.textColor = UIColor(hexColor: "FFFFFF")
             config.progressBarColor = UIColor(hexColor: "FFFFFF")
             config.progressBarHeight = 2.0
+            config.animationType = .bounce
             break
         case .warning:
             config.barColor = UIColor(hexColor: "FFFF00")
             config.textColor = UIColor(hexColor: "FFFFFF")
             config.progressBarColor = UIColor(hexColor: "FFFFFF")
             config.progressBarHeight = 2.0
+            config.animationType = .bounce
             break
         case .matrix:
             config.barColor = UIColor(hexColor: "000000")
             config.textColor = UIColor.green
             config.progressBarHeight = 2.0
+            config.animationType = .move
             break
         case .dark:
-            config.barColor = UIColor(hexColor: "7A141F")
+            config.barColor = UIColor(hexColor: "000000")
             config.textColor = UIColor(hexColor: "FFFFFFF2")
             config.progressBarHeight = 2.0
+            config.animationType = .move
             break
         default:
             break

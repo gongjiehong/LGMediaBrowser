@@ -84,5 +84,10 @@ open class LGStatusBarView: UIView {
         }
         return textSize
     }
-
+    
+    override open var frame: CGRect {
+        didSet {
+            println(frame)
+        }
+    }
 }
