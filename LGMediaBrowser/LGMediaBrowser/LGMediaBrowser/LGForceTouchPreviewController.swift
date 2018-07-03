@@ -140,13 +140,26 @@ open class LGForceTouchPreviewController: UIViewController {
                     weakSelf.progressView.isShowError = true
                 }
             }
+        } else if let asset = self.mediaModel?.mediaLocation.toAsset() {
+            self.progressView.isHidden = true
+            LGPhotoManager.requestImage(forAsset: asset) {[weak self] (resultImage, infoDic) in
+                guard let weakSelf = self else { return }
+                weakSelf.imageView.image = resultImage
+            }
         } else {
             self.progressView.isShowError = true
         }
     }
     
     func setupLivePhotoView() {
-        
+        if #available(iOS 9.1, *) {
+            self.view.addSubview(livePhotoView)
+            livePhotoView.frame = CGRect(x: 0,
+                                         y: (self.view.lg_height - self.preferredContentSize.height) / 2.0,
+                                         width: self.view.lg_width,
+                                         height: self.preferredContentSize.height)
+        } else {
+        }
     }
     
     func setupVideoView() {

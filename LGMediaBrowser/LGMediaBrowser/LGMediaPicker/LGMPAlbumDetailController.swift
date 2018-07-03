@@ -320,7 +320,59 @@ extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
     public func previewingContext(_ previewingContext: UIViewControllerPreviewing,
                                   viewControllerForLocation location: CGPoint) -> UIViewController?
     {
-        return nil
+        guard let indexPath = self.listView.indexPathForItem(at: location) else { return nil }
+        guard let cell = self.listView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell else { return nil }
+        
+        previewingContext.sourceRect = cell.frame
+        
+        var index = indexPath.row
+        if self.allowTakePhoto && configs.sortBy != .ascending {
+            index = indexPath.row - 1
+        }
+        let model = self.dataArray[index]
+        
+        func assetTypeToMediaType(_ type: LGPhotoModel.AssetMediaType) -> LGMediaType {
+            switch type {
+            case .unknown:
+                return LGMediaType.other
+            case .generalImage:
+                return LGMediaType.generalPhoto
+            case .livePhoto:
+                return LGMediaType.livePhoto
+            case .video:
+                return LGMediaType.video
+            case .audio:
+                return LGMediaType.audio
+            default:
+                return LGMediaType.other
+            }
+        }
+
+        let mediaModel = LGMediaModel(mediaLocation: model.asset,
+                                      mediaType: assetTypeToMediaType(model.type),
+                                      isLocalFile: true,
+                                      thumbnailImage: nil)
+        
+        let previewVC = LGForceTouchPreviewController(mediaModel: mediaModel,
+                                                      currentIndex: indexPath.row)
+        previewVC.preferredContentSize = getSizeWith(photoModel: model)
+        return previewVC
+
+    }
+    
+    func getSizeWith(photoModel: LGPhotoModel) -> CGSize {
+        var width = min(CGFloat(photoModel.asset.pixelWidth),
+                        self.view.lg_width)
+        var height = width * CGFloat(photoModel.asset.pixelHeight) / CGFloat(photoModel.asset.pixelWidth)
+        
+        if height.isNaN { return CGSize.zero }
+
+        if height > self.view.lg_height {
+            height = self.view.lg_height
+            width = height * CGFloat(photoModel.asset.pixelWidth) / CGFloat(photoModel.asset.pixelHeight)
+        }
+        
+        return CGSize(width: width, height: height)
     }
     
     @available(iOS 9.0, *)
