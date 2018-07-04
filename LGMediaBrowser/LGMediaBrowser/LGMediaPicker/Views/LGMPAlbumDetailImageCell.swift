@@ -36,12 +36,14 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     }()
     
     /// 选择当前图片或视频的操作按钮
-    lazy var selectButton: UIButton = {
-        let tempBtn = UIButton(type: UIButtonType.custom)
+    lazy var selectButton: LGClickAreaButton = {
+        let tempBtn = LGClickAreaButton(type: UIButtonType.custom)
         tempBtn.frame = CGRect(x: self.contentView.lg_width - 26.0, y: 5, width: 23.0, height: 23.0)
         tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControlState.normal)
         tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControlState.selected)
         tempBtn.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControlEvents.touchUpInside)
+        tempBtn.setTitleColor(UIColor.white, for: UIControlState.normal)
+        tempBtn.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
         tempBtn.enlargeOffset = UIEdgeInsets(top: 0, left: 20, bottom: 20, right: 0)
         return tempBtn
     }()
@@ -243,7 +245,6 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
                     weakSelf.layoutImageView.image = resultImage
                 }
         })
-
     }
     
 }

@@ -9,6 +9,7 @@
 import UIKit
 import LGWebImage
 import PhotosUI
+import Photos
 
 open class LGForceTouchPreviewController: UIViewController {
     public var mediaModel: LGMediaModel?
@@ -142,10 +143,24 @@ open class LGForceTouchPreviewController: UIViewController {
             }
         } else if let asset = self.mediaModel?.mediaLocation.toAsset() {
             self.progressView.isHidden = true
-            LGPhotoManager.requestImage(forAsset: asset) {[weak self] (resultImage, infoDic) in
-                guard let weakSelf = self else { return }
-                weakSelf.imageView.image = resultImage
+            if let tempImage = self.mediaModel?.thumbnailImage {
+                self.imageView.image = tempImage
             }
+
+            DispatchQueue.utility.async {
+                PHCachingImageManager.default().requestImageData(for: asset,
+                                                                 options: nil)
+                { [weak self] (imageData, dataUTI, imageOrientation, infoDic) in
+                    guard let data = imageData else { return }
+                    let image = LGImage.imageWith(data: data)
+                    
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else { return }
+                        weakSelf.imageView.image = image
+                    }
+                }
+            }
+
         } else {
             self.progressView.isShowError = true
         }
@@ -154,16 +169,62 @@ open class LGForceTouchPreviewController: UIViewController {
     func setupLivePhotoView() {
         if #available(iOS 9.1, *) {
             self.view.addSubview(livePhotoView)
-            livePhotoView.frame = CGRect(x: 0,
-                                         y: (self.view.lg_height - self.preferredContentSize.height) / 2.0,
-                                         width: self.view.lg_width,
-                                         height: self.preferredContentSize.height)
-        } else {
+            livePhotoView.frame = self.view.bounds
+            if let asset = self.mediaModel?.mediaLocation.toAsset() {
+                PHCachingImageManager.default().requestLivePhoto(for: asset,
+                                                                 targetSize: CGSize(width: asset.pixelWidth,
+                                                                                    height: asset.pixelHeight),
+                                                                 contentMode: PHImageContentMode.aspectFill,
+                                                                 options: nil)
+                {[weak self] (livePhoto, infoDic) in
+                    guard let weakSelf = self else { return }
+                    guard let livePhoto = livePhoto  else { return }
+                    weakSelf.livePhotoView.livePhoto = livePhoto
+                    weakSelf.livePhotoView.startPlayback(with: PHLivePhotoViewPlaybackStyle.full)
+                }
+            }
         }
     }
     
     func setupVideoView() {
+        guard let mediaModel = self.mediaModel else { return }
+
+        if let playerView = self.playerView {
+            self.view.addSubview(playerView)
+            playerView.play()
+            return
+        }
         
+        if mediaModel.isLocalFile {
+            if let asset = mediaModel.mediaLocation.toAsset() {
+                
+                self.view.bringSubview(toFront: self.progressView)
+                
+                let options = PHVideoRequestOptions()
+                options.isNetworkAccessAllowed = true
+                options.progressHandler = {[weak self] (progress, error, stop, infoDic) in
+                    guard let weakSelf = self else { return }
+                    weakSelf.progressView.progress = CGFloat(progress)
+                }
+                
+                PHCachingImageManager.default().requestAVAsset(forVideo: asset,
+                                                               options: options)
+                {(avAsset, audioMix, infoDic) in
+                    guard let avAsset = avAsset else { return }
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else { return }
+                        weakSelf.playerView = LGPlayerView(frame: weakSelf.view.bounds,
+                                                           mediaPlayerItem: AVPlayerItem(asset: avAsset),
+                                                           isMuted: false)
+                        weakSelf.view.addSubview(weakSelf.playerView!)
+                        weakSelf.playerView?.play()
+                        weakSelf.progressView.isHidden = true
+                    }
+                }
+            }
+        } else {
+            
+        }
     }
     
     func setupAudioView() {

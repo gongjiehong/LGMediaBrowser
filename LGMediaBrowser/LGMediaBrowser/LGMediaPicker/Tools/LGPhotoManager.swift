@@ -193,16 +193,16 @@ public class LGPhotoManager {
     public static func formatDuration(_ duration: TimeInterval) -> String {
         let durationInt = Int(duration)
         if durationInt < 60 {
-            return String(format: "00:%2d", durationInt)
+            return String(format: "00:%0.2d", durationInt)
         } else if durationInt < 3600 {
             let minutes = durationInt / 60
             let seconds = durationInt % 60
-            return String(format: "%2d:%2d", minutes, seconds)
+            return String(format: "%0.2d:%0.2d", minutes, seconds)
         } else {
             let hours = durationInt / 3600
             let minutes = (durationInt % 3600) / 60
             let seconds = durationInt % 60
-            return String(format: "%2d:%2d:%2d",hours , minutes, seconds)
+            return String(format: "%0.2d:%0.2d:%0.2d",hours , minutes, seconds)
         }
     }
     
@@ -285,6 +285,10 @@ public class LGPhotoManager {
         }
 
         return resultModel!
+    }
+    
+    public static func requestImageData() {
+//        imageManager.
     }
     
     public static func cancelImageRequest(_ requestId: PHImageRequestID) {

@@ -4,6 +4,8 @@
 <dict>
 	<key>NavigationBarTitle</key>
 	<string>3D3A4A</string>
+	<key>NavigationBarTint</key>
+	<string>00CE2E</string>
 	<key>PromptText</key>
 	<string>#000000</string>
 	<key>OpenSettingsButtonTitle</key>
@@ -30,5 +32,11 @@
 	<string>FFFFFF</string>
 	<key>CancelButtonText</key>
 	<string>F55257</string>
+	<key>CutLine</key>
+	<string>E8E8E8</string>
+	<key>BottomBarNormalText</key>
+	<string>00CE2E</string>
+	<key>BottomBarDisableText</key>
+	<string>C8C8C8</string>
 </dict>
 </plist>

@@ -26,12 +26,31 @@ public class LGPhotoModel {
     public var isSelected: Bool
     public var url: URL?
     public var image: UIImage?
+    public var currentSelectedIndex: Int = -1
     
     public init(asset: PHAsset, type: AssetMediaType, duration: String) {
         self.asset = asset
         self.type = type
         self.duration = duration
         self.isSelected = false
+    }
+    
+    public var pixelSize: CGSize {
+        return CGSize(width: self.asset.pixelWidth, height: self.asset.pixelHeight)
+    }
+    
+    public func pixelSize(containInSize size: CGSize) -> CGSize {
+        var width = min(CGFloat(self.asset.pixelWidth), size.width)
+        var height = width * CGFloat(self.asset.pixelHeight) / CGFloat(self.asset.pixelWidth)
+        
+        if height.isNaN { return CGSize.zero }
+        
+        if height > size.height {
+            height = size.height
+            width = height * CGFloat(self.asset.pixelWidth) / CGFloat(self.asset.pixelHeight)
+        }
+        
+        return CGSize(width: width, height: height)
     }
 }
 

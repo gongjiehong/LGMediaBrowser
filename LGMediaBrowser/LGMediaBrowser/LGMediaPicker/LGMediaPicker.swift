@@ -25,6 +25,9 @@ public class LGMediaPicker: LGMPNavigationController {
         /// cell的圆角大小，默认0.0没有圆角
         public var cellCornerRadius: CGFloat = 0.0
         
+        /// 是否允许混合选择，默认可以，如果为true，可以同时选择视频和图片
+        public var allowMixSelect: Bool = true
+        
         /// 可选的数据类型，默认视频和图片都可选[.image, .video]
         public var resultMediaTypes: LGPhotoManager.ResultMediaType = [.image, .video, .livePhoto, .animatedImage]
         
@@ -109,20 +112,25 @@ public class LGMediaPicker: LGMPNavigationController {
     /// 配置，默认使用默认配置
     public var config: Configuration = Configuration.default
     
-    /// 存储相册对象的素组
-    private var albumsArray: [LGAlbumListModel] = []
-    
+    var selectedDataArray: [LGPhotoModel] = []
     
     public override func viewDidLoad() {
         super.viewDidLoad()
         
         LGPhotoManager.sort = self.config.sortBy
-
-        requestAccessAndSetupLayout()
         
         self.title = LGLocalizedString("Albums")
+        
+        self.view.backgroundColor = UIColor.white
+        
+        self.navigationBar.tintColor = UIColor(colorName: "NavigationBarTint")
     }
-
+    
+    public override func loadView() {
+        super.loadView()
+        requestAccessAndSetupLayout()
+    }
+    
     public override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -141,7 +149,6 @@ public class LGMediaPicker: LGMPNavigationController {
                     albumList.configs = self?.config
                     
                     let allPhotosList = LGMPAlbumDetailController()
-                    allPhotosList.configs = self?.config
                     self?.viewControllers = [albumList, allPhotosList]
                     break
                 case .denied, .restricted:

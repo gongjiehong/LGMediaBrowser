@@ -16,9 +16,13 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     var dataArray: [LGPhotoModel] = []
     
-    var selectedDataArray: [LGPhotoModel] = []
+    weak var mainPicker: LGMediaPicker {
+        return self.navigationController as! LGMediaPicker
+    }
     
-    var configs: LGMediaPicker.Configuration!
+    var configs: LGMediaPicker.Configuration {
+        return mainPicker?.config ?? LGMediaPicker.Configuration.default
+    }
     
     lazy var allowTakePhoto: Bool = {
         return configs.allowTakePhotoInLibrary &&
@@ -32,6 +36,14 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         } else {
             return false
         }
+    }()
+    
+    lazy var bottomBar: LGMPAlbumDetailBottomBar = {
+       let temp = LGMPAlbumDetailBottomBar(frame: CGRect(x: 0.0,
+                                                         y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
+                                                         width: self.view.lg_width,
+                                                         height: 44.0))
+        return temp
     }()
     
     struct Settings {
@@ -59,6 +71,10 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         setupListCollectionView()
         
         setupCancel()
+        
+        fetchDataIfNeeded()
+        
+        self.view.addSubview(bottomBar)
     }
     
     func setupCancel() {
@@ -126,11 +142,15 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                                      y: 0,
                                      width: self.view.lg_width,
                                      height: self.view.lg_height - 44.0 - UIDevice.bottomSafeMargin)
+        bottomBar.frame = CGRect(x: 0.0,
+                                 y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
+                                 width: self.view.lg_width,
+                                 height: 44.0)
     }
     
-    public override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        fetchDataIfNeeded()
+    public override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        self.scrollToBottom()
     }
     
     func fetchDataIfNeeded() {
@@ -143,7 +163,6 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                 self.dataArray += photos
                 self.title = albumListModel.title
                 self.cachingImages()
-                self.scrollToBottom()
             } else {
                 DispatchQueue.userInteractive.async { [weak self] in
                     guard let weakSelf = self else { return }
@@ -157,7 +176,6 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                         weakSelf.title = album.title
                         weakSelf.listView.reloadData()
                         weakSelf.cachingImages()
-                        weakSelf.scrollToBottom()
                     }
                 }
             }
@@ -193,11 +211,9 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         
         let lastIndexPath = IndexPath(row: row, section: 0)
         
-        DispatchQueue.main.after(0.1) {
-            self.listView.scrollToItem(at: lastIndexPath,
-                                       at: UICollectionViewScrollPosition.bottom,
-                                       animated: false)
-        }
+        self.listView.scrollToItem(at: lastIndexPath,
+                                   at: UICollectionViewScrollPosition.bottom,
+                                   animated: false)
     }
 }
 
@@ -224,7 +240,9 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                 }
                 cell.cornerRadius = configs.cellCornerRadius
                 if configs.isShowCaptureImageOnTakePhotoBtn {
-//                    cell.startCapture()
+                    DispatchQueue.main.after(0.3) {
+                        cell.startCapture()
+                    }
                 }
                 return cell
             }
@@ -280,39 +298,29 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         
     }
     
-//    func canSelectModel(_ model: LGPhotoModel) -> Bool {
-//        if selectedDataArray.count > configs.maxSelectCount {
-//
-//        }
-//    }
-//
-//    - (BOOL)canAddModel:(ZLPhotoModel *)model
-//    {
-//    ZLImageNavigationController *nav = (ZLImageNavigationController *)self.navigationController;
-//    ZLPhotoConfiguration *configuration =nav.configuration;
-//
-//    if (nav.arrSelectedModels.count >= configuration.maxSelectCount) {
-//    ShowToastLong(GetLocalLanguageTextValue(ZLPhotoBrowserMaxSelectCountText), configuration.maxSelectCount);
-//    return NO;
-//    }
-//    if (nav.arrSelectedModels.count > 0) {
-//    ZLPhotoModel *sm = nav.arrSelectedModels.firstObject;
-//    if (!configuration.allowMixSelect &&
-//    ((model.type < ZLAssetMediaTypeVideo && sm.type == ZLAssetMediaTypeVideo) || (model.type == ZLAssetMediaTypeVideo && sm.type < ZLAssetMediaTypeVideo))) {
-//    ShowToastLong(@"%@", GetLocalLanguageTextValue(ZLPhotoBrowserCannotSelectVideo));
-//    return NO;
-//    }
-//    }
-//    if (![ZLPhotoManager judgeAssetisInLocalAblum:model.asset]) {
-//    ShowToastLong(@"%@", GetLocalLanguageTextValue(ZLPhotoBrowseriCloudPhotoText));
-//    return NO;
-//    }
-//    if (model.type == ZLAssetMediaTypeVideo && GetDuration(model.duration) > configuration.maxVideoDuration) {
-//    ShowToastLong(GetLocalLanguageTextValue(ZLPhotoBrowserMaxVideoDurationText), configuration.maxVideoDuration);
-//    return NO;
-//    }
-//    return YES;
-//    }
+    func canSelectModel(_ model: LGPhotoModel) -> Bool {
+        if selectedDataArray.count > configs.maxSelectCount {
+            let tipsString = String(format: LGLocalizedString("Select a maximum of %d photos."),
+                                    configs.maxSelectCount)
+            LGStatusBarTips.show(withStatus: tipsString,
+                                 style: LGStatusBarConfig.Style.error)
+            return false
+        }
+        
+        if mainPicker.selectedDataArray.count > 0 {
+            if let selectedModel = mainPicker.selectedDataArray.first {
+                if !configs.allowMixSelect && model.type != selectedModel.type) {
+                    let tipsString = LGLocalizedString("Can't select photos and videos at the same time.")
+                    LGStatusBarTips
+                    return false
+                }
+            }
+        }
+        
+        
+    }
+
+
 }
 
 extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
@@ -351,7 +359,7 @@ extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
         let mediaModel = LGMediaModel(mediaLocation: model.asset,
                                       mediaType: assetTypeToMediaType(model.type),
                                       isLocalFile: true,
-                                      thumbnailImage: nil)
+                                      thumbnailImage: cell.layoutImageView.image)
         
         let previewVC = LGForceTouchPreviewController(mediaModel: mediaModel,
                                                       currentIndex: indexPath.row)
@@ -379,6 +387,6 @@ extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
     public func previewingContext(_ previewingContext: UIViewControllerPreviewing,
                                   commit viewControllerToCommit: UIViewController)
     {
-        
+        return
     }
 }

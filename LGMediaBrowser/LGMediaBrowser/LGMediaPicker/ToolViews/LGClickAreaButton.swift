@@ -1,28 +1,16 @@
 //
-//  UIButton+LGMediaPicker.swift
+//  LGButton.swift
 //  LGMediaBrowser
 //
-//  Created by 龚杰洪 on 2018/6/26.
+//  Created by 龚杰洪 on 2018/7/4.
 //  Copyright © 2018年 龚杰洪. All rights reserved.
 //
 
 import UIKit
 
-public extension UIButton {
-    private struct AssociatedKeys {
-        static var enlargeOffset: String = "enlargeOffset"
-    }
+public class LGClickAreaButton: UIButton {
     
-    public var enlargeOffset: UIEdgeInsets {
-        set {
-            objc_setAssociatedObject(self,
-                                     &AssociatedKeys.enlargeOffset,
-                                     newValue,
-                                     objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        } get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.enlargeOffset) as? UIEdgeInsets ?? UIEdgeInsets.zero
-        }
-    }
+    public var enlargeOffset: UIEdgeInsets = UIEdgeInsets.zero
     
     private var enlargedRect: CGRect {
         if enlargeOffset == UIEdgeInsets.zero {
@@ -35,7 +23,7 @@ public extension UIButton {
         }
     }
     
-    override open func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+    override public func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let enlargedRect = self.enlargedRect
         if enlargedRect == self.bounds {
             return super.hitTest(point, with: event)

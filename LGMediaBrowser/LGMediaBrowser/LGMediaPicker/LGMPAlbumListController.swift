@@ -247,7 +247,6 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         let listModel = self.dataArray[indexPath.row]
         let detail = LGMPAlbumDetailController()
-        detail.configs = self.configs
         detail.albumListModel = listModel
         self.navigationController?.pushViewController(detail, animated: true)
     }

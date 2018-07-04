@@ -35,4 +35,10 @@
 "Loading..." = "Loading...";
 "Cancel" = "Cancel";
 "Back" = "Back";
+"Preview" = "Preview";
+"Edit" = "Edit";
+"Original" = "Original";
+"Done" = "Done";
+"Select a maximum of %d photos." = "Select a maximum of %d photos.";
+"Can't select photos and videos at the same time." = "Can't select photos and videos at the same time.";
 
