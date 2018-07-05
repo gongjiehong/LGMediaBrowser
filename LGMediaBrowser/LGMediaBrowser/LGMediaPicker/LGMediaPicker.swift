@@ -146,9 +146,10 @@ public class LGMediaPicker: LGMPNavigationController {
                 switch status {
                 case .authorized:
                     let albumList = LGMPAlbumListController()
-                    albumList.configs = self?.config
+                    albumList.mainPicker = self
                     
                     let allPhotosList = LGMPAlbumDetailController()
+                    allPhotosList.mainPicker = self
                     self?.viewControllers = [albumList, allPhotosList]
                     break
                 case .denied, .restricted:

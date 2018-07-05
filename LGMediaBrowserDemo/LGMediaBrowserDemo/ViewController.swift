@@ -47,8 +47,10 @@ class ViewController: UIViewController {
 //        }
         
 
-        
+        var config = LGMediaPicker.Configuration.default
+        config.resultMediaTypes = .image
         let picker = LGMediaPicker()
+        picker.config = config
         self.present(picker, animated: true) {
 
         }

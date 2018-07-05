@@ -76,5 +76,6 @@ public class LGAlbumListModel {
         self.isAllPhotos = isAllPhotos
         self.result = result
         self.headImageAsset = headImageAsset
+        
     }
 }

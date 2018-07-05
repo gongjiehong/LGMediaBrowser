@@ -213,6 +213,21 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
             self.typeMarkView.image = UIImage(namedFromThisBundle: "mark_livePhoto")
             self.timeOrTypeMarkLabel.text = LGLocalizedString("Live")
             break
+        case .generalImage:
+            if #available(iOS 11.0, *) {
+                if model.asset.playbackStyle == .imageAnimated {
+                    self.markBgView.isHidden = false
+                    self.typeMarkView.isHidden = false
+                    self.timeOrTypeMarkLabel.isHidden = false
+                    self.typeMarkView.image = nil
+                    self.timeOrTypeMarkLabel.text = LGLocalizedString("GIF")
+                } else {
+                    self.markBgView.isHidden = true
+                }
+            } else {
+                self.markBgView.isHidden = true
+            }
+            break
         default:
             self.markBgView.isHidden = true
             break
@@ -226,6 +241,11 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
         self.selectButton.isHidden = !self.isShowSelectButton
         self.selectButton.isEnabled = self.isShowSelectButton
         self.selectButton.isSelected = model.isSelected
+        if model.currentSelectedIndex == -1 {
+            self.selectButton.setTitle(nil, for: UIControlState.normal)
+        } else {
+            self.selectButton.setTitle("\(model.currentSelectedIndex)", for: UIControlState.normal)
+        }
         
         let scale = UIScreen.main.scale
         let tempSize = CGSize(width: self.contentView.lg_width * scale, height: self.contentView.lg_height * scale)

@@ -287,9 +287,30 @@ public class LGPhotoManager {
         return resultModel!
     }
     
-    public static func requestImageData() {
-//        imageManager.
+    public static func getPhotoBytes(withPhotos photos: [LGPhotoModel], completion: @escaping (String, Int) -> Void) {
+        var totalDataLength: Int = 0
+        var count: Int = 0
+        for model in photos {
+            imageManager.requestImageData(for: model.asset,
+                                          options: nil)
+            { (data, dataUTI, imageOrientation, infoDic) in
+                guard let data = data else { return }
+                totalDataLength += data.count
+                count += 1
+                if count >= photos.count {
+                    completion(self.formatDataLength(totalDataLength), totalDataLength)
+                }
+            }
+        }
     }
+    
+    public static func formatDataLength(_ dataLength: Int) -> String {
+        let formatter = ByteCountFormatter()
+        formatter.allowedUnits = .useMB
+        formatter.countStyle = .file
+        return formatter.string(fromByteCount: Int64(dataLength))
+    }
+    
     
     public static func cancelImageRequest(_ requestId: PHImageRequestID) {
         if requestId != PHInvalidImageRequestID {

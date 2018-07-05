@@ -8,9 +8,17 @@
 
 import UIKit
 
+public protocol LGMPAlbumDetailBottomBarDelegate: NSObjectProtocol {
+    func previewButtonPressed(_ button: UIButton)
+    func originalButtonPressed(_ button: UIButton)
+    func doneButtonPressed(_ button: UIButton)
+}
+
 public class LGMPAlbumDetailBottomBar: UIView {
     
     public var allowSelectOriginal: Bool = true
+    
+    public weak var delegate: LGMPAlbumDetailBottomBarDelegate?
     
     public lazy var cutLine: UIView = {
         let temp = UIView(frame: CGRect(x: 0, y: 0, width: self.bounds.width, height: 1.0))
@@ -118,14 +126,15 @@ public class LGMPAlbumDetailBottomBar: UIView {
 
     // MARK: -  actions
     @objc func previewButtonPressed(_ button: UIButton) {
-        
+        delegate?.previewButtonPressed(button)
     }
     
     @objc func originalButtonPressed(_ button: UIButton) {
-        
+        button.isSelected = !button.isSelected
+        delegate?.originalButtonPressed(button)
     }
     
     @objc func doneButtonPressed(_ button: UIButton) {
-        
+        delegate?.doneButtonPressed(button)
     }
 }

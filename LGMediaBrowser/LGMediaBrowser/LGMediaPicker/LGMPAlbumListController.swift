@@ -129,10 +129,13 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     /// 数据源
     public var dataArray: [LGAlbumListModel] = []
+
+    weak var mainPicker: LGMediaPicker!
     
     /// 设置参数
-    public var configs: LGMediaPicker.Configuration!
-    
+    var configs: LGMediaPicker.Configuration {
+        return mainPicker.config
+    }
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -142,6 +145,8 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         setupTableView()
         
         setupCancel()
+        
+        PHPhotoLibrary.shared().register(self)
     }
     
     // MARK: -  设置取消按钮
@@ -185,7 +190,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     }
     
     /// 获取相册列表
-    func fetchAlbumList() {
+    @objc func fetchAlbumList() {
         let hud = LGLoadingHUD.show(inView: self.view)
         DispatchQueue.userInteractive.async { [weak self] in
             LGPhotoManager.fetchAlbumList(LGPhotoManager.ResultMediaType.all) { [weak self] (resultArray) in
@@ -215,6 +220,10 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         LGPhotoManager.startCachingImages(for: assetArray,
                                           targetSize: itemSize,
                                           contentMode: PHImageContentMode.aspectFill)
+    }
+    
+    deinit {
+        PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
     
 }
@@ -248,6 +257,18 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
         let listModel = self.dataArray[indexPath.row]
         let detail = LGMPAlbumDetailController()
         detail.albumListModel = listModel
+        detail.mainPicker = mainPicker
         self.navigationController?.pushViewController(detail, animated: true)
+    }
+}
+
+extension LGMPAlbumListController: PHPhotoLibraryChangeObserver {
+    public func photoLibraryDidChange(_ changeInstance: PHChange) {
+        DispatchQueue.main.async { [weak self] in
+            guard let weakSelf = self else { return }
+            NSObject.cancelPreviousPerformRequests(withTarget: weakSelf)
+            weakSelf.perform(#selector(LGMPAlbumListController.fetchAlbumList),
+                             with: nil, afterDelay: 0.3)
+        }
     }
 }

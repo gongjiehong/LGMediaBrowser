@@ -16,6 +16,8 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     var dataArray: [LGPhotoModel] = []
     
+    var selectedIndexPath: [IndexPath] = []
+    
     lazy var allowTakePhoto: Bool = {
         return configs.allowTakePhotoInLibrary &&
             (configs.resultMediaTypes.contains(.video) ||
@@ -35,6 +37,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                                                          y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
                                                          width: self.view.lg_width,
                                                          height: 44.0))
+        temp.delegate = self
         return temp
     }()
     
@@ -56,12 +59,10 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         }()
     }
     
-    func mainPicker() -> LGMediaPicker {
-        return self.navigationController as! LGMediaPicker
-    }
+    weak var mainPicker: LGMediaPicker!
     
     var configs: LGMediaPicker.Configuration {
-        return mainPicker().config
+        return mainPicker.config
     }
 
     override public func viewDidLoad() {
@@ -155,22 +156,35 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         self.scrollToBottom()
     }
     
-    func fetchDataIfNeeded(_ needRefresh: Bool = false) {
+    @objc func fetchDataIfNeeded(_ needRefresh: Bool = false) {
         if self.dataArray.count == 0 || needRefresh {
             let hud = LGLoadingHUD.show(inView: self.view)
             if let albumListModel = albumListModel {
-                hud.dismiss()
                 if needRefresh {
                     guard let result = albumListModel.result else { return }
                     let photos = LGPhotoManager.fetchPhoto(inResult: result,
                                                            supportMediaType: self.configs.resultMediaTypes)
+                    for temp in photos {
+                        for selectedTemp in self.mainPicker.selectedDataArray
+                            where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
+                                temp.isSelected = true
+                        }
+                    }
                     self.dataArray.removeAll()
                     self.dataArray += photos
+                    self.listView.reloadData()
                 } else {
                     let photos = albumListModel.models
+                    for temp in albumListModel.models {
+                        for selectedTemp in self.mainPicker.selectedDataArray
+                            where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
+                                temp.isSelected = true
+                        }
+                    }
                     self.dataArray.removeAll()
                     self.dataArray += photos
                 }
+                hud.dismiss()
                 self.title = albumListModel.title
                 self.cachingImages()
                 
@@ -180,6 +194,12 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                     let album = LGPhotoManager.getAllPhotosAlbum(weakSelf.configs.resultMediaTypes)
                     weakSelf.albumListModel = album
                     weakSelf.dataArray.removeAll()
+                    for temp in album.models {
+                        for selectedTemp in weakSelf.mainPicker.selectedDataArray
+                            where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
+                            temp.isSelected = true
+                        }
+                    }
                     weakSelf.dataArray += album.models
                     DispatchQueue.main.async { [weak self] in
                         hud.dismiss()
@@ -228,6 +248,9 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     }
     
     deinit {
+        if self.mainPicker != nil {
+            self.mainPicker.selectedDataArray.removeAll()
+        }
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
 }
@@ -279,42 +302,47 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         }
         
         cell.listModel = dataModel
-//        cell.selectedBlock = { [weak self] (isSelected) in
-//            guard let weakSelf = self else { return }
-//            if !isSelected {
-//                
-//            }
-//            if (!selected) {
-//                //选中
-//                if ([strongSelf canAddModel:model]) {
-//                    if (![strongSelf shouldDirectEdit:model]) {
-//                        model.selected = YES;
-//                        [weakNav.arrSelectedModels addObject:model];
-//                        strongCell.btnSelect.selected = YES;
-//                        [strongSelf shouldDirectEdit:model];
-//                    }
-//                }
-//            } else {
-//                strongCell.btnSelect.selected = NO;
-//                model.selected = NO;
-//                for (ZLPhotoModel *m in weakNav.arrSelectedModels) {
-//                    if ([m.asset.localIdentifier isEqualToString:model.asset.localIdentifier]) {
-//                        [weakNav.arrSelectedModels removeObject:m];
-//                        break;
-//                    }
-//                }
-//            }
-//            if (configuration.showSelectedMask) {
-//                strongCell.topView.hidden = !model.isSelected;
-//            }
-//            [strongSelf resetBottomBtnsStatus:YES];
-//        }
+        weak var weakCell = cell
+        cell.selectedBlock = { [weak self] (isSelected) in
+            guard let weakSelf = self else { return }
+            guard let weakCell = weakCell else { return }
+            if !isSelected {
+                if weakSelf.canSelectModel(dataModel) {
+                    dataModel.isSelected = true
+                    weakSelf.mainPicker.selectedDataArray.append(dataModel)
+                    weakSelf.selectedIndexPath.append(indexPath)
+                    weakCell.selectButton.isSelected = true
+                }
+            } else {
+                weakCell.selectButton.isSelected = false
+                dataModel.isSelected = false
+                if let index = weakSelf.mainPicker.selectedDataArray.index(where: { (temp) -> Bool in
+                    temp.asset.localIdentifier == dataModel.asset.localIdentifier
+                }) {
+                    dataModel.currentSelectedIndex = -1
+                    weakSelf.mainPicker.selectedDataArray.remove(at: index)
+                }
+            }
+           
+            if weakSelf.configs.isShowSelectedMask {
+                weakCell.coverView.isHidden = !dataModel.isSelected
+            }
+            
+            if dataModel.currentSelectedIndex == -1 {
+                weakCell.selectButton.setTitle(nil,
+                                               for: UIControlState.normal)
+            } else {
+                weakCell.selectButton.setTitle("\(dataModel.currentSelectedIndex)",
+                                               for: UIControlState.normal)
+            }
+            weakSelf.refreshSelectedIndexsLayout()
+            weakSelf.refreshBottomBarStatus()
+        }
         return cell
-        
     }
     
     func canSelectModel(_ model: LGPhotoModel) -> Bool {
-        if mainPicker().selectedDataArray.count > configs.maxSelectCount {
+        if mainPicker.selectedDataArray.count >= configs.maxSelectCount {
             let tipsString = String(format: LGLocalizedString("Select a maximum of %d photos."),
                                     configs.maxSelectCount)
             LGStatusBarTips.show(withStatus: tipsString,
@@ -322,8 +350,8 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             return false
         }
         
-        if mainPicker().selectedDataArray.count > 0 {
-            if let selectedModel = mainPicker().selectedDataArray.first {
+        if mainPicker.selectedDataArray.count > 0 {
+            if let selectedModel = mainPicker.selectedDataArray.first {
                 if !configs.allowMixSelect && model.type != selectedModel.type {
                     let tipsString = LGLocalizedString("Can't select photos and videos at the same time.")
                     LGStatusBarTips.show(withStatus: tipsString,
@@ -336,6 +364,65 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         return true
     }
 
+    var isSelecteOriginalPhoto: Bool {
+        return self.bottomBar.originalPhotoButton.isSelected
+    }
+    
+    func refreshBottomBarStatus() {
+        if mainPicker.selectedDataArray.count > 0 {
+            self.bottomBar.previewButton.isEnabled = true
+            self.bottomBar.originalPhotoButton.isEnabled = true
+            self.bottomBar.doneButton.isEnabled = true
+            self.bottomBar.doneButton.setTitle(LGLocalizedString("Done") + "(\(mainPicker.selectedDataArray.count))",
+                                               for: UIControlState.normal)
+            layoutPhotosBytes()
+        } else {
+            self.bottomBar.previewButton.isEnabled = false
+            self.bottomBar.originalPhotoButton.isEnabled = false
+            self.bottomBar.originalPhotoButton.isSelected = false
+            self.bottomBar.photoBytesLabel.text = ""
+            self.bottomBar.doneButton.isEnabled = false
+            self.bottomBar.doneButton.setTitle(LGLocalizedString("Done"), for: UIControlState.normal)
+        }
+    }
+    
+    func layoutPhotosBytes() {
+        if isSelecteOriginalPhoto {
+            LGPhotoManager.getPhotoBytes(withPhotos: mainPicker.selectedDataArray)
+            { (mbFormatString, originalLength) in
+                DispatchQueue.main.async { [weak self] in
+                    self?.bottomBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
+                }
+            }
+        } else {
+            self.bottomBar.photoBytesLabel.text = ""
+        }
+    }
+    
+    func refreshSelectedIndexsLayout() {
+        var indexs: [IndexPath] = []
+        
+        for tempModel in mainPicker.selectedDataArray {
+            if let index = dataArray.index(where: { (temp) -> Bool in
+                tempModel.asset.localIdentifier == temp.asset.localIdentifier
+            }) {
+                if !self.allowTakePhoto || self.configs.sortBy == .ascending {
+                    indexs.append(IndexPath(row: index, section: 0))
+                } else {
+                    indexs.append(IndexPath(row: index - 1, section: 0))
+                }
+                
+            }
+            
+            if let index = mainPicker.selectedDataArray.index(where: { (temp) -> Bool in
+                tempModel.asset.localIdentifier == temp.asset.localIdentifier
+            }) {
+                tempModel.currentSelectedIndex = index + 1
+            }
+            
+            self.listView.reloadItems(at: indexs)
+        }
+    }
 
 }
 
@@ -409,6 +496,40 @@ extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
 
 extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
     public func photoLibraryDidChange(_ changeInstance: PHChange) {
-        self.fetchDataIfNeeded(true)
+        DispatchQueue.main.async { [weak self] in
+            guard let weakSelf = self else { return }
+            NSObject.cancelPreviousPerformRequests(withTarget: weakSelf)
+            weakSelf.perform(#selector(LGMPAlbumDetailController.changeAndReload(_:)),
+                         with: changeInstance,
+                         afterDelay: 0.3)
+        }
+    }
+    
+    @objc func changeAndReload(_ changeInstance: PHChange) {
+        guard let result = self.albumListModel?.result else { return }
+        if let detail = changeInstance.changeDetails(for: result) {
+            
+            let photos = LGPhotoManager.fetchPhoto(inResult: detail.fetchResultAfterChanges,
+                                                   supportMediaType: configs.resultMediaTypes)
+            self.dataArray.removeAll()
+            self.dataArray += photos
+            self.listView.reloadData()
+            self.cachingImages()
+            self.scrollToBottom()
+        }
+    }
+}
+
+extension LGMPAlbumDetailController: LGMPAlbumDetailBottomBarDelegate {
+    public func previewButtonPressed(_ button: UIButton) {
+        
+    }
+    
+    public func originalButtonPressed(_ button: UIButton) {
+        layoutPhotosBytes()
+    }
+    
+    public func doneButtonPressed(_ button: UIButton) {
+        
     }
 }

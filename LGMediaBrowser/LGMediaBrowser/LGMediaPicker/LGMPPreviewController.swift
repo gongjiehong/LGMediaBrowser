@@ -1,32 +1,15 @@
 //
-//  LGMediaBrowser.swift
-//  LGMediaBrowser
+//  LGMPPreviewController.swift
+//  LGMPPreviewController
 //
-//  Created by 龚杰洪 on 2018/4/27.
+//  Created by 龚杰洪 on 2018/7/5.
 //  Copyright © 2018年 龚杰洪. All rights reserved.
 //
 
 import UIKit
-import Photos
 
-/// override hitTest 解决slider滑动问题
-class LGCollectionView: UICollectionView {
-    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        let view = super.hitTest(point, with: event)
-        if let view = view, view.isKind(of: UISlider.self) {
-            self.isScrollEnabled = false
-        } else {
-            self.isScrollEnabled = true
-        }
-        return view
-    }
-}
-
-/// 全局设置
-var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
-
-/// 媒体文件浏览器，支持视频，音频（需要系统支持的格式）；普通图片，LivePhoto等
-public class LGMediaBrowser: UIViewController {
+/// 本地文件预览
+public class LGMPPreviewController: LGMPBaseViewController {
     
     /// 重用标识定义
     private struct Reuse {
@@ -40,21 +23,14 @@ public class LGMediaBrowser: UIViewController {
     /// 左右元素的间距
     private let itemPadding: CGFloat = 10.0
     
-    /// 自定义滑动dismiss Transition
-    private var interactiveTransition: LGMediaBrowserInteractiveTransition!
+//    /// 自定义pop动画
+//    private var interactiveTransition: LGMPPreviewControllerInteractiveTransition!
     
     /// 显示各种媒体文件的UICollectionView
     public weak var collectionView: UICollectionView!
     
-    /// 媒体文件模型LGMediaModel array
-    public var mediaArray: [LGMediaModel] = []
-    
-    /// 回调
-    public weak var delegate: LGMediaBrowserDelegate?
-    
-    /// 数据源
-    public weak var dataSource: LGMediaBrowserDataSource?
-    
+    /// 媒体文件模型LGPhotoModel array
+    public var mediaArray: [LGPhotoModel] = []
     
     /// 从哪个视图present上来的
     public weak var targetView: UIView?
@@ -75,7 +51,7 @@ public class LGMediaBrowser: UIViewController {
     weak var actionView: LGActionView!
     
     /// 浏览器的当前状态，分为纯浏览和浏览并删除，浏览并删除时显示删除按钮
-    public var status: LGMediaBrowserStatus = .browsing
+    public var status: LGMPPreviewControllerStatus = .browsing
     
     /// 当前显示的页码
     var currentIndex: Int = 0 {
@@ -104,8 +80,8 @@ public class LGMediaBrowser: UIViewController {
     }
     
     public convenience init(mediaArray: [LGMediaModel],
-                            configs: LGMediaBrowserSettings,
-                            status: LGMediaBrowserStatus = .browsing,
+                            configs: LGMPPreviewControllerSettings,
+                            status: LGMPPreviewControllerStatus = .browsing,
                             currentIndex: Int = 0) {
         self.init(nibName: nil, bundle: nil)
         self.mediaArray = mediaArray
@@ -120,7 +96,7 @@ public class LGMediaBrowser: UIViewController {
     // MARK: -  视图load后进行一系列初始化操作
     override public func viewDidLoad() {
         super.viewDidLoad()
-
+        
         self.view.backgroundColor = globalConfigs.backgroundColor
         
         setupTransition()
@@ -140,7 +116,7 @@ public class LGMediaBrowser: UIViewController {
     
     /// 添加下拉关闭手势
     func addPanDissmissGesture() {
-        self.interactiveTransition = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView,
+        self.interactiveTransition = LGMPPreviewControllerInteractiveTransition(fromTargetView: self.targetView,
                                                                          toTargetView: self.targetView,
                                                                          targetController: self)
         self.interactiveTransition.addPanGestureFor(viewController: self)
@@ -173,9 +149,9 @@ public class LGMediaBrowser: UIViewController {
     /// 设置collectionView
     func setupCollectionView() {
         let frame = CGRect(x: -itemPadding,
-                            y: UIDevice.topSafeMargin,
-                            width: self.view.lg_width + itemPadding * 2.0,
-                            height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+                           y: UIDevice.topSafeMargin,
+                           width: self.view.lg_width + itemPadding * 2.0,
+                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
         let collection = LGCollectionView(frame: frame,
                                           collectionViewLayout: flowLayout)
         self.collectionView = collection
@@ -190,9 +166,9 @@ public class LGMediaBrowser: UIViewController {
         
         self.collectionView.delaysContentTouches = false
         
-        self.collectionView.register(LGMediaBrowserVideoCell.self, forCellWithReuseIdentifier: Reuse.VideoCell)
-        self.collectionView.register(LGMediaBrowserAudioCell.self, forCellWithReuseIdentifier: Reuse.AudioCell)
-        self.collectionView.register(LGMediaBrowserGeneralPhotoCell.self,
+        self.collectionView.register(LGMPPreviewControllerVideoCell.self, forCellWithReuseIdentifier: Reuse.VideoCell)
+        self.collectionView.register(LGMPPreviewControllerAudioCell.self, forCellWithReuseIdentifier: Reuse.AudioCell)
+        self.collectionView.register(LGMPPreviewControllerGeneralPhotoCell.self,
                                      forCellWithReuseIdentifier: Reuse.GeneralPhotoCell)
         self.collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: Reuse.Other)
         
@@ -224,7 +200,7 @@ public class LGMediaBrowser: UIViewController {
         pageControl = temp
         self.view.addSubview(pageControl)
     }
-
+    
     func refreshPageControl() {
         self.pageControl.numberOfPages = self.mediaArray.count
         self.pageControl.currentPage = currentIndex
@@ -319,17 +295,17 @@ public class LGMediaBrowser: UIViewController {
     // MARK: -  退出当前页面
     
     func dismissSelf() {
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.willDismissAtPageIndex(_:))) == true {
+        if self.delegate?.responds(to: #selector(LGMPPreviewControllerDelegate.willDismissAtPageIndex(_:))) == true {
             self.delegate?.willDismissAtPageIndex!(self.currentIndex)
         }
         self.dismiss(animated: true) {
-            if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didDismissAtPageIndex(_:))) == true {
+            if self.delegate?.responds(to: #selector(LGMPPreviewControllerDelegate.didDismissAtPageIndex(_:))) == true {
                 self.delegate?.didDismissAtPageIndex!(self.currentIndex)
             }
         }
     }
     
-
+    
     
     // MARK: -  旋转方向处理
     private var lastOrientation: UIDeviceOrientation = UIDevice.current.orientation
@@ -345,7 +321,7 @@ public class LGMediaBrowser: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     // MARK: -  状态栏显示与隐藏处理
     override public var preferredStatusBarStyle: UIStatusBarStyle {
         return UIStatusBarStyle.lightContent
@@ -353,17 +329,17 @@ public class LGMediaBrowser: UIViewController {
     
     override public var prefersStatusBarHidden: Bool {
         return !globalConfigs.displayStatusbar
-    } 
+    }
     
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using [segue destinationViewController].
+     // Pass the selected object to the new view controller.
+     }
+     */
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -372,17 +348,17 @@ public class LGMediaBrowser: UIViewController {
 }
 
 // MARK: - UIViewControllerTransitioningDelegate
-extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
+extension LGMPPreviewController: UIViewControllerTransitioningDelegate {
     
     func getCurrentLayoutView() -> UIView? {
         if let cell = self.collectionView.cellForItem(at: IndexPath(row: self.currentIndex, section: 0)) {
-            if cell.isKind(of: LGMediaBrowserGeneralPhotoCell.self) == true {
-                let generalPhotoCell = cell as! LGMediaBrowserGeneralPhotoCell
+            if cell.isKind(of: LGMPPreviewControllerGeneralPhotoCell.self) == true {
+                let generalPhotoCell = cell as! LGMPPreviewControllerGeneralPhotoCell
                 let zoomView = generalPhotoCell.previewView as? LGZoomingScrollView
                 return zoomView?.imageView
-            } else if cell.isKind(of: LGMediaBrowserAudioCell.self) == true ||
-                cell.isKind(of: LGMediaBrowserVideoCell.self) == true {
-                return (cell as? LGMediaBrowserPreviewCell)?.previewView
+            } else if cell.isKind(of: LGMPPreviewControllerAudioCell.self) == true ||
+                cell.isKind(of: LGMPPreviewControllerVideoCell.self) == true {
+                return (cell as? LGMPPreviewControllerPreviewCell)?.previewView
             } else {
                 return nil
             }
@@ -393,10 +369,10 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     
     
     public func animationController(forPresented presented: UIViewController,
-                                             presenting: UIViewController,
-                                             source: UIViewController) -> UIViewControllerAnimatedTransitioning?
+                                    presenting: UIViewController,
+                                    source: UIViewController) -> UIViewControllerAnimatedTransitioning?
     {
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+        if self.delegate?.responds(to: #selector(LGMPPreviewControllerDelegate.viewForMedia(_:index:))) == true {
             if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
                 self.targetView = view
             }
@@ -409,7 +385,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
             finalImageSize = layoutView.lg_size
         }
         
-        return LGMediaBrowserPresentTransition(direction: .present,
+        return LGMPPreviewControllerPresentTransition(direction: .present,
                                                targetView: self.targetView,
                                                finalImageSize: finalImageSize,
                                                placeholderImage: animationImage)
@@ -418,7 +394,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     public func animationController(forDismissed dismissed: UIViewController) ->
         UIViewControllerAnimatedTransitioning?
     {
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+        if self.delegate?.responds(to: #selector(LGMPPreviewControllerDelegate.viewForMedia(_:index:))) == true {
             if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
                 self.targetView = view
             }
@@ -438,17 +414,17 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         } else if let image = self.animationImage {
             finalImageSize = image.size
         }
-        return LGMediaBrowserPresentTransition(direction: .dismiss,
+        return LGMPPreviewControllerPresentTransition(direction: .dismiss,
                                                targetView: self.targetView,
                                                finalImageSize: finalImageSize,
                                                placeholderImage: animationImage)
-
+        
     }
-
+    
     public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) ->
         UIViewControllerInteractiveTransitioning?
     {
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+        if self.delegate?.responds(to: #selector(LGMPPreviewControllerDelegate.viewForMedia(_:index:))) == true {
             if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
                 self.targetView = view
             }
@@ -484,7 +460,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
 }
 
 // MARK: UICollectionViewDataSource & UICollectionViewDelegate
-extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
+extension LGMPPreviewController: UICollectionViewDelegate, UICollectionViewDataSource {
     
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -510,70 +486,70 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               videoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         videoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
+        var result: LGMPPreviewControllerVideoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        if let temp = cell as? LGMPPreviewControllerVideoCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMPPreviewControllerVideoCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaArray[indexPath.row]
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               audioCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         audioCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserAudioCell
+        var result: LGMPPreviewControllerAudioCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.AudioCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserAudioCell {
+        if let temp = cell as? LGMPPreviewControllerAudioCell {
             result = temp
         } else {
-            result = LGMediaBrowserAudioCell(frame: CGRect.zero)
+            result = LGMPPreviewControllerAudioCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaArray[indexPath.row]
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               generalPhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         generalPhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserGeneralPhotoCell
+        var result: LGMPPreviewControllerGeneralPhotoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.GeneralPhotoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserGeneralPhotoCell {
+        if let temp = cell as? LGMPPreviewControllerGeneralPhotoCell {
             result = temp
         } else {
-            result = LGMediaBrowserGeneralPhotoCell(frame: CGRect.zero)
+            result = LGMPPreviewControllerGeneralPhotoCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaArray[indexPath.row]
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               livePhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         livePhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
+        var result: LGMPPreviewControllerVideoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        if let temp = cell as? LGMPPreviewControllerVideoCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMPPreviewControllerVideoCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaArray[indexPath.row]
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               otherCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         otherCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
+        var result: LGMPPreviewControllerVideoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        if let temp = cell as? LGMPPreviewControllerVideoCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMPPreviewControllerVideoCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaArray[indexPath.row]
         return result
@@ -583,7 +559,7 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
                                willDisplay cell: UICollectionViewCell,
                                forItemAt indexPath: IndexPath)
     {
-        if let temp = cell as? LGMediaBrowserPreviewCell {
+        if let temp = cell as? LGMPPreviewControllerPreviewCell {
             temp.willDisplay()
         }
     }
@@ -592,7 +568,7 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
                                didEndDisplaying cell: UICollectionViewCell,
                                forItemAt indexPath: IndexPath)
     {
-        if let temp = cell as? LGMediaBrowserPreviewCell {
+        if let temp = cell as? LGMPPreviewControllerPreviewCell {
             temp.didEndDisplay()
         }
     }
@@ -600,14 +576,14 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let index = Int(scrollView.contentOffset.x / scrollView.lg_width)
         self.currentIndex = index
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didScrollToIndex(_:index:))) == true {
+        if self.delegate?.responds(to: #selector(LGMPPreviewControllerDelegate.didScrollToIndex(_:index:))) == true {
             self.delegate?.didScrollToIndex!(self, index: self.currentIndex)
         }
     }
 }
 
 // MARK: - UICollectionViewDelegateFlowLayout
-extension LGMediaBrowser: UICollectionViewDelegateFlowLayout {
+extension LGMPPreviewController: UICollectionViewDelegateFlowLayout {
     public func collectionView(_ collectionView: UICollectionView,
                                layout collectionViewLayout: UICollectionViewLayout,
                                sizeForItemAt indexPath: IndexPath) -> CGSize
@@ -618,7 +594,7 @@ extension LGMediaBrowser: UICollectionViewDelegateFlowLayout {
 }
 
 // MARK: -  LGActionViewDelegate
-extension LGMediaBrowser: LGActionViewDelegate {
+extension LGMPPreviewController: LGActionViewDelegate {
     func closeButtonPressed() {
         dismissSelf()
     }
@@ -642,7 +618,7 @@ extension LGMediaBrowser: LGActionViewDelegate {
         }
         
         if let delegate = self.delegate,
-            delegate.responds(to: #selector(LGMediaBrowserDelegate.removeMedia(_:index:reload:)))
+            delegate.responds(to: #selector(LGMPPreviewControllerDelegate.removeMedia(_:index:reload:)))
         {
             delegate.removeMedia!(self,
                                   index: self.currentIndex,
@@ -653,7 +629,7 @@ extension LGMediaBrowser: LGActionViewDelegate {
     }
 }
 
-extension LGMediaBrowser: UIGestureRecognizerDelegate {
+extension LGMPPreviewController: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
         if touch.view?.isKind(of: UISlider.self) == true {
             return false
@@ -661,4 +637,5 @@ extension LGMediaBrowser: UIGestureRecognizerDelegate {
         return true
     }
 }
+
 
