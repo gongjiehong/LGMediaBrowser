@@ -75,6 +75,8 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         fetchDataIfNeeded()
         
         self.view.addSubview(bottomBar)
+        
+        PHPhotoLibrary.shared().register(self)
     }
     
     func setupCancel() {
@@ -153,16 +155,25 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         self.scrollToBottom()
     }
     
-    func fetchDataIfNeeded() {
-        if self.dataArray.count == 0 {
+    func fetchDataIfNeeded(_ needRefresh: Bool = false) {
+        if self.dataArray.count == 0 || needRefresh {
             let hud = LGLoadingHUD.show(inView: self.view)
             if let albumListModel = albumListModel {
                 hud.dismiss()
-                let photos = albumListModel.models
-                self.dataArray.removeAll()
-                self.dataArray += photos
+                if needRefresh {
+                    guard let result = albumListModel.result else { return }
+                    let photos = LGPhotoManager.fetchPhoto(inResult: result,
+                                                           supportMediaType: self.configs.resultMediaTypes)
+                    self.dataArray.removeAll()
+                    self.dataArray += photos
+                } else {
+                    let photos = albumListModel.models
+                    self.dataArray.removeAll()
+                    self.dataArray += photos
+                }
                 self.title = albumListModel.title
                 self.cachingImages()
+                
             } else {
                 DispatchQueue.userInteractive.async { [weak self] in
                     guard let weakSelf = self else { return }
@@ -214,6 +225,10 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         self.listView.scrollToItem(at: lastIndexPath,
                                    at: UICollectionViewScrollPosition.bottom,
                                    animated: false)
+    }
+    
+    deinit {
+        PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
 }
 
@@ -388,5 +403,11 @@ extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
                                   commit viewControllerToCommit: UIViewController)
     {
         return
+    }
+}
+
+extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
+    public func photoLibraryDidChange(_ changeInstance: PHChange) {
+        self.fetchDataIfNeeded(true)
     }
 }
