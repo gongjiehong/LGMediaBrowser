@@ -16,14 +16,6 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     var dataArray: [LGPhotoModel] = []
     
-    weak var mainPicker: LGMediaPicker {
-        return self.navigationController as! LGMediaPicker
-    }
-    
-    var configs: LGMediaPicker.Configuration {
-        return mainPicker?.config ?? LGMediaPicker.Configuration.default
-    }
-    
     lazy var allowTakePhoto: Bool = {
         return configs.allowTakePhotoInLibrary &&
             (configs.resultMediaTypes.contains(.video) ||
@@ -62,6 +54,14 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         static var itemLineSpacing: CGFloat = {
             return 3.0 * min(UIScreen.main.bounds.width / 320.0, 1.4)
         }()
+    }
+    
+    func mainPicker() -> LGMediaPicker {
+        return self.navigationController as! LGMediaPicker
+    }
+    
+    var configs: LGMediaPicker.Configuration {
+        return mainPicker().config
     }
 
     override public func viewDidLoad() {
@@ -314,7 +314,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     }
     
     func canSelectModel(_ model: LGPhotoModel) -> Bool {
-        if selectedDataArray.count > configs.maxSelectCount {
+        if mainPicker().selectedDataArray.count > configs.maxSelectCount {
             let tipsString = String(format: LGLocalizedString("Select a maximum of %d photos."),
                                     configs.maxSelectCount)
             LGStatusBarTips.show(withStatus: tipsString,
@@ -322,17 +322,18 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             return false
         }
         
-        if mainPicker.selectedDataArray.count > 0 {
-            if let selectedModel = mainPicker.selectedDataArray.first {
-                if !configs.allowMixSelect && model.type != selectedModel.type) {
+        if mainPicker().selectedDataArray.count > 0 {
+            if let selectedModel = mainPicker().selectedDataArray.first {
+                if !configs.allowMixSelect && model.type != selectedModel.type {
                     let tipsString = LGLocalizedString("Can't select photos and videos at the same time.")
-                    LGStatusBarTips
+                    LGStatusBarTips.show(withStatus: tipsString,
+                                         style: LGStatusBarConfig.Style.error)
                     return false
                 }
             }
         }
         
-        
+        return true
     }
 
 
