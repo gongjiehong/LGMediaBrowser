@@ -32,7 +32,7 @@
 //    /// 媒体文件模型LGPhotoModel array
 //    public var mediaArray: [LGPhotoModel] = []
 //    
-//    /// 从哪个视图present上来的
+//    /// 从哪个视图push过来的
 //    public weak var targetView: UIView?
 //    
 //    /// 动画用到的图片
@@ -41,17 +41,11 @@
 //            return nil
 //        }
 //        let model = self.mediaArray[currentIndex]
-//        return model.thumbnailImage
+////        return LGPhotoManager
 //    }
-//    
-//    /// 分页标记
-//    public weak var pageControl: UIPageControl!
 //    
 //    /// 关闭和删除按钮视图
 //    weak var actionView: LGActionView!
-//    
-//    /// 浏览器的当前状态，分为纯浏览和浏览并删除，浏览并删除时显示删除按钮
-//    public var status: LGMPPreviewControllerStatus = .browsing
 //    
 //    /// 当前显示的页码
 //    var currentIndex: Int = 0 {

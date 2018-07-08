@@ -54,6 +54,7 @@ public class LGLoadingHUD: UIView {
     
     @discardableResult
     public static func show(inView targetView: UIView? = nil) -> LGLoadingHUD {
+        assert(Thread.current == Thread.main, "此方法必须在主线程调用")
         var frame = UIScreen.main.bounds
         var realTargetView: UIView?
         if let targetView = targetView {
@@ -66,9 +67,9 @@ public class LGLoadingHUD: UIView {
             }
         }
         let temp = LGLoadingHUD(frame: frame)
-        DispatchQueue.main.async {
-            guard let realTargetView = realTargetView else { return }
-            realTargetView.addSubview(temp)
+        
+        if realTargetView != nil {
+            realTargetView!.addSubview(temp)
             temp.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
             temp.alpha = 0.6
             UIView.animate(withDuration: 0.2,
@@ -76,23 +77,30 @@ public class LGLoadingHUD: UIView {
                             temp.transform = CGAffineTransform.identity
                             temp.alpha = 1.0
             })
+        } else {
+            println("targetView is nil, Unable to show")
         }
+        
         return temp
     }
     
     public func show(inView targetView: UIView? = nil) {
-        var realTargetView = targetView
-        if realTargetView == nil {
+        assert(Thread.current == Thread.main, "此方法必须在主线程调用")
+        
+        var realTargetView: UIView?
+        if targetView == nil {
             realTargetView = UIApplication.shared.keyWindow
         }
-        DispatchQueue.main.async {
-            guard let realTargetView = realTargetView else { return }
-            realTargetView.addSubview(self)
+        
+        if realTargetView != nil {
+            realTargetView!.addSubview(self)
             self.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
             UIView.animate(withDuration: 0.2,
                            animations: {
                             self.transform = CGAffineTransform.identity
             })
+        } else {
+            println("targetView is nil, Unable to show")
         }
     }
     
@@ -102,14 +110,13 @@ public class LGLoadingHUD: UIView {
     }
     
     public func dismiss() {
-        DispatchQueue.main.async {
-            UIView.animate(withDuration: 0.2,
-                           animations: {
-                            self.transform = CGAffineTransform(scaleX: 0.4, y: 0.4)
-                            self.alpha = 0.0
-            }, completion: { (isFinished) in
-                self.removeFromSuperview()
-            })
-        }
+        assert(Thread.current == Thread.main, "此方法必须在主线程调用")
+        UIView.animate(withDuration: 0.2,
+                       animations: {
+                        self.transform = CGAffineTransform(scaleX: 0.4, y: 0.4)
+                        self.alpha = 0.0
+        }, completion: { (isFinished) in
+            self.removeFromSuperview()
+        })
     }
 }
