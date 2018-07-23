@@ -81,7 +81,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     /// - Parameter player: 初始化完成的AVPlayer
     private func constructPlayerAndPlay(_ player: LGPlayer) {
         self.player = player
-        self.layer.contentsGravity = kCAGravityResizeAspect
+        self.layer.contentsGravity = CALayerContentsGravity.resizeAspect
         if let playerLayer = self.layer as? AVPlayerLayer {
             playerLayer.player = player
         }
@@ -89,8 +89,14 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         
         if !isMuted {
             do {
-                try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord,
-                                                                with: [])
+                if #available(iOS 10.0, *) {
+                    try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord,
+                                                                    mode: AVAudioSession.Mode.default)
+                } else {
+                    // Fallback on earlier versions
+                }
+//                try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord,
+//                                                                with: [])
             } catch {
                 
             }
@@ -110,7 +116,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     /// 暂停播放
     public func pause() {
         self.player?.pause()
-        self.player?.seek(to: kCMTimeZero)
+        self.player?.seek(to: CMTime.zero)
     }
     
     /// 自动播放和暂停

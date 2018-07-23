@@ -16,7 +16,7 @@ func buttonStatusChangedAnimation() -> CAKeyframeAnimation {
     let animation = CAKeyframeAnimation(keyPath: "transform")
     animation.duration = 0.3
     animation.isRemovedOnCompletion = true
-    animation.fillMode = kCAFillModeForwards
+    animation.fillMode = CAMediaTimingFillMode.forwards
     
     animation.values = [CATransform3DMakeScale(0.7, 0.7, 1.0),
                         CATransform3DMakeScale(1.2, 1.2, 1.0),
@@ -30,19 +30,19 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     /// 显示缩略图的视图
     lazy var layoutImageView: UIImageView = {
         let tempImageView = UIImageView(frame: self.contentView.bounds)
-        tempImageView.contentMode = UIViewContentMode.scaleAspectFill
+        tempImageView.contentMode = UIView.ContentMode.scaleAspectFill
         tempImageView.clipsToBounds = true
         return tempImageView
     }()
     
     /// 选择当前图片或视频的操作按钮
     lazy var selectButton: LGClickAreaButton = {
-        let tempBtn = LGClickAreaButton(type: UIButtonType.custom)
+        let tempBtn = LGClickAreaButton(type: UIButton.ButtonType.custom)
         tempBtn.frame = CGRect(x: self.contentView.lg_width - 26.0, y: 5, width: 23.0, height: 23.0)
-        tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControlState.normal)
-        tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControlState.selected)
-        tempBtn.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControlEvents.touchUpInside)
-        tempBtn.setTitleColor(UIColor.white, for: UIControlState.normal)
+        tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
+        tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControl.State.selected)
+        tempBtn.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        tempBtn.setTitleColor(UIColor.white, for: UIControl.State.normal)
         tempBtn.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
         tempBtn.enlargeOffset = UIEdgeInsets(top: 0, left: 20, bottom: 20, right: 0)
         return tempBtn
@@ -174,7 +174,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
         
         if isShowMask {
             self.coverView.frame = self.bounds
-            self.contentView.bringSubview(toFront: self.coverView)
+            self.contentView.bringSubviewToFront(self.coverView)
         }
         
         self.markBgView.frame = CGRect(x: 0,
@@ -242,9 +242,9 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
         self.selectButton.isEnabled = self.isShowSelectButton
         self.selectButton.isSelected = model.isSelected
         if model.currentSelectedIndex == -1 {
-            self.selectButton.setTitle(nil, for: UIControlState.normal)
+            self.selectButton.setTitle(nil, for: UIControl.State.normal)
         } else {
-            self.selectButton.setTitle("\(model.currentSelectedIndex)", for: UIControlState.normal)
+            self.selectButton.setTitle("\(model.currentSelectedIndex)", for: UIControl.State.normal)
         }
         
         let scale = UIScreen.main.scale

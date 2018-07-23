@@ -236,16 +236,16 @@ public class LGCameraCapture: UIViewController {
     
     /// 切换前后摄像头的按钮
     lazy var toggleCameraBtn: UIButton = {
-        let tempBtn = UIButton(type: UIButtonType.custom)
-        tempBtn.setImage(UIImage(namedFromThisBundle: "btn_toggle_camera"), for: UIControlState.normal)
-        tempBtn.addTarget(self, action: #selector(toggleCameraBtnPressed(_:)), for: UIControlEvents.touchUpInside)
+        let tempBtn = UIButton(type: UIButton.ButtonType.custom)
+        tempBtn.setImage(UIImage(namedFromThisBundle: "btn_toggle_camera"), for: UIControl.State.normal)
+        tempBtn.addTarget(self, action: #selector(toggleCameraBtnPressed(_:)), for: UIControl.Event.touchUpInside)
         return tempBtn
     }()
     
     /// 显示焦距反馈的图片视图
     lazy var focusCursorImageView: UIImageView = {
         let temp = UIImageView(image: UIImage(namedFromThisBundle: "camera_focus"))
-        temp.contentMode = UIViewContentMode.scaleAspectFit
+        temp.contentMode = UIView.ContentMode.scaleAspectFit
         temp.clipsToBounds = true
         temp.alpha = 0.0
         temp.frame = CGRect(x: 0, y: 0, width: 80.0, height: 80.0)
@@ -283,7 +283,7 @@ public class LGCameraCapture: UIViewController {
         let temp = UIImageView(frame: self.view.bounds)
         temp.backgroundColor = UIColor.black
         temp.isHidden = true
-        temp.contentMode = UIViewContentMode.scaleAspectFill
+        temp.contentMode = UIView.ContentMode.scaleAspectFill
         return temp
     }()
     
@@ -469,7 +469,7 @@ public class LGCameraCapture: UIViewController {
                                           outputSettings: nil)
         movieWriter.hasAudioTrack = true
         movieWriter.encodingLiveVideo = true
-        movieWriter.assetWriter.movieFragmentInterval = kCMTimeInvalid
+        movieWriter.assetWriter.movieFragmentInterval = CMTime.invalid
         
         
         let finalSize = getCropSize(movieRealOutputSize)
@@ -501,7 +501,7 @@ public class LGCameraCapture: UIViewController {
                         let sel = #selector(LGCameraCapture.willResignActive(_:))
                         NotificationCenter.default.addObserver(self,
                                                                selector: sel,
-                                                               name: NSNotification.Name.UIApplicationWillResignActive,
+                                                               name: UIApplication.willResignActiveNotification,
                                                                object: nil)
                     } else {
                         self.onDismiss()
@@ -513,7 +513,13 @@ public class LGCameraCapture: UIViewController {
         }
         
         do {
-            try AVAudioSession.sharedInstance().setCategory(AVAudioSessionCategoryPlayAndRecord)
+            if #available(iOS 10.0, *) {
+                
+                try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord,
+                                                                mode: AVAudioSession.Mode.default)
+            } else {
+                // Fallback on earlier versions
+            }
             try AVAudioSession.sharedInstance().setActive(true)
         } catch {
             println(error)
@@ -658,7 +664,7 @@ public class LGCameraCapture: UIViewController {
         }
         do {
             try AVAudioSession.sharedInstance().setActive(false,
-                                                          with: .notifyOthersOnDeactivation)
+                                                          options: .notifyOthersOnDeactivation)
         } catch {
             println(error)
         }
@@ -766,7 +772,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
                                           outputSettings: nil)
         movieWriter.hasAudioTrack = true
         movieWriter.encodingLiveVideo = true
-        movieWriter.assetWriter.movieFragmentInterval = kCMTimeInvalid
+        movieWriter.assetWriter.movieFragmentInterval = CMTime.invalid
         
         self.videoCamera.addTarget(self.cropFilter)
         self.videoCamera.audioEncodingTarget = movieWriter

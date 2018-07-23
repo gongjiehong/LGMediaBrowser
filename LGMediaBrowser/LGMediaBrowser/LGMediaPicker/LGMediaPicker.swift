@@ -52,11 +52,11 @@ public class LGMediaPicker: LGMPNavigationController {
         /// 是否允许选择原图，默认允许，true
         public var allowSelectOriginal: Bool = true
 
-        /// 可编辑的视频最大长度，默认kCMTimeZero，表示不限制长度
-        public var maxVideoEditDuration: CMTime = kCMTimeZero
+        /// 可编辑的视频最大长度，默认CMTime.zero，表示不限制长度
+        public var maxVideoEditDuration: CMTime = CMTime.zero
         
-        /// 最大视频长度，默认kCMTimeZero，表示不限制
-        public var maxVideoDuration: CMTime = kCMTimeZero
+        /// 最大视频长度，默认CMTime.zero，表示不限制
+        public var maxVideoDuration: CMTime = CMTime.zero
         
         /// 是否允许滑动选择，默认允许true
         public var allowSlideSelect: Bool = true

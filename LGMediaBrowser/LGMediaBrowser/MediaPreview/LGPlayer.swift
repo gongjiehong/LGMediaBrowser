@@ -68,9 +68,9 @@ open class LGPlayer: AVPlayer {
     public var itemDuration: CMTime {
         let ratio = 1.0 / _itemsLoopLength
         if let duration = self.currentItem?.duration {
-            return CMTimeMultiply(duration, Int32(ratio))
+            return CMTimeMultiply(duration, multiplier: Int32(ratio))
         } else {
-            return kCMTimeZero
+            return CMTime.zero
         }
     }
     
@@ -78,7 +78,7 @@ open class LGPlayer: AVPlayer {
     /// 可以播放的时长
     public var playableDuration: CMTime {
         if let item = self.currentItem {
-            var playableDuration = kCMTimeZero
+            var playableDuration = CMTime.zero
             if item.status != .failed {
                 for value in item.loadedTimeRanges {
                     let timeRange = value.timeRangeValue
@@ -87,7 +87,7 @@ open class LGPlayer: AVPlayer {
             }
             return playableDuration
         } else {
-            return kCMTimeZero
+            return CMTime.zero
         }
     }
     
@@ -250,7 +250,7 @@ open class LGPlayer: AVPlayer {
                         var itemsLoopLength = 1.0
                         itemsLoopLength = weakSelf._itemsLoopLength
                         let ratio = 1.0 / itemsLoopLength
-                        let currentTime = CMTimeMultiplyByFloat64(resultTime, ratio)
+                        let currentTime = CMTimeMultiplyByFloat64(resultTime, multiplier: ratio)
                         if let durationSeconds = weakSelf.currentItem?.duration.seconds, !durationSeconds.isNaN {
                             let loopCount = resultTime.seconds / durationSeconds / itemsLoopLength
                             delegate.player(weakSelf, didPlay: currentTime, loopsCount: Int(loopCount))
@@ -329,7 +329,7 @@ open class LGPlayer: AVPlayer {
             return
         }
         let composition = AVMutableComposition()
-        let timeRange = CMTimeRangeMake(kCMTimeZero, asset.duration)
+        let timeRange = CMTimeRange(start: CMTime.zero, duration: asset.duration)
         do {
             for _ in 0..<loopCount {
                 try composition.insertTimeRange(timeRange, of: asset, at: composition.duration)
@@ -347,7 +347,7 @@ open class LGPlayer: AVPlayer {
     @objc func playReachedEnd(_ noti: Notification) {
         if let object = noti.object as? AVPlayerItem, self.currentItem == object {
             if self.isLoopEnabled {
-                self.seek(to: kCMTimeZero)
+                self.seek(to: CMTime.zero)
                 if self.isPlaying {
                     self.play()
                 }

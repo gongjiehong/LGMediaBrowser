@@ -42,7 +42,7 @@ open class LGMPBaseViewController: UIViewController {
     
     func setupBackButton() {
         let backItem = UIBarButtonItem(title: LGLocalizedString("Back"),
-                                       style: UIBarButtonItemStyle.plain,
+                                       style: UIBarButtonItem.Style.plain,
                                        target: self,
                                        action: #selector(backButtonPressed(_:)))
         self.navigationItem.backBarButtonItem = backItem

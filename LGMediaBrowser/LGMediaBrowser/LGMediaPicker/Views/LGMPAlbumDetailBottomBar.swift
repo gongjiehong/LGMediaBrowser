@@ -27,25 +27,25 @@ public class LGMPAlbumDetailBottomBar: UIView {
     }()
     
     public lazy var previewButton: UIButton = {
-        let temp = UIButton(type: UIButtonType.custom)
+        let temp = UIButton(type: UIButton.ButtonType.custom)
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
-        temp.setTitle(LGLocalizedString("Preview"), for: UIControlState.normal)
-        temp.addTarget(self, action: #selector(previewButtonPressed(_:)), for: UIControlEvents.touchUpInside)
-        temp.setTitleColor(UIColor(colorName: "BottomBarDisableText"), for: UIControlState.disabled)
-        temp.setTitleColor(UIColor(colorName: "BottomBarNormalText"), for: UIControlState.normal)
+        temp.setTitle(LGLocalizedString("Preview"), for: UIControl.State.normal)
+        temp.addTarget(self, action: #selector(previewButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        temp.setTitleColor(UIColor(colorName: "BottomBarDisableText"), for: UIControl.State.disabled)
+        temp.setTitleColor(UIColor(colorName: "BottomBarNormalText"), for: UIControl.State.normal)
         temp.isEnabled = false
         return temp
     }()
     
     public lazy var originalPhotoButton: UIButton = {
-        let temp = UIButton(type: UIButtonType.custom)
+        let temp = UIButton(type: UIButton.ButtonType.custom)
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
-        temp.setTitle(LGLocalizedString("Original"), for: UIControlState.normal)
-        temp.setImage(UIImage(namedFromThisBundle: "btn_original_normal"), for: UIControlState.normal)
-        temp.setImage(UIImage(namedFromThisBundle: "btn_original_selected"), for: UIControlState.selected)
-        temp.setTitleColor(UIColor(colorName: "BottomBarDisableText"), for: UIControlState.disabled)
-        temp.setTitleColor(UIColor(colorName: "BottomBarNormalText"), for: UIControlState.normal)
-        temp.addTarget(self, action: #selector(originalButtonPressed(_:)), for: UIControlEvents.touchUpInside)
+        temp.setTitle(LGLocalizedString("Original"), for: UIControl.State.normal)
+        temp.setImage(UIImage(namedFromThisBundle: "btn_original_normal"), for: UIControl.State.normal)
+        temp.setImage(UIImage(namedFromThisBundle: "btn_original_selected"), for: UIControl.State.selected)
+        temp.setTitleColor(UIColor(colorName: "BottomBarDisableText"), for: UIControl.State.disabled)
+        temp.setTitleColor(UIColor(colorName: "BottomBarNormalText"), for: UIControl.State.normal)
+        temp.addTarget(self, action: #selector(originalButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         temp.isEnabled = false
         return temp
     }()
@@ -58,14 +58,14 @@ public class LGMPAlbumDetailBottomBar: UIView {
     }()
     
     public lazy var doneButton: UIButton = {
-        let temp = UIButton(type: UIButtonType.custom)
+        let temp = UIButton(type: UIButton.ButtonType.custom)
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
-        temp.setTitleColor(UIColor.white, for: UIControlState.normal)
-        temp.setTitleColor(UIColor.white.withAlphaComponent(0.6), for: UIControlState.disabled)
-        temp.setTitle(LGLocalizedString("Done"), for: UIControlState.normal)
+        temp.setTitleColor(UIColor.white, for: UIControl.State.normal)
+        temp.setTitleColor(UIColor.white.withAlphaComponent(0.6), for: UIControl.State.disabled)
+        temp.setTitle(LGLocalizedString("Done"), for: UIControl.State.normal)
         temp.layer.masksToBounds = true
         temp.layer.cornerRadius = 3.0
-        temp.addTarget(self, action: #selector(doneButtonPressed(_:)), for: UIControlEvents.touchUpInside)
+        temp.addTarget(self, action: #selector(doneButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         temp.backgroundColor = UIColor(colorName: "BottomBarNormalText")
         temp.isEnabled = false
         return temp

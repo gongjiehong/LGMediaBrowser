@@ -89,7 +89,7 @@ public class LGMediaBrowser: UIViewController {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 0.0
         layout.minimumLineSpacing = itemPadding * 2
-        layout.scrollDirection = UICollectionViewScrollDirection.horizontal
+        layout.scrollDirection = UICollectionView.ScrollDirection.horizontal
         layout.sectionInset = UIEdgeInsets(top: 0.0, left: itemPadding, bottom: 0.0, right: itemPadding)
         return layout
     }()
@@ -151,7 +151,7 @@ public class LGMediaBrowser: UIViewController {
     func installNotifications() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(deviceOrientationDidChange(_:)),
-                                               name: NSNotification.Name.UIDeviceOrientationDidChange,
+                                               name: UIDevice.orientationDidChangeNotification,
                                                object: nil)
         
         NotificationCenter.default.addObserver(self,
@@ -311,7 +311,7 @@ public class LGMediaBrowser: UIViewController {
         if self.currentIndex != 0 {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
                                                            section: 0),
-                                             at: UICollectionViewScrollPosition.centeredHorizontally,
+                                             at: UICollectionView.ScrollPosition.centeredHorizontally,
                                              animated: false)
         }
     }

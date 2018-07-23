@@ -77,33 +77,33 @@ class LGCameraCaptureToolView: UIView {
     weak var delegate: LGCameraCaptureToolViewDelegate?
     
     lazy var dismissBtn: UIButton = {
-        let dismissBtn = UIButton(type: UIButtonType.custom)
+        let dismissBtn = UIButton(type: UIButton.ButtonType.custom)
         dismissBtn.frame = CGRect(x: 60, y: self.lg_height / 2 - 25.0 / 2, width: 25.0, height: 25.0)
         dismissBtn.setImage(UIImage(namedFromThisBundle: "btn_arrow_down"),
-                            for: UIControlState.normal)
-        dismissBtn.addTarget(self, action: #selector(dismissBtnPressed(_:)), for: UIControlEvents.touchUpInside)
+                            for: UIControl.State.normal)
+        dismissBtn.addTarget(self, action: #selector(dismissBtnPressed(_:)), for: UIControl.Event.touchUpInside)
         return dismissBtn
     }()
     
     lazy var cancelBtn: UIButton = {
-        let cancelBtn = UIButton(type: UIButtonType.custom)
+        let cancelBtn = UIButton(type: UIButton.ButtonType.custom)
         cancelBtn.backgroundColor = UIColor(red: 244 / 255.0,
                                             green: 244 / 255.0,
                                             blue: 244 / 255.0,
                                             alpha: 0.9)
-        cancelBtn.setImage(UIImage(namedFromThisBundle: "btn_retake"), for: UIControlState.normal)
-        cancelBtn.addTarget(self, action: #selector(retakeBtnPressed(_:)), for: UIControlEvents.touchUpInside)
+        cancelBtn.setImage(UIImage(namedFromThisBundle: "btn_retake"), for: UIControl.State.normal)
+        cancelBtn.addTarget(self, action: #selector(retakeBtnPressed(_:)), for: UIControl.Event.touchUpInside)
         cancelBtn.layer.masksToBounds = true
         cancelBtn.isHidden = true
         return cancelBtn
     }()
     
     lazy var doneBtn: UIButton = {
-        let doneBtn = UIButton(type: UIButtonType.custom)
+        let doneBtn = UIButton(type: UIButton.ButtonType.custom)
         doneBtn.frame = self.bottomView.frame
         doneBtn.backgroundColor = UIColor.white
-        doneBtn.setImage(UIImage(namedFromThisBundle: "btn_take_done"), for: UIControlState.normal)
-        doneBtn.addTarget(self, action: #selector(doneBtnPressed(_:)), for: UIControlEvents.touchUpInside)
+        doneBtn.setImage(UIImage(namedFromThisBundle: "btn_take_done"), for: UIControl.State.normal)
+        doneBtn.addTarget(self, action: #selector(doneBtnPressed(_:)), for: UIControl.Event.touchUpInside)
         doneBtn.layer.masksToBounds = true
         doneBtn.isHidden = true
         return doneBtn

@@ -33,7 +33,7 @@ open class LGStatusBarView: UIView {
     }()
     
     public private(set) lazy var activityIndicatorView: UIActivityIndicatorView = {
-        let temp = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.white)
+        let temp = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.white)
         temp.hidesWhenStopped = true
         return temp
     }()
@@ -79,7 +79,7 @@ open class LGStatusBarView: UIView {
     var textSize: CGSize {
         var textSize: CGSize = CGSize.zero
         if let text = self.textLabel.text, let font = self.textLabel.font {
-            let attributes: [NSAttributedStringKey: Any] = [NSAttributedStringKey.font: font]
+            let attributes: [NSAttributedString.Key: Any] = [NSAttributedString.Key.font: font]
             let constraintSize = CGSize(width: self.lg_width, height: CGFloat.greatestFiniteMagnitude)
             textSize = text.boundingRect(with: constraintSize,
                                          options: .usesLineFragmentOrigin,

@@ -133,6 +133,7 @@
 				TargetAttributes = {
 					FE0980E72099B88A006B6D8C = {
 						CreatedOnToolsVersion = 9.3;
+						LastSwiftMigration = 1000;
 					};
 				};
 			};
@@ -335,7 +336,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "c086cb14-49ea-41bb-9999-f06b5d3e9166";
 				PROVISIONING_PROFILE_SPECIFIER = "* Development";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -357,7 +358,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "c086cb14-49ea-41bb-9999-f06b5d3e9166";
 				PROVISIONING_PROFILE_SPECIFIER = "* Development";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

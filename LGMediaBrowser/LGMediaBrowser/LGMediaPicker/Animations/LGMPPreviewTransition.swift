@@ -35,10 +35,8 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         switch self.direction {
         case .push:
             return 0.45
-            break
         case .pop:
             return 0.35
-            break
         }
     }
 }

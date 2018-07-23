@@ -144,7 +144,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         tempImageView = imageView
         tempImageView?.layer.masksToBounds = true
         tempImageView?.clipsToBounds = true
-        tempImageView?.contentMode = UIViewContentMode.scaleAspectFill
+        tempImageView?.contentMode = UIView.ContentMode.scaleAspectFill
         
         tempImageView?.image = targetImage
         
@@ -222,7 +222,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         
         let containerView = transitionContext.containerView
         
-        let options = UIViewAnimationOptions.curveEaseOut
+        let options = UIView.AnimationOptions.curveEaseOut
         let tempImageViewFrame = self.tempImageView?.frame ?? CGRect.zero
         self.tempImageView?.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.tempImageView?.transform = CGAffineTransform.identity

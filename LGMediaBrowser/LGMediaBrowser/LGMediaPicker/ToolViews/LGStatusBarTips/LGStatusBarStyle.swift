@@ -109,7 +109,7 @@ open class LGStatusBarConfig {
     ///
     /// - Parameter style: 状态条风格定义
     /// - Returns: 组装好的config
-    open static func config(withStyle style: Style = .default) -> LGStatusBarConfig {
+    public static func config(withStyle style: Style = .default) -> LGStatusBarConfig {
         let config = LGStatusBarConfig()
         switch style {
         case .default:

@@ -26,7 +26,7 @@ public class LGAlbumListCell: UITableViewCell {
     weak var titleAndCountLabel: UILabel!
     
     // MARK: -  初始化
-    public override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupDefaultViews()
     }
@@ -39,7 +39,7 @@ public class LGAlbumListCell: UITableViewCell {
     // MARK: - 设置默认视图
     func setupDefaultViews() {
         let thumbnailImageView = UIImageView(frame: CGRect.zero)
-        thumbnailImageView.contentMode = UIViewContentMode.scaleAspectFill
+        thumbnailImageView.contentMode = UIView.ContentMode.scaleAspectFill
         self.contentView.addSubview(thumbnailImageView)
         self.thumbnailImageView = thumbnailImageView
         
@@ -89,11 +89,11 @@ public class LGAlbumListCell: UITableViewCell {
         }
         
         let attrString = NSMutableAttributedString(string: titleAndCountText)
-        attrString.addAttributes([NSAttributedStringKey.font: titleFont,
-                                  NSAttributedStringKey.foregroundColor: UIColor(colorName: "AlbumListTitle")],
+        attrString.addAttributes([NSAttributedString.Key.font: titleFont,
+                                  NSAttributedString.Key.foregroundColor: UIColor(colorName: "AlbumListTitle")],
                                  range: NSMakeRange(0, albumTitle.count))
-        attrString.addAttributes([NSAttributedStringKey.font: UIFont.systemFont(ofSize: 12.0),
-                                  NSAttributedStringKey.foregroundColor: UIColor(colorName: "AlbumListCount")],
+        attrString.addAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12.0),
+                                  NSAttributedString.Key.foregroundColor: UIColor(colorName: "AlbumListCount")],
                                  range: NSMakeRange(albumTitle.count, attrString.length - albumTitle.count))
         titleAndCountLabel.attributedText = attrString
         
@@ -152,7 +152,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     // MARK: -  设置取消按钮
     func setupCancel() {
         let rightItem = UIBarButtonItem(title: LGLocalizedString("Cancel"),
-                                        style: UIBarButtonItemStyle.plain,
+                                        style: UIBarButtonItem.Style.plain,
                                         target: self,
                                         action: #selector(close))
         self.navigationItem.rightBarButtonItem = rightItem
@@ -165,7 +165,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     /// 初始化tableview
     func setupTableView() {
-        let temp = UITableView(frame: self.view.bounds, style: UITableViewStyle.plain)
+        let temp = UITableView(frame: self.view.bounds, style: UITableView.Style.plain)
         temp.estimatedRowHeight = 0.0
         temp.estimatedSectionFooterHeight = 0.0
         temp.estimatedSectionHeaderHeight = 0.0
@@ -245,10 +245,10 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
         {
             cell = tempCell
         } else {
-            cell = LGAlbumListCell(style: UITableViewCellStyle.default, reuseIdentifier: Reuse.LGAlbumListCell)
+            cell = LGAlbumListCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: Reuse.LGAlbumListCell)
         }
         cell.dataModel = self.dataArray[indexPath.row]
-        cell.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
+        cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
         return cell
     }
     

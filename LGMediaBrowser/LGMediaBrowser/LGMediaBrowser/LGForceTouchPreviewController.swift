@@ -19,7 +19,7 @@ open class LGForceTouchPreviewController: UIViewController {
     
     lazy var imageView: LGAnimatedImageView = {
         let temp = LGAnimatedImageView(frame: CGRect.zero)
-        temp.contentMode = UIViewContentMode.scaleAspectFill
+        temp.contentMode = UIView.ContentMode.scaleAspectFill
         temp.clipsToBounds = true
         return temp
     }()
@@ -33,7 +33,7 @@ open class LGForceTouchPreviewController: UIViewController {
     lazy var livePhotoView: PHLivePhotoView = {
         let temp = PHLivePhotoView(frame: CGRect.zero)
         temp.clipsToBounds = true
-        temp.contentMode = UIViewContentMode.scaleAspectFill
+        temp.contentMode = UIView.ContentMode.scaleAspectFill
         return temp
     }()
     
@@ -115,13 +115,13 @@ open class LGForceTouchPreviewController: UIViewController {
             }
         } else {
             self.progressView.isShowError = true
-            self.view.bringSubview(toFront: self.progressView)
+            self.view.bringSubviewToFront(self.progressView)
         }
     }
     
     func setupGeneralPhotoView() {
         self.view.addSubview(self.imageView)
-        self.view.bringSubview(toFront: self.progressView)
+        self.view.bringSubviewToFront(self.progressView)
         
         
         if let url = self.mediaModel?.mediaLocation.toURL() {
@@ -198,7 +198,7 @@ open class LGForceTouchPreviewController: UIViewController {
         if mediaModel.isLocalFile {
             if let asset = mediaModel.mediaLocation.toAsset() {
                 
-                self.view.bringSubview(toFront: self.progressView)
+                self.view.bringSubviewToFront(self.progressView)
                 
                 let options = PHVideoRequestOptions()
                 options.isNetworkAccessAllowed = true

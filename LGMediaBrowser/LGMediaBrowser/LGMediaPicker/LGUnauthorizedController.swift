@@ -34,7 +34,7 @@ public class LGUnauthorizedController: LGMPBaseViewController {
     
     func setupCancel() {
         let rightItem = UIBarButtonItem(title: LGLocalizedString("Cancel"),
-                                        style: UIBarButtonItemStyle.plain,
+                                        style: UIBarButtonItem.Style.plain,
                                         target: self,
                                         action: #selector(close))
         self.navigationItem.rightBarButtonItem = rightItem
@@ -74,13 +74,13 @@ public class LGUnauthorizedController: LGMPBaseViewController {
         let highlightedBgImage = UIImage(namedFromThisBundle: "btn_open_settings_highlited")
         let resizedHighImage = highlightedBgImage?.resizableImage(withCapInsets: capInsets)
         
-        let tempButton = UIButton(type: UIButtonType.custom)
-        tempButton.setBackgroundImage(resizedNormalImage, for: UIControlState.normal)
-        tempButton.setBackgroundImage(resizedHighImage, for: UIControlState.highlighted)
-        tempButton.setTitle(LGLocalizedString("Open Settings"), for: UIControlState.normal)
-        tempButton.setTitleColor(UIColor(colorName: "OpenSettingsButtonTitle"), for: UIControlState.normal)
+        let tempButton = UIButton(type: UIButton.ButtonType.custom)
+        tempButton.setBackgroundImage(resizedNormalImage, for: UIControl.State.normal)
+        tempButton.setBackgroundImage(resizedHighImage, for: UIControl.State.highlighted)
+        tempButton.setTitle(LGLocalizedString("Open Settings"), for: UIControl.State.normal)
+        tempButton.setTitleColor(UIColor(colorName: "OpenSettingsButtonTitle"), for: UIControl.State.normal)
         tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 16.0)
-        tempButton.addTarget(self, action: #selector(openSettings), for: UIControlEvents.touchUpInside)
+        tempButton.addTarget(self, action: #selector(openSettings), for: UIControl.Event.touchUpInside)
         self.view.addSubview(tempButton)
         self.openSystemSettingButton = tempButton
     }
@@ -139,7 +139,7 @@ public class LGUnauthorizedController: LGMPBaseViewController {
                                             height: labelHeight)
         }
         
-        if let buttonTitle = self.openSystemSettingButton.title(for: UIControlState.normal) {
+        if let buttonTitle = self.openSystemSettingButton.title(for: UIControl.State.normal) {
             let width = buttonTitle.width(withConstrainedHeight: 30.0, font: UIFont.systemFont(ofSize: 16.0))
             self.openSystemSettingButton.frame = CGRect(x: (self.view.lg_width - width - 20.0) / 2.0,
                                                         y: self.promptLabel.frame.maxY + 5.0,
@@ -160,7 +160,7 @@ public class LGUnauthorizedController: LGMPBaseViewController {
     }
     
     @objc func openSettings() {
-        if let url = URL(string: UIApplicationOpenSettingsURLString) {
+        if let url = URL(string: UIApplication.openSettingsURLString) {
             UIApplication.shared.openURL(url)
         }
     }

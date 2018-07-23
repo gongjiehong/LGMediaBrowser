@@ -36,7 +36,7 @@ internal class LGButton: UIButton {
         let image = UIImage(named: imageName,
                             in: Bundle(for: LGButton.self),
                             compatibleWith: nil) ?? UIImage()
-        self.setImage(image, for: UIControlState())
+        self.setImage(image, for: UIControl.State())
     }
     
     open func setFrameSize(_ size: CGSize? = nil) {

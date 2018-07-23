@@ -45,7 +45,7 @@ open class LGZoomingScrollView: UIScrollView {
         self.delegate = self
         self.showsHorizontalScrollIndicator = false
         self.showsVerticalScrollIndicator = false
-        self.decelerationRate = UIScrollViewDecelerationRateFast
+        self.decelerationRate = UIScrollView.DecelerationRate.fast
         self.autoresizingMask = [.flexibleWidth,
                                  .flexibleTopMargin,
                                  .flexibleBottomMargin,

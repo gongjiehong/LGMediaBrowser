@@ -39,7 +39,7 @@ public class LGFPSLabel: UILabel {
         
         timer = CADisplayLink(target: LGMPWeakTarget(target: self),
                               selector: #selector(timeInvoke(_:)))
-        timer.add(to: RunLoop.main, forMode: RunLoopMode.commonModes)
+        timer.add(to: RunLoop.main, forMode: RunLoop.Mode.common)
     }
     
     var defaultFont: UIFont = UIFont.systemFont(ofSize: 14.0)
@@ -62,13 +62,13 @@ public class LGFPSLabel: UILabel {
         let color = UIColor(hue: 0.27 * (progress - 0.2), saturation: 1.0, brightness: 0.9, alpha: 1.0)
 
         let text = NSMutableAttributedString(string: String(format: "%d FPS", Int(round(fps))))
-        text.addAttribute(NSAttributedStringKey.foregroundColor,
+        text.addAttribute(NSAttributedString.Key.foregroundColor,
                           value: color,
                           range: NSMakeRange(0, text.length - 3))
-        text.addAttribute(NSAttributedStringKey.foregroundColor,
+        text.addAttribute(NSAttributedString.Key.foregroundColor,
                           value: UIColor.white,
                           range: NSMakeRange(text.length - 3, 3))
-        text.addAttribute(NSAttributedStringKey.font,
+        text.addAttribute(NSAttributedString.Key.font,
                           value: defaultFont,
                           range: NSMakeRange(0, text.length))
 

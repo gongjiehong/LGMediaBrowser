@@ -13,7 +13,13 @@ public class LGAudioTools {
     public class func overrideCategoryMixWithOthers() {
         let session = AVAudioSession.sharedInstance()
         do {
-            try session.setCategory(AVAudioSessionCategoryPlayback, with: AVAudioSessionCategoryOptions.mixWithOthers)
+            if #available(iOS 10.0, *) {
+                try session.setCategory(AVAudioSession.Category.playback,
+                                        mode: AVAudioSession.Mode.default)
+            } else {
+                // Fallback on earlier versions
+            }
+//            try session.setCategory(AVAudioSessionCategoryPlayback, with: AVAudioSession.CategoryOptions.mixWithOthers)
         } catch {
             println(error)
         }
@@ -47,14 +53,14 @@ public class LGAudioTools {
                 duration = temp
             }
         } else {
-            duration = kCMTimeZero
+            duration = CMTime.zero
         }
         
         for track in audioAsset.tracks(withMediaType: AVMediaType.audio) {
             do {
-                try audioTrackComposition?.insertTimeRange(CMTimeRangeMake(startTime, duration),
+                try audioTrackComposition?.insertTimeRange(CMTimeRange(start: startTime, duration: duration),
                                                            of: track,
-                                                           at: kCMTimeZero)
+                                                           at: CMTime.zero)
             } catch {
                 block(error)
                 return
@@ -63,9 +69,9 @@ public class LGAudioTools {
         
         for track in videoTracks {
             do {
-                try videoTrackComposition?.insertTimeRange(CMTimeRangeMake(startTime, duration),
+                try videoTrackComposition?.insertTimeRange(CMTimeRange(start: startTime, duration: duration),
                                                            of: track,
-                                                           at: kCMTimeZero)
+                                                           at: CMTime.zero)
             } catch {
                 block(error)
             }

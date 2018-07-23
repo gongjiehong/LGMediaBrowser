@@ -82,7 +82,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     func setupCancel() {
         let rightItem = UIBarButtonItem(title: LGLocalizedString("Cancel"),
-                                        style: UIBarButtonItemStyle.plain,
+                                        style: UIBarButtonItem.Style.plain,
                                         target: self,
                                         action: #selector(close))
         self.navigationItem.rightBarButtonItem = rightItem
@@ -243,7 +243,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         let lastIndexPath = IndexPath(row: row, section: 0)
         
         self.listView.scrollToItem(at: lastIndexPath,
-                                   at: UICollectionViewScrollPosition.bottom,
+                                   at: UICollectionView.ScrollPosition.bottom,
                                    animated: false)
     }
     
@@ -330,10 +330,10 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             
             if dataModel.currentSelectedIndex == -1 {
                 weakCell.selectButton.setTitle(nil,
-                                               for: UIControlState.normal)
+                                               for: UIControl.State.normal)
             } else {
                 weakCell.selectButton.setTitle("\(dataModel.currentSelectedIndex)",
-                                               for: UIControlState.normal)
+                                               for: UIControl.State.normal)
             }
             weakSelf.refreshSelectedIndexsLayout()
             weakSelf.refreshBottomBarStatus()
@@ -374,7 +374,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             self.bottomBar.originalPhotoButton.isEnabled = true
             self.bottomBar.doneButton.isEnabled = true
             self.bottomBar.doneButton.setTitle(LGLocalizedString("Done") + "(\(mainPicker.selectedDataArray.count))",
-                                               for: UIControlState.normal)
+                                               for: UIControl.State.normal)
             layoutPhotosBytes()
         } else {
             self.bottomBar.previewButton.isEnabled = false
@@ -382,7 +382,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             self.bottomBar.originalPhotoButton.isSelected = false
             self.bottomBar.photoBytesLabel.text = ""
             self.bottomBar.doneButton.isEnabled = false
-            self.bottomBar.doneButton.setTitle(LGLocalizedString("Done"), for: UIControlState.normal)
+            self.bottomBar.doneButton.setTitle(LGLocalizedString("Done"), for: UIControl.State.normal)
         }
     }
     

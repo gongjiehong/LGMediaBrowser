@@ -69,7 +69,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             let tempBgView = UIView(frame: containerView.bounds)
             
             tempImageView.clipsToBounds = true
-            tempImageView.contentMode = UIViewContentMode.scaleAspectFill
+            tempImageView.contentMode = UIView.ContentMode.scaleAspectFill
             tempImageView.frame = targetView.convert(targetView.bounds, to: containerView)
             
             tempBgView.addSubview(tempImageView)
@@ -93,7 +93,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                            delay: 0.0,
                            usingSpringWithDamping: 0.75,
                            initialSpringVelocity: 0,
-                           options: UIViewAnimationOptions.curveEaseInOut,
+                           options: UIView.AnimationOptions.curveEaseInOut,
                            animations:
                 {
 //                    toVC.view.alpha = 1.0
@@ -173,7 +173,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         if let targetView = self.targetView {
             let tempImageView = UIImageView(image: self.placeholderImage)
             tempImageView.clipsToBounds = true
-            tempImageView.contentMode = UIViewContentMode.scaleAspectFill
+            tempImageView.contentMode = UIView.ContentMode.scaleAspectFill
             
             let containerView = transitionContext.containerView
             tempImageView.frame = containerView.bounds

@@ -62,30 +62,30 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     lazy var centerPlayButton: UIButton = {
-        let button = UIButton(type: UIButtonType.custom)
+        let button = UIButton(type: UIButton.ButtonType.custom)
         button.setBackgroundImage(UIImage(named: "play_center_big",
                                           in: Bundle(for: LGPlayer.self),
                                           compatibleWith: nil),
-                                  for: UIControlState.normal)
+                                  for: UIControl.State.normal)
         button.bounds = CGRect(x: 0,
                                y: 0,
                                width: ControlsConfig.bigPlayButtonWidth,
                                height: ControlsConfig.bigPlayButtonHeight)
-        button.addTarget(self, action: #selector(centerPlayButtonPressed(_:)), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(centerPlayButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         return button
     }()
     
     lazy var playOrPauseButton: UIButton = {
-        let button = UIButton(type: UIButtonType.custom)
+        let button = UIButton(type: UIButton.ButtonType.custom)
         button.setBackgroundImage(UIImage(named: "menu_play",
                                           in: Bundle(for: LGPlayer.self),
                                           compatibleWith: nil),
-                                  for: UIControlState.normal)
+                                  for: UIControl.State.normal)
         button.bounds = CGRect(x: 0,
                                y: 0,
                                width: ControlsConfig.smallPlayButtonWidth,
                                height: ControlsConfig.smallPlayButtonHeight)
-        button.addTarget(self, action: #selector(playOrPauseButtonPressed(_:)), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(playOrPauseButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         return button
     }()
     
@@ -97,16 +97,16 @@ open class LGPlayerControlView: LGPlayerView {
         slider.setThumbImage(UIImage(named: "slider_handle",
                                      in: Bundle(for: LGPlayerControlView.self),
                                      compatibleWith: nil),
-                             for: UIControlState.normal)
+                             for: UIControl.State.normal)
         slider.setThumbImage(UIImage(named: "slider_handle",
                                      in: Bundle(for: LGPlayerControlView.self),
                                      compatibleWith: nil),
-                             for: UIControlState.highlighted)
-        slider.addTarget(self, action: #selector(sliderTouchDown(_:)), for: UIControlEvents.touchDown)
-        slider.addTarget(self, action: #selector(sliderTouchCancel(_:)), for: UIControlEvents.touchCancel)
-        slider.addTarget(self, action: #selector(sliderTouchUpInside(_:)), for: UIControlEvents.touchUpInside)
-        slider.addTarget(self, action: #selector(sliderTouchUpOutside(_:)), for: UIControlEvents.touchUpOutside)
-        slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: UIControlEvents.valueChanged)
+                             for: UIControl.State.highlighted)
+        slider.addTarget(self, action: #selector(sliderTouchDown(_:)), for: UIControl.Event.touchDown)
+        slider.addTarget(self, action: #selector(sliderTouchCancel(_:)), for: UIControl.Event.touchCancel)
+        slider.addTarget(self, action: #selector(sliderTouchUpInside(_:)), for: UIControl.Event.touchUpInside)
+        slider.addTarget(self, action: #selector(sliderTouchUpOutside(_:)), for: UIControl.Event.touchUpOutside)
+        slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: UIControl.Event.valueChanged)
         return slider
     }()
     
@@ -425,7 +425,7 @@ open class LGPlayerControlView: LGPlayerView {
     
     func stopPlay() {
         self.player?.pause()
-        self.player?.seek(to: kCMTimeZero)
+        self.player?.seek(to: CMTime.zero)
         self.progressSlider.value = 0.0
         self.currentTimeLabel.text = "00:00"
     }
@@ -443,7 +443,7 @@ extension LGPlayerControlView: LGPlayerDelegate {
             self.playOrPauseButton.setBackgroundImage(UIImage(named: "menu_pause",
                                                               in: Bundle(for: LGPlayerControlView.self),
                                                               compatibleWith: nil),
-                                                      for: UIControlState.normal)
+                                                      for: UIControl.State.normal)
         } else {
             if self.mediaType == LGMediaType.video {
                 self.centerPlayButton.isHidden = false
@@ -451,7 +451,7 @@ extension LGPlayerControlView: LGPlayerDelegate {
             self.playOrPauseButton.setBackgroundImage(UIImage(named: "menu_play",
                                                               in: Bundle(for: LGPlayerControlView.self),
                                                               compatibleWith: nil),
-                                                      for: UIControlState.normal)
+                                                      for: UIControl.State.normal)
         }
     }
     
