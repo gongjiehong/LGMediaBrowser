@@ -10,9 +10,9 @@ import UIKit
 import LGMediaBrowser
 import AVFoundation
 
-class ViewController: UIViewController {
-
-//    var player: LGPlayerControlView!
+class ViewController: UIViewController, UINavigationBarDelegate {
+    
+//    var fpsLabel
     
     @IBOutlet weak var imageView: UIImageView!
     
@@ -30,7 +30,35 @@ class ViewController: UIViewController {
         let tap = UITapGestureRecognizer(target: self, action: #selector(imageTaped(_:)))
         self.imageView.addGestureRecognizer(tap)
         
+        testNavigationBar()
         
+    }
+    
+    func testNavigationBar() {
+        let navigationBar = UINavigationBar(frame: CGRect(x: 0,
+                                                          y: 0,
+                                                          width: UIScreen.main.bounds.width,
+                                                          height: 64.0))
+        navigationBar.delegate = self
+        navigationBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        let titleItem = UINavigationItem(title: "Title")
+        navigationBar.items?.append(titleItem)
+        
+        self.view.addSubview(navigationBar)
+        navigationBar.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+        navigationBar.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+        
+        
+        if #available(iOS 11.0, *) {
+            navigationBar.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
+        } else {
+            navigationBar.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
+        }
+    }
+    
+    func position(for bar: UIBarPositioning) -> UIBarPosition {
+        return UIBarPosition.topAttached
     }
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
@@ -116,7 +144,6 @@ class ViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-//        player.frame = self.view.bounds
     }
 
     override func didReceiveMemoryWarning() {

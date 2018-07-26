@@ -70,9 +70,44 @@ extension URL: LGMediaLocation {
 }
 
 public class LGMediaModel {
+    
+    /// <#Description#>
+    ///
+    /// - generalPhoto: <#generalPhoto description#>
+    /// - livePhoto: <#livePhoto description#>
+    /// - video: <#video description#>
+    /// - audio: <#audio description#>
+    /// - other: <#other description#>
+    public enum MediaType {
+        case generalPhoto
+        case livePhoto
+        case video
+        case audio
+        case other
+    }
+    
+    /// <#Description#>
+    ///
+    /// - remoteFile: <#remoteFile description#>
+    /// - localFile: <#localFile description#>
+    /// - album: <#album description#>
+    /// - iCloud: <#iCloud description#>
+    public enum Position {
+        case remoteFile
+        case localFile
+        case album
+        case iCloud
+    }
+    
+//    public private(set) var thumbnail: LGURLConvertible
+//    public
+    
+    
     public private(set) var mediaLocation: LGMediaLocation
     public private(set) var mediaType: LGMediaType
     public private(set) var isLocalFile: Bool
+    
+    var progress: Progress = Progress(totalUnitCount: Int64.max)
     
     private var _thumbnailImage: UIImage?
     private var _lock: NSLock = NSLock()

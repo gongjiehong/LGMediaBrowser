@@ -14,6 +14,10 @@
 		FE0980F62099B88B006B6D8C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FE0980F42099B88B006B6D8C /* LaunchScreen.storyboard */; };
 		FE0980FE2099B953006B6D8C /* LGMediaBrowser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */; };
 		FE0980FF2099B953006B6D8C /* LGMediaBrowser.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FE1DC4EF2109C65500C0EB23 /* FeatureListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1DC4EE2109C65500C0EB23 /* FeatureListViewController.swift */; };
+		FE4FBB242109C87100CA18E6 /* RemoteImageBrowsingDemoCon.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB232109C87100CA18E6 /* RemoteImageBrowsingDemoCon.swift */; };
+		FE4FBB262109C89400CA18E6 /* MediaPickerDemoCon.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB252109C89400CA18E6 /* MediaPickerDemoCon.swift */; };
+		FE4FBB282109C8A900CA18E6 /* MediaCaptureDemoCon.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */; };
 		FEF8976020A2A07C005E4880 /* LGWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975F20A2A07C005E4880 /* LGWebImage.framework */; };
 		FEF8976120A2A07C005E4880 /* LGWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975F20A2A07C005E4880 /* LGWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FEF8976420A2A0F0005E4880 /* LGHTTPRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */; };
@@ -46,6 +50,11 @@
 		FE0980F52099B88B006B6D8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FE0980F72099B88B006B6D8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGMediaBrowser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE1DC4EE2109C65500C0EB23 /* FeatureListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureListViewController.swift; sourceTree = "<group>"; };
+		FE4FBB1F2109C69D00CA18E6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		FE4FBB232109C87100CA18E6 /* RemoteImageBrowsingDemoCon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImageBrowsingDemoCon.swift; sourceTree = "<group>"; };
+		FE4FBB252109C89400CA18E6 /* MediaPickerDemoCon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPickerDemoCon.swift; sourceTree = "<group>"; };
+		FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCaptureDemoCon.swift; sourceTree = "<group>"; };
 		FEA01DF520C14B9400947D59 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		FEA01DF620C14B9400947D59 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
 		FEF8975F20A2A07C005E4880 /* LGWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -90,7 +99,11 @@
 			isa = PBXGroup;
 			children = (
 				FE0980EB2099B88A006B6D8C /* AppDelegate.swift */,
+				FE1DC4EE2109C65500C0EB23 /* FeatureListViewController.swift */,
 				FE0980ED2099B88A006B6D8C /* ViewController.swift */,
+				FE4FBB232109C87100CA18E6 /* RemoteImageBrowsingDemoCon.swift */,
+				FE4FBB252109C89400CA18E6 /* MediaPickerDemoCon.swift */,
+				FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */,
 				FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */,
 				FE0980EF2099B88A006B6D8C /* Main.storyboard */,
 				FE0980F22099B88B006B6D8C /* Assets.xcassets */,
@@ -174,8 +187,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE4FBB242109C87100CA18E6 /* RemoteImageBrowsingDemoCon.swift in Sources */,
 				FE0980EE2099B88A006B6D8C /* ViewController.swift in Sources */,
 				FE0980EC2099B88A006B6D8C /* AppDelegate.swift in Sources */,
+				FE4FBB282109C8A900CA18E6 /* MediaCaptureDemoCon.swift in Sources */,
+				FE1DC4EF2109C65500C0EB23 /* FeatureListViewController.swift in Sources */,
+				FE4FBB262109C89400CA18E6 /* MediaPickerDemoCon.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -187,6 +204,7 @@
 			children = (
 				FE0980F02099B88A006B6D8C /* Base */,
 				FEA01DF520C14B9400947D59 /* zh-Hans */,
+				FE4FBB1F2109C69D00CA18E6 /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
