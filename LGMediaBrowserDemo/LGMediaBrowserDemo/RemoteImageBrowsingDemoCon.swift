@@ -7,10 +7,11 @@
 //
 
 import UIKit
+import LGWebImage
 
 
 fileprivate class RemoteImageLayoutCell: UICollectionViewCell {
-    weak var imageView: UIImageView!
+    weak var imageView: LGAnimatedImageView!
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -23,7 +24,7 @@ fileprivate class RemoteImageLayoutCell: UICollectionViewCell {
     }
     
     func setupImageView() {
-        let temp = UIImageView(frame: CGRect.zero)
+        let temp = LGAnimatedImageView(frame: CGRect.zero)
         temp.contentMode = UIView.ContentMode.scaleAspectFill
         temp.translatesAutoresizingMaskIntoConstraints = false
         temp.clipsToBounds = true
@@ -110,6 +111,6 @@ extension RemoteImageBrowsingController: UICollectionViewDelegate, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        collectionView.deselectItem(at: indexPath, animated: true)
+//        collectionView.deselectItem(at: indexPath, animated: true)
     }
 }

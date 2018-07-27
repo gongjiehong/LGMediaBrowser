@@ -205,24 +205,27 @@ public class LGPhotoManager {
             return String(format: "%0.2d:%0.2d:%0.2d",hours , minutes, seconds)
         }
     }
-    
+
     /// 根据图片ASSET，最终输出大小，缩放模式请求图片
     ///
     /// - Parameters:
     ///   - asset: 图片PHAsset对象
     ///   - outputSize: 需要的输出大小
     ///   - resizeMode: 缩放模式，默认选最快速的
+    ///   - progressHandlder: 下载进度回调
     ///   - completion: 完成回调
     /// - Returns: 请求ID PHImageRequestID
     @discardableResult
     public static func requestImage(forAsset asset: PHAsset,
                                     outputSize: CGSize = CGSize.zero,
                                     resizeMode: PHImageRequestOptionsResizeMode = PHImageRequestOptionsResizeMode.fast,
+                                    progressHandlder: PHAssetImageProgressHandler? = nil,
                                     completion: @escaping (UIImage?, [AnyHashable: Any]?) -> Void) -> PHImageRequestID
     {
         let options = PHImageRequestOptions()
         options.resizeMode = resizeMode
         options.isNetworkAccessAllowed = true
+        options.progressHandler = progressHandlder
         
         var realOutputSize: CGSize
         if outputSize.equalTo(CGSize.zero) {
@@ -232,22 +235,16 @@ public class LGPhotoManager {
         }
         
         return imageManager.requestImage(for: asset,
-                                                            targetSize: realOutputSize,
-                                                            contentMode: PHImageContentMode.aspectFill,
-                                                            options: options,
-                                                            resultHandler:
+                                         targetSize: realOutputSize,
+                                         contentMode: PHImageContentMode.aspectFill,
+                                         options: options,
+                                         resultHandler:
             { (resultImage, infoDic) in
-            
+                
                 let isCancelled = infoDic?[PHImageCancelledKey] as? Bool
                 let hasError = (infoDic?[PHImageErrorKey] != nil)
                 if isCancelled != true && hasError == false {
                     completion(resultImage, infoDic)
-//                    DispatchQueue.background.async {
-//                        let result = resultImage?.lg_imageByDecoded
-//                        DispatchQueue.main.async {
-//                            completion(result, infoDic)
-//                        }
-//                    }
                 }
         })
     }

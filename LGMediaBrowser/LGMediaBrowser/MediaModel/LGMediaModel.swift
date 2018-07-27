@@ -12,72 +12,19 @@ import AVFoundation
 import LGWebImage
 import LGHTTPRequest
 
-public enum LGMediaType {
-    case generalPhoto
-    case livePhoto
-    case video
-    case audio
-    case other
-}
+/// 用于组装progress的最大值
+private let _totalUnitCount: Int64 = 1000
 
-public protocol LGMediaLocation {
-    func toURL() ->  URL?
-    func toAsset() -> PHAsset?
-}
-
-extension String: LGMediaLocation {
-    public func toURL() -> URL? {
-        if self.range(of: "://") != nil {
-            return URL(string: self)
-        } else {
-            return URL(fileURLWithPath: self)
-        }
-    }
-    
-    public func toAsset() -> PHAsset? {
-        return nil
-    }
-}
-
-extension PHAsset: LGMediaLocation {
-    public func toURL() -> URL? {
-        return nil
-    }
-    
-    public func toAsset() -> PHAsset? {
-        return self
-    }
-}
-
-extension AVURLAsset: LGMediaLocation {
-    public func toURL() -> URL? {
-        return self.url
-    }
-    
-    public func toAsset() -> PHAsset? {
-        return nil
-    }
-}
-
-extension URL: LGMediaLocation {
-    public func toURL() -> URL? {
-        return self
-    }
-    
-    public func toAsset() -> PHAsset? {
-        return nil
-    }
-}
-
+/// 存储媒体数据的模型，承载下载数据功能
 public class LGMediaModel {
     
-    /// <#Description#>
+    /// 定义媒体类型
     ///
-    /// - generalPhoto: <#generalPhoto description#>
-    /// - livePhoto: <#livePhoto description#>
-    /// - video: <#video description#>
-    /// - audio: <#audio description#>
-    /// - other: <#other description#>
+    /// - generalPhoto: 普通图片，支持动图
+    /// - livePhoto: LivePhoto
+    /// - video: 视频
+    /// - audio: 音频
+    /// - other: 其它，此类型会被忽略，不处理展示
     public enum MediaType {
         case generalPhoto
         case livePhoto
@@ -86,113 +33,232 @@ public class LGMediaModel {
         case other
     }
     
-    /// <#Description#>
+    /// 媒体文件位置
     ///
-    /// - remoteFile: <#remoteFile description#>
-    /// - localFile: <#localFile description#>
-    /// - album: <#album description#>
-    /// - iCloud: <#iCloud description#>
+    /// - remoteFile: 远程服务器上的文件
+    /// - localFile: 本地文件
+    /// - album: 系统相册中的PHAsset
     public enum Position {
         case remoteFile
         case localFile
         case album
-        case iCloud
     }
     
-//    public private(set) var thumbnail: LGURLConvertible
-//    public
+    /// 缩略图地址，如果是LivePhoto，该属性为第一帧图像的URL
+    public private(set) var thumbnailImageURL: LGURLConvertible?
     
+    /// 媒体文件地址，如果是LivePhoto，该属性为视频的URL
+    public private(set) var mediaURL: LGURLConvertible?
     
-    public private(set) var mediaLocation: LGMediaLocation
-    public private(set) var mediaType: LGMediaType
-    public private(set) var isLocalFile: Bool
+    /// 相册中的媒体文件Asset对象
+    public private(set) var mediaAsset: PHAsset?
     
-    var progress: Progress = Progress(totalUnitCount: Int64.max)
+    /// 媒体文件类型
+    public private(set) var mediaType: MediaType
     
+    /// 媒体文件位置
+    public private(set) var mediaPosition: Position
+    
+    private var _progress: Progress?
     private var _thumbnailImage: UIImage?
-    private var _lock: NSLock = NSLock()
+    private var _lock: DispatchSemaphore = DispatchSemaphore(value: 1)
+    private var _requestId: PHImageRequestID = PHInvalidImageRequestID
     
-    public var thumbnailImage: UIImage? {
-        set {
-            _lock.lock()
+    private var _mediaFileProgress: Progress = Progress(totalUnitCount: _totalUnitCount / 2)
+    private var _thumbnailImageProgress: Progress = Progress(totalUnitCount: _totalUnitCount / 2)
+    
+    /// 下载或导出进度
+    public private(set) var progress: Progress {
+        get {
+            _ = _lock.wait(timeout: DispatchTime.distantFuture)
             defer {
-                _lock.unlock()
+                _ = _lock.signal()
+            }
+            
+            if _progress == nil {
+                _progress = Progress(totalUnitCount: _totalUnitCount)
+                _progress?.addChild(_mediaFileProgress, withPendingUnitCount: _totalUnitCount / 2)
+                _progress?.addChild(_thumbnailImageProgress, withPendingUnitCount: _totalUnitCount / 2)
+                return _progress!
+            } else {
+                return _progress!
+            }
+        } set {
+            _ = _lock.wait(timeout: DispatchTime.distantFuture)
+            defer {
+                _ = _lock.signal()
+            }
+            _progress = newValue
+        }
+    }
+    
+    /// 占位图，大多数时候直接就是原图
+    public private(set) var thumbnailImage: UIImage? {
+        set {
+            _ = _lock.wait(timeout: DispatchTime.distantFuture)
+            defer {
+                _ = _lock.signal()
             }
             _thumbnailImage = newValue
         } get {
-            _lock.lock()
+            _ = _lock.wait(timeout: DispatchTime.distantFuture)
             defer {
-                _lock.unlock()
+                _ = _lock.signal()
             }
             return _thumbnailImage
         }
     }
         
-    public var thumbnailImageURL: LGURLConvertible?
     
-    public init(mediaLocation: LGMediaLocation,
-                mediaType: LGMediaType,
-                isLocalFile: Bool,
-                thumbnailImage: UIImage?,
-                thumbnailImageURL: LGURLConvertible? = nil)
+    /// 初始化, 同时会在异步线程请求媒体内容
+    ///
+    /// - Parameters:
+    ///   - thumbnailImageURL: 媒体文件缩略图路径
+    ///   - mediaURL: 媒体文件路径
+    ///   - mediaAsset: 媒体文件的PHAsset
+    ///   - mediaType: 媒体类型
+    ///   - mediaPosition: 媒体文件的位置
+    ///   - thumbnailImage: 缩略图
+    public init(thumbnailImageURL: LGURLConvertible?,
+                mediaURL: LGURLConvertible?,
+                mediaAsset: PHAsset?,
+                mediaType: MediaType,
+                mediaPosition: Position,
+                thumbnailImage: UIImage? = nil)
     {
-        self.mediaLocation = mediaLocation
-        self.mediaType = mediaType
-        self.isLocalFile = isLocalFile
-        _thumbnailImage = thumbnailImage
         self.thumbnailImageURL = thumbnailImageURL
+        self.mediaURL = mediaURL
+        self.mediaAsset = mediaAsset
+        self.mediaType = mediaType
+        self.mediaPosition = mediaPosition
+        self.thumbnailImage = thumbnailImage
         
         fetchThumbnailImage()
     }
     
-    public func fetchThumbnailImage() {
-        switch self.mediaType {
-        case .generalPhoto:
-            if let url = self.mediaLocation.toURL() {
-                if isLocalFile  {
-                    if self.thumbnailImage != nil {
-                        
-                    } else {
-                        do {
-                            let data = try Data(contentsOf: url)
-                            self.thumbnailImage = LGImage.imageWith(data: data)
-                        } catch {
-                        }
-                    }
-                } else {
-                    LGWebImageManager.default.downloadImageWith(url: url,
-                                                                options: LGWebImageOptions.default,
-                                                                progress: nil,
-                                                                transform: nil)
-                    { (resultImage, imageURL, sourceType, imageStage, error) in
-                        guard error == nil, let image = resultImage else {
-                            return
-                        }
-                        self.thumbnailImage = image
-                    }
-                }
-            }
-            break
-        case .livePhoto:
-            break
-        case .audio, .video:
-            guard let url = self.thumbnailImageURL else {
+    /// 获取缩略图
+    func fetchThumbnailImage() {
+        
+        func downloadImageFromRemote() {
+            if self.thumbnailImageURL == nil {
                 return
             }
-            LGWebImageManager.default.downloadImageWith(url: url,
+            LGWebImageManager.default.downloadImageWith(url: self.thumbnailImageURL!,
                                                         options: LGWebImageOptions.default,
-                                                        progress: nil,
-                                                        transform: nil)
-            { (resultImage, imageURL, sourceType, imageStage, error) in
-                guard error == nil, let image = resultImage else {
-                    return
-                }
-                self.thumbnailImage = image
+                                                        progress:
+                { [weak self] (progressValue) in
+                    guard let weakSelf = self else { return }
+                    weakSelf.progress = progressValue
+                    
+            }, transform: nil) { [weak self] (resultImage, resultURL, sourceType, imageStage, error) in
+                guard let weakSelf = self else { return }
+                weakSelf.thumbnailImage = resultImage
             }
+        }
+        
+        func loadImageFromDisk() {
+            if self.thumbnailImage == nil {
+                DispatchQueue.background.async { [weak self] in
+                    guard let weakSelf = self else { return }
+                    do {
+                        if let url = try weakSelf.thumbnailImageURL?.asURL() {
+                            let absoluteString = url.absoluteString
+                            // 正确的文件URL格式为 file://[path], 所以在转换后进行一次判断
+                            if absoluteString.range(of: "://") != nil {
+                                let data = try Data(contentsOf: url)
+                                weakSelf.thumbnailImage = LGImage.imageWith(data: data)
+                            } else {
+                                let fileURL = URL(fileURLWithPath: absoluteString)
+                                let data = try Data(contentsOf: fileURL)
+                                weakSelf.thumbnailImage = LGImage.imageWith(data: data)
+                            }
+                            weakSelf.progress.completedUnitCount = _totalUnitCount
+                        }
+                    } catch {
+                        println(error)
+                    }
+                }
+            }
+        }
+        
+        func exportImageFromAsset() {
+            guard let asset = self.mediaAsset else { return }
+            _requestId = LGPhotoManager.requestImage(forAsset: asset,
+                                                     outputSize: CGSize(width: asset.pixelWidth,
+                                                                        height: asset.pixelHeight),
+                                                     resizeMode: PHImageRequestOptionsResizeMode.exact,
+                                                     progressHandlder:
+                { [weak self] (value, error, stop, info) in
+                    guard let weakSelf = self else { return }
+                    if error == nil {
+                        weakSelf.progress.completedUnitCount = Int64(Double(_totalUnitCount) * value)
+                    }
+            }) { [weak self] (resultImage, info) in
+                guard let weakSelf = self else { return }
+                weakSelf.thumbnailImage = resultImage
+            }
+        }
+        
+        switch self.mediaPosition {
+        case Position.remoteFile:
+            downloadImageFromRemote()
             break
-        default:
+        case Position.localFile:
+            loadImageFromDisk()
+            break
+        case Position.album:
+            exportImageFromAsset()
             break
         }
     }
     
+    public func fetchMediaFile() {
+        func downloadGeneralPhoto() {
+            do {
+                if let thumbnailImageURL = try self.thumbnailImageURL?.asURL(),
+                    let mediaURL = try self.mediaURL?.asURL()
+                {
+                    if thumbnailImageURL == mediaURL {
+                        return
+                    } else {
+                        self.progress.addChild(_mediaFileProgress, withPendingUnitCount: <#T##Int64#>)
+                        LGWebImageManager.default.downloadImageWith(url: mediaURL,
+                                                                    options: LGWebImageOptions.default,
+                                                                    progress:
+                            { [weak self] (downloadProgress) in
+                                guard let weakSelf = self else { return }
+                                weakSelf._mediaFileProgress = downloadProgress
+                        }, transform: nil) { [weak self] (resultImage, resultURL, sourceType, imageStage, error) in
+                            
+                        }
+                    }
+                }
+            } catch {
+                println(error)
+            }
+        }
+        
+        
+        switch self.mediaPosition {
+        case Position.remoteFile:
+            switch self.mediaType {
+            case MediaType.generalPhoto:
+                if self.thumbnailImageURL == self.mediaURL {
+                    return
+                }
+//                LGWebImageManager.default.downloadImageWith(url: <#T##LGURLConvertible#>)
+                break
+            }
+            
+            break
+        case Position.localFile:
+            break
+        case Position.album:
+            break
+        }
+    }
+    
+    deinit {
+        LGPhotoManager.cancelImageRequest(_requestId)
+    }
 }
