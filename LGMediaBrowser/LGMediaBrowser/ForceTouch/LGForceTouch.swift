@@ -60,7 +60,7 @@ open class LGForceTouch: NSObject {
         else {
             let gestureRecognizer = LGForceTouchGestureRecognizer(forceTouch: self)
             gestureRecognizer.context = previewing
-            gestureRecognizer.cancelsTouchesInView = false
+            gestureRecognizer.cancelsTouchesInView = true
             gestureRecognizer.delaysTouchesBegan = true
             gestureRecognizer.delegate = self
             sourceView.addGestureRecognizer(gestureRecognizer)
@@ -82,6 +82,12 @@ open class LGForceTouch: NSObject {
 extension LGForceTouch: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                                   shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+    {
+        return true
+    }
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                                  shouldBeRequiredToFailBy otherGestureRecognizer: UIGestureRecognizer) -> Bool
     {
         return true
     }
