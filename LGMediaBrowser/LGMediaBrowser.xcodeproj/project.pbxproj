@@ -13,6 +13,10 @@
 		FE0980DA2099A2FF006B6D8C /* LGPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */; };
 		FE0980DC2099A7E5006B6D8C /* LGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */; };
 		FE0980DE2099AF34006B6D8C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FE0980DD2099AF34006B6D8C /* Images.xcassets */; };
+		FE1F17472112AEF100990B47 /* UIView+ScreenShot.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1F17462112AEF100990B47 /* UIView+ScreenShot.swift */; };
+		FE1F174A2112B12400990B47 /* LGForceTouchGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1F17492112B12400990B47 /* LGForceTouchGestureRecognizer.swift */; };
+		FE1F174C2112B14D00990B47 /* LGForceTouchManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1F174B2112B14D00990B47 /* LGForceTouchManager.swift */; };
+		FE1F174E2112B97A00990B47 /* LGSystemForceTouchDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1F174D2112B97A00990B47 /* LGSystemForceTouchDelegate.swift */; };
 		FE3BC13A20E61C6900DFDFB6 /* LGStatusBarTips.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE3BC13920E61C6900DFDFB6 /* LGStatusBarTips.swift */; };
 		FE4574F820AE853300CFF847 /* LGActionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4574F120AE853300CFF847 /* LGActionView.swift */; };
 		FE4574F920AE853300CFF847 /* LGMediaBrowserDefines.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4574F220AE853300CFF847 /* LGMediaBrowserDefines.swift */; };
@@ -61,6 +65,8 @@
 		FEC1AA8B20DBA1E900E60543 /* LGMPAlbumListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEC1AA8A20DBA1E900E60543 /* LGMPAlbumListController.swift */; };
 		FEC1AA8E20DBA20F00E60543 /* LGMPBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEC1AA8D20DBA20F00E60543 /* LGMPBaseViewController.swift */; };
 		FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
+		FECA691D2112A3C100B4CAED /* LGForceTouchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FECA691C2112A3C100B4CAED /* LGForceTouchView.swift */; };
+		FECA691F2112A45900B4CAED /* LGForceTouch.swift in Sources */ = {isa = PBXBuildFile; fileRef = FECA691E2112A45900B4CAED /* LGForceTouch.swift */; };
 		FED2044E20E0D40B004DEA17 /* LGLoadingHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED2044D20E0D40B004DEA17 /* LGLoadingHUD.swift */; };
 		FED2046320E0EE72004DEA17 /* LGMPAlbumDetailController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FED2046220E0EE72004DEA17 /* LGMPAlbumDetailController.swift */; };
 		FEDFAC8020BE9A4C00DBA1AF /* LGMediaBrowser.strings in Resources */ = {isa = PBXBuildFile; fileRef = FEDFAC8220BE9A4C00DBA1AF /* LGMediaBrowser.strings */; };
@@ -89,6 +95,10 @@
 		FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayerView.swift; sourceTree = "<group>"; };
 		FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayer.swift; sourceTree = "<group>"; };
 		FE0980DD2099AF34006B6D8C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		FE1F17462112AEF100990B47 /* UIView+ScreenShot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+ScreenShot.swift"; sourceTree = "<group>"; };
+		FE1F17492112B12400990B47 /* LGForceTouchGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGForceTouchGestureRecognizer.swift; sourceTree = "<group>"; };
+		FE1F174B2112B14D00990B47 /* LGForceTouchManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGForceTouchManager.swift; sourceTree = "<group>"; };
+		FE1F174D2112B97A00990B47 /* LGSystemForceTouchDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGSystemForceTouchDelegate.swift; sourceTree = "<group>"; };
 		FE3BC13920E61C6900DFDFB6 /* LGStatusBarTips.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGStatusBarTips.swift; sourceTree = "<group>"; };
 		FE4574F120AE853300CFF847 /* LGActionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGActionView.swift; sourceTree = "<group>"; };
 		FE4574F220AE853300CFF847 /* LGMediaBrowserDefines.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGMediaBrowserDefines.swift; sourceTree = "<group>"; };
@@ -138,6 +148,8 @@
 		FEC1AA7920DB83EB00E60543 /* GPUImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GPUImage.framework; sourceTree = "<group>"; };
 		FEC1AA8A20DBA1E900E60543 /* LGMPAlbumListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMPAlbumListController.swift; sourceTree = "<group>"; };
 		FEC1AA8D20DBA20F00E60543 /* LGMPBaseViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMPBaseViewController.swift; sourceTree = "<group>"; };
+		FECA691C2112A3C100B4CAED /* LGForceTouchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGForceTouchView.swift; sourceTree = "<group>"; };
+		FECA691E2112A45900B4CAED /* LGForceTouch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGForceTouch.swift; sourceTree = "<group>"; };
 		FED2044D20E0D40B004DEA17 /* LGLoadingHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGLoadingHUD.swift; sourceTree = "<group>"; };
 		FED2046220E0EE72004DEA17 /* LGMPAlbumDetailController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMPAlbumDetailController.swift; sourceTree = "<group>"; };
 		FEDFAC8120BE9A4C00DBA1AF /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/LGMediaBrowser.strings; sourceTree = "<group>"; };
@@ -250,6 +262,7 @@
 			isa = PBXGroup;
 			children = (
 				FE4574F720AE853300CFF847 /* LGMediaBrowser.h */,
+				FECA691A2112A32900B4CAED /* ForceTouch */,
 				FE0332F520B26C1B00573193 /* DebugLog */,
 				FE4574FF20AE854B00CFF847 /* LGMediaPicker */,
 				FE4574F020AE853300CFF847 /* LGMediaBrowser */,
@@ -368,6 +381,19 @@
 				FEAA0AFE20C4F140001B3E03 /* LGAlbumListModel.swift */,
 			);
 			path = Tools;
+			sourceTree = "<group>";
+		};
+		FECA691A2112A32900B4CAED /* ForceTouch */ = {
+			isa = PBXGroup;
+			children = (
+				FECA691C2112A3C100B4CAED /* LGForceTouchView.swift */,
+				FECA691E2112A45900B4CAED /* LGForceTouch.swift */,
+				FE1F174D2112B97A00990B47 /* LGSystemForceTouchDelegate.swift */,
+				FE1F17492112B12400990B47 /* LGForceTouchGestureRecognizer.swift */,
+				FE1F17462112AEF100990B47 /* UIView+ScreenShot.swift */,
+				FE1F174B2112B14D00990B47 /* LGForceTouchManager.swift */,
+			);
+			path = ForceTouch;
 			sourceTree = "<group>";
 		};
 		FEDFAC8620BE9CD900DBA1AF /* Extensions */ = {
@@ -504,6 +530,7 @@
 				FE93856B20EE1A6900FEC9AB /* LGMPPreviewController.swift in Sources */,
 				FE4574FB20AE853300CFF847 /* LGMediaBrowser.swift in Sources */,
 				FE4A253720B3D06A00955857 /* UIColor+LGMediaBrowser.swift in Sources */,
+				FECA691F2112A45900B4CAED /* LGForceTouch.swift in Sources */,
 				FE96C46A20A14DF800FC8F0A /* LGMediaBrowserPresentTransition.swift in Sources */,
 				FEAB31AE20E1E63A003593F6 /* LGMPAlbumDetailCameraCell.swift in Sources */,
 				FE0980D82099A2C0006B6D8C /* LGZoomingScrollView.swift in Sources */,
@@ -520,6 +547,7 @@
 				FEAA0AFC20C4E24C001B3E03 /* String+LGMediaPicker.swift in Sources */,
 				FE96482B20AAC9C6001738AB /* UIGestureRecognizer+LGMediaBrowser.swift in Sources */,
 				FE4574FA20AE853300CFF847 /* LGForceTouchPreviewController.swift in Sources */,
+				FE1F174E2112B97A00990B47 /* LGSystemForceTouchDelegate.swift in Sources */,
 				FEAA0AFF20C4F140001B3E03 /* LGAlbumListModel.swift in Sources */,
 				FE9521F92092C8D50097600A /* LGMediaBrowserPreviewCells.swift in Sources */,
 				FE0980DC2099A7E5006B6D8C /* LGPlayer.swift in Sources */,
@@ -542,14 +570,18 @@
 				FE70E30E20A0363200554854 /* LGSectorProgressView.swift in Sources */,
 				FEB546D920BAB42F00839967 /* LGCameraCaptureToolView.swift in Sources */,
 				FEB546D420BA981C00839967 /* LGAudioConfiguration.swift in Sources */,
+				FECA691D2112A3C100B4CAED /* LGForceTouchView.swift in Sources */,
 				FEF8975120A2960B005E4880 /* UIView+LGMediaBrowser.swift in Sources */,
 				FEB546E020BABE8A00839967 /* LGAudioTools.swift in Sources */,
 				FE96C46F20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift in Sources */,
 				FEC1AA8E20DBA20F00E60543 /* LGMPBaseViewController.swift in Sources */,
 				FED2046320E0EE72004DEA17 /* LGMPAlbumDetailController.swift in Sources */,
 				FE0980D520999C6D006B6D8C /* LGTapDetectingImageView.swift in Sources */,
+				FE1F174A2112B12400990B47 /* LGForceTouchGestureRecognizer.swift in Sources */,
 				FE3BC13A20E61C6900DFDFB6 /* LGStatusBarTips.swift in Sources */,
+				FE1F174C2112B14D00990B47 /* LGForceTouchManager.swift in Sources */,
 				FE70E31620A0571A00554854 /* LGMediaPreviewerProtocol.swift in Sources */,
+				FE1F17472112AEF100990B47 /* UIView+ScreenShot.swift in Sources */,
 				FE0332F720B26C1C00573193 /* DebugLog.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -708,7 +740,7 @@
 				);
 				INFOPLIST_FILE = LGMediaBrowser/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -741,7 +773,7 @@
 				);
 				INFOPLIST_FILE = LGMediaBrowser/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
