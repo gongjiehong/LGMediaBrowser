@@ -93,7 +93,7 @@ public class LGMediaModel {
     }
     
     /// 占位图，大多数时候直接就是原图
-    public private(set) var thumbnailImage: UIImage? {
+    public var thumbnailImage: UIImage? {
         set {
             _ = _lock.wait(timeout: DispatchTime.distantFuture)
             defer {
@@ -215,13 +215,13 @@ public class LGMediaModel {
     public func fetchMediaFile() {
         func downloadGeneralPhoto() {
             do {
-                if let thumbnailImageURL = try self.thumbnailImageURL?.asURL(),
-                    let mediaURL = try self.mediaURL?.asURL()
+                let thumbnailImageURL = try self.thumbnailImageURL?.asURL()
+                if let mediaURL = try self.mediaURL?.asURL()
                 {
                     if thumbnailImageURL == mediaURL {
                         return
                     } else {
-                        self.progress.addChild(_mediaFileProgress, withPendingUnitCount: <#T##Int64#>)
+                        self.progress.addChild(_mediaFileProgress, withPendingUnitCount: _totalUnitCount / 2)
                         LGWebImageManager.default.downloadImageWith(url: mediaURL,
                                                                     options: LGWebImageOptions.default,
                                                                     progress:
@@ -243,13 +243,17 @@ public class LGMediaModel {
         case Position.remoteFile:
             switch self.mediaType {
             case MediaType.generalPhoto:
-                if self.thumbnailImageURL == self.mediaURL {
-                    return
-                }
-//                LGWebImageManager.default.downloadImageWith(url: <#T##LGURLConvertible#>)
+                downloadGeneralPhoto()
+                break
+            case MediaType.livePhoto:
+                break
+            case MediaType.audio:
+                break
+            case MediaType.video:
+                break
+            default:
                 break
             }
-            
             break
         case Position.localFile:
             break
@@ -261,4 +265,9 @@ public class LGMediaModel {
     deinit {
         LGPhotoManager.cancelImageRequest(_requestId)
     }
+}
+
+
+public enum LGMediaModelError: Error {
+    case mediaURLIsInvalid
 }

@@ -36,15 +36,6 @@ open class LGTapDetectingImageView: LGAnimatedImageView, LGMediaPreviewerProtoco
         self.isUserInteractionEnabled = true
     }
     
-    public required init(frame: CGRect,
-                         mediaLocation: LGMediaLocation,
-                         mediaType: LGMediaType,
-                         isLocalFile: Bool,
-                         placeholderImage: UIImage?) throws
-    {
-        super.init(frame: frame)
-    }
-    
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.isUserInteractionEnabled = true

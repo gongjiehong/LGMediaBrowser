@@ -14,10 +14,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     
     public var mediaModel: LGMediaModel? {
         didSet {
-            if let media = mediaModel {
-                let url = media.mediaLocation.toURL()
-                self.player?.setItemBy(url)
-            }
+            mediaModelDidSet()
         }
     }
     
@@ -67,13 +64,9 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     }
     
     public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
-        if let url = mediaModel.mediaLocation.toURL() {
-            self.init(frame: frame, mediaURL: url, isMuted: false)
-            self.layer.contents = mediaModel.thumbnailImage?.cgImage
-            self.mediaModel = mediaModel
-        } else {
-            throw LGMediaBrowserError.cannotConvertToURL
-        }
+        self.init(frame: frame)
+        self.layer.contents = mediaModel.thumbnailImage?.cgImage
+        self.mediaModel = mediaModel
     }
     
     /// 设置player并播放
@@ -106,6 +99,35 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    func mediaModelDidSet() {
+        if let media = mediaModel {
+            do {
+                switch media.mediaPosition {
+                case .localFile:
+                    guard var url = try media.mediaURL?.asURL() else {
+                        return
+                    }
+                    if url.absoluteString.range(of: "://") == nil {
+                        url = URL(fileURLWithPath: url.absoluteString)
+                    }
+                    self.player?.setItemBy(url)
+                    break
+                case .remoteFile:
+                    guard let url = try media.mediaURL?.asURL() else {
+                        return
+                    }
+                    self.player?.setItemBy(url)
+                    break
+                case .album:
+                    
+                    break
+                }
+            } catch {
+                println(error)
+            }
+        }
     }
     
     /// 开始播放
