@@ -124,8 +124,14 @@ public class LGMediaModel {
                 mediaAsset: PHAsset?,
                 mediaType: MediaType,
                 mediaPosition: Position,
-                thumbnailImage: UIImage? = nil)
+                thumbnailImage: UIImage? = nil) /*throws*/
     {
+//        switch mediaType {
+//        case .video:
+//         break
+//        default:
+//            break
+//        }
         self.thumbnailImageURL = thumbnailImageURL
         self.mediaURL = mediaURL
         self.mediaAsset = mediaAsset

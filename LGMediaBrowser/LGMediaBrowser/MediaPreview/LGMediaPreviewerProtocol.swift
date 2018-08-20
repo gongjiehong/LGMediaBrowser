@@ -9,5 +9,5 @@
 import Foundation
 
 public protocol LGMediaPreviewerProtocol: class {
-    init(frame: CGRect, mediaModel: LGMediaModel) throws
+//    init(frame: CGRect, mediaModel: LGMediaModel) throws
 }

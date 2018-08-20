@@ -156,7 +156,7 @@ class LGForceTouchTargetPreviewView: UIView {
         super.layoutSubviews()
         imageContainer.frame = self.bounds
         imageView.frame = imageViewFrame
-        imageView.contentMode = UIViewContentMode.scaleAspectFit
+        imageView.contentMode = UIView.ContentMode.scaleAspectFit
         imageView.center = CGPoint(x: self.lg_width / 2.0, y: self.lg_height / 2.0)
     }
     

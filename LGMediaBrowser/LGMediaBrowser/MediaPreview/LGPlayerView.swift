@@ -63,8 +63,8 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         
     }
     
-    public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
-        self.init(frame: frame)
+    public init(frame: CGRect, mediaModel: LGMediaModel) {
+        super.init(frame: frame)
         self.layer.contents = mediaModel.thumbnailImage?.cgImage
         self.mediaModel = mediaModel
     }

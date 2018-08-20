@@ -21,7 +21,7 @@ class LGForceTouchManager {
     
     lazy var forceTouchWindow: UIWindow = {
         let window = UIWindow(frame: UIScreen.main.bounds)
-        window.windowLevel = UIWindowLevelAlert
+        window.windowLevel = UIWindow.Level.alert
         window.rootViewController = UIViewController()
         return window
     }()

@@ -485,7 +485,7 @@ public class LGCameraCapture: UIViewController {
         videoCamera.audioEncodingTarget = movieWriter
         
 
-        cropFilter.addTarget(self.filter as! GPUImageInput)
+        cropFilter.addTarget((self.filter as! GPUImageInput))
         self.filter?.addTarget(movieWriter)
         if let filterView = self.view as? GPUImageView {
             self.filter?.addTarget(filterView)

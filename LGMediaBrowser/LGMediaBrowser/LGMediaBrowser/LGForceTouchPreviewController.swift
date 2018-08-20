@@ -122,26 +122,74 @@ open class LGForceTouchPreviewController: UIViewController {
     func setupGeneralPhotoView() {
         self.view.addSubview(self.imageView)
         self.view.bringSubviewToFront(self.progressView)
-        
-        
-        if let url = self.mediaModel?.mediaLocation.toURL() {
-            self.imageView.lg_setImageWithURL(url,
-                                              placeholder: nil,
-                                              options: LGWebImageOptions.default,
-                                              progressBlock:
-                {[weak self] (progress) in
-                    self?.progressView.progress = CGFloat(progress.fractionCompleted)
-            }, transformBlock: nil)
-            {[weak self] (resultImage, imageURL, sourceType, imageStage, error) in
-                guard let weakSelf = self else { return }
-                if error == nil, let resultImage = resultImage {
-                    weakSelf.progressView.isHidden = true
-                    weakSelf.preferredContentSize = weakSelf.calcfinalImageSize(resultImage.size)
-                } else {
-                    weakSelf.progressView.isShowError = true
+        guard let mediaModel = self.mediaModel else {
+            self.progressView.isShowError = true
+            return
+        }
+
+        func setImageWithRemoteURL() {
+            do {
+                guard let url = try mediaModel.mediaURL?.asURL() else {
+                    self.progressView.isShowError = true
+                    return
                 }
+
+                self.imageView.lg_setImageWithURL(url,
+                                                  placeholder: nil,
+                                                  options: LGWebImageOptions.default,
+                                                  progressBlock:
+                    {[weak self] (progress) in
+                        self?.progressView.progress = CGFloat(progress.fractionCompleted)
+                    }, transformBlock: nil)
+                {[weak self] (resultImage, imageURL, sourceType, imageStage, error) in
+                    guard let weakSelf = self else { return }
+                    if error == nil, let resultImage = resultImage {
+                        weakSelf.progressView.isHidden = true
+                        weakSelf.preferredContentSize = weakSelf.calcfinalImageSize(resultImage.size)
+                    } else {
+                        weakSelf.progressView.isShowError = true
+                    }
+                }
+            } catch {
+                println(error)
             }
-        } else if let asset = self.mediaModel?.mediaLocation.toAsset() {
+
+        }
+
+        func setImageWithLocalFile() {
+            do {
+                guard var url = try mediaModel.mediaURL?.asURL() else {
+                    self.progressView.isShowError = true
+                    return
+                }
+
+                if url.absoluteString.range(of: "://") == nil {
+                    url = URL(fileURLWithPath: url.absoluteString)
+                }
+
+                DispatchQueue.userInitiated.async {
+                    do {
+                        let data = try Data(contentsOf: url)
+                        let image = LGImage.imageWith(data: data)
+                        DispatchQueue.main.async { [weak self] in
+                            guard let weakSelf = self else { return }
+                            weakSelf.imageView.image = image
+                        }
+                    } catch {
+                        println(error)
+                    }
+                }
+            } catch {
+                println(error)
+            }
+        }
+
+        func setImageWithAlbumAsset() {
+            guard let asset = self.mediaModel?.mediaAsset else {
+                self.progressView.isShowError = true
+                return
+            }
+
             self.progressView.isHidden = true
             if let tempImage = self.mediaModel?.thumbnailImage {
                 self.imageView.image = tempImage
@@ -153,16 +201,25 @@ open class LGForceTouchPreviewController: UIViewController {
                 { [weak self] (imageData, dataUTI, imageOrientation, infoDic) in
                     guard let data = imageData else { return }
                     let image = LGImage.imageWith(data: data)
-                    
+
                     DispatchQueue.main.async { [weak self] in
                         guard let weakSelf = self else { return }
                         weakSelf.imageView.image = image
                     }
                 }
             }
+        }
 
-        } else {
-            self.progressView.isShowError = true
+        switch mediaModel.mediaPosition {
+        case .localFile:
+            setImageWithLocalFile()
+            break
+        case .remoteFile:
+            setImageWithRemoteURL()
+            break
+        case .album:
+            setImageWithAlbumAsset()
+            break
         }
     }
     
@@ -170,18 +227,36 @@ open class LGForceTouchPreviewController: UIViewController {
         if #available(iOS 9.1, *) {
             self.view.addSubview(livePhotoView)
             livePhotoView.frame = self.view.bounds
-            if let asset = self.mediaModel?.mediaLocation.toAsset() {
-                PHCachingImageManager.default().requestLivePhoto(for: asset,
-                                                                 targetSize: CGSize(width: asset.pixelWidth,
-                                                                                    height: asset.pixelHeight),
-                                                                 contentMode: PHImageContentMode.aspectFill,
-                                                                 options: nil)
-                {[weak self] (livePhoto, infoDic) in
+            guard let mediaModel = self.mediaModel else { return }
+
+            func setLivePhotoWithAlbumAsset() {
+                guard let asset = mediaModel.mediaAsset else { return }
+                let options = PHLivePhotoRequestOptions()
+                options.isNetworkAccessAllowed = true
+                options.progressHandler = { [weak self] (progress, error, stoped, infoDic) in
+
+                }
+                LGPhotoManager.imageManager.requestLivePhoto(for: asset,
+                                                             targetSize: CGSize(width: asset.pixelWidth,
+                                                                                height: asset.pixelHeight),
+                                                             contentMode: PHImageContentMode.aspectFill,
+                                                             options: options)
+                { [weak self] (livePhoto, infoDic) in
                     guard let weakSelf = self else { return }
                     guard let livePhoto = livePhoto  else { return }
                     weakSelf.livePhotoView.livePhoto = livePhoto
                     weakSelf.livePhotoView.startPlayback(with: PHLivePhotoViewPlaybackStyle.full)
                 }
+            }
+
+            switch mediaModel.mediaPosition {
+            case .localFile:
+                break
+            case .remoteFile:
+                break
+            case .album:
+                setLivePhotoWithAlbumAsset()
+                break
             }
         }
     }

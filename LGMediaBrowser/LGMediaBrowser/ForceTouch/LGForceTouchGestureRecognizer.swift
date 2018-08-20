@@ -138,7 +138,7 @@ class LGForceTouchGestureRecognizer: UIGestureRecognizer {
         timer?.invalidate()
         timer = CADisplayLink(target: LGMPWeakTarget(target: self),
                                     selector: #selector(animateToTargetProgress))
-        timer?.add(to: RunLoop.main, forMode: RunLoopMode.commonModes)
+        timer?.add(to: RunLoop.main, forMode: RunLoop.Mode.common)
     }
     
     @objc func animateToTargetProgress() {
