@@ -442,26 +442,28 @@ extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
         }
         let model = self.dataArray[index]
         
-        func assetTypeToMediaType(_ type: LGPhotoModel.AssetMediaType) -> LGMediaType {
+        func assetTypeToMediaType(_ type: LGPhotoModel.AssetMediaType) -> LGMediaModel.MediaType {
             switch type {
             case .unknown:
-                return LGMediaType.other
+                return .other
             case .generalImage:
-                return LGMediaType.generalPhoto
+                return .generalPhoto
             case .livePhoto:
-                return LGMediaType.livePhoto
+                return .livePhoto
             case .video:
-                return LGMediaType.video
+                return .video
             case .audio:
-                return LGMediaType.audio
+                return .audio
             default:
-                return LGMediaType.other
+                return .other
             }
         }
 
-        let mediaModel = LGMediaModel(mediaLocation: model.asset,
+        let mediaModel = LGMediaModel(thumbnailImageURL: nil,
+                                      mediaURL: nil,
+                                      mediaAsset: model.asset,
                                       mediaType: assetTypeToMediaType(model.type),
-                                      isLocalFile: true,
+                                      mediaPosition: LGMediaModel.Position.album,
                                       thumbnailImage: cell.layoutImageView.image)
         
         let previewVC = LGForceTouchPreviewController(mediaModel: mediaModel,

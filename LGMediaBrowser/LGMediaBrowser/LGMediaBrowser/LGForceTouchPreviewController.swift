@@ -270,36 +270,38 @@ open class LGForceTouchPreviewController: UIViewController {
             return
         }
         
-        if mediaModel.isLocalFile {
-            if let asset = mediaModel.mediaLocation.toAsset() {
-                
-                self.view.bringSubviewToFront(self.progressView)
-                
-                let options = PHVideoRequestOptions()
-                options.isNetworkAccessAllowed = true
-                options.progressHandler = {[weak self] (progress, error, stop, infoDic) in
-                    guard let weakSelf = self else { return }
-                    weakSelf.progressView.progress = CGFloat(progress)
-                }
-                
-                PHCachingImageManager.default().requestAVAsset(forVideo: asset,
-                                                               options: options)
-                {(avAsset, audioMix, infoDic) in
-                    guard let avAsset = avAsset else { return }
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else { return }
-                        weakSelf.playerView = LGPlayerView(frame: weakSelf.view.bounds,
-                                                           mediaPlayerItem: AVPlayerItem(asset: avAsset),
-                                                           isMuted: false)
-                        weakSelf.view.addSubview(weakSelf.playerView!)
-                        weakSelf.playerView?.play()
-                        weakSelf.progressView.isHidden = true
-                    }
-                }
-            }
-        } else {
-            
-        }
+        
+        
+//        if mediaModel.mediaPosition == .localFile {
+//            if let asset = mediaModel.mediaLocation.toAsset() {
+//                
+//                self.view.bringSubviewToFront(self.progressView)
+//                
+//                let options = PHVideoRequestOptions()
+//                options.isNetworkAccessAllowed = true
+//                options.progressHandler = {[weak self] (progress, error, stop, infoDic) in
+//                    guard let weakSelf = self else { return }
+//                    weakSelf.progressView.progress = CGFloat(progress)
+//                }
+//                
+//                PHCachingImageManager.default().requestAVAsset(forVideo: asset,
+//                                                               options: options)
+//                {(avAsset, audioMix, infoDic) in
+//                    guard let avAsset = avAsset else { return }
+//                    DispatchQueue.main.async { [weak self] in
+//                        guard let weakSelf = self else { return }
+//                        weakSelf.playerView = LGPlayerView(frame: weakSelf.view.bounds,
+//                                                           mediaPlayerItem: AVPlayerItem(asset: avAsset),
+//                                                           isMuted: false)
+//                        weakSelf.view.addSubview(weakSelf.playerView!)
+//                        weakSelf.playerView?.play()
+//                        weakSelf.progressView.isHidden = true
+//                    }
+//                }
+//            }
+//        } else {
+//            
+//        }
     }
     
     func setupAudioView() {

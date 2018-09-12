@@ -719,11 +719,11 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     func playVideo() {
         if self.playerView.superview == nil {
             self.playerView.frame = self.view.bounds
-            self.playerView.player?.isLoopEnabled = true
+            self.playerView.player.isLoopEnabled = true
             self.view.insertSubview(playerView, belowSubview: self.toolView)
         }
         self.playerView.isHidden = false
-        self.playerView.player?.setItemBy(destinationVideoURL)
+        self.playerView.player.setItemBy(destinationVideoURL)
         self.playerView.play()
     }
     
@@ -745,7 +745,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         self.toggleCameraBtn.isHidden = false
         self.playerView.isHidden = true
         self.playerView.pause()
-        self.playerView.player?.replaceCurrentItem(with: nil)
+        self.playerView.player.replaceCurrentItem(with: nil)
         
         removeVideo()
     }

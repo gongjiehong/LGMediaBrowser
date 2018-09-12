@@ -15,7 +15,7 @@ public protocol LGTapDetectingImageViewDelegate: NSObjectProtocol {
 }
 
 open class LGTapDetectingImageView: LGAnimatedImageView, LGMediaPreviewerProtocol {
-    public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
+    public required convenience init(frame: CGRect, mediaModel: LGMediaModel) {
         self.init(frame: frame)
     }
     

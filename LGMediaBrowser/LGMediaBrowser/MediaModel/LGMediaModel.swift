@@ -13,7 +13,7 @@ import LGWebImage
 import LGHTTPRequest
 
 /// 用于组装progress的最大值
-private let _totalUnitCount: Int64 = 1000
+private let _totalUnitCount: Int64 = 1_000
 
 /// 存储媒体数据的模型，承载下载数据功能
 public class LGMediaModel {

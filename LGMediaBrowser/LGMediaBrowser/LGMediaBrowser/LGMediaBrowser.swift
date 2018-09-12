@@ -240,8 +240,8 @@ public class LGMediaBrowser: UIViewController {
     }
     
     @objc func needHideControls(_ noti: Notification) {
-        if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
-            self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+        if self.mediaArray[currentIndex].mediaType == .video ||
+            self.mediaArray[currentIndex].mediaType == .audio {
             showOrHideControls(!isShowingControls)
         } else {
             showOrHideControls(false)
@@ -427,8 +427,8 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         var finalImageSize: CGSize = CGSize.zero
         
         if let layoutView = getCurrentLayoutView() {
-            if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
-                self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+            if self.mediaArray[currentIndex].mediaType == .video ||
+                self.mediaArray[currentIndex].mediaType == .audio {
                 if let image = self.animationImage {
                     finalImageSize = image.size
                 }
@@ -462,8 +462,8 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         var fromTargetView: UIView?
         if let layoutView = getCurrentLayoutView() {
             fromTargetView = layoutView
-            if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
-                self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+            if self.mediaArray[currentIndex].mediaType == .video ||
+                self.mediaArray[currentIndex].mediaType == .audio {
                 if let image = self.animationImage {
                     finalImageSize = image.size
                 }

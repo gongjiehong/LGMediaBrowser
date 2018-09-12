@@ -19,14 +19,16 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     }
     
     /// 播放器对象
-    open weak var player: LGPlayer?
+    public lazy var player: LGPlayer = {
+        return LGPlayer()
+    }()
     
     /// 是否静音，默认不静音
     open var isMuted: Bool {
         get {
-            return self.player?.isMuted ?? false
+            return self.player.isMuted
         } set {
-            self.player?.isMuted = newValue
+            self.player.isMuted = newValue
         }
     }
     
@@ -44,8 +46,11 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     ///   - frame: 视图位置和大小
     ///   - mediaURL: 媒体文件URL，可以是remote URL，也可以是本地文件URL
     ///   - isMuted: 是否如静音，默认不静音
-    public convenience init(frame: CGRect, mediaURL: URL, isMuted: Bool = false) {
-        let mediaPlayerItem = AVPlayerItem(url: mediaURL)
+    public convenience init(frame: CGRect, mediaURL: URL? = nil, isMuted: Bool = false) {
+        var mediaPlayerItem: AVPlayerItem?
+        if let mediaURL = mediaURL {
+            mediaPlayerItem = AVPlayerItem(url: mediaURL)
+        }
         self.init(frame: frame, mediaPlayerItem: mediaPlayerItem, isMuted: isMuted)
     }
     
@@ -55,43 +60,40 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     ///   - frame: 视图位置和大小
     ///   - mediaPlayerItem: AVPlayerItem
     ///   - isMuted: 是否如静音，默认不静音
-    public init(frame: CGRect, mediaPlayerItem: AVPlayerItem, isMuted: Bool = false) {
+    public init(frame: CGRect, mediaPlayerItem: AVPlayerItem? = nil, isMuted: Bool = false) {
         super.init(frame: frame)
-        let player = LGPlayer(playerItem: mediaPlayerItem)
         self.isMuted = isMuted
-        constructPlayerAndPlay(player)
-        
+        self.player.replaceCurrentItem(with: mediaPlayerItem)
+        constructPlayerAndPlay()
     }
     
-    public init(frame: CGRect, mediaModel: LGMediaModel) {
+    /// 通过frame和媒体模型进行初始化，默认不静音
+    ///
+    /// - Parameters:
+    ///   - frame: 视图位置和大小
+    ///   - mediaModel: LGMediaModel
+    required public init(frame: CGRect, mediaModel: LGMediaModel) {
         super.init(frame: frame)
         self.layer.contents = mediaModel.thumbnailImage?.cgImage
         self.mediaModel = mediaModel
+        constructPlayerAndPlay()
     }
     
     /// 设置player并播放
     ///
     /// - Parameter player: 初始化完成的AVPlayer
-    private func constructPlayerAndPlay(_ player: LGPlayer) {
-        self.player = player
+    private func constructPlayerAndPlay() {
         self.layer.contentsGravity = CALayerContentsGravity.resizeAspect
         if let playerLayer = self.layer as? AVPlayerLayer {
-            playerLayer.player = player
+            playerLayer.player = self.player
         }
         self.backgroundColor = UIColor.black
         
         if !isMuted {
             do {
-                if #available(iOS 10.0, *) {
-                    try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord,
-                                                                    mode: AVAudioSession.Mode.default)
-                } else {
-                    // Fallback on earlier versions
-                }
-//                try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord,
-//                                                                with: [])
+                try AVAudioSession.sharedInstance().setMode(AVAudioSession.Mode.moviePlayback)
             } catch {
-                
+                println(error)
             }
         }
     }
@@ -112,13 +114,13 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
                     if url.absoluteString.range(of: "://") == nil {
                         url = URL(fileURLWithPath: url.absoluteString)
                     }
-                    self.player?.setItemBy(url)
+                    self.player.setItemBy(url)
                     break
                 case .remoteFile:
                     guard let url = try media.mediaURL?.asURL() else {
                         return
                     }
-                    self.player?.setItemBy(url)
+                    self.player.setItemBy(url)
                     break
                 case .album:
                     
@@ -132,13 +134,13 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     
     /// 开始播放
     public func play() {
-        self.player?.play()
+        self.player.play()
     }
     
     /// 暂停播放
     public func pause() {
-        self.player?.pause()
-        self.player?.seek(to: CMTime.zero)
+        self.player.pause()
+        self.player.seek(to: CMTime.zero)
     }
     
     /// 自动播放和暂停
@@ -155,7 +157,7 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     
     deinit {
         pause()
-        self.player = nil
+        self.player.replaceCurrentItem(with: nil)
     }
 }
 
