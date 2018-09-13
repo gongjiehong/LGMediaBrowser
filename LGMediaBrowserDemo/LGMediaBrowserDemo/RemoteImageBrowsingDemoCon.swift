@@ -94,12 +94,12 @@ extension RemoteImageBrowsingController: UICollectionViewDelegate, UICollectionV
         } else {
             cell = RemoteImageLayoutCell(frame: CGRect.zero)
         }
-        cell.imageView.lg_setImageWithURL(dataArray[indexPath.row])
+        cell.imageView.lg_setImageWithURL(ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 256))
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return dataArray.count
+        return ImageCount//dataArray.count
     }
     
     func collectionView(_ collectionView: UICollectionView,
@@ -114,3 +114,22 @@ extension RemoteImageBrowsingController: UICollectionViewDelegate, UICollectionV
 //        collectionView.deselectItem(at: indexPath, animated: true)
     }
 }
+
+let ImageCount: Int = 4_000
+let ImageURLPrefix: String = "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/"
+class ImgaeURLConstructHelper {
+    static func imageURL(fromFile file: String, size: Int) -> String {
+        return String(format: "%@%d/%@", ImageURLPrefix, size, file)
+    }
+    
+    static func imageURL(fromFileID fileID: Int, size: Int) -> String {
+        if size > 0 {
+            return String(format: "%@%d/%d.jpg", ImageURLPrefix, size, fileID)
+        } else {
+            return String(format: "%@origin/%d.jpg", ImageURLPrefix, fileID)
+        }
+    }
+}
+
+
+

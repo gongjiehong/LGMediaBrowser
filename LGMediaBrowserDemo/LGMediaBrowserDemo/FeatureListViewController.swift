@@ -7,9 +7,15 @@
 //
 
 import UIKit
+import LGMediaBrowser
 
 class FeatureListViewController: UITableViewController {
 
+    lazy var fpsLabel: LGFPSLabel = {
+        let fpsLabel = LGFPSLabel(frame: CGRect(x: UIScreen.main.bounds.width - 80, y: UIScreen.main.bounds.height - 20.0, width: 60, height: 20))
+        return fpsLabel
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -23,6 +29,14 @@ class FeatureListViewController: UITableViewController {
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if fpsLabel.superview == nil {
+            UIApplication.shared.keyWindow?.addSubview(fpsLabel)
+        }
     }
 
     // MARK: - Table view data source

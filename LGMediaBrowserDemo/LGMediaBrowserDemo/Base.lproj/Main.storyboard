@@ -123,9 +123,9 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="74I-qX-J8V">
-                                <rect key="frame" x="16" y="64" width="343" height="603"/>
+                                <rect key="frame" x="16" y="0.0" width="343" height="667"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="rwJ-Ln-WCZ">
+                                <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="0.0" id="rwJ-Ln-WCZ">
                                     <size key="itemSize" width="50" height="50"/>
                                     <size key="headerReferenceSize" width="0.0" height="0.0"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
@@ -151,7 +151,7 @@
                         <constraints>
                             <constraint firstAttribute="trailingMargin" secondItem="74I-qX-J8V" secondAttribute="trailing" id="Dez-OT-A06"/>
                             <constraint firstItem="7zY-te-Kzz" firstAttribute="top" secondItem="74I-qX-J8V" secondAttribute="bottom" id="bfh-sF-BTU"/>
-                            <constraint firstItem="74I-qX-J8V" firstAttribute="top" secondItem="6Oy-RA-TCg" secondAttribute="bottom" id="f8G-z0-9gp"/>
+                            <constraint firstItem="74I-qX-J8V" firstAttribute="top" secondItem="WhN-oN-cTs" secondAttribute="top" id="f8G-z0-9gp"/>
                             <constraint firstItem="74I-qX-J8V" firstAttribute="leading" secondItem="WhN-oN-cTs" secondAttribute="leadingMargin" id="nEC-hg-phF"/>
                         </constraints>
                     </view>
