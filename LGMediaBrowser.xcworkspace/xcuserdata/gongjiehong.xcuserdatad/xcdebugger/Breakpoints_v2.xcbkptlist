@@ -230,12 +230,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGWebImage/LGWebImage/Core/LGWebImageManager.swift"
-            timestampString = "558499151.212387"
+            timestampString = "558610528.852913"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "852"
-            endingLineNumber = "852"
-            landmarkName = "cancelWith(callbackToken:)"
+            startingLineNumber = "842"
+            endingLineNumber = "842"
+            landmarkName = "==(_:_:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
