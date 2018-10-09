@@ -29,7 +29,6 @@ extension UIView {
         }
     }
     
-    
     public var lg_originX: CGFloat {
         set {
             let newFrame = CGRect(origin: CGPoint(x: newValue, y: self.frame.origin.y),
@@ -39,7 +38,6 @@ extension UIView {
             return self.frame.origin.x
         }
     }
-    
     
     public var lg_originY: CGFloat {
         set {
@@ -68,6 +66,45 @@ extension UIView {
             self.frame = newFrame
         } get {
             return self.frame.origin
+        }
+    }
+
+    
+    public var lg_top: CGFloat {
+        set {
+            self.lg_originY = newValue
+        } get {
+            return self.lg_originY
+        }
+    }
+
+    public var lg_bottom: CGFloat {
+        set {
+            if newValue < self.lg_originY {
+                return
+            }
+            self.lg_height = newValue - self.lg_originY
+        } get {
+            return self.lg_originY + self.lg_height
+        }
+    }
+
+    public var lg_left: CGFloat {
+        set {
+            self.lg_originX = newValue
+        } get {
+            return self.lg_originX
+        }
+    }
+
+    public var lg_right: CGFloat {
+        set {
+            if newValue < self.lg_originX {
+                return
+            }
+            self.lg_width = newValue - self.lg_originX
+        } get {
+            return self.lg_originX + self.lg_width
         }
     }
 }
