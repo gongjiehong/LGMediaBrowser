@@ -8,7 +8,7 @@
 
 import UIKit
 import LGWebImage
-
+import LGMediaBrowser
 
 fileprivate class RemoteImageLayoutCell: UICollectionViewCell {
     weak var imageView: LGAnimatedImageView!
@@ -106,13 +106,35 @@ extension RemoteImageBrowsingController: UICollectionViewDelegate, UICollectionV
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize
     {
-        let itemWidth = (UIScreen.main.bounds.width - 50) / 4
+        let itemWidth = (UIScreen.main.bounds.width) / 4
         return CGSize(width: itemWidth, height: itemWidth)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-//        collectionView.deselectItem(at: indexPath, animated: true)
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let mediaBrowser = LGMediaBrowser(dataSource: self,
+                                          configs: LGMediaBrowserSettings(),
+                                          status: .browsing,
+                                          currentIndex: indexPath.row)
+        self.navigationController?.pushViewController(mediaBrowser, animated: true)
     }
+}
+
+extension RemoteImageBrowsingController: LGMediaBrowserDataSource {
+    func numberOfPhotosInPhotoBrowser(_ photoBrowser: LGMediaBrowser) -> Int {
+        return ImageCount
+    }
+    
+    func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel {
+        let url = ImgaeURLConstructHelper.imageURL(fromFileID: index + 1, size: 256)
+        return LGMediaModel(thumbnailImageURL: url,
+                            mediaURL: url,
+                            mediaAsset: nil,
+                            mediaType: LGMediaModel.MediaType.generalPhoto,
+                            mediaPosition: LGMediaModel.Position.remoteFile)
+    }
+    
+    
 }
 
 let ImageCount: Int = 4_000

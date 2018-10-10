@@ -16,18 +16,6 @@ class MediaPickerDemoCon: UIViewController {
 
         // Do any additional setup after loading the view.
         
-        for _ in 0...100 {
-            var request = LGURLSessionManager.default.request("https://www.baidu.com")
-            withUnsafePointer(to: &request) {
-                print($0)
-            }
-            
-            var request1 = LGURLSessionManager.default.request("https://www.qq.com")
-            withUnsafePointer(to: &request1) {
-                print($0)
-            }
-            
-        }
     }
     
 

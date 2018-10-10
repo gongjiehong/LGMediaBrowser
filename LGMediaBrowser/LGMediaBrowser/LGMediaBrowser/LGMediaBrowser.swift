@@ -117,6 +117,20 @@ public class LGMediaBrowser: UIViewController {
         self.currentIndex = currentIndex
     }
     
+    public convenience init(dataSource: LGMediaBrowserDataSource,
+                            configs: LGMediaBrowserSettings,
+                            status: LGMediaBrowserStatus = .browsing,
+                            currentIndex: Int = 0) {
+        self.init(nibName: nil, bundle: nil)
+        self.dataSource = dataSource
+        globalConfigs = configs
+        self.status = status
+        if self.status == .browsingAndEditing {
+            globalConfigs.displayDeleteButton = true
+        }
+        self.currentIndex = currentIndex
+    }
+    
     // MARK: -  视图load后进行一系列初始化操作
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -485,32 +499,41 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
 
 // MARK: UICollectionViewDataSource & UICollectionViewDelegate
 extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
-    
-    
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return mediaArray.count
+        if let dataSource = self.dataSource {
+            return dataSource.numberOfPhotosInPhotoBrowser(self)
+        } else {
+            return mediaArray.count
+        }
     }
     
     public func collectionView(_ collectionView: UICollectionView,
                                cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        let media = mediaArray[indexPath.row]
+        var media: LGMediaModel
+        if let dataSource = self.dataSource {
+            media = dataSource.photoBrowser(self, photoAtIndex: indexPath.row)
+        } else {
+            media = mediaArray[indexPath.row]
+        }
+        
         switch media.mediaType {
         case .video:
-            return listView(collectionView, videoCellForItemAt: indexPath)
+            return listView(collectionView, videoCellForItemAt: indexPath, mediaModel: media)
         case .audio:
-            return listView(collectionView, audioCellForItemAt: indexPath)
+            return listView(collectionView, audioCellForItemAt: indexPath, mediaModel: media)
         case .generalPhoto:
-            return listView(collectionView, generalPhotoCellForItemAt: indexPath)
+            return listView(collectionView, generalPhotoCellForItemAt: indexPath, mediaModel: media)
         case .livePhoto:
-            return listView(collectionView, livePhotoCellForItemAt: indexPath)
+            return listView(collectionView, livePhotoCellForItemAt: indexPath, mediaModel: media)
         default:
-            return listView(collectionView, otherCellForItemAt: indexPath)
+            return listView(collectionView, otherCellForItemAt: indexPath, mediaModel: media)
         }
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               videoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         videoCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
         var result: LGMediaBrowserVideoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
@@ -519,12 +542,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             result = LGMediaBrowserVideoCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               audioCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         audioCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
         var result: LGMediaBrowserAudioCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.AudioCell, for: indexPath)
@@ -533,12 +557,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             result = LGMediaBrowserAudioCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               generalPhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         generalPhotoCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
         var result: LGMediaBrowserGeneralPhotoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.GeneralPhotoCell, for: indexPath)
@@ -547,12 +572,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             result = LGMediaBrowserGeneralPhotoCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               livePhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         livePhotoCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
         var result: LGMediaBrowserVideoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
@@ -561,12 +587,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             result = LGMediaBrowserVideoCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               otherCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         otherCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
         var result: LGMediaBrowserVideoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
@@ -575,7 +602,7 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             result = LGMediaBrowserVideoCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
@@ -646,8 +673,9 @@ extension LGMediaBrowser: LGActionViewDelegate {
         {
             delegate.removeMedia!(self,
                                   index: self.currentIndex,
-                                  reload: {
-                                    deleteItemRefresh()
+                                  reload:
+                {
+                    deleteItemRefresh()
             })
         }
     }
