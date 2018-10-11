@@ -9,7 +9,7 @@
 import UIKit
 import LGMediaBrowser
 
-class FeatureListViewController: UITableViewController {
+class FeatureListViewController: UITableViewController, UIGestureRecognizerDelegate {
 
     lazy var fpsLabel: LGFPSLabel = {
         let fpsLabel = LGFPSLabel(frame: CGRect(x: UIScreen.main.bounds.width - 80, y: UIScreen.main.bounds.height - 20.0, width: 60, height: 20))
@@ -24,6 +24,9 @@ class FeatureListViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
+        
+        // MARK: - 开启手势pop
+        self.navigationController?.interactivePopGestureRecognizer?.delegate = self
     }
 
     override func didReceiveMemoryWarning() {

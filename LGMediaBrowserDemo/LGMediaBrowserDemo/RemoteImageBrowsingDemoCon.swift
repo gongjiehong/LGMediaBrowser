@@ -45,6 +45,8 @@ class RemoteImageBrowsingController: UIViewController {
     
     var dataArray: [String] = []
     
+    var forchTouch: LGForceTouch!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -71,8 +73,16 @@ class RemoteImageBrowsingController: UIViewController {
         // Only supports iOS11 and above
         dataArray.append("http://staticfile.cxylg.com/IMG_0392.heic")
         
+        
+        forchTouch = LGForceTouch(viewController: self)
+        _ = forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.collectionView)
     }
     
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+    }
 
     /*
     // MARK: - Navigation
@@ -116,6 +126,7 @@ extension RemoteImageBrowsingController: UICollectionViewDelegate, UICollectionV
                                           configs: LGMediaBrowserSettings(),
                                           status: .browsing,
                                           currentIndex: indexPath.row)
+        mediaBrowser.delegate = self
         self.navigationController?.pushViewController(mediaBrowser, animated: true)
     }
 }
@@ -133,9 +144,53 @@ extension RemoteImageBrowsingController: LGMediaBrowserDataSource {
                             mediaType: LGMediaModel.MediaType.generalPhoto,
                             mediaPosition: LGMediaModel.Position.remoteFile)
     }
-    
-    
 }
+
+extension RemoteImageBrowsingController: LGMediaBrowserDelegate {
+    func didScrollToIndex(_ browser: LGMediaBrowser, index: Int) {
+        self.collectionView.scrollToItem(at: IndexPath(row: index, section: 0),
+                                         at: UICollectionView.ScrollPosition.centeredVertically,
+                                         animated: false)
+    }
+}
+
+extension RemoteImageBrowsingController: LGForceTouchPreviewingDelegate {
+    func previewingContext(_ previewingContext: LGForceTouchPreviewingContext,
+                           viewControllerForLocation location: CGPoint) -> UIViewController?
+    {
+        guard let indexPath = self.collectionView.indexPathForItem(at: location),
+            let cell = self.collectionView.cellForItem(at: indexPath) as? RemoteImageLayoutCell else
+        {
+                return nil
+        }
+        
+        previewingContext.sourceRect = cell.frame
+        
+        let url = ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 256)
+        let mediaModel = LGMediaModel(thumbnailImageURL: url,
+                            mediaURL: url,
+                            mediaAsset: nil,
+                            mediaType: LGMediaModel.MediaType.generalPhoto,
+                            mediaPosition: LGMediaModel.Position.remoteFile,
+                            thumbnailImage: cell.imageView.image)
+        let previewController = LGForceTouchPreviewController(mediaModel: mediaModel, currentIndex: indexPath.row)
+        return previewController
+    }
+    
+    func previewingContext(_ previewingContext: LGForceTouchPreviewingContext,
+                           commitViewController viewControllerToCommit: UIViewController)
+    {
+        guard let previewController = viewControllerToCommit as? LGForceTouchPreviewController else {return}
+        let mediaBrowser = LGMediaBrowser(dataSource: self,
+                                          configs: LGMediaBrowserSettings(),
+                                          status: .browsing,
+                                          currentIndex: previewController.currentIndex)
+        mediaBrowser.delegate = self
+        self.navigationController?.pushViewController(mediaBrowser, animated: false)
+    }
+}
+
+
 
 let ImageCount: Int = 4_000
 let ImageURLPrefix: String = "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/"

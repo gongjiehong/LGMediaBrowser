@@ -7,19 +7,19 @@
 	<key>NavigationBarTint</key>
 	<string>00CE2E</string>
 	<key>PromptText</key>
-	<string>#000000</string>
+	<string>000000</string>
 	<key>OpenSettingsButtonTitle</key>
-	<string>#FFFFFF</string>
+	<string>FFFFFF</string>
 	<key>NavigationBarBg</key>
-	<string>#FFFFFF</string>
+	<string>FFFFFF</string>
 	<key>BottomViewBg</key>
-	<string>#FFFFFF</string>
+	<string>FFFFFF</string>
 	<key>BottomButtonsNormalTitle</key>
-	<string>#000000</string>
+	<string>000000</string>
 	<key>BottomButtonsDisableBg</key>
-	<string>#FFFFFF</string>
+	<string>FFFFFF</string>
 	<key>SelectedImageMask</key>
-	<string>#FFFFFF</string>
+	<string>FFFFFF</string>
 	<key>AlbumListTitle</key>
 	<string>3D3A4A</string>
 	<key>AlbumListCount</key>
@@ -38,5 +38,7 @@
 	<string>00CE2E</string>
 	<key>BottomBarDisableText</key>
 	<string>C8C8C8</string>
+	<key>ActionBarTitle</key>
+	<string>FFFFFF</string>
 </dict>
 </plist>

@@ -37,6 +37,18 @@ extension UIDevice {
         }
     }
     
+    static var statusBarHeight: CGFloat {
+        if #available(iOS 11.0, *) {
+            guard let keyWindow = UIApplication.shared.keyWindow else {
+                return 20.0
+            }
+            if keyWindow.safeAreaInsets.top > 0 {
+                return 0.0
+            }
+        }
+        return 20.0
+    }
+        
     static var bottomSafeMargin: CGFloat {
         if #available(iOS 11.0, *) {
             guard let keyWindow = UIApplication.shared.keyWindow else {

@@ -108,7 +108,11 @@ public class LGMediaModel {
             return _thumbnailImage
         }
     }
-        
+    
+    internal init() {
+        self.mediaType = .other
+        self.mediaPosition = .localFile
+    }
     
     /// 初始化, 同时会在异步线程请求媒体内容
     ///

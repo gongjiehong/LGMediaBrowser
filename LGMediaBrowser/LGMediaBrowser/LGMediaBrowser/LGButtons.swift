@@ -22,7 +22,7 @@ internal class LGButton: UIButton {
     fileprivate let size: CGSize = CGSize(width: 44, height: 44)
     fileprivate var marginX: CGFloat = 0
     fileprivate var marginY: CGFloat = 0
-    fileprivate var extraMarginY: CGFloat = LGMesurement.isPhoneX ? 10 : 0
+    fileprivate var extraMarginY: CGFloat = LGMesurement.isNotchScreen ? 24.0 : 0
     
     func setup(_ imageName: String) {
         self.backgroundColor = .clear

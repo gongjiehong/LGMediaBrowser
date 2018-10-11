@@ -68,9 +68,6 @@ public class LGMediaBrowser: UIViewController {
         return model.thumbnailImage
     }
     
-    /// 分页标记
-    public weak var pageControl: UIPageControl!
-    
     /// 关闭和删除按钮视图
     weak var actionView: LGActionView!
     
@@ -80,7 +77,7 @@ public class LGMediaBrowser: UIViewController {
     /// 当前显示的页码
     var currentIndex: Int = 0 {
         didSet {
-            refreshPageControl()
+            refreshCountLayout()
         }
     }
     
@@ -143,13 +140,27 @@ public class LGMediaBrowser: UIViewController {
         
         setupActionView()
         
-        setupPageControl()
+        setupMediaArray()
         
         installNotifications()
         
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         
         addPanDissmissGesture()
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
+    }
+    
+    // MARK: - 初始化数据源
+    func setupMediaArray() {
+        if let dataSource = self.dataSource {
+            let count = dataSource.numberOfPhotosInPhotoBrowser(self)
+            self.mediaArray = [LGMediaModel](repeating: LGMediaModel(), count: count)
+            self.refreshCountLayout()
+        }
     }
     
     /// 添加下拉关闭手势
@@ -159,6 +170,10 @@ public class LGMediaBrowser: UIViewController {
                                                                          targetController: self)
         self.interactiveTransition.addPanGestureFor(viewController: self)
         self.interactiveTransition.panDismissGesture?.delegate = self
+        
+        if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
+            self.interactiveTransition.panDismissGesture?.require(toFail: panPopGeusture)
+        }
     }
     
     /// 添加通知
@@ -217,37 +232,28 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.isPagingEnabled = true
         self.collectionView.backgroundColor = UIColor.clear
         self.collectionView.keyboardDismissMode = .onDrag
+        
+        if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
+            collectionView.panGestureRecognizer.require(toFail: panPopGeusture)
+        }
+        
     }
     
     func setupActionView() {
-        let temp = LGActionView(frame: CGRect(x: 0, y: 0, width: self.view.lg_width, height: 100))
+        let temp = LGActionView(frame: CGRect(x: 0,
+                                              y: 0,
+                                              width: self.view.lg_width,
+                                              height: UIDevice.statusBarHeight + UIDevice.topSafeMargin + 44.0))
         temp.delegate = self
         self.actionView = temp
         self.view.addSubview(temp)
         self.actionView.animate(hidden: false)
     }
     
-    func setupPageControl() {
-        let originY = self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 85
-        let temp = UIPageControl(frame: CGRect(x: 0,
-                                               y: originY,
-                                               width: self.view.lg_width,
-                                               height: 20.0))
-        temp.hidesForSinglePage = true
-        temp.isUserInteractionEnabled = false
-        pageControl = temp
-        self.view.addSubview(pageControl)
-    }
-
-    func refreshPageControl() {
-        self.pageControl.numberOfPages = self.mediaArray.count
-        self.pageControl.currentPage = currentIndex
-    }
-    
     // MARK: -  点击屏幕关闭，或者显示控件
     @objc func tapedScreen(_ noti: Notification) {
         if globalConfigs.enableTapToClose && self.status == .browsing {
-            self.dismissSelf()
+            self.closeSelf()
         } else {
             showOrHideControls(!isShowingControls)
         }
@@ -275,7 +281,6 @@ public class LGMediaBrowser: UIViewController {
             UIView.animate(withDuration: 0.25,
                            animations:
                 {
-                    self.pageControl.alpha = 1.0
             }) { (isFinished) in
                 self.isAnimating = false
             }
@@ -284,7 +289,6 @@ public class LGMediaBrowser: UIViewController {
             UIView.animate(withDuration: 0.25,
                            animations:
                 {
-                    self.pageControl.alpha = 0.0
             }) { (isFinished) in
                 self.isAnimating = false
             }
@@ -312,15 +316,10 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.frame = frame
         self.collectionView.reloadData()
         
-        self.actionView.frame = CGRect(x: 0, y: 0, width: self.view.lg_width, height: 100)
-        
-        let originY = self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 85
-        self.pageControl.frame = CGRect(x: 0,
-                                        y: originY,
-                                        width: self.view.lg_width,
-                                        height: 20.0)
-        
-        refreshPageControl()
+        self.actionView.frame = CGRect(x: 0,
+                                       y: 0,
+                                       width: self.view.lg_width,
+                                       height: UIDevice.statusBarHeight + UIDevice.topSafeMargin + 44.0)
         
         if self.currentIndex != 0 {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
@@ -332,13 +331,31 @@ public class LGMediaBrowser: UIViewController {
     
     // MARK: -  退出当前页面
     
-    func dismissSelf() {
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.willDismissAtPageIndex(_:))) == true {
-            self.delegate?.willDismissAtPageIndex!(self.currentIndex)
+    func closeSelf() {
+        
+        func callWillHide() {
+            if let delegate = self.delegate,
+                delegate.responds(to: #selector(LGMediaBrowserDelegate.willHide(_:atIndex:))) {
+                delegate.willHide!(self, atIndex: self.currentIndex)
+            }
         }
-        self.dismiss(animated: true) {
-            if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didDismissAtPageIndex(_:))) == true {
-                self.delegate?.didDismissAtPageIndex!(self.currentIndex)
+        
+        func callDidHide() {
+            if let delegate = self.delegate,
+                delegate.responds(to: #selector(LGMediaBrowserDelegate.didHide(_:atIndex:)))
+            {
+                delegate.didHide!(self, atIndex: self.currentIndex)
+            }
+        }
+        
+        callWillHide()
+        
+        if let navi = self.navigationController, navi.topViewController == self, navi.viewControllers.count > 1 {
+            self.navigationController?.popViewController(animated: true)
+            callDidHide()
+        } else {
+            self.dismiss(animated: true) {
+                callDidHide()
             }
         }
     }
@@ -368,6 +385,13 @@ public class LGMediaBrowser: UIViewController {
     override public var prefersStatusBarHidden: Bool {
         return !globalConfigs.displayStatusbar
     } 
+    
+    // MARK: - 刷新数量显示
+    
+    func refreshCountLayout() {
+        guard let actionView = self.actionView else {return}
+        actionView.titleLabel.text = "\(self.currentIndex + 1) / \(self.mediaArray.count)"
+    }
     
     /*
     // MARK: - Navigation
@@ -513,6 +537,7 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         var media: LGMediaModel
         if let dataSource = self.dataSource {
             media = dataSource.photoBrowser(self, photoAtIndex: indexPath.row)
+            self.mediaArray[indexPath.row] = media
         } else {
             media = mediaArray[indexPath.row]
         }
@@ -647,7 +672,7 @@ extension LGMediaBrowser: UICollectionViewDelegateFlowLayout {
 // MARK: -  LGActionViewDelegate
 extension LGMediaBrowser: LGActionViewDelegate {
     func closeButtonPressed() {
-        dismissSelf()
+        closeSelf()
     }
     
     func deleteButtonPressed() {
@@ -657,13 +682,12 @@ extension LGMediaBrowser: LGActionViewDelegate {
                 self.collectionView.deleteItems(at: [IndexPath(row: self.currentIndex, section: 0)])
             }) { (isFinished) in
                 if self.currentIndex < self.mediaArray.count {
-                    self.refreshPageControl()
                 } else {
                     self.currentIndex -= 1
                 }
                 
                 if self.currentIndex < 0 {
-                    self.dismissSelf()
+                    self.closeSelf()
                 }
             }
         }

@@ -23,7 +23,7 @@ public enum LGMediaBrowserStatus {
 }
 
 public struct LGMediaBrowserSettings {
-    public var displayStatusbar: Bool = false
+    public var displayStatusbar: Bool = true
     public var displayCloseButton: Bool = true
     public var displayDeleteButton: Bool = false
     public var longPhotoWidthMatchScreen: Bool = true
@@ -48,13 +48,13 @@ public struct LGButtonOptions {
 
 @objc public protocol LGMediaBrowserDelegate: NSObjectProtocol {
     @objc optional
-    func didShowMediaAtIndex(_ browser: LGMediaBrowser, index: Int)
+    func didShow(_ browser: LGMediaBrowser, atIndex index: Int)
     
     @objc optional
-    func willDismissAtPageIndex(_ index: Int)
+    func willHide(_ browser: LGMediaBrowser, atIndex index: Int)
     
     @objc optional
-    func didDismissAtPageIndex(_ index: Int)
+    func didHide(_ browser: LGMediaBrowser, atIndex index: Int)
     
     @objc optional
     func didScrollToIndex(_ browser: LGMediaBrowser, index: Int)

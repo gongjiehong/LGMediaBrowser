@@ -15,6 +15,7 @@ protocol LGActionViewDelegate: NSObjectProtocol {
 
 class LGActionView: UIView {
     internal var closeButton: LGCloseButton!
+    internal var titleLabel: UILabel!
     internal var deleteButton: LGDeleteButton!
     
     weak var delegate: LGActionViewDelegate?
@@ -27,6 +28,7 @@ class LGActionView: UIView {
         super.init(frame: frame)
         configureCloseButton()
         configureDeleteButton()
+        configureTitleLabel()
     }
     
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -55,13 +57,15 @@ class LGActionView: UIView {
     func animate(hidden: Bool) {
         let closeFrame: CGRect = hidden ? closeButton.hideFrame : closeButton.showFrame
         let deleteFrame: CGRect = hidden ? deleteButton.hideFrame : deleteButton.showFrame
+        let titleFrame: CGRect = hidden ? titleLabelHideFrame : titleLabelShowFrame
         
         let closeBtnHidden = !globalConfigs.displayCloseButton
         let deleteBtnHidden = !globalConfigs.displayDeleteButton
-        
+        let titleLabelHidden = hidden
         if hidden == false {
             self.closeButton.isHidden = closeBtnHidden
             self.deleteButton.isHidden = deleteBtnHidden
+            self.titleLabel.isHidden = titleLabelHidden
         }
         UIView.animate(withDuration: 0.35,
                        animations: {
@@ -70,11 +74,15 @@ class LGActionView: UIView {
                         self.closeButton.frame = closeFrame
                         self.deleteButton.alpha = alpha
                         self.deleteButton.frame = deleteFrame
+                        self.titleLabel.alpha = alpha
+                        self.titleLabel.frame = titleFrame
+                        
         }) { (finished) in
             if finished {
                 if !hidden {
                     self.closeButton.isHidden = closeBtnHidden
                     self.deleteButton.isHidden = deleteBtnHidden
+                    self.titleLabel.isHidden = titleLabelHidden
                 }
             }
         }
@@ -118,5 +126,35 @@ extension LGActionView {
         
         guard let image = image else { return }
         deleteButton.setImage(image, for: UIControl.State())
+    }
+    
+    func configureTitleLabel() {
+        if titleLabel == nil {
+            titleLabel = UILabel(frame: titleLabelHideFrame)
+            titleLabel.textColor = UIColor(colorName: "ActionBarTitle")
+            titleLabel.backgroundColor = UIColor.clear
+            titleLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFont.Weight.medium)
+            titleLabel.isHidden = true
+            self.addSubview(titleLabel)
+        }
+    }
+    
+    var titleLabelShowFrame: CGRect {
+        let titleLabelWidth: CGFloat = self.lg_width - 80.0
+        let titleLabelHeight: CGFloat = 30.0
+        let topSafeMargin = UIDevice.topSafeMargin
+        let statusBarHeight = UIDevice.statusBarHeight
+        let titleLabelOriginY =
+            topSafeMargin + statusBarHeight +
+                (self.lg_height - topSafeMargin - titleLabelHeight - statusBarHeight) / 2.0
+        return CGRect(x: titleLabelWidth / 2.0,
+                      y: titleLabelOriginY,
+                      width: titleLabelWidth,
+                      height: titleLabelHeight)
+    }
+
+    var titleLabelHideFrame: CGRect {
+        let frame = titleLabelShowFrame
+        return CGRect(x: frame.origin.x, y: -frame.origin.y, width: frame.width, height: frame.height)
     }
 }

@@ -37,7 +37,19 @@ public struct LGMesurement {
         return screenWidth / screenHeight
     }()
     
-    public static let isPhoneX: Bool = {
-        return isPhone && UIScreen.main.nativeBounds.height == 2436
-    }()
+    public static var isNotchScreen: Bool {
+        guard let keyWindow = UIApplication.shared.keyWindow else {
+            return false
+        }
+        
+        if #available(iOS 11.0, *) {
+            if keyWindow.safeAreaInsets.top > 20.0 {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return false
+        }
+    }
 }
