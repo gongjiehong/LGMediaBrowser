@@ -62,13 +62,9 @@ open class LGMediaBrowserVideoCell: LGMediaBrowserPreviewCell {
     }
     
     func initPlayerView(_ media: LGMediaModel) {
-        do {
-            previewView = try LGPlayerControlView(frame: self.contentView.bounds,
-                                                  mediaModel: media)
-            self.contentView.addSubview(previewView!)
-        } catch {
-            println(error)
-        }
+        previewView = LGPlayerControlView(frame: self.contentView.bounds,
+                                          mediaModel: media)
+        self.contentView.addSubview(previewView!)
     }
 }
 
@@ -103,7 +99,9 @@ open class LGMediaBrowserGeneralPhotoCell: LGMediaBrowserPreviewCell {
     }
     
     override open func willDisplay() {
-        
+        if let previewView = self.previewView as? LGZoomingScrollView {
+            previewView.setMaxMinZoomScalesForCurrentBounds()
+        }
     }
     
     override open func didEndDisplay() {

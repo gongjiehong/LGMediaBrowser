@@ -18,20 +18,11 @@ class ViewController: UIViewController, UINavigationBarDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
-        
 
-//        player = LGPlayerControlView(frame: CGRect.zero,
-//                                     mediaURL: URL(string: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8")!,
-//                                     isMuted: false)
-//
-//        player.mediaType = LGMediaType.video
-//        self.view.addSubview(player)
         let tap = UITapGestureRecognizer(target: self, action: #selector(imageTaped(_:)))
         self.imageView.addGestureRecognizer(tap)
         
         testNavigationBar()
-        
     }
     
     func testNavigationBar() {
@@ -62,17 +53,6 @@ class ViewController: UIViewController, UINavigationBarDelegate {
     }
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
-//        let picker = LGCameraCapture()
-//        picker.outputSize = CGSize(width: 1, height: 1)
-//        picker.maximumVideoRecordingDuration = 20.0
-//        picker.videoType = .mp4
-//        self.present(picker, animated: true) {
-//
-//        }
-//        let auth = LGUnauthorizedController()
-//        self.present(auth, animated: true) {
-//
-//        }
         
 
         var config = LGMediaPicker.Configuration.default

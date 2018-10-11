@@ -39,7 +39,7 @@ fileprivate class RemoteImageLayoutCell: UICollectionViewCell {
     }
 }
 
-class RemoteImageBrowsingController: UIViewController {
+class RemoteImageWallController: UIViewController {
 
     @IBOutlet weak var collectionView: UICollectionView!
     
@@ -95,7 +95,7 @@ class RemoteImageBrowsingController: UIViewController {
     */
 }
 
-extension RemoteImageBrowsingController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         var cell: RemoteImageLayoutCell
         if let temp = collectionView.dequeueReusableCell(withReuseIdentifier: "RemoteImageLayoutCell",
@@ -122,8 +122,10 @@ extension RemoteImageBrowsingController: UICollectionViewDelegate, UICollectionV
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+        var configs = LGMediaBrowserSettings()
+        configs.enableTapToClose = false
         let mediaBrowser = LGMediaBrowser(dataSource: self,
-                                          configs: LGMediaBrowserSettings(),
+                                          configs: configs,
                                           status: .browsing,
                                           currentIndex: indexPath.row)
         mediaBrowser.delegate = self
@@ -131,7 +133,7 @@ extension RemoteImageBrowsingController: UICollectionViewDelegate, UICollectionV
     }
 }
 
-extension RemoteImageBrowsingController: LGMediaBrowserDataSource {
+extension RemoteImageWallController: LGMediaBrowserDataSource {
     func numberOfPhotosInPhotoBrowser(_ photoBrowser: LGMediaBrowser) -> Int {
         return ImageCount
     }
@@ -146,7 +148,7 @@ extension RemoteImageBrowsingController: LGMediaBrowserDataSource {
     }
 }
 
-extension RemoteImageBrowsingController: LGMediaBrowserDelegate {
+extension RemoteImageWallController: LGMediaBrowserDelegate {
     func didScrollToIndex(_ browser: LGMediaBrowser, index: Int) {
         self.collectionView.scrollToItem(at: IndexPath(row: index, section: 0),
                                          at: UICollectionView.ScrollPosition.centeredVertically,
@@ -154,7 +156,7 @@ extension RemoteImageBrowsingController: LGMediaBrowserDelegate {
     }
 }
 
-extension RemoteImageBrowsingController: LGForceTouchPreviewingDelegate {
+extension RemoteImageWallController: LGForceTouchPreviewingDelegate {
     func previewingContext(_ previewingContext: LGForceTouchPreviewingContext,
                            viewControllerForLocation location: CGPoint) -> UIViewController?
     {
@@ -181,8 +183,10 @@ extension RemoteImageBrowsingController: LGForceTouchPreviewingDelegate {
                            commitViewController viewControllerToCommit: UIViewController)
     {
         guard let previewController = viewControllerToCommit as? LGForceTouchPreviewController else {return}
+        var configs = LGMediaBrowserSettings()
+        configs.enableTapToClose = false
         let mediaBrowser = LGMediaBrowser(dataSource: self,
-                                          configs: LGMediaBrowserSettings(),
+                                          configs: configs,
                                           status: .browsing,
                                           currentIndex: previewController.currentIndex)
         mediaBrowser.delegate = self

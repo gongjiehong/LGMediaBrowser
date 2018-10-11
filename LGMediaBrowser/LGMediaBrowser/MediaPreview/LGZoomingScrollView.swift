@@ -107,16 +107,18 @@ open class LGZoomingScrollView: UIScrollView {
                                                  placeholder: media.thumbnailImage,
                                                  options: LGWebImageOptions.default,
                                                  progressBlock:
-                        { (progressModel) in
-                            self.progressView.progress = CGFloat(progressModel.fractionCompleted)
-                    }, transformBlock: nil) { (resultImage, _, _, imageStage, error) in
+                        { [weak self] (progressModel) in
+                            guard let weakSelf = self else {return}
+                            weakSelf.progressView.progress = CGFloat(progressModel.fractionCompleted)
+                    }, transformBlock: nil) { [weak self] (resultImage, _, _, imageStage, error) in
+                        guard let weakSelf = self else {return}
                         guard error == nil, let image = resultImage else {
-                            self.progressView.isShowError = true
+                            weakSelf.progressView.isShowError = true
                             return
                         }
-                        self.mediaModel?.thumbnailImage = image
-                        self.progressView.isHidden = imageStage == LGWebImageStage.finished
-                        self.displayImage(complete: imageStage == LGWebImageStage.finished)
+                        weakSelf.mediaModel?.thumbnailImage = image
+                        weakSelf.progressView.isHidden = imageStage == LGWebImageStage.finished
+                        weakSelf.displayImage(complete: imageStage == LGWebImageStage.finished)
                     }
                 }
             } catch {

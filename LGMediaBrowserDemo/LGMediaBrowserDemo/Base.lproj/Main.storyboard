@@ -113,7 +113,7 @@
         <!--Remote Media Layout-->
         <scene sceneID="xIP-D5-QpE">
             <objects>
-                <viewController title="Remote Media Layout" id="jeQ-Lk-NHc" customClass="RemoteImageBrowsingController" customModule="LGMediaBrowserDemo" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Remote Media Layout" id="jeQ-Lk-NHc" customClass="RemoteImageWallController" customModule="LGMediaBrowserDemo" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="6Oy-RA-TCg"/>
                         <viewControllerLayoutGuide type="bottom" id="7zY-te-Kzz"/>
