@@ -8,7 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		FE0980EC2099B88A006B6D8C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980EB2099B88A006B6D8C /* AppDelegate.swift */; };
-		FE0980EE2099B88A006B6D8C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980ED2099B88A006B6D8C /* ViewController.swift */; };
+		FE0980EE2099B88A006B6D8C /* MediaBrowserEntranceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980ED2099B88A006B6D8C /* MediaBrowserEntranceController.swift */; };
 		FE0980F12099B88A006B6D8C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FE0980EF2099B88A006B6D8C /* Main.storyboard */; };
 		FE0980F32099B88B006B6D8C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FE0980F22099B88B006B6D8C /* Assets.xcassets */; };
 		FE0980F62099B88B006B6D8C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FE0980F42099B88B006B6D8C /* LaunchScreen.storyboard */; };
@@ -44,7 +44,7 @@
 /* Begin PBXFileReference section */
 		FE0980E82099B88A006B6D8C /* LGMediaBrowserDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LGMediaBrowserDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE0980EB2099B88A006B6D8C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		FE0980ED2099B88A006B6D8C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		FE0980ED2099B88A006B6D8C /* MediaBrowserEntranceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaBrowserEntranceController.swift; sourceTree = "<group>"; };
 		FE0980F02099B88A006B6D8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FE0980F22099B88B006B6D8C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FE0980F52099B88B006B6D8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -100,7 +100,7 @@
 			children = (
 				FE0980EB2099B88A006B6D8C /* AppDelegate.swift */,
 				FE1DC4EE2109C65500C0EB23 /* FeatureListViewController.swift */,
-				FE0980ED2099B88A006B6D8C /* ViewController.swift */,
+				FE0980ED2099B88A006B6D8C /* MediaBrowserEntranceController.swift */,
 				FE4FBB232109C87100CA18E6 /* RemoteImageWallController.swift */,
 				FE4FBB252109C89400CA18E6 /* MediaPickerDemoCon.swift */,
 				FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */,
@@ -188,7 +188,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE4FBB242109C87100CA18E6 /* RemoteImageWallController.swift in Sources */,
-				FE0980EE2099B88A006B6D8C /* ViewController.swift in Sources */,
+				FE0980EE2099B88A006B6D8C /* MediaBrowserEntranceController.swift in Sources */,
 				FE0980EC2099B88A006B6D8C /* AppDelegate.swift in Sources */,
 				FE4FBB282109C8A900CA18E6 /* MediaCaptureDemoCon.swift in Sources */,
 				FE1DC4EF2109C65500C0EB23 /* FeatureListViewController.swift in Sources */,

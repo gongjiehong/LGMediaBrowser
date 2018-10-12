@@ -185,11 +185,12 @@ public class LGMediaBrowser: UIViewController {
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(tapedScreen(_:)),
-                                               name: kTapedScreenNotification, object: nil)
+                                               name: LGMediaBrowser.tapedScreenNotification,
+                                               object: nil)
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(needHideControls(_:)),
-                                               name: kNeedHideControlsNotification,
+                                               name: LGMediaBrowser.needHideControlsNotification,
                                                object: nil)
     }
     
@@ -714,3 +715,7 @@ extension LGMediaBrowser: UIGestureRecognizerDelegate {
     }
 }
 
+extension LGMediaBrowser {
+    public static let tapedScreenNotification = Notification.Name("TapedScreenNotification")
+    public static let needHideControlsNotification = Notification.Name("NeedHideControlsNotification")
+}

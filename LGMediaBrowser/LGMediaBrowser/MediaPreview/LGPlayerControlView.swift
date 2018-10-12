@@ -391,7 +391,7 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     @objc func showOrHideControls() {
-        NotificationCenter.default.post(name: kNeedHideControlsNotification, object: nil)
+        NotificationCenter.default.post(name: LGMediaBrowser.needHideControlsNotification, object: nil)
         if self.mediaType == .audio {
             return
         }

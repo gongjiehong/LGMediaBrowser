@@ -290,7 +290,7 @@ open class LGZoomingScrollView: UIScrollView {
             // zoom out
             setZoomScale(minimumZoomScale, animated: true)
         } else {
-            let zoomRect = zoomRectForScrollViewWith(maximumZoomScale, touchPoint: touchPoint)
+            let zoomRect = zoomRectForScrollViewWith(minimumZoomScale * 2.0, touchPoint: touchPoint)
             zoom(to: zoomRect, animated: true)
         }
         
@@ -298,11 +298,11 @@ open class LGZoomingScrollView: UIScrollView {
     }
     
     @objc func postNotification() {
-        NotificationCenter.default.post(name: kTapedScreenNotification, object: nil)
+        NotificationCenter.default.post(name: LGMediaBrowser.tapedScreenNotification, object: nil)
     }
     
     @objc func postDoubleTapNotification() {
-        NotificationCenter.default.post(name: kNeedHideControlsNotification, object: nil)
+        NotificationCenter.default.post(name: LGMediaBrowser.needHideControlsNotification, object: nil)
     }
     
     deinit {

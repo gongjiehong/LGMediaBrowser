@@ -43,36 +43,12 @@ class RemoteImageWallController: UIViewController {
 
     @IBOutlet weak var collectionView: UICollectionView!
     
-    var dataArray: [String] = []
-    
     var forchTouch: LGForceTouch!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
         
         self.collectionView.register(RemoteImageLayoutCell.self, forCellWithReuseIdentifier: "RemoteImageLayoutCell")
-        
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/mew_interlaced.png")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480450.jp2")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1518065289.tiff")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/5ad6b3c630e69.bmp")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/AnimatedPortableNetworkGraphics.png")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/C3ZwL.png")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/Pikachu.gif")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/animated.webp")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/bitbug_favicon.ico")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/google%402x.webp")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/lime-cat.JPEG")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/normal_png.png")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/static_gif.gif")
-        dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/twitter_fav_icon_300.png")
-        
-        // Only supports iOS11 and above
-        dataArray.append("http://staticfile.cxylg.com/IMG_0392.heic")
-        
         
         forchTouch = LGForceTouch(viewController: self)
         _ = forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.collectionView)
@@ -124,6 +100,7 @@ extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewD
         collectionView.deselectItem(at: indexPath, animated: true)
         var configs = LGMediaBrowserSettings()
         configs.enableTapToClose = false
+        configs.displayStatusbar = false
         let mediaBrowser = LGMediaBrowser(dataSource: self,
                                           configs: configs,
                                           status: .browsing,
@@ -185,6 +162,7 @@ extension RemoteImageWallController: LGForceTouchPreviewingDelegate {
         guard let previewController = viewControllerToCommit as? LGForceTouchPreviewController else {return}
         var configs = LGMediaBrowserSettings()
         configs.enableTapToClose = false
+        configs.displayStatusbar = false
         let mediaBrowser = LGMediaBrowser(dataSource: self,
                                           configs: configs,
                                           status: .browsing,

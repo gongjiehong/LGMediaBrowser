@@ -8,9 +8,20 @@
 
 import Foundation
 
+internal protocol LGButtonPropertys {
+    var showFrame: CGRect {get set}
+    var hideFrame: CGRect {get set}
+    var padding: CGPoint {get}
+    var imageName: String {get}
+}
+
+
 internal class LGButton: UIButton {
     internal var showFrame: CGRect!
     internal var hideFrame: CGRect!
+    internal var padding: CGPoint {
+        return CGPoint.zero
+    }
     
     fileprivate var insets: UIEdgeInsets {
         if UI_USER_INTERFACE_IDIOM() == .phone {
@@ -69,22 +80,25 @@ internal class LGImageButton: LGButton {
 }
 
 class LGCloseButton: LGImageButton {
+    override var padding: CGPoint {
+        return CGPoint(x: 5, y: 20)
+    }
     override var imageName: String { return "btn_close_white" }
     override var marginX: CGFloat {
         get {
             let swapCloseAndDeleteButtons = globalConfigs.swapCloseAndDeleteButtons
             var result: CGFloat
             if swapCloseAndDeleteButtons {
-                result = LGMesurement.screenWidth - LGButtonOptions.closeButtonPadding.x - self.size.width
+                result = LGMesurement.screenWidth - padding.x - self.size.width
             } else {
-                result = LGButtonOptions.closeButtonPadding.x
+                result = padding.x
             }
             return result
         }
         set { super.marginX = newValue }
     }
     override var marginY: CGFloat {
-        get { return LGButtonOptions.closeButtonPadding.y + extraMarginY }
+        get { return padding.y + extraMarginY }
         set { super.marginY = newValue }
     }
     
@@ -101,22 +115,25 @@ class LGCloseButton: LGImageButton {
 }
 
 class LGDeleteButton: LGImageButton {
+    override var padding: CGPoint {
+        return CGPoint(x: 5, y: 20)
+    }
     override var imageName: String { return "btn_delete_white" }
     override var marginX: CGFloat {
         get {
             let swapCloseAndDeleteButtons = globalConfigs.swapCloseAndDeleteButtons
             var result: CGFloat
             if swapCloseAndDeleteButtons {
-                result = LGButtonOptions.deleteButtonPadding.x
+                result = padding.x
             } else {
-                result = LGMesurement.screenWidth - LGButtonOptions.deleteButtonPadding.x - self.size.width
+                result = LGMesurement.screenWidth - padding.x - self.size.width
             }
             return result
         }
         set { super.marginX = newValue }
     }
     override var marginY: CGFloat {
-        get { return LGButtonOptions.deleteButtonPadding.y + extraMarginY }
+        get { return padding.y + extraMarginY }
         set { super.marginY = newValue }
     }
     

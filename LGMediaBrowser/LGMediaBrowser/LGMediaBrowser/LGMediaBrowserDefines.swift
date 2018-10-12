@@ -38,14 +38,6 @@ public struct LGMediaBrowserSettings {
     }
 }
 
-public let kTapedScreenNotification = Notification.Name("TapedScreenNotification")
-public let kNeedHideControlsNotification = Notification.Name("NeedHideControlsNotification")
-
-public struct LGButtonOptions {
-    public static var closeButtonPadding: CGPoint = CGPoint(x: 5, y: 20)
-    public static var deleteButtonPadding: CGPoint = CGPoint(x: 5, y: 20)
-}
-
 @objc public protocol LGMediaBrowserDelegate: NSObjectProtocol {
     @objc optional
     func didShow(_ browser: LGMediaBrowser, atIndex index: Int)
@@ -84,4 +76,3 @@ func LGLocalizedString(_ key: String, comment: String) -> String {
 func LGLocalizedString(_ key: String) -> String {
     return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: thisBundle(), value: "", comment: key)
 }
-

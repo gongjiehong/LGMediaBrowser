@@ -14,6 +14,9 @@ open class LGMPPreviewTransition: NSObject {
         case pop
     }
     
+    public var targetView: UIView?
+    public var finalImageSize: CGSize = CGSize.zero
+    public var placeholderImage: UIImage?
     public private(set) var direction: Direction
     
     public init(withDirection direction: Direction) {
@@ -25,10 +28,22 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
     public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
         switch self.direction {
         case .push:
+            pushAnimation(using: transitionContext)
             break
         case .pop:
+            popAnimation(using: transitionContext)
             break
         }
+    }
+    
+    func pushAnimation(using transitionContext: UIViewControllerContextTransitioning) {
+        guard let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from),
+            let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) else {return}
+        
+    }
+    
+    func popAnimation(using transitionContext: UIViewControllerContextTransitioning) {
+        
     }
     
     public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {

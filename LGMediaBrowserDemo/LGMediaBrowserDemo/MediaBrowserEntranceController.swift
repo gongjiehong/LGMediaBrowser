@@ -10,9 +10,8 @@ import UIKit
 import LGMediaBrowser
 import AVFoundation
 
-class ViewController: UIViewController, UINavigationBarDelegate {
+class MediaBrowserEntranceController: UIViewController {
     
-//    var fpsLabel
     
     @IBOutlet weak var imageView: UIImageView!
     
@@ -21,52 +20,10 @@ class ViewController: UIViewController, UINavigationBarDelegate {
 
         let tap = UITapGestureRecognizer(target: self, action: #selector(imageTaped(_:)))
         self.imageView.addGestureRecognizer(tap)
-        
-        testNavigationBar()
     }
-    
-    func testNavigationBar() {
-        let navigationBar = UINavigationBar(frame: CGRect(x: 0,
-                                                          y: 0,
-                                                          width: UIScreen.main.bounds.width,
-                                                          height: 64.0))
-        navigationBar.delegate = self
-        navigationBar.translatesAutoresizingMaskIntoConstraints = false
-        
-        let titleItem = UINavigationItem(title: "Title")
-        navigationBar.items?.append(titleItem)
-        
-        self.view.addSubview(navigationBar)
-        navigationBar.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
-        navigationBar.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
-        
-        
-        if #available(iOS 11.0, *) {
-            navigationBar.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor).isActive = true
-        } else {
-            navigationBar.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
-        }
-    }
-    
-    func position(for bar: UIBarPositioning) -> UIBarPosition {
-        return UIBarPosition.topAttached
-    }
+
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
-        
-
-        var config = LGMediaPicker.Configuration.default
-        config.resultMediaTypes = .image
-        let picker = LGMediaPicker()
-        picker.config = config
-        self.present(picker, animated: true) {
-
-        }
-
-        let fpsLabel = LGFPSLabel(frame: CGRect(x: UIScreen.main.bounds.width - 80, y: UIScreen.main.bounds.height - 20.0, width: 60, height: 20))
-        UIApplication.shared.keyWindow?.addSubview(fpsLabel)
-        return
-        
         var dataArray = [String]()
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/mew_interlaced.png")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480450.jp2")
@@ -94,33 +51,28 @@ class ViewController: UIViewController, UINavigationBarDelegate {
                                            mediaURL: stringResult,
                                            mediaAsset: nil,
                                            mediaType: LGMediaModel.MediaType.generalPhoto,
-                                           mediaPosition: LGMediaModel.Position.remoteFile,
-                                           thumbnailImage: UIImage(named: "1510480481")))
+                                           mediaPosition: LGMediaModel.Position.remoteFile))
         }
         modelArray += [LGMediaModel(thumbnailImageURL: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
                                     mediaURL: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
                                     mediaAsset: nil,
                                     mediaType: LGMediaModel.MediaType.generalPhoto,
-                                    mediaPosition: LGMediaModel.Position.remoteFile,
-                                    thumbnailImage: UIImage(named: "1510480481")),
+                                    mediaPosition: LGMediaModel.Position.remoteFile),
                        LGMediaModel(thumbnailImageURL: nil,
                                     mediaURL: "http://staticfile.cxylg.com/Lenka%20-%20Trouble%20Is%20a%20Friend.mp3",
                                     mediaAsset: nil,
                                     mediaType: LGMediaModel.MediaType.audio,
-                                    mediaPosition: LGMediaModel.Position.remoteFile,
-                                    thumbnailImage: UIImage(named: "1510480481")),
+                                    mediaPosition: LGMediaModel.Position.remoteFile),
                        LGMediaModel(thumbnailImageURL: nil,
                                     mediaURL: "http://staticfile.cxylg.com/94NWfqRSWgta-SCVideo.2.mp4",
                                     mediaAsset: nil,
                                     mediaType: LGMediaModel.MediaType.video,
-                                    mediaPosition: LGMediaModel.Position.remoteFile,
-                                    thumbnailImage: UIImage(named: "1510480481")),
+                                    mediaPosition: LGMediaModel.Position.remoteFile),
                        LGMediaModel(thumbnailImageURL: nil,
                                     mediaURL: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8",
                                     mediaAsset: nil,
                                     mediaType: LGMediaModel.MediaType.video,
-                                    mediaPosition: LGMediaModel.Position.remoteFile,
-                                    thumbnailImage: UIImage(named: "1510480481"))]
+                                    mediaPosition: LGMediaModel.Position.remoteFile)]
         
         let media = LGMediaBrowser(mediaArray: modelArray,
                                    configs: LGMediaBrowserSettings(),
@@ -144,7 +96,7 @@ class ViewController: UIViewController, UINavigationBarDelegate {
 
 }
 
-extension ViewController: LGMediaBrowserDelegate {
+extension MediaBrowserEntranceController: LGMediaBrowserDelegate {
     func removeMedia(_ browser: LGMediaBrowser, index: Int, reload: @escaping (() -> Void)) {
         reload()
     }
