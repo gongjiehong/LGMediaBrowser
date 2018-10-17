@@ -16,6 +16,8 @@ class FeatureListViewController: UITableViewController, UIGestureRecognizerDeleg
         return fpsLabel
     }()
     
+    var naviDelegate = LGMediaBrowserNaviDelegate()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -27,6 +29,7 @@ class FeatureListViewController: UITableViewController, UIGestureRecognizerDeleg
         
         // MARK: - 开启手势pop
         self.navigationController?.interactivePopGestureRecognizer?.delegate = self
+        self.navigationController?.delegate = naviDelegate
     }
 
     override func didReceiveMemoryWarning() {

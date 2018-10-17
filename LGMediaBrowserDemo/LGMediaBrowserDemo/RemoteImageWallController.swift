@@ -117,11 +117,16 @@ extension RemoteImageWallController: LGMediaBrowserDataSource {
     
     func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel {
         let url = ImgaeURLConstructHelper.imageURL(fromFileID: index + 1, size: 256)
+        var image: UIImage?
+        if let cell = collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? RemoteImageLayoutCell {
+            image = cell.imageView.image
+        }
         return LGMediaModel(thumbnailImageURL: url,
                             mediaURL: url,
                             mediaAsset: nil,
                             mediaType: LGMediaModel.MediaType.generalPhoto,
-                            mediaPosition: LGMediaModel.Position.remoteFile)
+                            mediaPosition: LGMediaModel.Position.remoteFile,
+                            thumbnailImage: image)
     }
 }
 
@@ -130,6 +135,11 @@ extension RemoteImageWallController: LGMediaBrowserDelegate {
         self.collectionView.scrollToItem(at: IndexPath(row: index, section: 0),
                                          at: UICollectionView.ScrollPosition.centeredVertically,
                                          animated: false)
+    }
+    
+    
+    func viewForMedia(_ browser: LGMediaBrowser, index: Int) -> UIView? {
+        return self.collectionView.cellForItem(at: IndexPath(row: index, section: 0))
     }
 }
 

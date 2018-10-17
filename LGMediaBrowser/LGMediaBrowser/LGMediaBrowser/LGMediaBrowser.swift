@@ -37,11 +37,28 @@ public class LGMediaBrowser: UIViewController {
         static var Other = "UICollectionViewCell"
     }
     
+    /// 重载navigationController，设置delegate，但OCRuntime在swift特别麻烦，懒得去hook或者添加动画回调方法了
+    /// 后续心情好再行添加相关实现
+//    public override var navigationController: UINavigationController? {
+//        if super.navigationController?.delegate == nil {
+//            super.navigationController?.delegate = self
+//        }
+//        return super.navigationController
+//    }
+    
     /// 左右元素的间距
     private let itemPadding: CGFloat = 10.0
     
     /// 自定义滑动dismiss Transition
-    private var interactiveTransition: LGMediaBrowserInteractiveTransition!
+    private lazy var interactiveTransition: LGMediaBrowserInteractiveTransition = {
+        let temp = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView,
+                                                       toTargetView: self.targetView,
+                                                       targetController: self)
+        temp.addPanGestureFor(viewController: self)
+        temp.panDismissGesture?.delegate = self
+         
+        return temp
+    }()
     
     /// 显示各种媒体文件的UICollectionView
     public weak var collectionView: UICollectionView!
@@ -62,6 +79,10 @@ public class LGMediaBrowser: UIViewController {
     /// 动画用到的图片
     public weak var animationImage: UIImage? {
         if self.mediaArray.count == 0 {
+            if let dataSource = self.dataSource {
+                let dataModel = dataSource.photoBrowser(self, photoAtIndex: self.currentIndex)
+                return dataModel.thumbnailImage
+            }
             return nil
         }
         let model = self.mediaArray[currentIndex]
@@ -165,15 +186,10 @@ public class LGMediaBrowser: UIViewController {
     
     /// 添加下拉关闭手势
     func addPanDissmissGesture() {
-        self.interactiveTransition = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView,
-                                                                         toTargetView: self.targetView,
-                                                                         targetController: self)
-        self.interactiveTransition.addPanGestureFor(viewController: self)
-        self.interactiveTransition.panDismissGesture?.delegate = self
         
-        if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
-            self.interactiveTransition.panDismissGesture?.require(toFail: panPopGeusture)
-        }
+//        if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
+//            self.interactiveTransition.panDismissGesture?.require(toFail: panPopGeusture)
+//        }
     }
     
     /// 添加通知
@@ -411,7 +427,7 @@ public class LGMediaBrowser: UIViewController {
 }
 
 // MARK: - UIViewControllerTransitioningDelegate
-extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
+extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserPushAnimationDelegate {
     
     func getCurrentLayoutView() -> UIView? {
         if let cell = self.collectionView.cellForItem(at: IndexPath(row: self.currentIndex, section: 0)) {
@@ -487,6 +503,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) ->
         UIViewControllerInteractiveTransitioning?
     {
+        self.interactiveTransition.actionType = .dismiss
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
             if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
                 self.targetView = view
@@ -519,6 +536,76 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         self.interactiveTransition.targetImage = self.animationImage
         self.interactiveTransition.finalImageSize = finalImageSize
         return self.interactiveTransition
+    }
+    
+    public func navigationController(_ navigationController: UINavigationController,
+                                     animationControllerFor operation: UINavigationController.Operation,
+                                     from fromVC: UIViewController,
+                                     to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning?
+    {
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
+        
+        if operation == .push {
+            let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.push)
+            transition.placeholderImage = animationImage
+            transition.targetView = targetView
+            return transition
+        } else {
+            if fromVC.self != self.self {
+                return nil
+            }
+            
+            let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.pop)
+            transition.placeholderImage = animationImage
+            transition.targetView = targetView
+            if let layoutView = getCurrentLayoutView() {
+                transition.finalImageSize = layoutView.lg_size
+            }
+            return transition
+        }
+    }
+    
+    public func navigationController(_ navigationController: UINavigationController,
+                                     interactionControllerFor animationController: UIViewControllerAnimatedTransitioning)
+        -> UIViewControllerInteractiveTransitioning?
+    {
+        self.interactiveTransition.actionType = .pop
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
+        
+        if !self.interactiveTransition.isInteration {
+            return nil
+        }
+        
+        var finalImageSize: CGSize = CGSize.zero
+        var fromTargetView: UIView?
+        if let layoutView = getCurrentLayoutView() {
+            fromTargetView = layoutView
+            if self.mediaArray[currentIndex].mediaType == .video ||
+                self.mediaArray[currentIndex].mediaType == .audio {
+                if let image = self.animationImage {
+                    finalImageSize = image.size
+                }
+            } else {
+                finalImageSize = layoutView.lg_size
+            }
+        } else if let image = self.animationImage {
+            finalImageSize = image.size
+        }
+        
+        self.interactiveTransition.targetController = self
+        self.interactiveTransition.toTargetView = self.targetView
+        self.interactiveTransition.fromTargetView = fromTargetView
+        self.interactiveTransition.targetImage = self.animationImage
+        self.interactiveTransition.finalImageSize = finalImageSize
+        return self.interactiveTransition.isInteration ? self.interactiveTransition : nil
     }
 }
 

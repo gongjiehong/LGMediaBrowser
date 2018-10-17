@@ -40,5 +40,7 @@
 	<string>C8C8C8</string>
 	<key>ActionBarTitle</key>
 	<string>FFFFFF</string>
+	<key>DefaultImage</key>
+	<string>D9D9E4</string>
 </dict>
 </plist>

@@ -9,6 +9,14 @@
 import UIKit
 
 public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTransition {
+    
+    public enum ActionType {
+        case pop
+        case dismiss
+    }
+    
+    public var actionType: ActionType = .dismiss
+    
     public var isInteration: Bool = false
     public weak var targetController: UIViewController?
     private weak var transitionContext: UIViewControllerContextTransitioning?
@@ -69,7 +77,15 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             beginX = location.x
             beginY = location.y
             isInteration = true
-            self.targetController?.dismiss(animated: true, completion: nil)
+            
+            switch self.actionType {
+            case .dismiss:
+                self.targetController?.dismiss(animated: true, completion: nil)
+                break
+            case .pop:
+                self.targetController?.navigationController?.popViewController(animated: true)
+                break
+            }
             break
         case .changed:
             if self.isInteration {
@@ -211,7 +227,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             self.backgroundView?.removeFromSuperview()
             self.backgroundView = nil
             let isCanceled = transitionContext.transitionWasCancelled
-            transitionContext.completeTransition(!isCanceled)
+//            transitionContext.completeTransition(!isCanceled)
         }
     }
     
