@@ -107,6 +107,7 @@ extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewD
                                           currentIndex: indexPath.row)
         mediaBrowser.delegate = self
         self.navigationController?.pushViewController(mediaBrowser, animated: true)
+//        self.present(mediaBrowser, animated: true, completion: nil)
     }
 }
 

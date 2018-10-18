@@ -105,10 +105,10 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 if let temp = toVC as? LGMediaBrowser {
                     temp.collectionView?.isHidden = false
                 }
-                let isCanceled = transitionContext.transitionWasCancelled
+                let isCancelled = transitionContext.transitionWasCancelled
                 tempImageView.removeFromSuperview()
                 tempBgView.removeFromSuperview()
-                transitionContext.completeTransition(!isCanceled)
+                transitionContext.completeTransition(!isCancelled)
             }
         } else {
             let fromView = fromVC.view
@@ -129,8 +129,8 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 {
                     toView?.frame = finalFrame
             }) { (isFinished) in
-                let isCanceled = transitionContext.transitionWasCancelled
-                transitionContext.completeTransition(!isCanceled)
+                let isCancelled = transitionContext.transitionWasCancelled
+                transitionContext.completeTransition(!isCancelled)
             }
         }
     }
@@ -200,10 +200,10 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 {
                     tempImageView.frame = rect
             }) { (finished) in
-                let isCanceled = transitionContext.transitionWasCancelled
+                let isCancelled = transitionContext.transitionWasCancelled
                 targetView.isHidden = false
                 tempImageView.removeFromSuperview()
-                if isCanceled {
+                if isCancelled {
                     fromVC.view.isHidden = false
                     fromVC.view.backgroundColor = UIColor.black
                     
@@ -211,7 +211,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                     
                 }
                 if !isInteractive {
-                    transitionContext.completeTransition(!isCanceled)
+                    transitionContext.completeTransition(!isCancelled)
                 }
             }
         } else {
@@ -230,9 +230,9 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 {
                     fromView?.frame = finalFrame
             }) { (isFinished) in
-                let isCanceled = transitionContext.transitionWasCancelled
+                let isCancelled = transitionContext.transitionWasCancelled
                 if !isInteractive {
-                    transitionContext.completeTransition(!isCanceled)
+                    transitionContext.completeTransition(!isCancelled)
                 }
             }
         }

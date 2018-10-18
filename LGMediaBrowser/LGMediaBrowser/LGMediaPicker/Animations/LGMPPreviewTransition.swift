@@ -155,7 +155,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         
         let options = UIView.AnimationOptions.curveEaseOut
         
-
+        let isInteractive = transitionContext.isInteractive
         UIView.animate(withDuration: transitionDuration(using: transitionContext),
                        delay: 0.0,
                        usingSpringWithDamping: 0.8,
@@ -183,7 +183,10 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
             self.targetView?.isHidden = false
             tempBackgroundView.removeFromSuperview()
             tempImageView.removeFromSuperview()
-            transitionContext.completeTransition(!transitionContext.transitionWasCancelled)
+            let isCancelled = !transitionContext.transitionWasCancelled
+            if !isInteractive {
+                transitionContext.completeTransition(!isCancelled)
+            }
         }
     }
     

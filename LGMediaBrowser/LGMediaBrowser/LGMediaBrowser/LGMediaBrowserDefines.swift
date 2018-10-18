@@ -66,8 +66,7 @@ public protocol LGMediaBrowserDataSource: NSObjectProtocol {
     func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel
 }
 
-let kPanDissmissGestureName = "LGMediaBrowser.PanDissmiss"
-
+let kPanExitGestureName = "LGMediaBrowser.PanExit"
 
 func LGLocalizedString(_ key: String, comment: String) -> String {
     return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: thisBundle(), value: "", comment: comment)

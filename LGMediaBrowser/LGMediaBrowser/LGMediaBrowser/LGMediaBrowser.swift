@@ -39,12 +39,12 @@ public class LGMediaBrowser: UIViewController {
     
     /// 重载navigationController，设置delegate，但OCRuntime在swift特别麻烦，懒得去hook或者添加动画回调方法了
     /// 后续心情好再行添加相关实现
-//    public override var navigationController: UINavigationController? {
-//        if super.navigationController?.delegate == nil {
-//            super.navigationController?.delegate = self
-//        }
-//        return super.navigationController
-//    }
+    //    public override var navigationController: UINavigationController? {
+    //        if super.navigationController?.delegate == nil {
+    //            super.navigationController?.delegate = self
+    //        }
+    //        return super.navigationController
+    //    }
     
     /// 左右元素的间距
     private let itemPadding: CGFloat = 10.0
@@ -55,8 +55,8 @@ public class LGMediaBrowser: UIViewController {
                                                        toTargetView: self.targetView,
                                                        targetController: self)
         temp.addPanGestureFor(viewController: self)
-        temp.panDismissGesture?.delegate = self
-         
+        temp.panExitGesture?.delegate = self
+        
         return temp
     }()
     
@@ -152,7 +152,7 @@ public class LGMediaBrowser: UIViewController {
     // MARK: -  视图load后进行一系列初始化操作
     override public func viewDidLoad() {
         super.viewDidLoad()
-
+        
         self.view.backgroundColor = globalConfigs.backgroundColor
         
         setupTransition()
@@ -167,7 +167,7 @@ public class LGMediaBrowser: UIViewController {
         
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         
-        addPanDissmissGesture()
+        addPanExitGesture()
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -185,11 +185,11 @@ public class LGMediaBrowser: UIViewController {
     }
     
     /// 添加下拉关闭手势
-    func addPanDissmissGesture() {
-        
-//        if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
-//            self.interactiveTransition.panDismissGesture?.require(toFail: panPopGeusture)
-//        }
+    func addPanExitGesture() {
+        let interactiveTransition = self.interactiveTransition
+        if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
+            interactiveTransition.panExitGesture?.require(toFail: panPopGeusture)
+        }
     }
     
     /// 添加通知
@@ -219,9 +219,9 @@ public class LGMediaBrowser: UIViewController {
     /// 设置collectionView
     func setupCollectionView() {
         let frame = CGRect(x: -itemPadding,
-                            y: UIDevice.topSafeMargin,
-                            width: self.view.lg_width + itemPadding * 2.0,
-                            height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+                           y: UIDevice.topSafeMargin,
+                           width: self.view.lg_width + itemPadding * 2.0,
+                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
         let collection = LGCollectionView(frame: frame,
                                           collectionViewLayout: flowLayout)
         self.collectionView = collection
@@ -377,7 +377,7 @@ public class LGMediaBrowser: UIViewController {
         }
     }
     
-
+    
     
     // MARK: -  旋转方向处理
     private var lastOrientation: UIDeviceOrientation = UIDevice.current.orientation
@@ -393,7 +393,7 @@ public class LGMediaBrowser: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     // MARK: -  状态栏显示与隐藏处理
     override public var preferredStatusBarStyle: UIStatusBarStyle {
         return UIStatusBarStyle.lightContent
@@ -411,14 +411,14 @@ public class LGMediaBrowser: UIViewController {
     }
     
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using [segue destinationViewController].
+     // Pass the selected object to the new view controller.
+     }
+     */
     
     deinit {
         NotificationCenter.default.removeObserver(self)
@@ -448,8 +448,8 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
     
     
     public func animationController(forPresented presented: UIViewController,
-                                             presenting: UIViewController,
-                                             source: UIViewController) -> UIViewControllerAnimatedTransitioning?
+                                    presenting: UIViewController,
+                                    source: UIViewController) -> UIViewControllerAnimatedTransitioning?
     {
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
             if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
@@ -497,9 +497,9 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
                                                targetView: self.targetView,
                                                finalImageSize: finalImageSize,
                                                placeholderImage: animationImage)
-
+        
     }
-
+    
     public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) ->
         UIViewControllerInteractiveTransitioning?
     {
@@ -570,7 +570,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
     }
     
     public func navigationController(_ navigationController: UINavigationController,
-                                     interactionControllerFor animationController: UIViewControllerAnimatedTransitioning)
+                                     interactionControllerFor controller: UIViewControllerAnimatedTransitioning)
         -> UIViewControllerInteractiveTransitioning?
     {
         self.interactiveTransition.actionType = .pop

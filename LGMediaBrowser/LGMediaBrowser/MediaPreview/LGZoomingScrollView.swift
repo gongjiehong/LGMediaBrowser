@@ -373,7 +373,7 @@ extension LGZoomingScrollView: UIGestureRecognizerDelegate {
                                   shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
     {
         if gestureRecognizer == self.panGestureRecognizer &&
-            otherGestureRecognizer.lg_name == kPanDissmissGestureName &&
+            otherGestureRecognizer.lg_name == kPanExitGestureName &&
             self.contentOffset.y <= 0.0
         {
             return true

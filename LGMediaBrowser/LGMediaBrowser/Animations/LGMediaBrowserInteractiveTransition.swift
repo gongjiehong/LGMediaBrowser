@@ -31,7 +31,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     private var tempImageView: UIImageView?
     private var backgroundView: UIView?
     
-    weak var panDismissGesture: UIPanGestureRecognizer?
+    weak var panExitGesture: UIPanGestureRecognizer?
     
     public init(fromTargetView: UIView?, toTargetView: UIView?, targetController: UIViewController?) {
         super.init()
@@ -48,8 +48,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     public func addPanGestureFor(viewController: UIViewController) {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
         viewController.view.addGestureRecognizer(pan)
-        pan.lg_name = kPanDissmissGestureName
-        panDismissGesture = pan
+        pan.lg_name = kPanExitGestureName
+        panExitGesture = pan
         self.targetController = viewController
     }
     
@@ -226,8 +226,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
             self.backgroundView = nil
-            let isCanceled = transitionContext.transitionWasCancelled
-//            transitionContext.completeTransition(!isCanceled)
+//            let isCancelled = transitionContext.transitionWasCancelled
+//            transitionContext.completeTransition(!isCancelled)
         }
     }
     
@@ -262,8 +262,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         }) { (isFinished) in
             self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
-            let isCanceled = transitionContext.transitionWasCancelled
-            transitionContext.completeTransition(!isCanceled)
+            let isCancelled = transitionContext.transitionWasCancelled
+            transitionContext.completeTransition(!isCancelled)
         }
     }
     

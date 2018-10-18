@@ -159,8 +159,8 @@ public class LGMediaModel {
                 { [weak self] (progressValue) in
                     guard let weakSelf = self else { return }
                     weakSelf.progress = progressValue
-                    
-            }, transform: nil) { [weak self] (resultImage, resultURL, sourceType, imageStage, error) in
+            }, transform: nil)
+            { [weak self] (resultImage, resultURL, sourceType, imageStage, error) in
                 guard let weakSelf = self else { return }
                 weakSelf.thumbnailImage = resultImage
             }
