@@ -20,23 +20,55 @@ public enum LGMediaBrowserError: Error {
 public enum LGMediaBrowserStatus {
     case browsing
     case browsingAndEditing
+    case checkMedia
 }
 
+
 public struct LGMediaBrowserSettings {
-    public var displayStatusbar: Bool = true
-    public var displayCloseButton: Bool = true
-    public var displayDeleteButton: Bool = false
-    public var longPhotoWidthMatchScreen: Bool = true
+    public var showsStatusBar: Bool = true
+    public var showsNavigationBar: Bool = false
+    public var showsCloseButton: Bool = true
+    public var showsDeleteButton: Bool = false
+    public var isLongPhotoWidthMatchScreen: Bool = true
+    public var isExchangeCloseAndDeleteButtons: Bool = false
+    public var isClickToTurnOffEnabled: Bool = true
+    public var isPlayVideoAfterDownloadEndsOrExportEnds: Bool = true
     public var backgroundColor: UIColor = UIColor.black
-    public var browserStatus: LGMediaBrowserStatus = .browsing
-    public var swapCloseAndDeleteButtons: Bool = false
-    public var enableTapToClose: Bool = true
-    public var playVideoAfterDownloadOrExport: Bool = true
     
     public init() {
-        
+    }
+    
+    public static func browsing() -> LGMediaBrowserSettings {
+        return LGMediaBrowserSettings()
+    }
+    
+    public static func browsingAndEditing() -> LGMediaBrowserSettings {
+        var result = LGMediaBrowserSettings()
+        result.showsDeleteButton = true
+        result.isClickToTurnOffEnabled = false
+        return result
+    }
+    
+    public static func checkMedia() -> LGMediaBrowserSettings {
+        var result = LGMediaBrowserSettings()
+        result.isClickToTurnOffEnabled = false
+        result.showsNavigationBar = true
+        result.showsStatusBar = true
+        return result
+    }
+    
+    public static func settings(with status: LGMediaBrowserStatus) -> LGMediaBrowserSettings {
+        switch status {
+        case .browsing:
+            return self.browsing()
+        case .browsingAndEditing:
+            return self.browsingAndEditing()
+        case .checkMedia:
+            return self.checkMedia()
+        }
     }
 }
+
 
 @objc public protocol LGMediaBrowserDelegate: NSObjectProtocol {
     @objc optional

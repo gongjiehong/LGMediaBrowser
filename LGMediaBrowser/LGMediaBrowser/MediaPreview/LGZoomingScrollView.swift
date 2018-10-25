@@ -210,7 +210,7 @@ open class LGZoomingScrollView: UIScrollView {
         // height in pixels. scale needs to remove if to use the old algorithm
         let deviceScreenHeight = UIScreen.main.bounds.height * scale
         
-        if globalConfigs.longPhotoWidthMatchScreen && imageView.frame.height >= imageView.frame.width
+        if globalConfigs.isLongPhotoWidthMatchScreen && imageView.frame.height >= imageView.frame.width
         {
             minScale = 1.0
             maxScale = 1.5
@@ -262,7 +262,7 @@ open class LGZoomingScrollView: UIScrollView {
             var imageViewFrame: CGRect = .zero
             imageViewFrame.origin = .zero
             // long photo
-            if globalConfigs.longPhotoWidthMatchScreen && image.size.height >= image.size.width
+            if globalConfigs.isLongPhotoWidthMatchScreen && image.size.height >= image.size.width
             {
                 let imageHeight = LGMesurement.screenWidth / image.size.width * image.size.height
                 imageViewFrame.size = CGSize(width: LGMesurement.screenWidth, height: imageHeight)

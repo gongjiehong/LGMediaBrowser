@@ -59,8 +59,8 @@ class LGActionView: UIView {
         let deleteFrame: CGRect = hidden ? deleteButton.hideFrame : deleteButton.showFrame
         let titleFrame: CGRect = hidden ? titleLabelHideFrame : titleLabelShowFrame
         
-        let closeBtnHidden = !globalConfigs.displayCloseButton
-        let deleteBtnHidden = !globalConfigs.displayDeleteButton
+        let closeBtnHidden = !globalConfigs.showsCloseButton
+        let deleteBtnHidden = !globalConfigs.showsDeleteButton
         let titleLabelHidden = hidden
         if hidden == false {
             self.closeButton.isHidden = closeBtnHidden
@@ -102,7 +102,7 @@ extension LGActionView {
         if closeButton == nil {
             closeButton = LGCloseButton(frame: .zero)
             closeButton.addTarget(self, action: #selector(closeButtonPressed(_:)), for: .touchUpInside)
-            closeButton.isHidden = !globalConfigs.displayCloseButton
+            closeButton.isHidden = !globalConfigs.showsCloseButton
             addSubview(closeButton)
         }
         
@@ -117,7 +117,7 @@ extension LGActionView {
         if deleteButton == nil {
             deleteButton = LGDeleteButton(frame: .zero)
             deleteButton.addTarget(self, action: #selector(deleteButtonPressed(_:)), for: .touchUpInside)
-            deleteButton.isHidden = !globalConfigs.displayDeleteButton
+            deleteButton.isHidden = !globalConfigs.showsDeleteButton
             addSubview(deleteButton)
         }
         

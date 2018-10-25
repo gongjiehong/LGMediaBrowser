@@ -10,7 +10,7 @@ import UIKit
 import Photos
 
 /// override hitTest 解决slider滑动问题
-class LGCollectionView: UICollectionView {
+internal class LGCollectionView: UICollectionView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let view = super.hitTest(point, with: event)
         if let view = view, view.isKind(of: UISlider.self) {
@@ -23,7 +23,7 @@ class LGCollectionView: UICollectionView {
 }
 
 /// 全局设置
-var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
+var globalConfigs: LGMediaBrowserSettings! = nil
 
 /// 媒体文件浏览器，支持视频，音频（需要系统支持的格式）；普通图片，LivePhoto等
 public class LGMediaBrowser: UIViewController {
@@ -36,15 +36,6 @@ public class LGMediaBrowser: UIViewController {
         static var LivePhotoCell = "LGMediaBrowserLivePhotoCell"
         static var Other = "UICollectionViewCell"
     }
-    
-    /// 重载navigationController，设置delegate，但OCRuntime在swift特别麻烦，懒得去hook或者添加动画回调方法了
-    /// 后续心情好再行添加相关实现
-    //    public override var navigationController: UINavigationController? {
-    //        if super.navigationController?.delegate == nil {
-    //            super.navigationController?.delegate = self
-    //        }
-    //        return super.navigationController
-    //    }
     
     /// 左右元素的间距
     private let itemPadding: CGFloat = 10.0
@@ -95,6 +86,8 @@ public class LGMediaBrowser: UIViewController {
     /// 浏览器的当前状态，分为纯浏览和浏览并删除，浏览并删除时显示删除按钮
     public var status: LGMediaBrowserStatus = .browsing
     
+    var showsStatusBar: Bool = true
+    
     /// 当前显示的页码
     var currentIndex: Int = 0 {
         didSet {
@@ -122,31 +115,35 @@ public class LGMediaBrowser: UIViewController {
     }
     
     public convenience init(mediaArray: [LGMediaModel],
-                            configs: LGMediaBrowserSettings,
+                            configs: LGMediaBrowserSettings? = nil,
                             status: LGMediaBrowserStatus = .browsing,
                             currentIndex: Int = 0) {
         self.init(nibName: nil, bundle: nil)
         self.mediaArray = mediaArray
-        globalConfigs = configs
+        globalConfigs = configs ?? LGMediaBrowserSettings.settings(with: status)
         self.status = status
         if self.status == .browsingAndEditing {
-            globalConfigs.displayDeleteButton = true
+            globalConfigs.showsDeleteButton = true
         }
         self.currentIndex = currentIndex
+        
+        showsStatusBar = globalConfigs.showsStatusBar
     }
     
     public convenience init(dataSource: LGMediaBrowserDataSource,
-                            configs: LGMediaBrowserSettings,
+                            configs: LGMediaBrowserSettings? = nil,
                             status: LGMediaBrowserStatus = .browsing,
                             currentIndex: Int = 0) {
         self.init(nibName: nil, bundle: nil)
         self.dataSource = dataSource
-        globalConfigs = configs
+        globalConfigs = configs ?? LGMediaBrowserSettings.settings(with: status)
         self.status = status
         if self.status == .browsingAndEditing {
-            globalConfigs.displayDeleteButton = true
+            globalConfigs.showsDeleteButton = true
         }
         self.currentIndex = currentIndex
+        
+        showsStatusBar = globalConfigs.showsStatusBar
     }
     
     // MARK: -  视图load后进行一系列初始化操作
@@ -159,7 +156,7 @@ public class LGMediaBrowser: UIViewController {
         
         setupCollectionView()
         
-        setupActionView()
+        setupTopBarInit()
         
         setupMediaArray()
         
@@ -168,11 +165,31 @@ public class LGMediaBrowser: UIViewController {
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         
         addPanExitGesture()
+        
+        self.extendedLayoutIncludesOpaqueBars = true
     }
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.navigationController?.setNavigationBarHidden(true, animated: true)
+        if globalConfigs.showsNavigationBar == true {
+            self.navigationController?.setNavigationBarHidden(false, animated: true)
+        } else {
+            self.navigationController?.setNavigationBarHidden(true, animated: true)
+        }
+    }
+    
+    func setupTopBarInit() {
+        switch self.status {
+        case .browsing, .browsingAndEditing:
+            setupActionView()
+            break
+        case .checkMedia:
+            break
+        }
+    }
+    
+    func setupNavigationItems() {
+        
     }
     
     // MARK: - 初始化数据源
@@ -254,6 +271,10 @@ public class LGMediaBrowser: UIViewController {
             collectionView.panGestureRecognizer.require(toFail: panPopGeusture)
         }
         
+        self.collectionView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 0.0).isActive = true
+        self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 0.0).isActive = true
+        self.collectionView.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: -10.0).isActive = true
+        self.collectionView.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: 10.0).isActive = true
     }
     
     func setupActionView() {
@@ -269,7 +290,7 @@ public class LGMediaBrowser: UIViewController {
     
     // MARK: -  点击屏幕关闭，或者显示控件
     @objc func tapedScreen(_ noti: Notification) {
-        if globalConfigs.enableTapToClose && self.status == .browsing {
+        if globalConfigs.isClickToTurnOffEnabled && self.status == .browsing {
             self.closeSelf()
         } else {
             showOrHideControls(!isShowingControls)
@@ -293,7 +314,16 @@ public class LGMediaBrowser: UIViewController {
         }
         isShowingControls = show
         if show {
-            self.actionView.animate(hidden: false)
+            switch self.status {
+            case .browsingAndEditing, .browsing:
+                self.actionView.animate(hidden: false)
+                break
+            case .checkMedia:
+                showsStatusBar = true
+                self.setNeedsStatusBarAppearanceUpdate()
+                self.navigationController?.setNavigationBarHidden(false, animated: true)
+                break
+            }
             isAnimating = true
             UIView.animate(withDuration: 0.25,
                            animations:
@@ -302,7 +332,16 @@ public class LGMediaBrowser: UIViewController {
                 self.isAnimating = false
             }
         } else {
-            self.actionView.animate(hidden: true)
+            switch self.status {
+            case .browsingAndEditing, .browsing:
+                self.actionView.animate(hidden: true)
+                break
+            case .checkMedia:
+                showsStatusBar = false
+                self.setNeedsStatusBarAppearanceUpdate()
+                self.navigationController?.setNavigationBarHidden(true, animated: true)
+                break
+            }
             UIView.animate(withDuration: 0.25,
                            animations:
                 {
@@ -326,17 +365,23 @@ public class LGMediaBrowser: UIViewController {
     }
     
     func refreshFrames() {
-        let frame = CGRect(x: -itemPadding,
-                           y: UIDevice.topSafeMargin,
-                           width: self.view.lg_width + itemPadding * 2.0,
-                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
-        self.collectionView.frame = frame
+//        let frame = CGRect(x: -itemPadding,
+//                           y: UIDevice.topSafeMargin,
+//                           width: self.view.lg_width + itemPadding * 2.0,
+//                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+//        self.collectionView.frame = frame
         self.collectionView.reloadData()
         
-        self.actionView.frame = CGRect(x: 0,
-                                       y: 0,
-                                       width: self.view.lg_width,
-                                       height: UIDevice.statusBarHeight + UIDevice.topSafeMargin + 44.0)
+        switch self.status {
+        case .browsing, .browsingAndEditing:
+            self.actionView.frame = CGRect(x: 0,
+                                           y: 0,
+                                           width: self.view.lg_width,
+                                           height: UIDevice.statusBarHeight + UIDevice.topSafeMargin + 44.0)
+            break
+        case .checkMedia:
+            break
+        }
         
         if self.currentIndex != 0 {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
@@ -400,14 +445,23 @@ public class LGMediaBrowser: UIViewController {
     }
     
     override public var prefersStatusBarHidden: Bool {
-        return !globalConfigs.displayStatusbar
-    } 
+        return !showsStatusBar
+    }
+    
+    override public var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        return UIStatusBarAnimation.slide
+    }
     
     // MARK: - 刷新数量显示
     
     func refreshCountLayout() {
-        guard let actionView = self.actionView else {return}
-        actionView.titleLabel.text = "\(self.currentIndex + 1) / \(self.mediaArray.count)"
+        let layoutTitle = "\(self.currentIndex + 1) / \(self.mediaArray.count)"
+        if self.status == .checkMedia {
+            self.title = layoutTitle
+        } else {
+            guard let actionView = self.actionView else {return}
+            actionView.titleLabel.text = layoutTitle
+        }
     }
     
     /*
@@ -423,6 +477,7 @@ public class LGMediaBrowser: UIViewController {
     deinit {
         NotificationCenter.default.removeObserver(self)
         UIDevice.current.endGeneratingDeviceOrientationNotifications()
+        globalConfigs = nil
     }
 }
 

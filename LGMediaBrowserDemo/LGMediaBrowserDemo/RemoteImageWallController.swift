@@ -98,12 +98,9 @@ extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewD
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        var configs = LGMediaBrowserSettings()
-        configs.enableTapToClose = false
-        configs.displayStatusbar = false
+
         let mediaBrowser = LGMediaBrowser(dataSource: self,
-                                          configs: configs,
-                                          status: .browsing,
+                                          status: LGMediaBrowserStatus.checkMedia,
                                           currentIndex: indexPath.row)
         mediaBrowser.delegate = self
         self.navigationController?.pushViewController(mediaBrowser, animated: true)
@@ -136,10 +133,12 @@ extension RemoteImageWallController: LGMediaBrowserDelegate {
         self.collectionView.scrollToItem(at: IndexPath(row: index, section: 0),
                                          at: UICollectionView.ScrollPosition.centeredVertically,
                                          animated: false)
+        self.collectionView.setNeedsLayout()
     }
     
     
     func viewForMedia(_ browser: LGMediaBrowser, index: Int) -> UIView? {
+        print(index, "-> UIView?")
         return self.collectionView.cellForItem(at: IndexPath(row: index, section: 0))
     }
 }
@@ -172,8 +171,8 @@ extension RemoteImageWallController: LGForceTouchPreviewingDelegate {
     {
         guard let previewController = viewControllerToCommit as? LGForceTouchPreviewController else {return}
         var configs = LGMediaBrowserSettings()
-        configs.enableTapToClose = false
-        configs.displayStatusbar = false
+        configs.isClickToTurnOffEnabled = false
+        configs.showsStatusBar = false
         let mediaBrowser = LGMediaBrowser(dataSource: self,
                                           configs: configs,
                                           status: .browsing,
@@ -200,6 +199,3 @@ class ImgaeURLConstructHelper {
         }
     }
 }
-
-
-

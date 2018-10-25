@@ -226,8 +226,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
             self.backgroundView = nil
-//            let isCancelled = transitionContext.transitionWasCancelled
-//            transitionContext.completeTransition(!isCancelled)
+            let isCancelled = transitionContext.transitionWasCancelled
+            transitionContext.completeTransition(!isCancelled)
         }
     }
     

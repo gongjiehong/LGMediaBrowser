@@ -86,9 +86,9 @@ class LGCloseButton: LGImageButton {
     override var imageName: String { return "btn_close_white" }
     override var marginX: CGFloat {
         get {
-            let swapCloseAndDeleteButtons = globalConfigs.swapCloseAndDeleteButtons
+            let isExchangeCloseAndDeleteButtons = globalConfigs.isExchangeCloseAndDeleteButtons
             var result: CGFloat
-            if swapCloseAndDeleteButtons {
+            if isExchangeCloseAndDeleteButtons {
                 result = LGMesurement.screenWidth - padding.x - self.size.width
             } else {
                 result = padding.x
@@ -121,9 +121,9 @@ class LGDeleteButton: LGImageButton {
     override var imageName: String { return "btn_delete_white" }
     override var marginX: CGFloat {
         get {
-            let swapCloseAndDeleteButtons = globalConfigs.swapCloseAndDeleteButtons
+            let isExchangeCloseAndDeleteButtons = globalConfigs.isExchangeCloseAndDeleteButtons
             var result: CGFloat
-            if swapCloseAndDeleteButtons {
+            if isExchangeCloseAndDeleteButtons {
                 result = padding.x
             } else {
                 result = LGMesurement.screenWidth - padding.x - self.size.width

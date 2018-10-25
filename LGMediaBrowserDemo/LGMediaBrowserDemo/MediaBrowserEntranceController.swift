@@ -75,7 +75,6 @@ class MediaBrowserEntranceController: UIViewController {
                                     mediaPosition: LGMediaModel.Position.remoteFile)]
         
         let media = LGMediaBrowser(mediaArray: modelArray,
-                                   configs: LGMediaBrowserSettings(),
                                    status: LGMediaBrowserStatus.browsingAndEditing,
                                    currentIndex: 0)
         media.targetView = self.imageView

@@ -130,12 +130,12 @@ public class LGMediaModel {
                 mediaPosition: Position,
                 thumbnailImage: UIImage? = nil) /*throws*/
     {
-//        switch mediaType {
-//        case .video:
-//         break
-//        default:
-//            break
-//        }
+        //        switch mediaType {
+        //        case .video:
+        //         break
+        //        default:
+        //            break
+        //        }
         self.thumbnailImageURL = thumbnailImageURL
         self.mediaURL = mediaURL
         self.mediaAsset = mediaAsset
@@ -148,77 +148,80 @@ public class LGMediaModel {
     
     /// 获取缩略图
     func fetchThumbnailImage() {
-        
-        func downloadImageFromRemote() {
-            if self.thumbnailImageURL == nil {
-                return
-            }
-            LGWebImageManager.default.downloadImageWith(url: self.thumbnailImageURL!,
-                                                        options: LGWebImageOptions.default,
-                                                        progress:
-                { [weak self] (progressValue) in
+        autoreleasepool {
+            func downloadImageFromRemote() {
+                
+                if self.thumbnailImageURL == nil {
+                    return
+                }
+                LGWebImageManager.default.downloadImageWith(url: self.thumbnailImageURL!,
+                                                            options: LGWebImageOptions.default,
+                                                            progress:
+                    { [weak self] (progressValue) in
+                        guard let weakSelf = self else { return }
+                        weakSelf.progress = progressValue
+                    }, transform: nil)
+                { [weak self] (resultImage, resultURL, sourceType, imageStage, error) in
                     guard let weakSelf = self else { return }
-                    weakSelf.progress = progressValue
-            }, transform: nil)
-            { [weak self] (resultImage, resultURL, sourceType, imageStage, error) in
-                guard let weakSelf = self else { return }
-                weakSelf.thumbnailImage = resultImage
+                    weakSelf.thumbnailImage = resultImage
+                }
+                
             }
-        }
-        
-        func loadImageFromDisk() {
-            if self.thumbnailImage == nil {
-                DispatchQueue.background.async { [weak self] in
-                    guard let weakSelf = self else { return }
-                    do {
-                        if let url = try weakSelf.thumbnailImageURL?.asURL() {
-                            let absoluteString = url.absoluteString
-                            // 正确的文件URL格式为 file://[path], 所以在转换后进行一次判断
-                            if absoluteString.range(of: "://") != nil {
-                                let data = try Data(contentsOf: url)
-                                weakSelf.thumbnailImage = LGImage.imageWith(data: data)
-                            } else {
-                                let fileURL = URL(fileURLWithPath: absoluteString)
-                                let data = try Data(contentsOf: fileURL)
-                                weakSelf.thumbnailImage = LGImage.imageWith(data: data)
+            
+            func loadImageFromDisk() {
+                if self.thumbnailImage == nil {
+                    DispatchQueue.background.async { [weak self] in
+                        guard let weakSelf = self else { return }
+                        do {
+                            if let url = try weakSelf.thumbnailImageURL?.asURL() {
+                                let absoluteString = url.absoluteString
+                                // 正确的文件URL格式为 file://[path], 所以在转换后进行一次判断
+                                if absoluteString.range(of: "://") != nil {
+                                    let data = try Data(contentsOf: url)
+                                    weakSelf.thumbnailImage = LGImage.imageWith(data: data)
+                                } else {
+                                    let fileURL = URL(fileURLWithPath: absoluteString)
+                                    let data = try Data(contentsOf: fileURL)
+                                    weakSelf.thumbnailImage = LGImage.imageWith(data: data)
+                                }
+                                weakSelf.progress.completedUnitCount = _totalUnitCount
                             }
-                            weakSelf.progress.completedUnitCount = _totalUnitCount
+                        } catch {
+                            println(error)
                         }
-                    } catch {
-                        println(error)
                     }
                 }
             }
-        }
-        
-        func exportImageFromAsset() {
-            guard let asset = self.mediaAsset else { return }
-            _requestId = LGPhotoManager.requestImage(forAsset: asset,
-                                                     outputSize: CGSize(width: asset.pixelWidth,
-                                                                        height: asset.pixelHeight),
-                                                     resizeMode: PHImageRequestOptionsResizeMode.exact,
-                                                     progressHandlder:
-                { [weak self] (value, error, stop, info) in
+            
+            func exportImageFromAsset() {
+                guard let asset = self.mediaAsset else { return }
+                _requestId = LGPhotoManager.requestImage(forAsset: asset,
+                                                         outputSize: CGSize(width: asset.pixelWidth,
+                                                                            height: asset.pixelHeight),
+                                                         resizeMode: PHImageRequestOptionsResizeMode.exact,
+                                                         progressHandlder:
+                    { [weak self] (value, error, stop, info) in
+                        guard let weakSelf = self else { return }
+                        if error == nil {
+                            weakSelf.progress.completedUnitCount = Int64(Double(_totalUnitCount) * value)
+                        }
+                }) { [weak self] (resultImage, info) in
                     guard let weakSelf = self else { return }
-                    if error == nil {
-                        weakSelf.progress.completedUnitCount = Int64(Double(_totalUnitCount) * value)
-                    }
-            }) { [weak self] (resultImage, info) in
-                guard let weakSelf = self else { return }
-                weakSelf.thumbnailImage = resultImage
+                    weakSelf.thumbnailImage = resultImage
+                }
             }
-        }
-        
-        switch self.mediaPosition {
-        case Position.remoteFile:
-            downloadImageFromRemote()
-            break
-        case Position.localFile:
-            loadImageFromDisk()
-            break
-        case Position.album:
-            exportImageFromAsset()
-            break
+            
+            switch self.mediaPosition {
+            case Position.remoteFile:
+                downloadImageFromRemote()
+                break
+            case Position.localFile:
+                loadImageFromDisk()
+                break
+            case Position.album:
+                exportImageFromAsset()
+                break
+            }
         }
     }
     
