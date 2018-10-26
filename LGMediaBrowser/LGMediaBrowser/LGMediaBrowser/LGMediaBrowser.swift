@@ -236,9 +236,9 @@ public class LGMediaBrowser: UIViewController {
     /// 设置collectionView
     func setupCollectionView() {
         let frame = CGRect(x: -itemPadding,
-                           y: UIDevice.topSafeMargin,
+                           y: UIDevice.topSafeMargin + 64.0,
                            width: self.view.lg_width + itemPadding * 2.0,
-                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 64.0)
         let collection = LGCollectionView(frame: frame,
                                           collectionViewLayout: flowLayout)
         self.collectionView = collection
@@ -270,11 +270,6 @@ public class LGMediaBrowser: UIViewController {
         if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
             collectionView.panGestureRecognizer.require(toFail: panPopGeusture)
         }
-        
-        self.collectionView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 0.0).isActive = true
-        self.collectionView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 0.0).isActive = true
-        self.collectionView.leftAnchor.constraint(equalTo: self.view.leftAnchor, constant: -10.0).isActive = true
-        self.collectionView.rightAnchor.constraint(equalTo: self.view.rightAnchor, constant: 10.0).isActive = true
     }
     
     func setupActionView() {
@@ -320,8 +315,8 @@ public class LGMediaBrowser: UIViewController {
                 break
             case .checkMedia:
                 showsStatusBar = true
-                self.setNeedsStatusBarAppearanceUpdate()
                 self.navigationController?.setNavigationBarHidden(false, animated: true)
+                self.setNeedsStatusBarAppearanceUpdate()
                 break
             }
             isAnimating = true
@@ -338,8 +333,8 @@ public class LGMediaBrowser: UIViewController {
                 break
             case .checkMedia:
                 showsStatusBar = false
-                self.setNeedsStatusBarAppearanceUpdate()
                 self.navigationController?.setNavigationBarHidden(true, animated: true)
+                self.setNeedsStatusBarAppearanceUpdate()
                 break
             }
             UIView.animate(withDuration: 0.25,
@@ -365,11 +360,11 @@ public class LGMediaBrowser: UIViewController {
     }
     
     func refreshFrames() {
-//        let frame = CGRect(x: -itemPadding,
-//                           y: UIDevice.topSafeMargin,
-//                           width: self.view.lg_width + itemPadding * 2.0,
-//                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
-//        self.collectionView.frame = frame
+        let frame = CGRect(x: -itemPadding,
+                           y: UIDevice.topSafeMargin + 64.0,
+                           width: self.view.lg_width + itemPadding * 2.0,
+                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 64.0)
+        self.collectionView.frame = frame
         self.collectionView.reloadData()
         
         switch self.status {
@@ -387,7 +382,7 @@ public class LGMediaBrowser: UIViewController {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
                                                            section: 0),
                                              at: UICollectionView.ScrollPosition.centeredHorizontally,
-                                             animated: false)
+                                             animated: true)
         }
     }
     
