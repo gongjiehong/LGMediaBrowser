@@ -96,6 +96,9 @@
                                                 </label>
                                             </subviews>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="XlJ-5n-FYN" kind="show" id="hpR-8i-8Zl"/>
+                                        </connections>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" textLabel="eWJ-xY-AXG" style="IBUITableViewCellStyleDefault" id="EYw-TQ-PAA">
                                         <rect key="frame" x="0.0" y="240" width="375" height="60"/>
@@ -248,6 +251,23 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="GCe-sk-q2o" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="689" y="687"/>
+        </scene>
+        <!--MediaPicker-->
+        <scene sceneID="w7i-pt-ARz">
+            <objects>
+                <viewController title="MediaPicker" id="XlJ-5n-FYN" customClass="MediaPickerDemoController" customModule="LGMediaBrowserDemo" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="RTa-nx-VzG"/>
+                        <viewControllerLayoutGuide type="bottom" id="8VC-ZM-6iB"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="Oe4-oZ-oXW">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="k4A-ig-TrT" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
         </scene>
     </scenes>
     <resources>

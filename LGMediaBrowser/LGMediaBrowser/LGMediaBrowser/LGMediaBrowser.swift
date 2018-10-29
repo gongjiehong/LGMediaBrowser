@@ -165,8 +165,6 @@ public class LGMediaBrowser: UIViewController {
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         
         addPanExitGesture()
-        
-//        self.extendedLayoutIncludesOpaqueBars = true
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -184,13 +182,50 @@ public class LGMediaBrowser: UIViewController {
             setupActionView()
             break
         case .checkMedia:
+            setupNavigationItems()
             break
         }
     }
     
     func setupNavigationItems() {
+        let tempBtn = LGClickAreaButton(type: UIButton.ButtonType.custom)
+        tempBtn.frame = CGRect(x: 0, y: 0, width: 23.0, height: 23.0)
+        tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
+        tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControl.State.selected)
+        tempBtn.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        tempBtn.setTitleColor(UIColor.white, for: UIControl.State.normal)
+        tempBtn.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
+        tempBtn.enlargeOffset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: tempBtn)
+        
+        
+        let toolBar = UIToolbar(frame: CGRect(x: 0,
+                                              y: self.view.lg_height - 44.0,
+                                              width: self.view.lg_width,
+                                              height: 44.0))
+        toolBar.delegate = self
+        let flexibleSpaceItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace,
+                                                target: self,
+                                                action: nil)
+        let editItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.edit,
+                                       target: self,
+                                       action: #selector(editPicture(_:)))
+        let doneItem = UIBarButtonItem(title: LGLocalizedString("Done"),
+                                       style: UIBarButtonItem.Style.plain,
+                                       target: self,
+                                       action: #selector(completeSelection(_:)))
+//            UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.done,
+//                                       target: self,
+//                                       action: #selector(completeSelection(_:)))
+        toolBar.items = [flexibleSpaceItem,
+                         editItem,
+                         doneItem]
+        toolBar.contentMode = UIView.ContentMode.right
+        self.view.addSubview(toolBar)
     }
+    
+    
     
     // MARK: - 初始化数据源
     func setupMediaArray() {
@@ -384,7 +419,7 @@ public class LGMediaBrowser: UIViewController {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
                                                            section: 0),
                                              at: UICollectionView.ScrollPosition.centeredHorizontally,
-                                             animated: true)
+                                             animated: false)
         }
     }
     
@@ -460,6 +495,28 @@ public class LGMediaBrowser: UIViewController {
             actionView.titleLabel.text = layoutTitle
         }
     }
+    
+    // MARK: -  选择按钮点击事件处理
+    @objc func selectButtonPressed(_ button: UIButton) {
+        if !button.isSelected {
+            button.layer.add(buttonStatusChangedAnimation(), forKey: nil)
+        }
+        
+//        if let selectedBlock = self.selectedBlock {
+//            selectedBlock(button.isSelected)
+//        }
+    }
+    
+    // MARK: - 编辑图片和选择完成
+    
+    @objc func editPicture(_ sender: UIBarButtonItem) {
+        
+    }
+    
+    @objc func completeSelection(_ sender: UIBarButtonItem) {
+        
+    }
+    
     
     /*
      // MARK: - Navigation
@@ -857,4 +914,10 @@ extension LGMediaBrowser: UIGestureRecognizerDelegate {
 extension LGMediaBrowser {
     public static let tapedScreenNotification = Notification.Name("TapedScreenNotification")
     public static let needHideControlsNotification = Notification.Name("NeedHideControlsNotification")
+}
+
+extension LGMediaBrowser: UIToolbarDelegate {
+    public func position(for bar: UIBarPositioning) -> UIBarPosition {
+        return UIBarPosition.bottom
+    }
 }
