@@ -173,7 +173,8 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
                 }
                 tempImageView.backgroundColor = UIColor.black.withAlphaComponent(0.0)
         }) { (isFinished) in
-            if transitionContext.transitionWasCancelled {
+            let isCancelled = transitionContext.transitionWasCancelled
+            if isCancelled {
                 fromVC.view.isHidden = false
             } else {
             }
@@ -183,7 +184,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
             self.targetView?.isHidden = false
             tempBackgroundView.removeFromSuperview()
             tempImageView.removeFromSuperview()
-            let isCancelled = !transitionContext.transitionWasCancelled
+            
             if !isInteractive {
                 transitionContext.completeTransition(!isCancelled)
             }

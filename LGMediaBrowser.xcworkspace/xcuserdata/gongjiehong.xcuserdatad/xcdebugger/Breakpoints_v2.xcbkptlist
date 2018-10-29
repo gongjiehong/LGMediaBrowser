@@ -156,11 +156,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGZoomingScrollView.swift"
-            timestampString = "562157712.611766"
+            timestampString = "562493878.6080559"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "119"
-            endingLineNumber = "119"
+            startingLineNumber = "125"
+            endingLineNumber = "125"
             landmarkName = "loadRemoteImage()"
             landmarkType = "9">
          </BreakpointContent>
@@ -188,7 +188,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Animations/LGMPPreviewTransition.swift"
-            timestampString = "561552697.781074"
+            timestampString = "562493878.608429"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "123"
@@ -310,6 +310,118 @@
                   moduleName = "UIKit"
                   usesParentBreakpointCondition = "Yes"
                   offsetFromSymbolStart = "0">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser.swift"
+            timestampString = "562493878.608567"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "369"
+            endingLineNumber = "369"
+            landmarkName = "refreshFrames()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Animations/LGMPPreviewTransition.swift"
+            timestampString = "562493878.608629"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "188"
+            endingLineNumber = "188"
+            landmarkName = "popAnimation(using:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Swift.Bool) -&gt; () in LGMediaBrowser.LGMPPreviewTransition.popAnimation(using: __C.UIViewControllerContextTransitioning) -&gt; ()"
+                  moduleName = "LGMediaBrowser"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/gongjiehong/Documents/%E6%88%91%E7%9A%84GIT/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Animations/LGMPPreviewTransition.swift"
+                  timestampString = "562493359.038083"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "188"
+                  endingLineNumber = "188"
+                  offsetFromSymbolStart = "1003">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Swift.Bool) -&gt; () in LGMediaBrowser.LGMPPreviewTransition.popAnimation(using: __C.UIViewControllerContextTransitioning) -&gt; ()"
+                  moduleName = "LGMediaBrowser"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/gongjiehong/Documents/%E6%88%91%E7%9A%84GIT/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Animations/LGMPPreviewTransition.swift"
+                  timestampString = "562493359.401495"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "188"
+                  endingLineNumber = "188"
+                  offsetFromSymbolStart = "1068">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Animations/LGMPPreviewTransition.swift"
+            timestampString = "562493878.608677"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "189"
+            endingLineNumber = "189"
+            landmarkName = "popAnimation(using:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Swift.Bool) -&gt; () in LGMediaBrowser.LGMPPreviewTransition.popAnimation(using: __C.UIViewControllerContextTransitioning) -&gt; ()"
+                  moduleName = "LGMediaBrowser"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/gongjiehong/Documents/%E6%88%91%E7%9A%84GIT/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Animations/LGMPPreviewTransition.swift"
+                  timestampString = "562493359.042379"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "189"
+                  endingLineNumber = "189"
+                  offsetFromSymbolStart = "1038">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #2 (Swift.Bool) -&gt; () in LGMediaBrowser.LGMPPreviewTransition.popAnimation(using: __C.UIViewControllerContextTransitioning) -&gt; ()"
+                  moduleName = "LGMediaBrowser"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/gongjiehong/Documents/%E6%88%91%E7%9A%84GIT/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaPicker/Animations/LGMPPreviewTransition.swift"
+                  timestampString = "562493359.40415"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "189"
+                  endingLineNumber = "189"
+                  offsetFromSymbolStart = "1100">
                </Location>
             </Locations>
          </BreakpointContent>

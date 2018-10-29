@@ -55,6 +55,12 @@ open class LGZoomingScrollView: UIScrollView {
         self.alwaysBounceHorizontal = false
         
         self.panGestureRecognizer.delegate = self
+        
+        if #available(iOS 11.0, *) {
+            self.contentInsetAdjustmentBehavior = .never
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
     func layoutImageIfNeeded() {

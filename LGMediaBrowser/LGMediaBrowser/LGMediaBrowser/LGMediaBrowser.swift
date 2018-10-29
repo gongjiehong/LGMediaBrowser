@@ -166,7 +166,7 @@ public class LGMediaBrowser: UIViewController {
         
         addPanExitGesture()
         
-        self.extendedLayoutIncludesOpaqueBars = true
+//        self.extendedLayoutIncludesOpaqueBars = true
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -236,17 +236,19 @@ public class LGMediaBrowser: UIViewController {
     /// 设置collectionView
     func setupCollectionView() {
         let frame = CGRect(x: -itemPadding,
-                           y: UIDevice.topSafeMargin + 64.0,
+                           y: 0,
                            width: self.view.lg_width + itemPadding * 2.0,
-                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 64.0)
+                           height: self.view.lg_height)
         let collection = LGCollectionView(frame: frame,
                                           collectionViewLayout: flowLayout)
         self.collectionView = collection
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
         if #available(iOS 11.0, *) {
+            self.collectionView.contentInset = UIEdgeInsets(top: -20.0, left: 0, bottom: 0, right: 0)
             self.collectionView.contentInsetAdjustmentBehavior = .never
         } else {
+            self.automaticallyAdjustsScrollViewInsets = false
         }
         
         self.view.addSubview(self.collectionView)
@@ -361,9 +363,9 @@ public class LGMediaBrowser: UIViewController {
     
     func refreshFrames() {
         let frame = CGRect(x: -itemPadding,
-                           y: UIDevice.topSafeMargin + 64.0,
+                           y: 0,
                            width: self.view.lg_width + itemPadding * 2.0,
-                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 64.0)
+                           height: self.view.lg_height)
         self.collectionView.frame = frame
         self.collectionView.reloadData()
         
@@ -803,7 +805,7 @@ extension LGMediaBrowser: UICollectionViewDelegateFlowLayout {
                                sizeForItemAt indexPath: IndexPath) -> CGSize
     {
         return CGSize(width: self.view.lg_width,
-                      height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+                      height: self.view.lg_height)
     }
 }
 
