@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import LGHTTPRequest
+import LGMediaBrowser
 
 class MediaPickerDemoController: UIViewController {
 
@@ -18,6 +18,11 @@ class MediaPickerDemoController: UIViewController {
         
     }
     
+    @IBAction func toChooseButtonPressed(_ sender: UIButton) {
+        let picker = LGMediaPicker()
+//        picker.delegate = self
+        self.present(picker, animated: true, completion: nil)
+    }
 
     /*
     // MARK: - Navigation
@@ -29,4 +34,9 @@ class MediaPickerDemoController: UIViewController {
     }
     */
 
+}
+
+
+extension MediaPickerDemoController: LGMediaPickerDelegate {
+    
 }

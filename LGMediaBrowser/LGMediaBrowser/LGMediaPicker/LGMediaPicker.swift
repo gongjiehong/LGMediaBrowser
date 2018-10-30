@@ -9,7 +9,7 @@
 import UIKit
 import Photos
 
-public protocol LGMediaPickerDelegate: NSObjectProtocol {
+public protocol LGMediaPickerDelegate: UINavigationControllerDelegate {
     
 }
 

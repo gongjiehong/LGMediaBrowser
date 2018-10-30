@@ -43,6 +43,7 @@ open class LGForceTouch: NSObject {
     }
     
     //MARK: Delegate registration
+    @discardableResult
     open func registerForPreviewingWithDelegate(_ delegate: LGForceTouchPreviewingDelegate,
                                                 sourceView: UIView) -> LGForceTouchPreviewingContext {
         let previewing = LGForceTouchPreviewingContext(delegate: delegate, sourceView: sourceView)

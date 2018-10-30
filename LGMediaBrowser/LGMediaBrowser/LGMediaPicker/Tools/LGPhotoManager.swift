@@ -226,6 +226,7 @@ public class LGPhotoManager {
         options.resizeMode = resizeMode
         options.isNetworkAccessAllowed = true
         options.progressHandler = progressHandlder
+        options.isSynchronous = false
         
         var realOutputSize: CGSize
         if outputSize.equalTo(CGSize.zero) {

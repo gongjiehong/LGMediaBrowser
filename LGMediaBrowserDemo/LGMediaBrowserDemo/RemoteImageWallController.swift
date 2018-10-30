@@ -40,7 +40,7 @@ fileprivate class RemoteImageLayoutCell: UICollectionViewCell {
 }
 
 class RemoteImageWallController: UIViewController {
-
+    
     @IBOutlet weak var collectionView: UICollectionView!
     
     var forchTouch: LGForceTouch!
@@ -59,20 +59,21 @@ class RemoteImageWallController: UIViewController {
         super.viewWillAppear(animated)
         self.navigationController?.setNavigationBarHidden(false, animated: true)
     }
-
+    
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using segue.destination.
+     // Pass the selected object to the new view controller.
+     }
+     */
 }
 
-extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView,
+                        cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         var cell: RemoteImageLayoutCell
         if let temp = collectionView.dequeueReusableCell(withReuseIdentifier: "RemoteImageLayoutCell",
                                                          for: indexPath) as? RemoteImageLayoutCell {
@@ -88,23 +89,26 @@ extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewD
         return ImageCount//dataArray.count
     }
     
+
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        
+        let mediaBrowser = LGMediaBrowser(dataSource: self,
+                                          status: LGMediaBrowserStatus.checkMedia,
+                                          currentIndex: indexPath.row)
+        mediaBrowser.delegate = self
+        self.navigationController?.pushViewController(mediaBrowser, animated: true)
+    }
+}
+
+extension RemoteImageWallController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                         layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize
     {
         let itemWidth = (UIScreen.main.bounds.width) / 4
         return CGSize(width: itemWidth, height: itemWidth)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        collectionView.deselectItem(at: indexPath, animated: true)
-
-        let mediaBrowser = LGMediaBrowser(dataSource: self,
-                                          status: LGMediaBrowserStatus.checkMedia,
-                                          currentIndex: indexPath.row)
-        mediaBrowser.delegate = self
-        self.navigationController?.pushViewController(mediaBrowser, animated: true)
-//        self.present(mediaBrowser, animated: true, completion: nil)
     }
 }
 
@@ -119,12 +123,12 @@ extension RemoteImageWallController: LGMediaBrowserDataSource {
         if let cell = collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? RemoteImageLayoutCell {
             image = cell.imageView.image
         }
-        return LGMediaModel(thumbnailImageURL: url,
-                            mediaURL: url,
-                            mediaAsset: nil,
-                            mediaType: LGMediaModel.MediaType.generalPhoto,
-                            mediaPosition: LGMediaModel.Position.remoteFile,
-                            thumbnailImage: image)
+        return (try? LGMediaModel(thumbnailImageURL: url,
+                                  mediaURL: url,
+                                  mediaAsset: nil,
+                                  mediaType: LGMediaModel.MediaType.generalPhoto,
+                                  mediaPosition: LGMediaModel.Position.remoteFile,
+                                  thumbnailImage: image)) ?? LGMediaModel()
     }
 }
 
@@ -150,18 +154,18 @@ extension RemoteImageWallController: LGForceTouchPreviewingDelegate {
         guard let indexPath = self.collectionView.indexPathForItem(at: location),
             let cell = self.collectionView.cellForItem(at: indexPath) as? RemoteImageLayoutCell else
         {
-                return nil
+            return nil
         }
         
         previewingContext.sourceRect = cell.frame
         
         let url = ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 256)
-        let mediaModel = LGMediaModel(thumbnailImageURL: url,
-                            mediaURL: url,
-                            mediaAsset: nil,
-                            mediaType: LGMediaModel.MediaType.generalPhoto,
-                            mediaPosition: LGMediaModel.Position.remoteFile,
-                            thumbnailImage: cell.imageView.image)
+        let mediaModel = (try? LGMediaModel(thumbnailImageURL: url,
+                                            mediaURL: url,
+                                            mediaAsset: nil,
+                                            mediaType: LGMediaModel.MediaType.generalPhoto,
+                                            mediaPosition: LGMediaModel.Position.remoteFile,
+                                            thumbnailImage: cell.imageView.image)) ?? LGMediaModel()
         let previewController = LGForceTouchPreviewController(mediaModel: mediaModel, currentIndex: indexPath.row)
         return previewController
     }

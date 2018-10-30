@@ -10,10 +10,13 @@ import UIKit
 
 open class LGMPNavigationController: UINavigationController {
 
+    open var naviDelegate: LGMediaBrowserNaviDelegate = LGMediaBrowserNaviDelegate()
+    
     open override func viewDidLoad() {
         super.viewDidLoad()
         
         self.interactivePopGestureRecognizer?.delegate = self
+        self.delegate = naviDelegate
     }
     
     open override var preferredStatusBarStyle: UIStatusBarStyle {

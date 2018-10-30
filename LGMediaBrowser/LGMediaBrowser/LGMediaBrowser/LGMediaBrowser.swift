@@ -176,6 +176,19 @@ public class LGMediaBrowser: UIViewController {
         }
     }
     
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        fixInteractiveTransitionActionType()
+    }
+    
+    func fixInteractiveTransitionActionType() {
+        if let navi = self.navigationController, navi.topViewController == self, navi.viewControllers.count > 1 {
+            self.interactiveTransition.actionType = .pop
+        } else {
+            self.interactiveTransition.actionType = .dismiss
+        }
+    }
+    
     func setupTopBarInit() {
         switch self.status {
         case .browsing, .browsingAndEditing:

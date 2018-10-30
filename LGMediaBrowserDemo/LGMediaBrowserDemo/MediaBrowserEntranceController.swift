@@ -45,42 +45,42 @@ class MediaBrowserEntranceController: UIViewController {
         dataArray.append("http://staticfile.cxylg.com/IMG_0392.heic")
         
         
-        var modelArray = [LGMediaModel]()
-        dataArray.forEach { (stringResult) in
-            modelArray.append(LGMediaModel(thumbnailImageURL: stringResult,
-                                           mediaURL: stringResult,
-                                           mediaAsset: nil,
-                                           mediaType: LGMediaModel.MediaType.generalPhoto,
-                                           mediaPosition: LGMediaModel.Position.remoteFile))
-        }
-        modelArray += [LGMediaModel(thumbnailImageURL: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
-                                    mediaURL: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
-                                    mediaAsset: nil,
-                                    mediaType: LGMediaModel.MediaType.generalPhoto,
-                                    mediaPosition: LGMediaModel.Position.remoteFile),
-                       LGMediaModel(thumbnailImageURL: nil,
-                                    mediaURL: "http://staticfile.cxylg.com/Lenka%20-%20Trouble%20Is%20a%20Friend.mp3",
-                                    mediaAsset: nil,
-                                    mediaType: LGMediaModel.MediaType.audio,
-                                    mediaPosition: LGMediaModel.Position.remoteFile),
-                       LGMediaModel(thumbnailImageURL: nil,
-                                    mediaURL: "http://staticfile.cxylg.com/94NWfqRSWgta-SCVideo.2.mp4",
-                                    mediaAsset: nil,
-                                    mediaType: LGMediaModel.MediaType.video,
-                                    mediaPosition: LGMediaModel.Position.remoteFile),
-                       LGMediaModel(thumbnailImageURL: nil,
-                                    mediaURL: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8",
-                                    mediaAsset: nil,
-                                    mediaType: LGMediaModel.MediaType.video,
-                                    mediaPosition: LGMediaModel.Position.remoteFile)]
-        
-        let media = LGMediaBrowser(mediaArray: modelArray,
-                                   status: LGMediaBrowserStatus.browsingAndEditing,
-                                   currentIndex: 0)
-        media.targetView = self.imageView
-        media.delegate = self
-        self.present(media, animated: true) {
-        }
+//        var modelArray = [LGMediaModel]()
+//        dataArray.forEach { (stringResult) in
+//            modelArray.append(LGMediaModel(thumbnailImageURL: stringResult,
+//                                           mediaURL: stringResult,
+//                                           mediaAsset: nil,
+//                                           mediaType: LGMediaModel.MediaType.generalPhoto,
+//                                           mediaPosition: LGMediaModel.Position.remoteFile))
+//        }
+//        modelArray += [LGMediaModel(thumbnailImageURL: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
+//                                    mediaURL: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
+//                                    mediaAsset: nil,
+//                                    mediaType: LGMediaModel.MediaType.generalPhoto,
+//                                    mediaPosition: LGMediaModel.Position.remoteFile),
+//                       LGMediaModel(thumbnailImageURL: nil,
+//                                    mediaURL: "http://staticfile.cxylg.com/Lenka%20-%20Trouble%20Is%20a%20Friend.mp3",
+//                                    mediaAsset: nil,
+//                                    mediaType: LGMediaModel.MediaType.audio,
+//                                    mediaPosition: LGMediaModel.Position.remoteFile),
+//                       LGMediaModel(thumbnailImageURL: nil,
+//                                    mediaURL: "http://staticfile.cxylg.com/94NWfqRSWgta-SCVideo.2.mp4",
+//                                    mediaAsset: nil,
+//                                    mediaType: LGMediaModel.MediaType.video,
+//                                    mediaPosition: LGMediaModel.Position.remoteFile),
+//                       LGMediaModel(thumbnailImageURL: nil,
+//                                    mediaURL: "https://devstreaming-cdn.apple.com/videos/wwdc/2017/102xyar2647hak3e/102/hls_vod_mvp.m3u8",
+//                                    mediaAsset: nil,
+//                                    mediaType: LGMediaModel.MediaType.video,
+//                                    mediaPosition: LGMediaModel.Position.remoteFile)]
+//        
+//        let media = LGMediaBrowser(mediaArray: modelArray,
+//                                   status: LGMediaBrowserStatus.browsingAndEditing,
+//                                   currentIndex: 0)
+//        media.targetView = self.imageView
+//        media.delegate = self
+//        self.present(media, animated: true) {
+//        }
     }
     
     override func viewDidLayoutSubviews() {

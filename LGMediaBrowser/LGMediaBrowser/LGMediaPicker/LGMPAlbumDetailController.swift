@@ -64,6 +64,8 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     var configs: LGMediaPicker.Configuration {
         return mainPicker.config
     }
+    
+    var forchTouch: LGForceTouch!
 
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -131,10 +133,8 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         self.listView.register(LGMPAlbumDetailCameraCell.self, forCellWithReuseIdentifier: Reuse.cameraCell)
         
         if configs.allowForceTouch, isForceTouchAvailable {
-            if #available(iOS 9.0, *) {
-                self.registerForPreviewing(with: self, sourceView: collectionView)
-            } else {
-            }
+            forchTouch = LGForceTouch(viewController: self)
+            forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.listView)
         }
     }
     
@@ -423,13 +423,28 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             self.listView.reloadItems(at: indexs)
         }
     }
+    
+    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        var configs = LGMediaBrowserSettings()
+        configs.isClickToTurnOffEnabled = false
+        configs.showsStatusBar = true
+        configs.showsNavigationBar = true
+        let mediaBrowser = LGMediaBrowser(dataSource: self,
+                                          configs: configs,
+                                          status: .checkMedia,
+                                          currentIndex: indexPath.row)
+        mediaBrowser.delegate = self
+        self.navigationController?.pushViewController(mediaBrowser, animated: true)
+    }
 
 }
 
-extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
-    @available(iOS 9.0, *)
-    public func previewingContext(_ previewingContext: UIViewControllerPreviewing,
-                                  viewControllerForLocation location: CGPoint) -> UIViewController?
+extension LGMPAlbumDetailController: LGForceTouchPreviewingDelegate {
+    
+    
+    public func previewingContext(_ previewingContext: LGForceTouchPreviewingContext,
+                           viewControllerForLocation location: CGPoint) -> UIViewController?
     {
         guard let indexPath = self.listView.indexPathForItem(at: location) else { return nil }
         guard let cell = self.listView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell else { return nil }
@@ -458,21 +473,42 @@ extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
                 return .other
             }
         }
-
-        let mediaModel = LGMediaModel(thumbnailImageURL: nil,
-                                      mediaURL: nil,
-                                      mediaAsset: model.asset,
-                                      mediaType: assetTypeToMediaType(model.type),
-                                      mediaPosition: LGMediaModel.Position.album,
-                                      thumbnailImage: cell.layoutImageView.image)
         
-        let previewVC = LGForceTouchPreviewController(mediaModel: mediaModel,
-                                                      currentIndex: indexPath.row)
-        previewVC.preferredContentSize = getSizeWith(photoModel: model)
-        return previewVC
-
+        do {
+            let mediaModel = try LGMediaModel(thumbnailImageURL: nil,
+                                              mediaURL: nil,
+                                              mediaAsset: model.asset,
+                                              mediaType: assetTypeToMediaType(model.type),
+                                              mediaPosition: LGMediaModel.Position.album,
+                                              thumbnailImage: cell.layoutImageView.image)
+            
+            let previewVC = LGForceTouchPreviewController(mediaModel: mediaModel,
+                                                          currentIndex: indexPath.row)
+            previewVC.currentIndex = indexPath.row
+            previewVC.preferredContentSize = getSizeWith(photoModel: model)
+            return previewVC
+        } catch {
+            println(error)
+            return nil
+        }
     }
     
+    public func previewingContext(_ previewingContext: LGForceTouchPreviewingContext,
+                           commitViewController viewControllerToCommit: UIViewController)
+    {
+        guard let previewController = viewControllerToCommit as? LGForceTouchPreviewController else {return}
+        var configs = LGMediaBrowserSettings()
+        configs.isClickToTurnOffEnabled = false
+        configs.showsStatusBar = true
+        configs.showsNavigationBar = true
+        let mediaBrowser = LGMediaBrowser(dataSource: self,
+                                          configs: configs,
+                                          status: .checkMedia,
+                                          currentIndex: previewController.currentIndex)
+        mediaBrowser.delegate = self
+        self.navigationController?.pushViewController(mediaBrowser, animated: false)
+    }
+
     func getSizeWith(photoModel: LGPhotoModel) -> CGSize {
         var width = min(CGFloat(photoModel.asset.pixelWidth),
                         self.view.lg_width)
@@ -486,13 +522,6 @@ extension LGMPAlbumDetailController: UIViewControllerPreviewingDelegate {
         }
         
         return CGSize(width: width, height: height)
-    }
-    
-    @available(iOS 9.0, *)
-    public func previewingContext(_ previewingContext: UIViewControllerPreviewing,
-                                  commit viewControllerToCommit: UIViewController)
-    {
-        return
     }
 }
 
@@ -534,4 +563,29 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomBarDelegate {
     public func doneButtonPressed(_ button: UIButton) {
         
     }
+}
+
+extension LGMPAlbumDetailController: LGMediaBrowserDataSource {
+    public func numberOfPhotosInPhotoBrowser(_ photoBrowser: LGMediaBrowser) -> Int {
+        return self.dataArray.count
+    }
+    
+    public func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel {
+        var dataModel: LGPhotoModel
+        if !self.allowTakePhoto || configs.sortBy == .ascending {
+            dataModel = self.dataArray[index]
+        } else {
+            dataModel = self.dataArray[index - 1]
+        }
+        return (try? LGMediaModel(thumbnailImageURL: nil,
+                                  mediaURL: nil,
+                                  mediaAsset: dataModel.asset,
+                                  mediaType: .generalPhoto,
+                                  mediaPosition: LGMediaModel.Position.album,
+                                  thumbnailImage: nil)) ?? LGMediaModel()
+    }
+}
+
+extension LGMPAlbumDetailController: LGMediaBrowserDelegate {
+    
 }

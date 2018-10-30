@@ -64,106 +64,25 @@ open class LGZoomingScrollView: UIScrollView {
     }
     
     func layoutImageIfNeeded() {
-        guard let media = self.mediaModel else {
-            self.imageView.image = nil
-            self.progressView.isShowError = true
+        guard let mediaModel = self.mediaModel else {
+            progressView.isShowError = true
             return
         }
         
-        if let image = media.thumbnailImage {
-            self.imageView.image = image
-            self.displayImage(complete: true)
-        }
-        
-        func loadLocalImage() {
-            progressView.isShowError = false
-            DispatchQueue.utility.async {
-                do {
-                    guard let photoURL = try media.mediaURL?.asURL() else {
-                        throw LGMediaModelError.mediaURLIsInvalid
-                    }
-                    
-                    let data = try Data(contentsOf: photoURL)
-                    let image = LGImage.imageWith(data: data)
-                    DispatchQueue.main.async {
-                        self.imageView.image = image
-                        self.displayImage(complete: true)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        self.progressView.isShowError = true
-                    }
-                }
-            }
-        }
-        
-        func loadRemoteImage() {
-            do {
-                guard let photoURL = try media.mediaURL?.asURL() else {
-                    throw LGMediaModelError.mediaURLIsInvalid
-                }
-                
-                if let image = LGImageCache.default.getImage(forKey: photoURL.absoluteString,
-                                                             withType: LGImageCacheType.memory) {
-                    self.imageView.image = image
-                    self.displayImage(complete: true)
-                } else {
-                    self.progressView.isHidden = false
-                    imageView.lg_setImageWithURL(photoURL,
-                                                 placeholder: media.thumbnailImage,
-                                                 options: LGWebImageOptions.default,
-                                                 progressBlock:
-                        { [weak self] (progressModel) in
-                            guard let weakSelf = self else {return}
-                            weakSelf.progressView.progress = CGFloat(progressModel.fractionCompleted)
-                    }, transformBlock: nil) { [weak self] (resultImage, _, _, imageStage, error) in
-                        guard let weakSelf = self else {return}
-                        guard error == nil, let image = resultImage else {
-                            weakSelf.progressView.isShowError = true
-                            return
-                        }
-                        weakSelf.mediaModel?.thumbnailImage = image
-                        weakSelf.progressView.isHidden = imageStage == LGWebImageStage.finished
-                        weakSelf.displayImage(complete: imageStage == LGWebImageStage.finished)
-                    }
-                }
-            } catch {
-                progressView.isShowError = true
-            }
-        }
-        
-        func loadImageFromAlbum() {
-            guard let asset = self.mediaModel?.mediaAsset else {
-                progressView.isShowError = true
-                return
-            }
-            LGPhotoManager.requestImage(forAsset: asset,
-                                        outputSize: CGSize(width: asset.pixelWidth,
-                                                           height: asset.pixelHeight),
-                                        resizeMode: .exact,
-                                        progressHandlder: { (progress, error, stoped, infoDic) in
-                                            self.progressView.progress = CGFloat(progress)
-            }) { (resultImage, infoDic) in
-                guard let resultImage = resultImage else {
+        do {
+            try mediaModel.fetchImage(withProgress: { (progress) in
+                self.progressView.progress = CGFloat(progress.fractionCompleted)
+            }, completion: { (resultImage) in
+                guard let _ = resultImage else {
                     self.progressView.isShowError = true
                     return
                 }
-                self.mediaModel?.thumbnailImage = resultImage
                 self.progressView.isHidden = true
                 self.displayImage(complete: true)
-            }
-        }
-        
-        switch media.mediaPosition {
-        case .localFile:
-            loadLocalImage()
-            break
-        case .remoteFile:
-            loadRemoteImage()
-            break
-        case .album:
-            loadImageFromAlbum()
-            break
+            })
+        } catch  {
+            println(error)
+            progressView.isShowError = true
         }
     }
     
