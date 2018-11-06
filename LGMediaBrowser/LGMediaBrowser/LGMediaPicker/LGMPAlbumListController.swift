@@ -187,6 +187,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         if self.dataArray.count == 0 {
             fetchAlbumList()
         }
+        self.navigationController?.setToolbarHidden(true, animated: true)
     }
     
     /// 获取相册列表

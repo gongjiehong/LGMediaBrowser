@@ -145,6 +145,12 @@ extension RemoteImageWallController: LGMediaBrowserDelegate {
         print(index, "-> UIView?")
         return self.collectionView.cellForItem(at: IndexPath(row: index, section: 0))
     }
+    
+    func didHide(_ browser: LGMediaBrowser, atIndex index: Int) {
+        self.collectionView.scrollToItem(at: IndexPath(row: index, section: 0),
+                                         at: UICollectionView.ScrollPosition.centeredVertically,
+                                         animated: false)
+    }
 }
 
 extension RemoteImageWallController: LGForceTouchPreviewingDelegate {

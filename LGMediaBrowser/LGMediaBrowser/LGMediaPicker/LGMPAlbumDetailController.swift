@@ -32,15 +32,6 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         }
     }()
     
-    lazy var bottomBar: LGMPAlbumDetailBottomBar = {
-       let temp = LGMPAlbumDetailBottomBar(frame: CGRect(x: 0.0,
-                                                         y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
-                                                         width: self.view.lg_width,
-                                                         height: 44.0))
-        temp.delegate = self
-        return temp
-    }()
-    
     struct Settings {
         static var columnCount: Int = {
             if UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.pad {
@@ -66,6 +57,15 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     }
     
     var forchTouch: LGForceTouch!
+    
+    lazy var bottomToolBar: LGMPAlbumDetailBottomToolBar = {
+        let temp = LGMPAlbumDetailBottomToolBar(frame: CGRect(x: 0,
+                                                              y: 0,
+                                                              width: LGMesurement.screenWidth,
+                                                              height: 44.0))
+        temp.barDelegate = self
+        return temp
+    }()
 
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -77,9 +77,11 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         
         fetchDataIfNeeded()
         
-        self.view.addSubview(bottomBar)
-        
         PHPhotoLibrary.shared().register(self)
+        
+        constructBottomToolBar()
+        
+
     }
     
     func setupCancel() {
@@ -136,26 +138,58 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
             forchTouch = LGForceTouch(viewController: self)
             forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.listView)
         }
+        
+        listView.translatesAutoresizingMaskIntoConstraints = false
+        
+        if #available(iOS 11.0, *) {
+            listView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        } else {
+            listView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        }
+        listView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+        listView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+        listView.topAnchor.constraint(equalTo: self.view.topAnchor).isActive = true
     }
     
+    func constructBottomToolBar() {
+        self.view.addSubview(bottomToolBar)
+        
+        bottomToolBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        if #available(iOS 11.0, *) {
+            bottomToolBar.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        } else {
+            bottomToolBar.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        }
+        bottomToolBar.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+        bottomToolBar.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+        bottomToolBar.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
+    }
+
+    // MARK: - 显示状态
     public override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
-        
-        self.listView.frame = CGRect(x: 0,
-                                     y: 0,
-                                     width: self.view.lg_width,
-                                     height: self.view.lg_height - 44.0 - UIDevice.bottomSafeMargin)
-        bottomBar.frame = CGRect(x: 0.0,
-                                 y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
-                                 width: self.view.lg_width,
-                                 height: 44.0)
+    }
+    
+    lazy var callOnceScrollToBottom: Void = {
+        self.scrollToBottom()
+    }()
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
     }
     
     public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        self.scrollToBottom()
     }
     
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        refreshBottomBarStatus()
+        _ = callOnceScrollToBottom
+    }
+    
+    // MARK: - 获取数据并显示
     @objc func fetchDataIfNeeded(_ needRefresh: Bool = false) {
         if self.dataArray.count == 0 || needRefresh {
             let hud = LGLoadingHUD.show(inView: self.view)
@@ -365,24 +399,28 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     }
 
     var isSelecteOriginalPhoto: Bool {
-        return self.bottomBar.originalPhotoButton.isSelected
+        return bottomToolBar.originalPhotoButton.isSelected
     }
     
     func refreshBottomBarStatus() {
         if mainPicker.selectedDataArray.count > 0 {
-            self.bottomBar.previewButton.isEnabled = true
-            self.bottomBar.originalPhotoButton.isEnabled = true
-            self.bottomBar.doneButton.isEnabled = true
-            self.bottomBar.doneButton.setTitle(LGLocalizedString("Done") + "(\(mainPicker.selectedDataArray.count))",
+            bottomToolBar.previewButton.isEnabled = true
+            bottomToolBar.originalPhotoButton.isEnabled = true
+            bottomToolBar.doneButton.isEnabled = true
+            bottomToolBar.doneButton.setTitle(LGLocalizedString("Done") + "(\(mainPicker.selectedDataArray.count))",
                                                for: UIControl.State.normal)
+            bottomToolBar.doneButton.sizeToFit()
+            bottomToolBar.doneButton.frame = CGRect(x: 0, y: 0, width: self.bottomToolBar.doneButton.lg_width + 20.0, height: 30.0)
             layoutPhotosBytes()
         } else {
-            self.bottomBar.previewButton.isEnabled = false
-            self.bottomBar.originalPhotoButton.isEnabled = false
-            self.bottomBar.originalPhotoButton.isSelected = false
-            self.bottomBar.photoBytesLabel.text = ""
-            self.bottomBar.doneButton.isEnabled = false
-            self.bottomBar.doneButton.setTitle(LGLocalizedString("Done"), for: UIControl.State.normal)
+            bottomToolBar.previewButton.isEnabled = false
+            bottomToolBar.originalPhotoButton.isEnabled = false
+            bottomToolBar.originalPhotoButton.isSelected = false
+            bottomToolBar.photoBytesLabel.text = ""
+            bottomToolBar.doneButton.isEnabled = false
+            bottomToolBar.doneButton.setTitle(LGLocalizedString("Done"), for: UIControl.State.normal)
+            bottomToolBar.doneButton.sizeToFit()
+            bottomToolBar.doneButton.frame = CGRect(x: 0, y: 0, width: self.bottomToolBar.doneButton.lg_width + 20.0, height: 30.0)
         }
     }
     
@@ -391,11 +429,13 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             LGPhotoManager.getPhotoBytes(withPhotos: mainPicker.selectedDataArray)
             { (mbFormatString, originalLength) in
                 DispatchQueue.main.async { [weak self] in
-                    self?.bottomBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
+                    guard let weakSelf = self else {return}
+                    weakSelf.bottomToolBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
+                    weakSelf.bottomToolBar.photoBytesLabel.sizeToFit()
                 }
             }
         } else {
-            self.bottomBar.photoBytesLabel.text = ""
+            self.bottomToolBar.photoBytesLabel.text = ""
         }
     }
     
@@ -551,26 +591,16 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
     }
 }
 
-extension LGMPAlbumDetailController: LGMPAlbumDetailBottomBarDelegate {
-    public func previewButtonPressed(_ button: UIButton) {
-        
-    }
-    
-    public func originalButtonPressed(_ button: UIButton) {
-        layoutPhotosBytes()
-    }
-    
-    public func doneButtonPressed(_ button: UIButton) {
-        
-    }
-}
-
 extension LGMPAlbumDetailController: LGMediaBrowserDataSource {
     public func numberOfPhotosInPhotoBrowser(_ photoBrowser: LGMediaBrowser) -> Int {
         return self.dataArray.count
     }
     
     public func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel {
+        var thumbnailImage: UIImage?
+        if let cell = self.listView.cellForItem(at: IndexPath(row: index, section: 0)) as? LGMPAlbumDetailImageCell {
+            thumbnailImage = cell.layoutImageView.image
+        }
         var dataModel: LGPhotoModel
         if !self.allowTakePhoto || configs.sortBy == .ascending {
             dataModel = self.dataArray[index]
@@ -582,10 +612,29 @@ extension LGMPAlbumDetailController: LGMediaBrowserDataSource {
                                   mediaAsset: dataModel.asset,
                                   mediaType: .generalPhoto,
                                   mediaPosition: LGMediaModel.Position.album,
-                                  thumbnailImage: nil)) ?? LGMediaModel()
+                                  thumbnailImage: thumbnailImage)) ?? LGMediaModel()
     }
 }
 
 extension LGMPAlbumDetailController: LGMediaBrowserDelegate {
     
+}
+
+
+extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
+    public func position(for bar: UIBarPositioning) -> UIBarPosition {
+        return UIBarPosition.bottom
+    }
+    
+    func previewButtonPressed(_ button: UIButton) {
+        
+    }
+    
+    func originalButtonPressed(_ button: UIButton) {
+        layoutPhotosBytes()
+    }
+    
+    func doneButtonPressed(_ button: UIButton) {
+        
+    }
 }

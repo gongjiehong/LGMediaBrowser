@@ -1,32 +1,26 @@
 //
-//  LGMPAlbumDetailBottomBar.swift
+//  LGMPAlbumDetailBottomToolBar.swift
 //  LGMediaBrowser
 //
-//  Created by 龚杰洪 on 2018/7/4.
+//  Created by 龚杰洪 on 2018/11/6.
 //  Copyright © 2018年 龚杰洪. All rights reserved.
 //
 
 import UIKit
 
-public protocol LGMPAlbumDetailBottomBarDelegate: NSObjectProtocol {
+internal protocol LGMPAlbumDetailBottomToolBarDelegate: UIToolbarDelegate {
     func previewButtonPressed(_ button: UIButton)
     func originalButtonPressed(_ button: UIButton)
     func doneButtonPressed(_ button: UIButton)
 }
 
-public class LGMPAlbumDetailBottomBar: UIView {
+internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
     
-    public var allowSelectOriginal: Bool = true
+    internal var allowSelectOriginal: Bool = true
     
-    public weak var delegate: LGMPAlbumDetailBottomBarDelegate?
+    internal weak var barDelegate: LGMPAlbumDetailBottomToolBarDelegate?
     
-    public lazy var cutLine: UIView = {
-        let temp = UIView(frame: CGRect(x: 0, y: 0, width: self.bounds.width, height: 1.0))
-        temp.backgroundColor = UIColor(colorName: "CutLine")
-        return temp
-    }()
-    
-    public lazy var previewButton: UIButton = {
+    internal lazy var previewButton: UIButton = {
         let temp = UIButton(type: UIButton.ButtonType.custom)
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
         temp.setTitle(LGLocalizedString("Preview"), for: UIControl.State.normal)
@@ -37,7 +31,7 @@ public class LGMPAlbumDetailBottomBar: UIView {
         return temp
     }()
     
-    public lazy var originalPhotoButton: UIButton = {
+    internal lazy var originalPhotoButton: UIButton = {
         let temp = UIButton(type: UIButton.ButtonType.custom)
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
         temp.setTitle(LGLocalizedString("Original"), for: UIControl.State.normal)
@@ -50,14 +44,14 @@ public class LGMPAlbumDetailBottomBar: UIView {
         return temp
     }()
     
-    public lazy var photoBytesLabel: UILabel = {
+    internal lazy var photoBytesLabel: UILabel = {
         let temp = UILabel(frame: CGRect.zero)
         temp.font = UIFont.systemFont(ofSize: 15.0)
         temp.textColor = UIColor(colorName: "BottomBarNormalText")
         return temp
     }()
     
-    public lazy var doneButton: UIButton = {
+    internal lazy var doneButton: UIButton = {
         let temp = UIButton(type: UIButton.ButtonType.custom)
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
         temp.setTitleColor(UIColor.white, for: UIControl.State.normal)
@@ -71,70 +65,86 @@ public class LGMPAlbumDetailBottomBar: UIView {
         return temp
     }()
     
-    public override init(frame: CGRect) {
+    override init(frame: CGRect) {
         super.init(frame: frame)
-        setupDefualtViews()
+        setupDefualtItems()
     }
     
-    public required init?(coder aDecoder: NSCoder) {
+    required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
-        setupDefualtViews()
+        setupDefualtItems()
     }
     
-    func setupDefualtViews() {
-        self.addSubview(cutLine)
-        self.addSubview(previewButton)
-        self.addSubview(originalPhotoButton)
-        self.addSubview(photoBytesLabel)
-        self.addSubview(doneButton)
+    func setupDefualtItems() {
+        self.delegate = self
+        
+        let previewButtonItem = UIBarButtonItem(customView: previewButton)
+        let originalPhotoButtonItem = UIBarButtonItem(customView: originalPhotoButton)
+        let photoBytesLableItem = UIBarButtonItem(customView: photoBytesLabel)
+        let doneButtonItem = UIBarButtonItem(customView: doneButton)
+        
+        let flexibleSpaceItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace,
+                                                target: nil,
+                                                action: nil)
+        self.items = [previewButtonItem,
+                      originalPhotoButtonItem,
+                      photoBytesLableItem,
+                      flexibleSpaceItem,
+                      doneButtonItem]
+        
+        self.contentMode = UIView.ContentMode.top
     }
+    
     
     public override func layoutSubviews() {
         super.layoutSubviews()
-        cutLine.frame = CGRect(x: 0, y: 0, width: self.lg_width, height: 0.5)
-        
-        var offsetX: CGFloat = 12.0
         let bottonButtonsHeight: CGFloat = 30.0
         let previewTitleWidth = LGLocalizedString("Preview").width(withConstrainedHeight: 20.0,
-                                                                  font: UIFont.systemFont(ofSize: 15.0))
-        previewButton.frame = CGRect(x: offsetX,
-                                     y: 7,
+                                                                   font: UIFont.systemFont(ofSize: 15.0))
+        previewButton.frame = CGRect(x: 0,
+                                     y: 0,
                                      width: previewTitleWidth,
                                      height: bottonButtonsHeight)
-        offsetX = previewButton.frame.maxX + 20.0
         
         if allowSelectOriginal {
             let originalTitleWidth = LGLocalizedString("Original").width(withConstrainedHeight: 20.0,
                                                                          font: UIFont.systemFont(ofSize: 15.0)) + 20.0
-            originalPhotoButton.frame = CGRect(x: offsetX,
-                                               y: 7,
-                                               width: originalTitleWidth,
+            originalPhotoButton.frame = CGRect(x: 0,
+                                               y: 0,
+                                               width: originalTitleWidth + 10.0,
                                                height: bottonButtonsHeight)
-            offsetX = originalPhotoButton.frame.maxX + 5.0
-            
-            photoBytesLabel.frame = CGRect(x: offsetX, y: 7, width: 80.0, height: bottonButtonsHeight)
+            photoBytesLabel.frame = CGRect(x: 0, y: 0, width: 80.0, height: bottonButtonsHeight)
         }
         
         var doneWidth = doneButton.currentTitle?.width(withConstrainedHeight: 20.0,
                                                        font: UIFont.systemFont(ofSize: 15.0)) ?? 0.0
         doneWidth = max(70.0, doneWidth)
-        doneButton.frame = CGRect(x: self.lg_width - doneWidth - 12.0,
-                                  y: 7,
+        doneButton.frame = CGRect(x: 0,
+                                  y: 0,
                                   width: doneWidth,
                                   height: bottonButtonsHeight)
     }
-
+    
     // MARK: -  actions
     @objc func previewButtonPressed(_ button: UIButton) {
-        delegate?.previewButtonPressed(button)
+        barDelegate?.previewButtonPressed(button)
     }
     
     @objc func originalButtonPressed(_ button: UIButton) {
         button.isSelected = !button.isSelected
-        delegate?.originalButtonPressed(button)
+        barDelegate?.originalButtonPressed(button)
     }
     
     @objc func doneButtonPressed(_ button: UIButton) {
-        delegate?.doneButtonPressed(button)
+        barDelegate?.doneButtonPressed(button)
+    }
+}
+
+extension LGMPAlbumDetailBottomToolBar: UIToolbarDelegate {
+    func position(for bar: UIBarPositioning) -> UIBarPosition {
+        guard let barDelegate = barDelegate, let barPosition = barDelegate.position?(for: bar) else {
+            return UIBarPosition.bottom
+        }
+        return barPosition
     }
 }

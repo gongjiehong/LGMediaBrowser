@@ -95,6 +95,12 @@ public class LGMediaBrowser: UIViewController {
         }
     }
     
+    lazy var bottomToolBar: LGMPMediaCheckBottomToolBar = {
+        let temp = LGMPMediaCheckBottomToolBar(frame: CGRect.zero)
+        temp.barDelegate = self
+        return temp
+    }()
+    
     /// UICollectionView显示设置
     lazy var flowLayout: UICollectionViewFlowLayout  = {
         let layout = UICollectionViewFlowLayout()
@@ -165,6 +171,8 @@ public class LGMediaBrowser: UIViewController {
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         
         addPanExitGesture()
+        
+        contructBottomToolBar()
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -174,6 +182,10 @@ public class LGMediaBrowser: UIViewController {
         } else {
             self.navigationController?.setNavigationBarHidden(true, animated: true)
         }
+    }
+    
+    public override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
     }
     
     public override func viewDidAppear(_ animated: Bool) {
@@ -211,33 +223,22 @@ public class LGMediaBrowser: UIViewController {
         tempBtn.enlargeOffset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: tempBtn)
-        
-        
-        let toolBar = UIToolbar(frame: CGRect(x: 0,
-                                              y: self.view.lg_height - 44.0,
-                                              width: self.view.lg_width,
-                                              height: 44.0))
-        toolBar.delegate = self
-        let flexibleSpaceItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace,
-                                                target: self,
-                                                action: nil)
-        let editItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.edit,
-                                       target: self,
-                                       action: #selector(editPicture(_:)))
-        let doneItem = UIBarButtonItem(title: LGLocalizedString("Done"),
-                                       style: UIBarButtonItem.Style.plain,
-                                       target: self,
-                                       action: #selector(completeSelection(_:)))
-//            UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.done,
-//                                       target: self,
-//                                       action: #selector(completeSelection(_:)))
-        toolBar.items = [flexibleSpaceItem,
-                         editItem,
-                         doneItem]
-        toolBar.contentMode = UIView.ContentMode.right
-        self.view.addSubview(toolBar)
     }
     
+    func contructBottomToolBar() {
+        self.view.addSubview(bottomToolBar)
+        
+        bottomToolBar.translatesAutoresizingMaskIntoConstraints = false
+        
+        if #available(iOS 11.0, *) {
+            bottomToolBar.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        } else {
+            bottomToolBar.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+        }
+        bottomToolBar.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
+        bottomToolBar.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
+        bottomToolBar.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
+    }
     
     
     // MARK: - 初始化数据源
@@ -278,7 +279,7 @@ public class LGMediaBrowser: UIViewController {
     /// 设置自定义动画
     func setupTransition() {
         self.transitioningDelegate = self
-        self.modalPresentationStyle = .currentContext
+        self.modalPresentationStyle = .custom
     }
     
     /// 设置collectionView
@@ -397,16 +398,15 @@ public class LGMediaBrowser: UIViewController {
     }
     
     // MARK: -  视图简要显示，处理frame
-    private var isFirstTimeLayout: Bool = true
+    private lazy var runOnceRefreshFrames: Void = {
+        refreshFrames()
+    }()
     
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if isFirstTimeLayout {
-            refreshFrames()
-            isFirstTimeLayout = false
-        } else {
-            
+        if self.status == .checkMedia {
         }
+        _ = runOnceRefreshFrames
     }
     
     func refreshFrames() {
@@ -929,7 +929,15 @@ extension LGMediaBrowser {
     public static let needHideControlsNotification = Notification.Name("NeedHideControlsNotification")
 }
 
-extension LGMediaBrowser: UIToolbarDelegate {
+extension LGMediaBrowser: LGMPMediaCheckBottomToolBarDelegate {
+    func editPictureButtonPressed(_ sender: UIButton) {
+        
+    }
+    
+    func doneButtonPressed(_ button: UIButton) {
+        
+    }
+    
     public func position(for bar: UIBarPositioning) -> UIBarPosition {
         return UIBarPosition.bottom
     }

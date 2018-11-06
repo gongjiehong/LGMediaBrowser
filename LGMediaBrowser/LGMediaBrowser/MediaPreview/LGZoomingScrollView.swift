@@ -70,15 +70,17 @@ open class LGZoomingScrollView: UIScrollView {
         }
         
         do {
-            try mediaModel.fetchImage(withProgress: { (progress) in
-                self.progressView.progress = CGFloat(progress.fractionCompleted)
-            }, completion: { (resultImage) in
+            try mediaModel.fetchImage(withProgress: { [weak self] (progress) in
+                guard let weakSelf = self else { return }
+                weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+            }, completion: { [weak self] (resultImage) in
+                guard let weakSelf = self else { return }
                 guard let _ = resultImage else {
-                    self.progressView.isShowError = true
+                    weakSelf.progressView.isShowError = true
                     return
                 }
-                self.progressView.isHidden = true
-                self.displayImage(complete: true)
+                weakSelf.progressView.isHidden = true
+                weakSelf.displayImage(complete: true)
             })
         } catch  {
             println(error)
