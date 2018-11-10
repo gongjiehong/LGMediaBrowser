@@ -59,6 +59,8 @@ public class LGMediaModel {
     /// 媒体文件位置
     public private(set) var mediaPosition: Position
     
+    internal var isSelected: Bool = false
+    
     private var _progress: Progress?
     private var _thumbnailImage: UIImage?
     private var _lock: DispatchSemaphore = DispatchSemaphore(value: 1)

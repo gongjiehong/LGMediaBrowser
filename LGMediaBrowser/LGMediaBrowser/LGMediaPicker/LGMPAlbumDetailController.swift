@@ -142,9 +142,11 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         listView.translatesAutoresizingMaskIntoConstraints = false
         
         if #available(iOS 11.0, *) {
-            listView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+            listView.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor,
+                                             constant: -44.0).isActive = true
         } else {
-            listView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
+            listView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor,
+                                             constant: -44.0).isActive = true
         }
         listView.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
         listView.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
@@ -181,12 +183,13 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
+        _ = callOnceScrollToBottom
     }
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         refreshBottomBarStatus()
-        _ = callOnceScrollToBottom
+        
     }
     
     // MARK: - 获取数据并显示
@@ -240,6 +243,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                         guard let weakSelf = self else { return }
                         weakSelf.title = album.title
                         weakSelf.listView.reloadData()
+                        weakSelf.scrollToBottom()
                         weakSelf.cachingImages()
                     }
                 }
@@ -275,7 +279,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         }
         
         let lastIndexPath = IndexPath(row: row, section: 0)
-        
+        self.listView.layoutIfNeeded()
         self.listView.scrollToItem(at: lastIndexPath,
                                    at: UICollectionView.ScrollPosition.bottom,
                                    animated: false)
@@ -409,8 +413,6 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             bottomToolBar.doneButton.isEnabled = true
             bottomToolBar.doneButton.setTitle(LGLocalizedString("Done") + "(\(mainPicker.selectedDataArray.count))",
                                                for: UIControl.State.normal)
-            bottomToolBar.doneButton.sizeToFit()
-            bottomToolBar.doneButton.frame = CGRect(x: 0, y: 0, width: self.bottomToolBar.doneButton.lg_width + 20.0, height: 30.0)
             layoutPhotosBytes()
         } else {
             bottomToolBar.previewButton.isEnabled = false
@@ -419,8 +421,6 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             bottomToolBar.photoBytesLabel.text = ""
             bottomToolBar.doneButton.isEnabled = false
             bottomToolBar.doneButton.setTitle(LGLocalizedString("Done"), for: UIControl.State.normal)
-            bottomToolBar.doneButton.sizeToFit()
-            bottomToolBar.doneButton.frame = CGRect(x: 0, y: 0, width: self.bottomToolBar.doneButton.lg_width + 20.0, height: 30.0)
         }
     }
     
@@ -466,23 +466,12 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        var configs = LGMediaBrowserSettings()
-        configs.isClickToTurnOffEnabled = false
-        configs.showsStatusBar = true
-        configs.showsNavigationBar = true
-        let mediaBrowser = LGMediaBrowser(dataSource: self,
-                                          configs: configs,
-                                          status: .checkMedia,
-                                          currentIndex: indexPath.row)
-        mediaBrowser.delegate = self
-        self.navigationController?.pushViewController(mediaBrowser, animated: true)
+        preview(with: indexPath.row)
     }
 
 }
 
 extension LGMPAlbumDetailController: LGForceTouchPreviewingDelegate {
-    
-    
     public func previewingContext(_ previewingContext: LGForceTouchPreviewingContext,
                            viewControllerForLocation location: CGPoint) -> UIViewController?
     {
@@ -537,16 +526,7 @@ extension LGMPAlbumDetailController: LGForceTouchPreviewingDelegate {
                            commitViewController viewControllerToCommit: UIViewController)
     {
         guard let previewController = viewControllerToCommit as? LGForceTouchPreviewController else {return}
-        var configs = LGMediaBrowserSettings()
-        configs.isClickToTurnOffEnabled = false
-        configs.showsStatusBar = true
-        configs.showsNavigationBar = true
-        let mediaBrowser = LGMediaBrowser(dataSource: self,
-                                          configs: configs,
-                                          status: .checkMedia,
-                                          currentIndex: previewController.currentIndex)
-        mediaBrowser.delegate = self
-        self.navigationController?.pushViewController(mediaBrowser, animated: false)
+        preview(with: previewController.currentIndex)
     }
 
     func getSizeWith(photoModel: LGPhotoModel) -> CGSize {
@@ -617,7 +597,23 @@ extension LGMPAlbumDetailController: LGMediaBrowserDataSource {
 }
 
 extension LGMPAlbumDetailController: LGMediaBrowserDelegate {
+    public func viewForMedia(_ browser: LGMediaBrowser, index: Int) -> UIView? {
+        self.listView.layoutIfNeeded()
+        return self.listView.cellForItem(at: IndexPath(row: index, section: 0))
+    }
     
+    public func didScrollToIndex(_ browser: LGMediaBrowser, index: Int) {
+        self.listView.layoutIfNeeded()
+        if let tempCell = self.listView.cellForItem(at: IndexPath(row: index, section: 0)) {
+            if self.listView.frame.contains(tempCell.frame) {
+                
+            } else {
+                self.listView.scrollToItem(at: IndexPath(row: index, section: 0),
+                                           at: UICollectionView.ScrollPosition.centeredVertically,
+                                           animated: true)
+            }
+        }
+    }
 }
 
 
@@ -627,7 +623,7 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
     }
     
     func previewButtonPressed(_ button: UIButton) {
-        
+        preview(with: self.selectedIndexPath.last?.row ?? 0)
     }
     
     func originalButtonPressed(_ button: UIButton) {
@@ -636,5 +632,18 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
     
     func doneButtonPressed(_ button: UIButton) {
         
+    }
+    
+    func preview(with index: Int) {
+        var configs = LGMediaBrowserSettings()
+        configs.isClickToTurnOffEnabled = false
+        configs.showsStatusBar = true
+        configs.showsNavigationBar = true
+        let mediaBrowser = LGMediaBrowser(dataSource: self,
+                                          configs: configs,
+                                          status: .checkMedia,
+                                          currentIndex: index)
+        mediaBrowser.delegate = self
+        self.navigationController?.pushViewController(mediaBrowser, animated: true)
     }
 }

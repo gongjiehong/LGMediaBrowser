@@ -96,7 +96,10 @@ public class LGMediaBrowser: UIViewController {
     }
     
     lazy var bottomToolBar: LGMPMediaCheckBottomToolBar = {
-        let temp = LGMPMediaCheckBottomToolBar(frame: CGRect.zero)
+        let temp = LGMPMediaCheckBottomToolBar(frame: CGRect(x: 0,
+                                                             y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
+                                                             width: self.view.lg_width,
+                                                             height: UIDevice.bottomSafeMargin + 44.0))
         temp.barDelegate = self
         return temp
     }()
@@ -675,6 +678,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
             let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.push)
             transition.placeholderImage = animationImage
             transition.targetView = targetView
+            transition.bottomBar = self.bottomToolBar
             return transition
         } else {
             if fromVC.self != self.self {
@@ -687,6 +691,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
             if let layoutView = getCurrentLayoutView() {
                 transition.finalImageSize = layoutView.lg_size
             }
+            transition.bottomBar = self.bottomToolBar
             return transition
         }
     }
@@ -727,6 +732,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
         self.interactiveTransition.fromTargetView = fromTargetView
         self.interactiveTransition.targetImage = self.animationImage
         self.interactiveTransition.finalImageSize = finalImageSize
+        self.interactiveTransition.bottomBar = self.bottomToolBar
         return self.interactiveTransition.isInteration ? self.interactiveTransition : nil
     }
 }

@@ -36,6 +36,17 @@ internal class LGMPMediaCheckBottomToolBar: UIToolbar {
         temp.addTarget(self, action: #selector(doneButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         temp.backgroundColor = UIColor(colorName: "BottomBarNormalText")
         temp.isEnabled = false
+        
+        let bottonButtonsHeight: CGFloat = 30.0
+        
+        var doneWidth = temp.currentTitle?.width(withConstrainedHeight: 20.0,
+                                                 font: UIFont.systemFont(ofSize: 15.0)) ?? 0.0
+        doneWidth = max(70.0, doneWidth)
+        temp.frame = CGRect(x: 0,
+                            y: 0,
+                            width: doneWidth,
+                            height: bottonButtonsHeight)
+        
         return temp
     }()
     
@@ -63,12 +74,6 @@ internal class LGMPMediaCheckBottomToolBar: UIToolbar {
         self.items = [editItem, flexibleSpaceItem, doneItem]
     }
     
-    // MARK: - layout
-    override func layoutSubviews() {
-        super.layoutSubviews()
-    }
-    
-    
     // MARK: - actions
     @objc func editPicture(_ sender: UIButton) {
         barDelegate?.editPictureButtonPressed(sender)
@@ -76,6 +81,15 @@ internal class LGMPMediaCheckBottomToolBar: UIToolbar {
     
     @objc func doneButtonPressed(_ sender: UIButton) {
         barDelegate?.doneButtonPressed(sender)
+    }
+    
+    // MARK: - copy
+    override func copy() -> Any {
+        let result = LGMPMediaCheckBottomToolBar(frame: self.frame)
+        result.editButton = editButton
+        result.barDelegate = barDelegate
+        result.doneButton = doneButton
+        return result
     }
 }
 

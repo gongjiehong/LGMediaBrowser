@@ -28,6 +28,15 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
         temp.setTitleColor(UIColor(colorName: "BottomBarDisableText"), for: UIControl.State.disabled)
         temp.setTitleColor(UIColor(colorName: "BottomBarNormalText"), for: UIControl.State.normal)
         temp.isEnabled = false
+        
+        let bottonButtonsHeight: CGFloat = 30.0
+        let previewTitleWidth = LGLocalizedString("Preview").width(withConstrainedHeight: 20.0,
+                                                                   font: UIFont.systemFont(ofSize: 15.0))
+        temp.frame = CGRect(x: 0,
+                            y: 0,
+                            width: previewTitleWidth,
+                            height: bottonButtonsHeight)
+        
         return temp
     }()
     
@@ -41,11 +50,20 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
         temp.setTitleColor(UIColor(colorName: "BottomBarNormalText"), for: UIControl.State.normal)
         temp.addTarget(self, action: #selector(originalButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         temp.isEnabled = false
+        
+        let bottonButtonsHeight: CGFloat = 30.0
+        let originalTitleWidth = LGLocalizedString("Original").width(withConstrainedHeight: 20.0,
+                                                                     font: UIFont.systemFont(ofSize: 15.0)) + 20.0
+        temp.frame = CGRect(x: 0,
+                            y: 0,
+                            width: originalTitleWidth + 10.0,
+                            height: bottonButtonsHeight)
+        
         return temp
     }()
     
     internal lazy var photoBytesLabel: UILabel = {
-        let temp = UILabel(frame: CGRect.zero)
+        let temp = UILabel(frame: CGRect(x: 0, y: 0, width: 80.0, height: 30.0))
         temp.font = UIFont.systemFont(ofSize: 15.0)
         temp.textColor = UIColor(colorName: "BottomBarNormalText")
         return temp
@@ -62,6 +80,17 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
         temp.addTarget(self, action: #selector(doneButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         temp.backgroundColor = UIColor(colorName: "BottomBarNormalText")
         temp.isEnabled = false
+        
+        let bottonButtonsHeight: CGFloat = 30.0
+        
+        var doneWidth = temp.currentTitle?.width(withConstrainedHeight: 20.0,
+                                                 font: UIFont.systemFont(ofSize: 15.0)) ?? 0.0
+        doneWidth = max(70.0, doneWidth)
+        temp.frame = CGRect(x: 0,
+                            y: 0,
+                            width: doneWidth,
+                            height: bottonButtonsHeight)
+        
         return temp
     }()
     
@@ -95,36 +124,6 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
         self.contentMode = UIView.ContentMode.top
     }
     
-    
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-        let bottonButtonsHeight: CGFloat = 30.0
-        let previewTitleWidth = LGLocalizedString("Preview").width(withConstrainedHeight: 20.0,
-                                                                   font: UIFont.systemFont(ofSize: 15.0))
-        previewButton.frame = CGRect(x: 0,
-                                     y: 0,
-                                     width: previewTitleWidth,
-                                     height: bottonButtonsHeight)
-        
-        if allowSelectOriginal {
-            let originalTitleWidth = LGLocalizedString("Original").width(withConstrainedHeight: 20.0,
-                                                                         font: UIFont.systemFont(ofSize: 15.0)) + 20.0
-            originalPhotoButton.frame = CGRect(x: 0,
-                                               y: 0,
-                                               width: originalTitleWidth + 10.0,
-                                               height: bottonButtonsHeight)
-            photoBytesLabel.frame = CGRect(x: 0, y: 0, width: 80.0, height: bottonButtonsHeight)
-        }
-        
-        var doneWidth = doneButton.currentTitle?.width(withConstrainedHeight: 20.0,
-                                                       font: UIFont.systemFont(ofSize: 15.0)) ?? 0.0
-        doneWidth = max(70.0, doneWidth)
-        doneButton.frame = CGRect(x: 0,
-                                  y: 0,
-                                  width: doneWidth,
-                                  height: bottonButtonsHeight)
-    }
-    
     // MARK: -  actions
     @objc func previewButtonPressed(_ button: UIButton) {
         barDelegate?.previewButtonPressed(button)
@@ -137,6 +136,18 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
     
     @objc func doneButtonPressed(_ button: UIButton) {
         barDelegate?.doneButtonPressed(button)
+    }
+    
+    // MARK: - copy
+    override func copy() -> Any {
+        let result = LGMPAlbumDetailBottomToolBar(frame: self.frame)
+        result.allowSelectOriginal = allowSelectOriginal
+        result.barDelegate = barDelegate
+        result.previewButton = previewButton
+        result.originalPhotoButton = originalPhotoButton
+        result.photoBytesLabel = photoBytesLabel
+        result.doneButton = doneButton
+        return result
     }
 }
 

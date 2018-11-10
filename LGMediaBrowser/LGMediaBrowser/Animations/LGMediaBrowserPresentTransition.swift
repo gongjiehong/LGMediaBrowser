@@ -15,10 +15,11 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         case dismiss
     }
     
-    var direction: Direction = .present
-    var targetView: UIView?
-    var finalImageSize: CGSize = CGSize.zero
-    var placeholderImage: UIImage?
+    public var direction: Direction = .present
+    public var targetView: UIView?
+    public var finalImageSize: CGSize = CGSize.zero
+    public var placeholderImage: UIImage?
+    public weak var bottomBar: UIView?
     
     public init(direction: Direction, targetView: UIView?, finalImageSize: CGSize, placeholderImage: UIImage?) {
         super.init()
@@ -75,7 +76,6 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             tempBgView.addSubview(tempImageView)
             containerView.addSubview(toVC.view)
             toVC.view.frame = containerView.bounds
-//            toVC.view.alpha = 0.0
             
             toVC.view.insertSubview(tempBgView, at: 0)
             if let temp = toVC as? LGMediaBrowser {
@@ -96,7 +96,6 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                            options: UIView.AnimationOptions.curveEaseInOut,
                            animations:
                 {
-//                    toVC.view.alpha = 1.0
                     tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
                                                  y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
                                                  width: imageWidth,

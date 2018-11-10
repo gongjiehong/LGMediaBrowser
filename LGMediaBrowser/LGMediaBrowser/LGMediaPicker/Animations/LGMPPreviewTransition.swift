@@ -18,6 +18,7 @@ open class LGMPPreviewTransition: NSObject {
     public var finalImageSize: CGSize = CGSize.zero
     public var placeholderImage: UIImage?
     public private(set) var direction: Direction
+    public weak var bottomBar: UIView?
     
     public init(withDirection direction: Direction) {
         self.direction = direction
@@ -79,7 +80,27 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         
         containerView.addSubview(fromVC.view)
         containerView.addSubview(toVC.view)
+        
+        var bottomBarView: UIView = UIView()
+        if let bottomBar = self.bottomBar, let copy = bottomBar.copy() as? UIView {
+            bottomBarView = copy
+            containerView.addSubview(bottomBarView)
+            bottomBarView.alpha = 0.0
+            
+            bottomBarView.translatesAutoresizingMaskIntoConstraints = false
+            bottomBarView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
+            bottomBarView.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
+            if #available(iOS 11.0, *) {
+                let safeBottomAnchor = containerView.safeAreaLayoutGuide.bottomAnchor
+                bottomBarView.bottomAnchor.constraint(equalTo: safeBottomAnchor).isActive = true
+            } else {
+                bottomBarView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
+            }
+            bottomBarView.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
+        }
+        
         toVC.view.alpha = 0.0
+        
         
         if let navigationBar = toVC.navigationController?.navigationBar {
             navigationBar.isUserInteractionEnabled = false
@@ -98,6 +119,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
                                                              y: (finalHeight - imageSize.height) / 2.0),
                                              size: imageSize)
                 tempBackgroundView.backgroundColor = UIColor.black.withAlphaComponent(1.0)
+                bottomBarView.alpha = 1.0
         }) { (isFinished) in
             toVC.view.alpha = 1.0
             tempBackgroundView.removeFromSuperview()
@@ -105,6 +127,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
             if let navigationBar = toVC.navigationController?.navigationBar {
                 navigationBar.isUserInteractionEnabled = true
             }
+            bottomBarView.removeFromSuperview()
             transitionContext.completeTransition(true)
         }
     }
@@ -130,7 +153,27 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         
         containerView.addSubview(toVC.view)
         containerView.addSubview(fromVC.view)
+        
+        var bottomBarView: UIView = UIView()
+        if let bottomBar = self.bottomBar, let copy = bottomBar.copy() as? UIView {
+            bottomBarView = copy
+            containerView.addSubview(bottomBarView)
+            bottomBarView.alpha = 1.0
+            
+            bottomBarView.translatesAutoresizingMaskIntoConstraints = false
+            bottomBarView.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
+            bottomBarView.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
+            if #available(iOS 11.0, *) {
+                let safeBottomAnchor = containerView.safeAreaLayoutGuide.bottomAnchor
+                bottomBarView.bottomAnchor.constraint(equalTo: safeBottomAnchor).isActive = true
+            } else {
+                bottomBarView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
+            }
+            bottomBarView.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
+        }
+        
         fromVC.view.isHidden = true
+        
         if transitionContext.isInteractive {
             tempBackgroundView.backgroundColor = UIColor.black
             if let navigationController = toVC.navigationController {
@@ -172,6 +215,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
                     tempImageView.alpha = 0.0
                 }
                 tempImageView.backgroundColor = UIColor.black.withAlphaComponent(0.0)
+                bottomBarView.alpha = 0.0
         }) { (isFinished) in
             let isCancelled = transitionContext.transitionWasCancelled
             if isCancelled {
@@ -184,7 +228,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
             self.targetView?.isHidden = false
             tempBackgroundView.removeFromSuperview()
             tempImageView.removeFromSuperview()
-            
+            bottomBarView.removeFromSuperview()
             if !isInteractive {
                 transitionContext.completeTransition(!isCancelled)
             }
