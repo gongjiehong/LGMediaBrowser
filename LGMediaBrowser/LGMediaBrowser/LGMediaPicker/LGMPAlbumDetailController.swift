@@ -302,14 +302,17 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         }
     }
     
-    public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    public func collectionView(_ collectionView: UICollectionView,
+                               cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+    {
         if self.allowTakePhoto {
             if (self.configs.sortBy == .ascending && indexPath.row == self.dataArray.count) ||
                 (self.configs.sortBy == .descending && indexPath.row == 0)
             {
                 var cell: LGMPAlbumDetailCameraCell
-                if let temp = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.cameraCell, for: indexPath)
-                    as? LGMPAlbumDetailCameraCell {
+                if let temp = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.cameraCell,
+                                                                 for: indexPath) as? LGMPAlbumDetailCameraCell
+                {
                     cell = temp
                 } else {
                     cell = LGMPAlbumDetailCameraCell(frame: CGRect.zero)

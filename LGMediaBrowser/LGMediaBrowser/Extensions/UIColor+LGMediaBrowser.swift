@@ -12,7 +12,6 @@ func thisBundle() -> Bundle {
     return Bundle(for: LGMediaBrowser.self)
 }
 
-
 // Only use within this framework
 extension UIImage {
     public convenience init?(namedFromThisBundle name: String) {

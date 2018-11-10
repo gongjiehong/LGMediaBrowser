@@ -61,7 +61,7 @@ public class LGAlbumListCell: UITableViewCell {
         super.layoutSubviews()
         let thumbnailImageViewSize = self.contentView.lg_height
         thumbnailImageView.frame = CGRect(x: 10,
-                                          y: 0,
+                                          y: 0.0,
                                           width: thumbnailImageViewSize,
                                           height: thumbnailImageViewSize)
         
@@ -171,6 +171,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         temp.estimatedSectionHeaderHeight = 0.0
         temp.delegate = self
         temp.dataSource = self
+        temp.separatorInset = UIEdgeInsets(top: 0, left: 10.0, bottom: 0.0, right: 0.0)
         self.view.addSubview(temp)
         self.listTable = temp
         
@@ -236,7 +237,7 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60.0
+        return 64.0
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
