@@ -11,7 +11,7 @@ import LGWebImage
 
 open class LGFileDownloader {
     
-    private struct Helper {
+    internal struct Helper {
         static var downloaderTempFilesDirectory: String {
             let tempDirSuffix = "LGFileDownloader/TempFile/"
             let tempDir = NSTemporaryDirectory() + tempDirSuffix

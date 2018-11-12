@@ -18,6 +18,8 @@
 		FE4FBB242109C87100CA18E6 /* RemoteImageWallController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB232109C87100CA18E6 /* RemoteImageWallController.swift */; };
 		FE4FBB262109C89400CA18E6 /* MediaPickerDemoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB252109C89400CA18E6 /* MediaPickerDemoController.swift */; };
 		FE4FBB282109C8A900CA18E6 /* MediaCaptureDemoCon.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */; };
+		FEAC89682199686F00E2FA34 /* IMG_0481.MOV in Resources */ = {isa = PBXBuildFile; fileRef = FEAC89662199686E00E2FA34 /* IMG_0481.MOV */; };
+		FEAC89692199686F00E2FA34 /* IMG_0481.HEIC in Resources */ = {isa = PBXBuildFile; fileRef = FEAC89672199686E00E2FA34 /* IMG_0481.HEIC */; };
 		FEF8976020A2A07C005E4880 /* LGWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975F20A2A07C005E4880 /* LGWebImage.framework */; };
 		FEF8976120A2A07C005E4880 /* LGWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975F20A2A07C005E4880 /* LGWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FEF8976420A2A0F0005E4880 /* LGHTTPRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */; };
@@ -57,6 +59,8 @@
 		FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCaptureDemoCon.swift; sourceTree = "<group>"; };
 		FEA01DF520C14B9400947D59 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		FEA01DF620C14B9400947D59 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		FEAC89662199686E00E2FA34 /* IMG_0481.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = IMG_0481.MOV; sourceTree = "<group>"; };
+		FEAC89672199686E00E2FA34 /* IMG_0481.HEIC */ = {isa = PBXFileReference; lastKnownFileType = file; path = IMG_0481.HEIC; sourceTree = "<group>"; };
 		FEF8975F20A2A07C005E4880 /* LGWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGHTTPRequest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Lenka - Trouble Is a Friend.mp3"; sourceTree = "<group>"; };
@@ -106,6 +110,8 @@
 				FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */,
 				FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */,
 				FE0980EF2099B88A006B6D8C /* Main.storyboard */,
+				FEAC89672199686E00E2FA34 /* IMG_0481.HEIC */,
+				FEAC89662199686E00E2FA34 /* IMG_0481.MOV */,
 				FE0980F22099B88B006B6D8C /* Assets.xcassets */,
 				FE0980F42099B88B006B6D8C /* LaunchScreen.storyboard */,
 				FE0980F72099B88B006B6D8C /* Info.plist */,
@@ -174,8 +180,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE0980F62099B88B006B6D8C /* LaunchScreen.storyboard in Resources */,
+				FEAC89692199686F00E2FA34 /* IMG_0481.HEIC in Resources */,
 				FE0980F32099B88B006B6D8C /* Assets.xcassets in Resources */,
 				FE0980F12099B88A006B6D8C /* Main.storyboard in Resources */,
+				FEAC89682199686F00E2FA34 /* IMG_0481.MOV in Resources */,
 				FEF8979220A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

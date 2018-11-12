@@ -79,3 +79,37 @@ public class LGAlbumListModel {
         
     }
 }
+
+extension LGPhotoModel {
+    public func asLGMediaModel() -> LGMediaModel {
+        do {
+            let model = try LGMediaModel(thumbnailImageURL: nil,
+                                         mediaURL: nil,
+                                         mediaAsset: self.asset,
+                                         mediaType: assetTypeToMediaType(self.type),
+                                         mediaPosition: LGMediaModel.Position.album,
+                                         thumbnailImage: self.image)
+            return model
+        } catch {
+            println(error)
+            return LGMediaModel()
+        }
+    }
+    
+    func assetTypeToMediaType(_ type: LGPhotoModel.AssetMediaType) -> LGMediaModel.MediaType {
+        switch type {
+        case .unknown:
+            return .other
+        case .generalImage:
+            return .generalPhoto
+        case .livePhoto:
+            return .livePhoto
+        case .video:
+            return .video
+        case .audio:
+            return .audio
+        default:
+            return .other
+        }
+    }
+}

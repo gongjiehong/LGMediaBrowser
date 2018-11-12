@@ -318,7 +318,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                     cell = LGMPAlbumDetailCameraCell(frame: CGRect.zero)
                 }
                 cell.cornerRadius = configs.cellCornerRadius
-                if configs.isShowCaptureImageOnTakePhotoBtn {
+                if configs.isShowCaptureImageOnTakePhotoButton {
                     DispatchQueue.main.after(0.3) {
                         cell.startCapture()
                     }
@@ -489,40 +489,11 @@ extension LGMPAlbumDetailController: LGForceTouchPreviewingDelegate {
         }
         let model = self.dataArray[index]
         
-        func assetTypeToMediaType(_ type: LGPhotoModel.AssetMediaType) -> LGMediaModel.MediaType {
-            switch type {
-            case .unknown:
-                return .other
-            case .generalImage:
-                return .generalPhoto
-            case .livePhoto:
-                return .livePhoto
-            case .video:
-                return .video
-            case .audio:
-                return .audio
-            default:
-                return .other
-            }
-        }
-        
-        do {
-            let mediaModel = try LGMediaModel(thumbnailImageURL: nil,
-                                              mediaURL: nil,
-                                              mediaAsset: model.asset,
-                                              mediaType: assetTypeToMediaType(model.type),
-                                              mediaPosition: LGMediaModel.Position.album,
-                                              thumbnailImage: cell.layoutImageView.image)
-            
-            let previewVC = LGForceTouchPreviewController(mediaModel: mediaModel,
-                                                          currentIndex: indexPath.row)
-            previewVC.currentIndex = indexPath.row
-            previewVC.preferredContentSize = getSizeWith(photoModel: model)
-            return previewVC
-        } catch {
-            println(error)
-            return nil
-        }
+        let previewVC = LGForceTouchPreviewController(mediaModel: model.asLGMediaModel(),
+                                                      currentIndex: indexPath.row)
+        previewVC.currentIndex = indexPath.row
+        previewVC.preferredContentSize = getSizeWith(photoModel: model)
+        return previewVC
     }
     
     public func previewingContext(_ previewingContext: LGForceTouchPreviewingContext,
@@ -590,12 +561,9 @@ extension LGMPAlbumDetailController: LGMediaBrowserDataSource {
         } else {
             dataModel = self.dataArray[index - 1]
         }
-        return (try? LGMediaModel(thumbnailImageURL: nil,
-                                  mediaURL: nil,
-                                  mediaAsset: dataModel.asset,
-                                  mediaType: .generalPhoto,
-                                  mediaPosition: LGMediaModel.Position.album,
-                                  thumbnailImage: thumbnailImage)) ?? LGMediaModel()
+        let mediaModel = dataModel.asLGMediaModel()
+        mediaModel.thumbnailImage = thumbnailImage
+        return mediaModel
     }
 }
 
@@ -608,7 +576,7 @@ extension LGMPAlbumDetailController: LGMediaBrowserDelegate {
     public func didScrollToIndex(_ browser: LGMediaBrowser, index: Int) {
         self.listView.layoutIfNeeded()
         if let tempCell = self.listView.cellForItem(at: IndexPath(row: index, section: 0)) {
-            if self.listView.frame.contains(tempCell.frame) {
+            if self.listView.frame.contains(tempCell.convert(tempCell.bounds, to: self.view)) {
                 
             } else {
                 self.listView.scrollToItem(at: IndexPath(row: index, section: 0),

@@ -235,11 +235,11 @@ public class LGCameraCapture: UIViewController {
     }()
     
     /// 切换前后摄像头的按钮
-    lazy var toggleCameraBtn: UIButton = {
-        let tempBtn = UIButton(type: UIButton.ButtonType.custom)
-        tempBtn.setImage(UIImage(namedFromThisBundle: "btn_toggle_camera"), for: UIControl.State.normal)
-        tempBtn.addTarget(self, action: #selector(toggleCameraBtnPressed(_:)), for: UIControl.Event.touchUpInside)
-        return tempBtn
+    lazy var toggleCameraButton: UIButton = {
+        let tempButton = UIButton(type: UIButton.ButtonType.custom)
+        tempButton.setImage(UIImage(namedFromThisBundle: "btn_toggle_camera"), for: UIControl.State.normal)
+        tempButton.addTarget(self, action: #selector(toggleCameraButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        return tempButton
     }()
     
     /// 显示焦距反馈的图片视图
@@ -379,7 +379,7 @@ public class LGCameraCapture: UIViewController {
         }
         
         if self.allowSwitchDevicePosition {
-            self.view.addSubview(toggleCameraBtn)
+            self.view.addSubview(toggleCameraButton)
         }
     }
     
@@ -411,13 +411,13 @@ public class LGCameraCapture: UIViewController {
         
         
         if allowSwitchDevicePosition {
-            let toggleCameraBtnSize = CGSize(width: 30.0, height: 30.0)
-            let toggleCameraBtnMargin: CGFloat = 20.0
-            let originX = self.view.lg_width - toggleCameraBtnMargin - toggleCameraBtnSize.width
-            self.toggleCameraBtn.frame = CGRect(x: originX,
-                                                y: toggleCameraBtnMargin + UIDevice.topSafeMargin,
-                                                width: toggleCameraBtnSize.width,
-                                                height: toggleCameraBtnSize.height)
+            let toggleCameraButtonSize = CGSize(width: 30.0, height: 30.0)
+            let toggleCameraButtonMargin: CGFloat = 20.0
+            let originX = self.view.lg_width - toggleCameraButtonMargin - toggleCameraButtonSize.width
+            self.toggleCameraButton.frame = CGRect(x: originX,
+                                                y: toggleCameraButtonMargin + UIDevice.topSafeMargin,
+                                                width: toggleCameraButtonSize.width,
+                                                height: toggleCameraButtonSize.height)
         }
     }
     
@@ -633,7 +633,7 @@ public class LGCameraCapture: UIViewController {
     }
     
     // MARK: - 切换前后摄像头
-    @objc func toggleCameraBtnPressed(_ sender: UIButton) {
+    @objc func toggleCameraButtonPressed(_ sender: UIButton) {
         let cameraCount = AVCaptureDevice.devices(for: AVMediaType.video).count
         if cameraCount > 1 {
             self.videoCamera.rotateCamera()
@@ -686,7 +686,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
             self.takedImageView.isHidden = false
         }
         
-        self.toggleCameraBtn.isHidden = true
+        self.toggleCameraButton.isHidden = true
         
         if isShutterSoundEnabled {
             AudioServicesPlaySystemSound(1108)
@@ -708,7 +708,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         movieWriter.finishRecording {
             DispatchQueue.main.async {
                 self.isRecording = false
-                self.toggleCameraBtn.isHidden = true
+                self.toggleCameraButton.isHidden = true
                 self.playVideo()
             }
         }
@@ -742,7 +742,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         self.takedImageView.isHidden = true
         self.takedImage = nil
         
-        self.toggleCameraBtn.isHidden = false
+        self.toggleCameraButton.isHidden = false
         self.playerView.isHidden = true
         self.playerView.pause()
         self.playerView.player.replaceCurrentItem(with: nil)

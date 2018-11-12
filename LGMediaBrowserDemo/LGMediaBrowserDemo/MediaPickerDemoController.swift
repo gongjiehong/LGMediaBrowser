@@ -38,5 +38,15 @@ class MediaPickerDemoController: UIViewController {
 
 
 extension MediaPickerDemoController: LGMediaPickerDelegate {
+    func pickerDidCancel(_ picker: LGMediaPicker) {
+        picker.dismiss(animated: true) {
+            
+        }
+    }
     
+    func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGPhotoModel], isOriginalPhoto isOriginal: Bool) {
+        picker.dismiss(animated: true) {
+            
+        }
+    }
 }

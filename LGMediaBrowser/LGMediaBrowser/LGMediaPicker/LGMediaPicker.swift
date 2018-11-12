@@ -9,8 +9,9 @@
 import UIKit
 import Photos
 
-public protocol LGMediaPickerDelegate: UINavigationControllerDelegate {
-    
+public protocol LGMediaPickerDelegate: NSObjectProtocol {
+    func pickerDidCancel(_ picker: LGMediaPicker)
+    func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGPhotoModel], isOriginalPhoto isOriginal: Bool)
 }
 
 public class LGMediaPicker: LGMPNavigationController {
@@ -80,13 +81,13 @@ public class LGMediaPicker: LGMPNavigationController {
         public var saveNewImageAfterEdit: Bool = false
         
         /// 是否在拍照按钮上显示当前拍摄到的内容
-        public var isShowCaptureImageOnTakePhotoBtn: Bool = true
+        public var isShowCaptureImageOnTakePhotoButton: Bool = true
         
         /// 排序方式，升序还是降序
         public var sortBy: LGPhotoManager.SortBy = .ascending
         
         /// 单选模式下是否显示选择按钮
-        public var isShowSelectBtnAtSingleMode: Bool = false
+        public var isShowSelectButtonAtSingleMode: Bool = false
         
         /// 是否在选中的图片上显示蒙层，默认不显示，false
         public var isShowSelectedMask: Bool = false
@@ -113,6 +114,8 @@ public class LGMediaPicker: LGMPNavigationController {
     public var config: Configuration = Configuration.default
     
     var selectedDataArray: [LGPhotoModel] = []
+    
+    public weak var pickerDelegate: LGMediaPickerDelegate?
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -143,6 +146,7 @@ public class LGMediaPicker: LGMPNavigationController {
     public func requestAccessAndSetupLayout() {
         PHPhotoLibrary.requestAuthorization { [weak self] (status) in
             DispatchQueue.main.async { [weak self] in
+                guard let weakSelf = self else {return}
                 switch status {
                 case .authorized:
                     let albumList = LGMPAlbumListController()
@@ -150,11 +154,12 @@ public class LGMediaPicker: LGMPNavigationController {
                     
                     let allPhotosList = LGMPAlbumDetailController()
                     allPhotosList.mainPicker = self
-                    self?.viewControllers = [albumList, allPhotosList]
+                    weakSelf.viewControllers = [albumList, allPhotosList]
                     break
                 case .denied, .restricted:
                     let controller = LGUnauthorizedController()
-                    self?.viewControllers = [controller]
+                    controller.unauthorizedType = .ablum
+                    weakSelf.viewControllers = [controller]
                     break
                 case .notDetermined:
                     break

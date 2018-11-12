@@ -76,42 +76,38 @@ class LGCameraCaptureToolView: UIView {
     
     weak var delegate: LGCameraCaptureToolViewDelegate?
     
-    lazy var dismissBtn: UIButton = {
-        let dismissBtn = UIButton(type: UIButton.ButtonType.custom)
-        dismissBtn.frame = CGRect(x: 60, y: self.lg_height / 2 - 25.0 / 2, width: 25.0, height: 25.0)
-        dismissBtn.setImage(UIImage(namedFromThisBundle: "btn_arrow_down"),
+    lazy var dismissButton: UIButton = {
+        let dismissButton = UIButton(type: UIButton.ButtonType.custom)
+        dismissButton.frame = CGRect(x: 60, y: self.lg_height / 2 - 25.0 / 2, width: 25.0, height: 25.0)
+        dismissButton.setImage(UIImage(namedFromThisBundle: "btn_arrow_down"),
                             for: UIControl.State.normal)
-        dismissBtn.addTarget(self, action: #selector(dismissBtnPressed(_:)), for: UIControl.Event.touchUpInside)
-        return dismissBtn
+        dismissButton.addTarget(self, action: #selector(dismissButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        return dismissButton
     }()
     
-    lazy var cancelBtn: UIButton = {
-        let cancelBtn = UIButton(type: UIButton.ButtonType.custom)
-        cancelBtn.backgroundColor = UIColor(red: 244 / 255.0,
+    lazy var cancelButton: UIButton = {
+        let cancelButton = UIButton(type: UIButton.ButtonType.custom)
+        cancelButton.backgroundColor = UIColor(red: 244 / 255.0,
                                             green: 244 / 255.0,
                                             blue: 244 / 255.0,
                                             alpha: 0.9)
-        cancelBtn.setImage(UIImage(namedFromThisBundle: "btn_retake"), for: UIControl.State.normal)
-        cancelBtn.addTarget(self, action: #selector(retakeBtnPressed(_:)), for: UIControl.Event.touchUpInside)
-        cancelBtn.layer.masksToBounds = true
-        cancelBtn.isHidden = true
-        return cancelBtn
+        cancelButton.setImage(UIImage(namedFromThisBundle: "btn_retake"), for: UIControl.State.normal)
+        cancelButton.addTarget(self, action: #selector(retakeButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        cancelButton.layer.masksToBounds = true
+        cancelButton.isHidden = true
+        return cancelButton
     }()
     
-    lazy var doneBtn: UIButton = {
-        let doneBtn = UIButton(type: UIButton.ButtonType.custom)
-        doneBtn.frame = self.bottomView.frame
-        doneBtn.backgroundColor = UIColor.white
-        doneBtn.setImage(UIImage(namedFromThisBundle: "btn_take_done"), for: UIControl.State.normal)
-        doneBtn.addTarget(self, action: #selector(doneBtnPressed(_:)), for: UIControl.Event.touchUpInside)
-        doneBtn.layer.masksToBounds = true
-        doneBtn.isHidden = true
-        return doneBtn
+    lazy var doneButton: UIButton = {
+        let doneButton = UIButton(type: UIButton.ButtonType.custom)
+        doneButton.frame = self.bottomView.frame
+        doneButton.backgroundColor = UIColor.white
+        doneButton.setImage(UIImage(namedFromThisBundle: "btn_take_done"), for: UIControl.State.normal)
+        doneButton.addTarget(self, action: #selector(doneButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        doneButton.layer.masksToBounds = true
+        doneButton.isHidden = true
+        return doneButton
     }()
-    
-//    lazy var filtersBtn: UIButton = {
-//        
-//    }
     
     lazy var topView: UIView = {
         let topView = UIView(frame: CGRect.zero)
@@ -164,9 +160,9 @@ class LGCameraCaptureToolView: UIView {
     func setupControls() {
         self.addSubview(bottomView)
         self.addSubview(topView)
-        self.addSubview(doneBtn)
-        self.addSubview(cancelBtn)
-        self.addSubview(dismissBtn)
+        self.addSubview(doneButton)
+        self.addSubview(cancelButton)
+        self.addSubview(dismissButton)
         setupTapGesture(true)
         setupLongPressGesture(true)
     }
@@ -194,27 +190,27 @@ class LGCameraCaptureToolView: UIView {
         self.topView.center = self.bottomView.center
         self.topView.layer.cornerRadius = (height * Settings.TopViewScale) / 2.0
         
-        self.dismissBtn.frame = CGRect(x: 60.0, y: self.lg_height / 2.0 - 25 / 2.0, width: 25, height: 25)
+        self.dismissButton.frame = CGRect(x: 60.0, y: self.lg_height / 2.0 - 25 / 2.0, width: 25, height: 25)
         
         
         
-        self.cancelBtn.frame = self.bottomView.frame
-        self.cancelBtn.layer.cornerRadius = (height * Settings.BottomViewScale) / 2.0
+        self.cancelButton.frame = self.bottomView.frame
+        self.cancelButton.layer.cornerRadius = (height * Settings.BottomViewScale) / 2.0
         
-        self.doneBtn.frame = self.bottomView.frame
-        self.doneBtn.layer.cornerRadius = (height * Settings.BottomViewScale) / 2.0
+        self.doneButton.frame = self.bottomView.frame
+        self.doneButton.layer.cornerRadius = (height * Settings.BottomViewScale) / 2.0
     }
     
     // MARK: -  controls actions
-    @objc func dismissBtnPressed(_ sender: UIButton) {
+    @objc func dismissButtonPressed(_ sender: UIButton) {
         delegate?.onDismiss()
     }
     
-    @objc func retakeBtnPressed(_ sender: UIButton) {
+    @objc func retakeButtonPressed(_ sender: UIButton) {
         delegate?.onRetake()
     }
     
-    @objc func doneBtnPressed(_ sender: UIButton) {
+    @objc func doneButtonPressed(_ sender: UIButton) {
         delegate?.onDoneClick()
     }
     
@@ -267,7 +263,7 @@ class LGCameraCaptureToolView: UIView {
     
     // MARK: -  animations
     func startAnimate() {
-        self.dismissBtn.isHidden = true
+        self.dismissButton.isHidden = true
         UIView.animate(withDuration: Settings.AnimateDuration,
                        animations:
             {
@@ -295,26 +291,26 @@ class LGCameraCaptureToolView: UIView {
         
         self.bottomView.isHidden = true
         self.topView.isHidden = true
-        self.dismissBtn.isHidden = true
+        self.dismissButton.isHidden = true
         
         self.bottomView.layer.transform = CATransform3DIdentity
         self.topView.layer.transform = CATransform3DIdentity
-        showCancelAndDoneBtn()
+        showCancelAnddoneButton()
     }
     
-    func showCancelAndDoneBtn() {
-        self.cancelBtn.isHidden = false
-        self.doneBtn.isHidden = false
+    func showCancelAnddoneButton() {
+        self.cancelButton.isHidden = false
+        self.doneButton.isHidden = false
         
-        var cancelRect = self.cancelBtn.frame
+        var cancelRect = self.cancelButton.frame
         cancelRect.origin.x = 40
         
-        var doneRect = self.doneBtn.frame
+        var doneRect = self.doneButton.frame
         doneRect.origin.x = self.lg_width - doneRect.width - 40.0
         
         UIView.animate(withDuration: Settings.AnimateDuration) {
-            self.cancelBtn.frame = cancelRect
-            self.doneBtn.frame = doneRect
+            self.cancelButton.frame = cancelRect
+            self.doneButton.frame = doneRect
         }
     }
     
@@ -322,14 +318,14 @@ class LGCameraCaptureToolView: UIView {
     func resetLayout() {
         animateLayer.removeFromSuperlayer()
         animateLayer.removeAllAnimations()
-        self.dismissBtn.isHidden = false
+        self.dismissButton.isHidden = false
         self.bottomView.isHidden = false
         self.topView.isHidden = false
-        self.cancelBtn.isHidden = true
+        self.cancelButton.isHidden = true
         
-        self.doneBtn.isHidden = true
-        self.cancelBtn.frame = self.bottomView.frame
-        self.doneBtn.frame = self.bottomView.frame
+        self.doneButton.isHidden = true
+        self.cancelButton.frame = self.bottomView.frame
+        self.doneButton.frame = self.bottomView.frame
     }
 }
 

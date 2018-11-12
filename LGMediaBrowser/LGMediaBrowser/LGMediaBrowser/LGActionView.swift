@@ -59,12 +59,12 @@ class LGActionView: UIView {
         let deleteFrame: CGRect = hidden ? deleteButton.hideFrame : deleteButton.showFrame
         let titleFrame: CGRect = hidden ? titleLabelHideFrame : titleLabelShowFrame
         
-        let closeBtnHidden = !globalConfigs.showsCloseButton
-        let deleteBtnHidden = !globalConfigs.showsDeleteButton
+        let closeButtonHidden = !globalConfigs.showsCloseButton
+        let deleteButtonHidden = !globalConfigs.showsDeleteButton
         let titleLabelHidden = hidden
         if hidden == false {
-            self.closeButton.isHidden = closeBtnHidden
-            self.deleteButton.isHidden = deleteBtnHidden
+            self.closeButton.isHidden = closeButtonHidden
+            self.deleteButton.isHidden = deleteButtonHidden
             self.titleLabel.isHidden = titleLabelHidden
         }
         UIView.animate(withDuration: 0.35,
@@ -80,8 +80,8 @@ class LGActionView: UIView {
         }) { (finished) in
             if finished {
                 if !hidden {
-                    self.closeButton.isHidden = closeBtnHidden
-                    self.deleteButton.isHidden = deleteBtnHidden
+                    self.closeButton.isHidden = closeButtonHidden
+                    self.deleteButton.isHidden = deleteButtonHidden
                     self.titleLabel.isHidden = titleLabelHidden
                 }
             }

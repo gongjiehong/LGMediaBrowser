@@ -37,15 +37,15 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     
     /// 选择当前图片或视频的操作按钮
     lazy var selectButton: LGClickAreaButton = {
-        let tempBtn = LGClickAreaButton(type: UIButton.ButtonType.custom)
-        tempBtn.frame = CGRect(x: self.contentView.lg_width - 26.0, y: 5, width: 23.0, height: 23.0)
-        tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
-        tempBtn.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControl.State.selected)
-        tempBtn.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControl.Event.touchUpInside)
-        tempBtn.setTitleColor(UIColor.white, for: UIControl.State.normal)
-        tempBtn.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
-        tempBtn.enlargeOffset = UIEdgeInsets(top: 0, left: 20, bottom: 20, right: 0)
-        return tempBtn
+        let tempButton = LGClickAreaButton(type: UIButton.ButtonType.custom)
+        tempButton.frame = CGRect(x: self.contentView.lg_width - 26.0, y: 5, width: 23.0, height: 23.0)
+        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
+        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControl.State.selected)
+        tempButton.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        tempButton.setTitleColor(UIColor.white, for: UIControl.State.normal)
+        tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
+        tempButton.enlargeOffset = UIEdgeInsets(top: 0, left: 20, bottom: 20, right: 0)
+        return tempButton
     }()
     
     /// 视频和LivePhoto标记的背景视图

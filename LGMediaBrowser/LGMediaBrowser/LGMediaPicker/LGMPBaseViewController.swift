@@ -48,7 +48,7 @@ open class LGMPBaseViewController: UIViewController {
         self.navigationItem.backBarButtonItem = backItem
     }
     
-    @objc func backButtonPressed(_ backBtn: UIButton) {
+    @objc func backButtonPressed(_ backButton: UIButton) {
         if let viewControllers = self.navigationController?.viewControllers, viewControllers.count > 1 {
             self.navigationController?.popViewController(animated: true)
         } else {
