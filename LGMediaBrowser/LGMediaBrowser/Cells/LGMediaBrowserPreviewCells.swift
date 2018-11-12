@@ -109,3 +109,9 @@ open class LGMediaBrowserGeneralPhotoCell: LGMediaBrowserPreviewCell {
     }
 }
 
+open class LGMediaBrowserLivePhotoCell: LGMediaBrowserPreviewCell {
+    open override func refreshLayout() {
+        
+    }
+}
+

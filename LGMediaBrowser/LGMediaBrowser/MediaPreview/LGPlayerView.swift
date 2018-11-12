@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import Photos
 
 /// 播放视频和音频的视图
 open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
@@ -65,6 +66,8 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         self.isMuted = isMuted
         self.player.replaceCurrentItem(with: mediaPlayerItem)
         constructPlayerAndPlay()
+        
+        self.backgroundColor = UIColor.clear
     }
     
     /// 通过frame和媒体模型进行初始化，默认不静音
@@ -91,6 +94,8 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         
         if !isMuted {
             do {
+                try AVAudioSession.sharedInstance().setActive(true,
+                                                              options: .notifyOthersOnDeactivation)
                 try AVAudioSession.sharedInstance().setMode(AVAudioSession.Mode.moviePlayback)
             } catch {
                 println(error)
@@ -123,7 +128,18 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
                     self.player.setItemBy(url)
                     break
                 case .album:
-                    
+                    guard let asset = media.mediaAsset else {return}
+                    let options = PHVideoRequestOptions()
+                    options.isNetworkAccessAllowed = true
+                    LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
+                                                               options: options)
+                    { (avAsset, audioMix, infoDic) in
+                        DispatchQueue.main.async { [weak self] in
+                            guard let weakSelf = self, let avAsset = avAsset else {return}
+                            weakSelf.player.setItem(AVPlayerItem(asset: avAsset))
+                            weakSelf.player.play()
+                        }
+                    }
                     break
                 }
             } catch {

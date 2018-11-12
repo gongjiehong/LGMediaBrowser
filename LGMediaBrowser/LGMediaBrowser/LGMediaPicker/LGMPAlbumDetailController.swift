@@ -487,9 +487,12 @@ extension LGMPAlbumDetailController: LGForceTouchPreviewingDelegate {
         if self.allowTakePhoto && configs.sortBy != .ascending {
             index = indexPath.row - 1
         }
-        let model = self.dataArray[index]
         
-        let previewVC = LGForceTouchPreviewController(mediaModel: model.asLGMediaModel(),
+        let model = self.dataArray[index]
+        let mediaModel = model.asLGMediaModel()
+        mediaModel.thumbnailImage = cell.layoutImageView.image
+        
+        let previewVC = LGForceTouchPreviewController(mediaModel: mediaModel,
                                                       currentIndex: indexPath.row)
         previewVC.currentIndex = indexPath.row
         previewVC.preferredContentSize = getSizeWith(photoModel: model)
@@ -602,7 +605,7 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
     }
     
     func doneButtonPressed(_ button: UIButton) {
-        
+
     }
     
     func preview(with index: Int) {

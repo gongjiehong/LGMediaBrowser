@@ -320,22 +320,55 @@ open class LGForceTouchPreviewController: UIViewController {
                                           mediaURL: URL(fileURLWithPath: destinationMovieFileURL),
                                           placeholderImage: placeholderImage)
                         } else {
+                            var synchronizeMark: Int = 0 {
+                                didSet {
+                                    if synchronizeMark >= 2 {
+                                        DispatchQueue.main.async {
+                                            setLivePhotoWithRemoteFile()
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            var totalProgress: Double = 0.0 {
+                                didSet {
+                                    DispatchQueue.main.async { [weak self] in
+                                        guard let weakSelf = self else {return}
+                                        weakSelf.progressView.progress = CGFloat(totalProgress / 2.0)
+                                    }
+                                }
+                            }
                             
                             LGFileDownloader.default.downloadFile(thumbnailImageURL,
-                                                                  progress: { (progress) in
-                                                                    
+                                                                  progress:
+                                { (progress) in
+                                    totalProgress += progress.fractionCompleted
                             }) { (destinationImageURL, isDownloadCompleted, error) in
-                                
+                                if !isDownloadCompleted {
+                                    DispatchQueue.main.async { [weak self] in
+                                        guard let weakSelf = self else {return}
+                                        weakSelf.progressView.isShowError = true
+                                    }
+                                    return
+                                }
+                                synchronizeMark += 1
                             }
                             
                             LGFileDownloader.default.downloadFile(movieFileURL,
-                                                                  progress: { (progress) in
-                                                                    
-                            }) { (destinationImageURL, isDownloadCompleted, error) in
-                                
+                                                                  progress:
+                                { (progress) in
+                                    totalProgress += progress.fractionCompleted
+                            }) { (destinationMovieURL, isDownloadCompleted, error) in
+                                if !isDownloadCompleted {
+                                    DispatchQueue.main.async { [weak self] in
+                                        guard let weakSelf = self else {return}
+                                        weakSelf.progressView.isShowError = true
+                                    }
+                                    return
+                                }
+                                synchronizeMark += 1
                             }
                         }
-                        
                     } else {
                         self.progressView.isShowError = true
                     }
@@ -361,6 +394,9 @@ open class LGForceTouchPreviewController: UIViewController {
     
     func setupVideoView() {
         guard let mediaModel = self.mediaModel else { return }
+        self.view.addSubview(imageView)
+        imageView.image = mediaModel.thumbnailImage
+        fixGeneralPhotoViewFrame()
         
         func playLocalVideo() {
             do {
@@ -460,7 +496,7 @@ open class LGForceTouchPreviewController: UIViewController {
     }
     
     func setupAudioView() {
-        
+        // 没有实际应用场景，暂不开发
     }
     
     override open func viewWillLayoutSubviews() {

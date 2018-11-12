@@ -8,6 +8,7 @@
 
 import UIKit
 import Photos
+import LGWebImage
 
 /// 组装按钮状态变化时候的bounce动画
 ///
@@ -28,8 +29,8 @@ func buttonStatusChangedAnimation() -> CAKeyframeAnimation {
 /// 显示普通图片和视频缩略图的CELL
 public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     /// 显示缩略图的视图
-    lazy var layoutImageView: UIImageView = {
-        let tempImageView = UIImageView(frame: self.contentView.bounds)
+    lazy var layoutImageView: LGAnimatedImageView = {
+        let tempImageView = LGAnimatedImageView(frame: self.contentView.bounds)
         tempImageView.contentMode = UIView.ContentMode.scaleAspectFill
         tempImageView.clipsToBounds = true
         return tempImageView

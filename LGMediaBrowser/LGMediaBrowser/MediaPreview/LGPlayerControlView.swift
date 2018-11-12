@@ -196,40 +196,6 @@ open class LGPlayerControlView: LGPlayerView {
         
         self.addSubview(self.progressView)
         self.progressView.center = self.center
-        
-//        if let url = self.mediaModel?.mediaLocation.toURL() {
-//            if globalConfigs.playVideoAfterDownloadOrExport && !url.isFileURL {
-//
-//                LGFileDownloader.default.downloadFile(url,
-//                                                      progress:
-//                    { [weak self] (pro) in
-//                        DispatchQueue.main.async { [weak self] in
-//                            self?.progressView.progress = CGFloat(pro.fractionCompleted)
-//                        }
-//                }) { [weak self] (fileURL, isDownloaded, error) in
-//                    DispatchQueue.main.async { [weak self] in
-//                        guard let weakSelf = self else {
-//                            return
-//                        }
-//                        if let fileURL = fileURL, isDownloaded, error == nil {
-//                            weakSelf.player?.pause()
-//                            weakSelf.player?.setItem(AVPlayerItem(url: fileURL))
-//                            weakSelf.player?.play()
-//                            layoutControls()
-//                            weakSelf.progressView.isHidden = true
-//                        } else {
-//                            weakSelf.progressView.isShowError = true
-//                        }
-//                    }
-//                }
-//                return
-//            }
-//            layoutControls()
-//            self.progressView.isHidden = true
-//        } else {
-//            self.progressView.isShowError = true
-//        }
-        
     }
     
     private func constructAudioPlayerControls() {

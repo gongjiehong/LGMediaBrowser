@@ -156,11 +156,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGPlayerControlView.swift"
-            timestampString = "561030818.605234"
+            timestampString = "563715224.2406811"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "304"
-            endingLineNumber = "304"
+            startingLineNumber = "270"
+            endingLineNumber = "270"
             landmarkName = "layoutVideoControls()"
             landmarkType = "7">
          </BreakpointContent>
@@ -204,7 +204,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowserDefines.swift"
-            timestampString = "563701936.910732"
+            timestampString = "563715224.2408381"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "56"
@@ -220,7 +220,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Cells/LGMediaBrowserPreviewCells.swift"
-            timestampString = "562220220.8400609"
+            timestampString = "563715224.240908"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "84"
@@ -236,7 +236,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Cells/LGMediaBrowserPreviewCells.swift"
-            timestampString = "562220220.840367"
+            timestampString = "563715224.240953"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "87"
@@ -252,7 +252,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Cells/LGMediaBrowserPreviewCells.swift"
-            timestampString = "562220220.840444"
+            timestampString = "563715224.2410001"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "90"
@@ -433,7 +433,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser.swift"
-            timestampString = "563701936.9108731"
+            timestampString = "563715224.241117"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "178"
@@ -465,7 +465,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaPicker/LGMPAlbumDetailController.swift"
-            timestampString = "563701936.910942"
+            timestampString = "563715224.241208"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "283"
@@ -504,6 +504,38 @@
                   offsetFromSymbolStart = "604">
                </Location>
             </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGPlayerView.swift"
+            timestampString = "563715224.241269"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "99"
+            endingLineNumber = "99"
+            landmarkName = "constructPlayerAndPlay()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGPlayerView.swift"
+            timestampString = "563715224.241598"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "101"
+            endingLineNumber = "101"
+            landmarkName = "constructPlayerAndPlay()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>
