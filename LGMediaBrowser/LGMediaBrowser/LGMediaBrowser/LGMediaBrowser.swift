@@ -195,6 +195,11 @@ public class LGMediaBrowser: UIViewController {
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         fixInteractiveTransitionActionType()
+        
+        if self.status == .checkMedia {
+            let model = self.mediaArray[self.currentIndex]
+            checkMediaButton.isSelected = model.isSelected
+        }
     }
     
     func fixInteractiveTransitionActionType() {
@@ -216,7 +221,7 @@ public class LGMediaBrowser: UIViewController {
         }
     }
     
-    func setupNavigationItems() {
+    lazy var checkMediaButton: LGClickAreaButton = {
         let tempButton = LGClickAreaButton(type: UIButton.ButtonType.custom)
         tempButton.frame = CGRect(x: 0, y: 0, width: 23.0, height: 23.0)
         tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
@@ -225,8 +230,10 @@ public class LGMediaBrowser: UIViewController {
         tempButton.setTitleColor(UIColor.white, for: UIControl.State.normal)
         tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
         tempButton.enlargeOffset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: tempButton)
+        return tempButton
+    }()
+    func setupNavigationItems() {
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: checkMediaButton)
     }
     
     func contructBottomToolBar() {
@@ -890,6 +897,11 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         self.currentIndex = index
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didScrollToIndex(_:index:))) == true {
             self.delegate?.didScrollToIndex!(self, index: self.currentIndex)
+        }
+        
+        if self.status == .checkMedia {
+            let model = self.mediaArray[index]
+            checkMediaButton.isSelected = model.isSelected
         }
     }
 }
