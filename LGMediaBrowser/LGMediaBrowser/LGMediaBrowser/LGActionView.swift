@@ -62,12 +62,14 @@ class LGActionView: UIView {
         let closeButtonHidden = !globalConfigs.showsCloseButton
         let deleteButtonHidden = !globalConfigs.showsDeleteButton
         let titleLabelHidden = hidden
+        
         if hidden == false {
             self.closeButton.isHidden = closeButtonHidden
             self.deleteButton.isHidden = deleteButtonHidden
             self.titleLabel.isHidden = titleLabelHidden
         }
-        UIView.animate(withDuration: 0.35,
+        
+        UIView.animate(withDuration: TimeInterval(UINavigationController.hideShowBarDuration),
                        animations: {
                         let alpha: CGFloat = hidden ? 0.0 : 1.0
                         self.closeButton.alpha = alpha

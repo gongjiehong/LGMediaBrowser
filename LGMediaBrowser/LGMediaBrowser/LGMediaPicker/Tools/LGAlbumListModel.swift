@@ -28,6 +28,33 @@ public class LGPhotoModel {
     public var image: UIImage?
     public var currentSelectedIndex: Int = -1
     
+    
+    /// 判断内容是否在iCloud上，此操作特别耗时
+    public var isICloudAsset: Bool {
+        return autoreleasepool {
+            let resources = PHAssetResource.assetResources(for: self.asset)
+            if resources.count > 0,
+                let resource = resources.first,
+                let locallyAvailable = resource.value(forKey: "locallyAvailable") as? NSNumber
+            {
+                return !locallyAvailable.boolValue
+            } else {
+                let options = PHImageRequestOptions()
+                options.isNetworkAccessAllowed = false
+                options.isSynchronous = true
+                
+                var result: Bool = false
+                
+                LGPhotoManager.imageManager.requestImageData(for: self.asset,
+                                                             options: options)
+                { (imageData, dataUTI, orientation, infoDic) in
+                    result = imageData == nil
+                }
+                return result
+            }
+        }
+    }
+    
     public init(asset: PHAsset, type: AssetMediaType, duration: String) {
         self.asset = asset
         self.type = type
@@ -76,7 +103,6 @@ public class LGAlbumListModel {
         self.isAllPhotos = isAllPhotos
         self.result = result
         self.headImageAsset = headImageAsset
-        
     }
 }
 

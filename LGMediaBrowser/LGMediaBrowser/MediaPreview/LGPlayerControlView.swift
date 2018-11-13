@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import Photos
 
 /// 播放工具条的背景视图
 open class LGPlayToolGradientView: UIView {
@@ -173,6 +174,83 @@ open class LGPlayerControlView: LGPlayerView {
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    override func mediaModelDidSet() {
+        if let media = mediaModel {
+            do {
+                switch media.mediaPosition {
+                case .localFile:
+                    guard var url = try media.mediaURL?.asURL() else {
+                        self.progressView.isShowError = true
+                        return
+                    }
+                    if url.absoluteString.range(of: "://") == nil {
+                        url = URL(fileURLWithPath: url.absoluteString)
+                    }
+                    self.player.setItemBy(url)
+                    self.progressView.isHidden = true
+                    break
+                case .remoteFile:
+                    guard let url = try media.mediaURL?.asURL() else {
+                        self.progressView.isShowError = true
+                        return
+                    }
+                    
+                    if !LGFileDownloader.default.remoteURLIsDownloaded(url) &&
+                        isPlayVideoAfterDownloadEndsOrExportEnds
+                    {
+                        LGFileDownloader.default.downloadFile(url,
+                                                              progress:
+                            { (progress) in
+                                DispatchQueue.main.async { [weak self] in
+                                    guard let weakSelf = self else {return}
+                                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+                                }
+                        }) { (destinationURL, isDownloadCompleted, error) in
+                            DispatchQueue.main.async { [weak self] in
+                                guard let weakSelf = self else {return}
+                                if isDownloadCompleted, let destinationURL = destinationURL {
+                                    weakSelf.player.setItemBy(destinationURL)
+                                    weakSelf.progressView.isHidden = true
+                                }
+                            }
+                        }
+                    } else if LGFileDownloader.default.remoteURLIsDownloaded(url) {
+                        let destinationPath = LGFileDownloader.Helper.filePath(withURL: url)
+                        self.player.setItemBy(URL(fileURLWithPath: destinationPath))
+                        self.progressView.isHidden = true
+                    } else {
+                        self.player.setItemBy(url)
+                        self.progressView.isHidden = true
+                    }
+                    break
+                case .album:
+                    guard let asset = media.mediaAsset else {return}
+                    let options = PHVideoRequestOptions()
+                    options.isNetworkAccessAllowed = true
+                    options.progressHandler = { (progress, error, stop, info) in
+                        DispatchQueue.main.async { [weak self] in
+                            guard let weakSelf = self else {return}
+                            weakSelf.progressView.progress = CGFloat(progress)
+                        }
+                    }
+                    LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
+                                                               options: options)
+                    { (avAsset, audioMix, infoDic) in
+                        DispatchQueue.main.async { [weak self] in
+                            guard let weakSelf = self, let avAsset = avAsset else {return}
+                            weakSelf.player.setItem(AVPlayerItem(asset: avAsset))
+                            weakSelf.player.play()
+                            weakSelf.progressView.isHidden = true
+                        }
+                    }
+                    break
+                }
+            } catch {
+                println(error)
+            }
+        }
     }
     
     deinit {

@@ -69,13 +69,14 @@ public class LGMediaBrowser: UIViewController {
     
     /// 动画用到的图片
     public weak var animationImage: UIImage? {
-        if self.mediaArray.count == 0 {
+        if self.mediaArray.count == 0 || self.mediaArray[currentIndex].thumbnailImage == nil {
             if let dataSource = self.dataSource {
                 let dataModel = dataSource.photoBrowser(self, photoAtIndex: self.currentIndex)
                 return dataModel.thumbnailImage
             }
             return nil
         }
+        
         let model = self.mediaArray[currentIndex]
         return model.thumbnailImage
     }
@@ -94,7 +95,7 @@ public class LGMediaBrowser: UIViewController {
             refreshCountLayout()
         }
     }
-    
+
     lazy var bottomToolBar: LGMPMediaCheckBottomToolBar = {
         let temp = LGMPMediaCheckBottomToolBar(frame: CGRect(x: 0,
                                                              y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
@@ -374,9 +375,14 @@ public class LGMediaBrowser: UIViewController {
                 break
             }
             isAnimating = true
-            UIView.animate(withDuration: 0.25,
+            
+            UIView.animate(withDuration: TimeInterval(UINavigationController.hideShowBarDuration),
                            animations:
                 {
+                    if self.status == .checkMedia {
+                        self.bottomToolBar.transform = CGAffineTransform.identity
+                        self.bottomToolBar.alpha = 1.0
+                    }
             }) { (isFinished) in
                 self.isAnimating = false
             }
@@ -389,11 +395,19 @@ public class LGMediaBrowser: UIViewController {
                 showsStatusBar = false
                 self.navigationController?.setNavigationBarHidden(true, animated: true)
                 self.setNeedsStatusBarAppearanceUpdate()
+                
                 break
             }
-            UIView.animate(withDuration: 0.25,
+            
+            UIView.animate(withDuration: TimeInterval(UINavigationController.hideShowBarDuration),
                            animations:
                 {
+                    if self.status == .checkMedia {
+                        self.bottomToolBar.transform = CGAffineTransform(translationX: 0,
+                                                                         y: self.bottomToolBar.lg_height)
+                        self.bottomToolBar.alpha = 0.0
+                        
+                    }
             }) { (isFinished) in
                 self.isAnimating = false
             }
@@ -675,10 +689,13 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
         }
         
         if operation == .push {
+            if !self.isViewLoaded {
+                self.loadViewIfNeeded()
+            }
             let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.push)
             transition.placeholderImage = animationImage
             transition.targetView = targetView
-            transition.bottomBar = self.bottomToolBar
+            transition.bottomBar = bottomToolBar
             return transition
         } else {
             if fromVC.self != self.self {
@@ -700,6 +717,9 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
                                      interactionControllerFor controller: UIViewControllerAnimatedTransitioning)
         -> UIViewControllerInteractiveTransitioning?
     {
+        if !self.isViewLoaded {
+            return nil
+        }
         self.interactiveTransition.actionType = .pop
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
             if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {

@@ -195,7 +195,8 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     @objc func fetchAlbumList() {
         let hud = LGLoadingHUD.show(inView: self.view)
         DispatchQueue.userInteractive.async { [weak self] in
-            LGPhotoManager.fetchAlbumList(LGPhotoManager.ResultMediaType.all) { [weak self] (resultArray) in
+            guard let weakSelf = self else { return }
+            LGPhotoManager.fetchAlbumList(weakSelf.configs.resultMediaTypes) { [weak self] (resultArray) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else { return }
                     hud.dismiss()

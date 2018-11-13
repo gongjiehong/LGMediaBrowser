@@ -51,31 +51,31 @@ public class LGPhotoManager {
             complete([])
             return
         }
-
+        
         
         let options = PHFetchOptions()
-        if !supportVideo {
+        
+        if supportImages {
             options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.image.rawValue)
-        }
-        if !supportImages {
+        } else if supportVideo {
             options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.video.rawValue)
         }
         
         options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: self.sort == .ascending)]
-
+        
         let smartAlbum = PHAssetCollection.fetchAssetCollections(with: PHAssetCollectionType.smartAlbum,
-                                                                  subtype: PHAssetCollectionSubtype.albumRegular,
-                                                                  options: nil)
+                                                                 subtype: PHAssetCollectionSubtype.albumRegular,
+                                                                 options: nil)
         let streamAlbum = PHAssetCollection.fetchAssetCollections(with: .album,
-                                                                   subtype: .albumMyPhotoStream,
-                                                                   options: nil)
+                                                                  subtype: .albumMyPhotoStream,
+                                                                  options: nil)
         let userAlbum = PHAssetCollection.fetchTopLevelUserCollections(with: nil)
         let syncedAlbum = PHAssetCollection.fetchAssetCollections(with: .album,
-                                                                   subtype: .albumSyncedAlbum,
-                                                                   options: nil)
+                                                                  subtype: .albumSyncedAlbum,
+                                                                  options: nil)
         let sharedAlbum = PHAssetCollection.fetchAssetCollections(with: .album,
-                                                                   subtype: .albumCloudShared,
-                                                                   options: nil)
+                                                                  subtype: .albumCloudShared,
+                                                                  options: nil)
         
         if let allAlbums = [smartAlbum, streamAlbum, userAlbum, syncedAlbum, sharedAlbum]
             as? [PHFetchResult<PHAssetCollection>]
@@ -137,22 +137,30 @@ public class LGPhotoManager {
     {
         var resultArray: [LGPhotoModel] = []
         var count: Int = 1
-        result.enumerateObjects { (asset, index, stop) in
-            let type = self.getAssetMediaType(from: asset)
-            if type == LGPhotoModel.AssetMediaType.generalImage && !supportMediaType.contains(.image) { return }
-            if type == LGPhotoModel.AssetMediaType.livePhoto && !supportMediaType.contains(.livePhoto)  { return }
-            if type == LGPhotoModel.AssetMediaType.video && !supportMediaType.contains(.video) { return }
-            if count == limitCount {
-                stop.pointee = true
+        
+        let options = PHImageRequestOptions()
+        options.resizeMode = .fast
+        options.isNetworkAccessAllowed = false
+        options.isSynchronous = true
+        
+        autoreleasepool {
+            result.enumerateObjects { (asset, index, stop) in
+                let type = self.getAssetMediaType(from: asset)
+                if type == LGPhotoModel.AssetMediaType.generalImage && !supportMediaType.contains(.image) { return }
+                if type == LGPhotoModel.AssetMediaType.livePhoto && !supportMediaType.contains(.livePhoto)  { return }
+                if type == LGPhotoModel.AssetMediaType.video && !supportMediaType.contains(.video) { return }
+                if count == limitCount {
+                    stop.pointee = true
+                }
+                
+                var durationStr = ""
+                if asset.mediaType == .video {
+                    durationStr = formatDuration(asset.duration)
+                }
+                
+                resultArray.append(LGPhotoModel(asset: asset, type: type, duration: durationStr))
+                count += 1
             }
-            
-            var durationStr = ""
-            if asset.mediaType == .video {
-                durationStr = formatDuration(asset.duration)
-            }
-            
-            resultArray.append(LGPhotoModel(asset: asset, type: type, duration: durationStr))
-            count += 1
         }
         
         return resultArray
@@ -185,7 +193,7 @@ public class LGPhotoManager {
         }
         return result
     }
-
+    
     /// 格式化视频时长为hh:mm:ss格式
     ///
     /// - Parameter duration: 视频时长
@@ -205,7 +213,26 @@ public class LGPhotoManager {
             return String(format: "%0.2d:%0.2d:%0.2d",hours , minutes, seconds)
         }
     }
-
+    
+    public typealias ImageDataCompleteBlock = (Data?, String?, UIImage.Orientation, [AnyHashable : Any]?) -> Void
+    
+    @discardableResult
+    public static func requestImageData(for asset: PHAsset,
+                                        resizeMode: PHImageRequestOptionsResizeMode,
+                                        progressHandler: PHAssetImageProgressHandler?,
+                                        resultHandler: @escaping ImageDataCompleteBlock) -> PHImageRequestID
+    {
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.resizeMode = resizeMode
+        options.progressHandler = progressHandler
+        return imageManager.requestImageData(for: asset,
+                                             options: options,
+                                             resultHandler: resultHandler)
+    }
+    
+    
+    
     /// 根据图片ASSET，最终输出大小，缩放模式请求图片
     ///
     /// - Parameters:
@@ -277,11 +304,11 @@ public class LGPhotoManager {
                                                result: result,
                                                headImageAsset: headImageAsset)
                 resultModel?.models = self.fetchPhoto(inResult: result,
-                                     supportMediaType: supportTypes)
+                                                      supportMediaType: supportTypes)
                 resultModel?.isAllPhotos = true
             }
         }
-
+        
         return resultModel!
     }
     

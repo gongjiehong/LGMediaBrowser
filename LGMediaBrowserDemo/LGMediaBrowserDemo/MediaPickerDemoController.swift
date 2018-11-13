@@ -20,7 +20,8 @@ class MediaPickerDemoController: UIViewController {
     
     @IBAction func toChooseButtonPressed(_ sender: UIButton) {
         let picker = LGMediaPicker()
-//        picker.delegate = self
+        picker.pickerDelegate = self
+        picker.config.resultMediaTypes = [.image]
         self.present(picker, animated: true, completion: nil)
     }
 

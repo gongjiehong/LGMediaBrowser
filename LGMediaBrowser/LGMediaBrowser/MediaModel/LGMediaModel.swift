@@ -404,6 +404,36 @@ public class LGMediaModel {
                 throw LGMediaModelError.mediaAssetIsInvalid
             }
             
+            if #available(iOS 11.0, *) {
+                if asset.playbackStyle == .imageAnimated {
+                    _requestId = LGPhotoManager.requestImageData(for: asset,
+                                                                 resizeMode: PHImageRequestOptionsResizeMode.fast,
+                                                                 progressHandler:
+                        { (progressValue, error, stoped, infoDic) in
+                            DispatchQueue.main.async { [weak self] in
+                                guard let weakSelf = self else { return }
+                                if error == nil {
+                                    let completedUnitCount = Int64(Double(_totalUnitCount) * progressValue)
+                                    weakSelf.progress.completedUnitCount = completedUnitCount
+                                    if let progressBlock = progressBlock {
+                                        progressBlock(weakSelf.progress)
+                                    }
+                                }
+                            }
+                    }) { (imageData, dataUTI, orientation, infoDic) in
+                        guard let imageData = imageData else {return}
+                        DispatchQueue.main.async { [weak self] in
+                            guard let weakSelf = self else { return }
+                            weakSelf.thumbnailImage = LGImage.imageWith(data: imageData)
+                            if let completion = completion {
+                                completion(weakSelf.thumbnailImage)
+                            }
+                        }
+                    }
+                    return
+                }
+            }
+            
             _requestId = LGPhotoManager.requestImage(forAsset: asset,
                                                      outputSize: CGSize(width: asset.pixelWidth,
                                                                         height: asset.pixelHeight),

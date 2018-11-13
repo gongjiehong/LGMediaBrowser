@@ -41,6 +41,8 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     /// 是否自动播放，默认否
     open var isAutoPlay: Bool = false
     
+    public var isPlayVideoAfterDownloadEndsOrExportEnds: Bool = false
+    
     /// 通过frame和媒体文件URL进行初始化，可选静音播放
     ///
     /// - Parameters:

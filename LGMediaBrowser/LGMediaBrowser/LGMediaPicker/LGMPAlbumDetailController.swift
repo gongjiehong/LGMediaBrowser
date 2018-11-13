@@ -605,7 +605,9 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
     }
     
     func doneButtonPressed(_ button: UIButton) {
-
+        mainPicker.pickerDelegate?.picker(mainPicker,
+                                          didDoneWith: mainPicker.selectedDataArray,
+                                          isOriginalPhoto: bottomToolBar.originalPhotoButton.isSelected)
     }
     
     func preview(with index: Int) {
