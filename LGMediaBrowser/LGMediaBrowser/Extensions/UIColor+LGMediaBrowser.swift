@@ -8,13 +8,16 @@
 
 import UIKit
 
-func thisBundle() -> Bundle {
-    return Bundle(for: LGMediaBrowser.self)
-}
 
 // Only use within this framework
+extension Bundle {
+    static var this: Bundle {
+        return Bundle(for: LGMediaBrowser.self)
+    }
+}
+
 extension UIImage {
     public convenience init?(namedFromThisBundle name: String) {
-        self.init(named: name, in: thisBundle(), compatibleWith: nil)
+        self.init(named: name, in: Bundle.this, compatibleWith: nil)
     }
 }

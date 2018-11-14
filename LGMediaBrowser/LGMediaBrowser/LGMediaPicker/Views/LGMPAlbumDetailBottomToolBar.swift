@@ -62,6 +62,14 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
         return temp
     }()
     
+    internal lazy var photoBytesIndicatorView: UIActivityIndicatorView = {
+        let temp = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.gray)
+        temp.frame = CGRect(x: 0, y: 0, width: 30.0, height: 30.0)
+        temp.hidesWhenStopped = true
+        temp.stopAnimating()
+        return temp
+    }()
+    
     internal lazy var photoBytesLabel: UILabel = {
         let temp = UILabel(frame: CGRect(x: 0, y: 0, width: 80.0, height: 30.0))
         temp.font = UIFont.systemFont(ofSize: 15.0)
@@ -120,8 +128,14 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
                       photoBytesLableItem,
                       flexibleSpaceItem,
                       doneButtonItem]
-        
-        self.contentMode = UIView.ContentMode.top
+
+        self.addSubview(photoBytesIndicatorView)
+        photoBytesIndicatorView.center = photoBytesLabel.center
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        photoBytesIndicatorView.center = photoBytesLabel.center
     }
     
     // MARK: -  actions

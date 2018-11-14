@@ -424,13 +424,35 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     }
     
     func layoutPhotosBytes() {
+        
         if isSelecteOriginalPhoto {
-            LGPhotoManager.getPhotoBytes(withPhotos: mainPicker.selectedDataArray)
-            { (mbFormatString, originalLength) in
-                DispatchQueue.main.async { [weak self] in
-                    guard let weakSelf = self else {return}
-                    weakSelf.bottomToolBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
-                    weakSelf.bottomToolBar.photoBytesLabel.sizeToFit()
+            DispatchQueue.background.async { [weak self] in
+                guard let weakSelf = self else {return}
+                if let photoModel = weakSelf.mainPicker.selectedDataArray.last, photoModel.isICloudAsset {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else {return}
+                        weakSelf.bottomToolBar.photoBytesLabel.text = "    "
+                        weakSelf.bottomToolBar.photoBytesIndicatorView.startAnimating()
+                    }
+                    LGPhotoManager.getPhotoBytes(withPhotos: weakSelf.mainPicker.selectedDataArray)
+                    { (mbFormatString, originalLength) in
+                        DispatchQueue.main.async { [weak self] in
+                            guard let weakSelf = self else {return}
+                            weakSelf.bottomToolBar.photoBytesIndicatorView.stopAnimating()
+                            weakSelf.bottomToolBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
+                            weakSelf.bottomToolBar.photoBytesLabel.sizeToFit()
+                        }
+                    }
+                } else {
+                    LGPhotoManager.getPhotoBytes(withPhotos: weakSelf.mainPicker.selectedDataArray)
+                    { (mbFormatString, originalLength) in
+                        DispatchQueue.main.async { [weak self] in
+                            guard let weakSelf = self else {return}
+                            weakSelf.bottomToolBar.photoBytesIndicatorView.stopAnimating()
+                            weakSelf.bottomToolBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
+                            weakSelf.bottomToolBar.photoBytesLabel.sizeToFit()
+                        }
+                    }
                 }
             }
         } else {
@@ -535,10 +557,10 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
             
             let photos = LGPhotoManager.fetchPhoto(inResult: detail.fetchResultAfterChanges,
                                                    supportMediaType: configs.resultMediaTypes)
-            self.dataArray.removeAll()
-            self.dataArray += photos
-            self.listView.reloadData()
-            self.cachingImages()
+//            self.dataArray.removeAll()
+//            self.dataArray += photos
+//            self.listView.reloadData()
+//            self.cachingImages()
 //            self.scrollToBottom()
         }
     }

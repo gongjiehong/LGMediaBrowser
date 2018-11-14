@@ -17,7 +17,7 @@ class LGColorHelper {
     var colorDictionary: [String: String]
     
     init() {
-        if let configPath = thisBundle().path(forResource: "LGMBColorConfigs", ofType: "plist") {
+        if let configPath = Bundle.this.path(forResource: "LGMBColorConfigs", ofType: "plist") {
             if let tempDic = NSDictionary(contentsOfFile: configPath) as? [String: String] {
                 colorDictionary = tempDic
             } else {

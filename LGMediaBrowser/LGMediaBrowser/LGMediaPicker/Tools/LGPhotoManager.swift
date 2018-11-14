@@ -319,15 +319,17 @@ public class LGPhotoManager {
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
         
-        for model in photos {
-            imageManager.requestImageData(for: model.asset,
-                                          options: options)
-            { (data, dataUTI, imageOrientation, infoDic) in
-                guard let data = data else { return }
-                totalDataLength += data.count
-                count += 1
-                if count >= photos.count {
-                    completion(self.formatDataLength(totalDataLength), totalDataLength)
+        autoreleasepool {
+            for model in photos {
+                imageManager.requestImageData(for: model.asset,
+                                              options: options)
+                { (data, dataUTI, imageOrientation, infoDic) in
+                    guard let data = data else { return }
+                    totalDataLength += data.count
+                    count += 1
+                    if count >= photos.count {
+                        completion(self.formatDataLength(totalDataLength), totalDataLength)
+                    }
                 }
             }
         }

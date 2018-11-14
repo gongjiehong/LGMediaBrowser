@@ -102,9 +102,9 @@ public protocol LGMediaBrowserDataSource: NSObjectProtocol {
 let kPanExitGestureName = "LGMediaBrowser.PanExit"
 
 func LGLocalizedString(_ key: String, comment: String) -> String {
-    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: thisBundle(), value: "", comment: comment)
+    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: Bundle.this, value: "", comment: comment)
 }
 
 func LGLocalizedString(_ key: String) -> String {
-    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: thisBundle(), value: "", comment: key)
+    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: Bundle.this, value: "", comment: key)
 }
