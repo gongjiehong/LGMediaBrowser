@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// 显示fouce touch效果的视图
 class LGForceTouchView: UIView {
 
     var preferredContentSize = CGSize.zero
@@ -80,9 +81,10 @@ class LGForceTouchView: UIView {
         sourceImageView.frame = sourceViewRect
         sourceImageView.image = sourceViewScreenshot
         
-        sourceViewCenter = CGPoint(x: sourceViewRect.origin.x + sourceViewRect.size.width/2, y: sourceViewRect.origin.y + sourceViewRect.size.height/2)
-        sourceToCenterXDelta = self.bounds.size.width/2 - sourceViewCenter.x
-        sourceToCenterYDelta = self.bounds.size.height/2 - sourceViewCenter.y
+        sourceViewCenter = CGPoint(x: sourceViewRect.origin.x + sourceViewRect.size.width / 2,
+                                   y: sourceViewRect.origin.y + sourceViewRect.size.height / 2)
+        sourceToCenterXDelta = self.bounds.size.width / 2 - sourceViewCenter.x
+        sourceToCenterYDelta = self.bounds.size.height / 2 - sourceViewCenter.y
         sourceToTargetWidthDelta = self.bounds.size.width - targePreviewPadding.width - sourceViewRect.size.width
         sourceToTargetHeightDelta = self.bounds.size.height - targePreviewPadding.height - sourceViewRect.size.height
         
@@ -90,7 +92,7 @@ class LGForceTouchView: UIView {
     
     func animateProgressiveBlur(_ progress: CGFloat) {
         if blurredScreenshots.count > 2 {
-            let blur = progress*CGFloat(blurredScreenshots.count - 1)
+            let blur = progress * CGFloat(blurredScreenshots.count - 1)
             let blurIndex = Int(blur)
             let blurRemainder = blur - CGFloat(blurIndex)
             blurredBaseImageView.image = blurredScreenshots.last
@@ -105,30 +107,35 @@ class LGForceTouchView: UIView {
         sourceImageView.isHidden = progress > 0.33
         targetPreviewView.isHidden = progress < 0.33
         
-        // Source rect expand stage
         if progress < 0.33 {
-            let adjustedProgress = min(progress*3,1.0)
+            // Source rect expand stage
+            let adjustedProgress = min(progress * 3, 1.0)
             animateProgressiveBlur(adjustedProgress)
-            let adjustedScale: CGFloat = 1.0 - CGFloat(adjustedProgress)*0.015
-            let adjustedSourceImageScale: CGFloat = 1.0 + CGFloat(adjustedProgress)*0.015
+            let adjustedScale: CGFloat = 1.0 - CGFloat(adjustedProgress) * 0.015
+            println(adjustedScale)
+            let adjustedSourceImageScale: CGFloat = 1.0 + CGFloat(adjustedProgress) * 0.015
             blurredImageViewFirst.transform = CGAffineTransform(scaleX: adjustedScale, y: adjustedScale)
             blurredImageViewSecond.transform = CGAffineTransform(scaleX: adjustedScale, y: adjustedScale)
             overlayView.alpha = CGFloat(adjustedProgress)
-            sourceImageView.transform = CGAffineTransform(scaleX: adjustedSourceImageScale, y: adjustedSourceImageScale)
-        }
+            sourceImageView.transform = CGAffineTransform(scaleX: adjustedSourceImageScale,
+                                                          y: adjustedSourceImageScale)
+        } else if progress < 0.45 {
             // Target preview reveal stage
-        else if progress < 0.45 {
-            let targetAdjustedScale: CGFloat = min(CGFloat((progress - 0.33)/0.1), CGFloat(1.0))
-            targetPreviewView.frame.size = CGSize(width: sourceViewRect.size.width + sourceToTargetWidthDelta*targetAdjustedScale, height: sourceViewRect.size.height + sourceToTargetHeightDelta*targetAdjustedScale)
-            targetPreviewView.center = CGPoint(x: sourceViewCenter.x + sourceToCenterXDelta*targetAdjustedScale, y: sourceViewCenter.y + sourceToCenterYDelta*targetAdjustedScale)
-        }
+            let targetAdjustedScale: CGFloat = min(CGFloat((progress - 0.33) / 0.1), CGFloat(1.0))
+            let width = sourceViewRect.size.width + sourceToTargetWidthDelta * targetAdjustedScale
+            let height = sourceViewRect.size.height + sourceToTargetHeightDelta * targetAdjustedScale
+            let centerX = sourceViewCenter.x + sourceToCenterXDelta * targetAdjustedScale
+            let centerY = sourceViewCenter.y + sourceToCenterYDelta * targetAdjustedScale
+            targetPreviewView.frame.size = CGSize(width: width,
+                                                  height: height)
+            targetPreviewView.center = CGPoint(x: centerX,
+                                               y: centerY)
+        } else if progress < 0.99 {
             // Target preview expand stage
-        else if progress < 0.96 {
-            let targetAdjustedScale = min(CGFloat(1 + (progress-0.66)/6),1.1)
+            let targetAdjustedScale = min(CGFloat(1 + (progress - 0.66) / 6), 1.1)
             targetPreviewView.transform = CGAffineTransform(scaleX: targetAdjustedScale, y: targetAdjustedScale)
-        }
+        } else {
             // Commit target view controller
-        else {
             targetPreviewView.frame = self.bounds
             targetPreviewView.imageContainer.layer.cornerRadius = 0
         }
@@ -136,7 +143,7 @@ class LGForceTouchView: UIView {
     }
 }
 
-/// <#Description#>
+/// forch touch效果容器视图
 class LGForceTouchTargetPreviewView: UIView {
     var imageContainer = UIImageView()
     var imageView = UIImageView()
@@ -156,7 +163,7 @@ class LGForceTouchTargetPreviewView: UIView {
         super.layoutSubviews()
         imageContainer.frame = self.bounds
         imageView.frame = imageViewFrame
-        imageView.contentMode = UIView.ContentMode.scaleAspectFit
+        imageView.contentMode = UIView.ContentMode.scaleAspectFill
         imageView.center = CGPoint(x: self.lg_width / 2.0, y: self.lg_height / 2.0)
     }
     

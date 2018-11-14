@@ -42,14 +42,14 @@ open class LGForceTouch: NSObject {
         self.viewController = viewController
     }
     
-    //MARK: Delegate registration
     @discardableResult
     open func registerForPreviewingWithDelegate(_ delegate: LGForceTouchPreviewingDelegate,
-                                                sourceView: UIView) -> LGForceTouchPreviewingContext {
+                                                sourceView: UIView) -> LGForceTouchPreviewingContext
+    {
         let previewing = LGForceTouchPreviewingContext(delegate: delegate, sourceView: sourceView)
         previewingContexts.append(previewing)
         
-        // If force touch is available, use Apple's implementation. Otherwise, use PeekPop's.
+        // 如果系统的3D touch可用，直接用系统的，不行再用LGForceTouchGestureRecognizer
         if isForceTouchCapable() {
             let delegate = LGSystemForceTouchDelegate(delegate: delegate)
             guard let target = viewController else {
@@ -57,8 +57,7 @@ open class LGForceTouch: NSObject {
             }
             delegate.registerFor3DTouch(sourceView, viewController: target)
             forceTouchDelegate = delegate
-        }
-        else {
+        } else {
             let gestureRecognizer = LGForceTouchGestureRecognizer(forceTouch: self)
             gestureRecognizer.context = previewing
             gestureRecognizer.cancelsTouchesInView = true
@@ -82,7 +81,7 @@ open class LGForceTouch: NSObject {
 
 extension LGForceTouch: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
-                                  shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
+                                  shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool
     {
         return true
     }
