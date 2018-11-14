@@ -115,7 +115,7 @@ extension LGPhotoModel {
                                          mediaType: assetTypeToMediaType(self.type),
                                          mediaPosition: LGMediaModel.Position.album,
                                          thumbnailImage: self.image)
-            model.isSelected = self.isSelected
+            model.photoModel = self
             return model
         } catch {
             println(error)

@@ -315,9 +315,13 @@ public class LGPhotoManager {
     public static func getPhotoBytes(withPhotos photos: [LGPhotoModel], completion: @escaping (String, Int) -> Void) {
         var totalDataLength: Int = 0
         var count: Int = 0
+        
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = true
+        
         for model in photos {
             imageManager.requestImageData(for: model.asset,
-                                          options: nil)
+                                          options: options)
             { (data, dataUTI, imageOrientation, infoDic) in
                 guard let data = data else { return }
                 totalDataLength += data.count

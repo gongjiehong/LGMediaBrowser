@@ -43,14 +43,12 @@ class RemoteImageWallController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
     
-    var forchTouch: LGForceTouch!
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.collectionView.register(RemoteImageLayoutCell.self, forCellWithReuseIdentifier: "RemoteImageLayoutCell")
         
-        forchTouch = LGForceTouch(viewController: self)
+        let forchTouch = LGForceTouch(viewController: self)
         _ = forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.collectionView)
     }
     
@@ -95,7 +93,7 @@ extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewD
         collectionView.deselectItem(at: indexPath, animated: true)
         
         let mediaBrowser = LGMediaBrowser(dataSource: self,
-                                          status: LGMediaBrowserStatus.checkMedia,
+                                          status: LGMediaBrowserStatus.browsing,
                                           currentIndex: indexPath.row)
         mediaBrowser.delegate = self
         self.navigationController?.pushViewController(mediaBrowser, animated: true)

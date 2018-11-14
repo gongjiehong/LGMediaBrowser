@@ -13,16 +13,17 @@ public enum LGMediaBrowserError: Error {
     case cannotConvertToPHAsset
 }
 
+
 /// LGMediaBrowser的状态定义，此状态决定内容的显示状态
 ///
 /// - browsing: 纯浏览图片
 /// - rowsingAndEditing: 浏览和编辑，例如修改
+/// - checkMedia: 媒体选择模式，私有，不能直接调用
 public enum LGMediaBrowserStatus {
     case browsing
     case browsingAndEditing
     case checkMedia
 }
-
 
 public struct LGMediaBrowserSettings {
     public var showsStatusBar: Bool = true

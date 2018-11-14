@@ -59,7 +59,7 @@ public class LGMediaModel {
     /// 媒体文件位置
     public private(set) var mediaPosition: Position
     
-    internal var isSelected: Bool = false
+    internal weak var photoModel: LGPhotoModel? = nil
     
     private var _progress: Progress?
     private var _thumbnailImage: UIImage?

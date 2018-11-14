@@ -34,9 +34,9 @@ open class LGForceTouch: NSObject {
     var previewingContexts: [LGForceTouchPreviewingContext] = []
     weak var viewController: UIViewController?
     
-    var forceTouchGestureRecognizer: LGForceTouchGestureRecognizer?
+    weak var forceTouchGestureRecognizer: LGForceTouchGestureRecognizer?
     
-    var forceTouchDelegate: LGSystemForceTouchDelegate?
+    weak var forceTouchDelegate: LGSystemForceTouchDelegate?
 
     public init(viewController: UIViewController) {
         self.viewController = viewController

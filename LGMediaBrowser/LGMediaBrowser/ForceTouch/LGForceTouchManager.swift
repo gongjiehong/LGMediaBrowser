@@ -9,7 +9,7 @@
 import Foundation
 
 class LGForceTouchManager {
-    weak var forceTouch: LGForceTouch!
+    var forceTouch: LGForceTouch!
     
     var viewController: UIViewController {
         return forceTouch.viewController ?? UIViewController()

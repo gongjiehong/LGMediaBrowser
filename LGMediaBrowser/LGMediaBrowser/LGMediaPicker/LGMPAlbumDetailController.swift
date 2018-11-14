@@ -55,9 +55,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     var configs: LGMediaPicker.Configuration {
         return mainPicker.config
     }
-    
-    var forchTouch: LGForceTouch!
-    
+        
     lazy var bottomToolBar: LGMPAlbumDetailBottomToolBar = {
         let temp = LGMPAlbumDetailBottomToolBar(frame: CGRect(x: 0,
                                                               y: 0,
@@ -80,8 +78,6 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         PHPhotoLibrary.shared().register(self)
         
         constructBottomToolBar()
-        
-
     }
     
     func setupCancel() {
@@ -135,7 +131,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         self.listView.register(LGMPAlbumDetailCameraCell.self, forCellWithReuseIdentifier: Reuse.cameraCell)
         
         if configs.allowForceTouch, isForceTouchAvailable {
-            forchTouch = LGForceTouch(viewController: self)
+            let forchTouch = LGForceTouch(viewController: self)
             forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.listView)
         }
         
@@ -543,7 +539,7 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
             self.dataArray += photos
             self.listView.reloadData()
             self.cachingImages()
-            self.scrollToBottom()
+//            self.scrollToBottom()
         }
     }
 }
@@ -615,11 +611,53 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
         configs.isClickToTurnOffEnabled = false
         configs.showsStatusBar = true
         configs.showsNavigationBar = true
-        let mediaBrowser = LGMediaBrowser(dataSource: self,
-                                          configs: configs,
-                                          status: .checkMedia,
-                                          currentIndex: index)
+        let mediaBrowser = LGCheckMediaBrowser(dataSource: self,
+                                               configs: configs,
+                                               status: .checkMedia,
+                                               currentIndex: index)
         mediaBrowser.delegate = self
+        mediaBrowser.checkMediaCallBack = self
         self.navigationController?.pushViewController(mediaBrowser, animated: true)
+    }
+}
+
+extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
+    func checkMedia(_ browser: LGCheckMediaBrowser, withIndex index: Int, isSelected: Bool) -> Bool {
+        var dataModel: LGPhotoModel
+        if !self.allowTakePhoto || configs.sortBy == .ascending {
+            dataModel = self.dataArray[index]
+        } else {
+            dataModel = self.dataArray[index - 1]
+        }
+        
+        if isSelected {
+            if canSelectModel(dataModel) {
+                dataModel.isSelected = true
+                self.mainPicker.selectedDataArray.append(dataModel)
+                let indexPath = IndexPath(row: index, section: 0)
+                self.selectedIndexPath.append(indexPath)
+                refreshSelectedIndexsLayout()
+                return true
+            } else {
+                return false
+            }
+        } else {
+            dataModel.isSelected = false
+            if let index = self.mainPicker.selectedDataArray.index(where: { (temp) -> Bool in
+                temp.asset.localIdentifier == dataModel.asset.localIdentifier
+            }) {
+                dataModel.currentSelectedIndex = -1
+                self.mainPicker.selectedDataArray.remove(at: index)
+            }
+            self.listView.reloadItems(at: [IndexPath(row: index, section: 0)])
+            refreshSelectedIndexsLayout()
+            return true
+        }
+    }
+    
+    func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGPhotoModel]) {
+        mainPicker.pickerDelegate?.picker(mainPicker,
+                                          didDoneWith: mainPicker.selectedDataArray,
+                                          isOriginalPhoto: bottomToolBar.originalPhotoButton.isSelected)
     }
 }

@@ -29,7 +29,7 @@ var globalConfigs: LGMediaBrowserSettings! = nil
 public class LGMediaBrowser: UIViewController {
     
     /// 重用标识定义
-    private struct Reuse {
+    internal struct Reuse {
         static var VideoCell = "LGMediaBrowserVideoCell"
         static var AudioCell = "LGMediaBrowserAudioCell"
         static var GeneralPhotoCell = "LGMediaBrowserGeneralPhotoCell"
@@ -41,7 +41,7 @@ public class LGMediaBrowser: UIViewController {
     private let itemPadding: CGFloat = 10.0
     
     /// 自定义滑动dismiss Transition
-    private lazy var interactiveTransition: LGMediaBrowserInteractiveTransition = {
+    internal lazy var interactiveTransition: LGMediaBrowserInteractiveTransition = {
         let temp = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView,
                                                        toTargetView: self.targetView,
                                                        targetController: self)
@@ -95,15 +95,6 @@ public class LGMediaBrowser: UIViewController {
             refreshCountLayout()
         }
     }
-
-    lazy var bottomToolBar: LGMPMediaCheckBottomToolBar = {
-        let temp = LGMPMediaCheckBottomToolBar(frame: CGRect(x: 0,
-                                                             y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
-                                                             width: self.view.lg_width,
-                                                             height: UIDevice.bottomSafeMargin + 44.0))
-        temp.barDelegate = self
-        return temp
-    }()
     
     /// UICollectionView显示设置
     lazy var flowLayout: UICollectionViewFlowLayout  = {
@@ -129,6 +120,11 @@ public class LGMediaBrowser: UIViewController {
                             status: LGMediaBrowserStatus = .browsing,
                             currentIndex: Int = 0) {
         self.init(nibName: nil, bundle: nil)
+        
+        if status == .checkMedia && self.isMember(of: LGMediaBrowser.self) {
+            assert(false, "媒体文件选择模式需要使用LGCheckMediaBrowser")
+        }
+        
         self.mediaArray = mediaArray
         globalConfigs = configs ?? LGMediaBrowserSettings.settings(with: status)
         self.status = status
@@ -145,6 +141,11 @@ public class LGMediaBrowser: UIViewController {
                             status: LGMediaBrowserStatus = .browsing,
                             currentIndex: Int = 0) {
         self.init(nibName: nil, bundle: nil)
+        
+        if status == .checkMedia && self.isMember(of: LGMediaBrowser.self) {
+            assert(false, "媒体文件选择模式需要使用LGCheckMediaBrowser")
+        }
+        
         self.dataSource = dataSource
         globalConfigs = configs ?? LGMediaBrowserSettings.settings(with: status)
         self.status = status
@@ -166,7 +167,7 @@ public class LGMediaBrowser: UIViewController {
         
         setupCollectionView()
         
-        setupTopBarInit()
+        setupActionView()
         
         setupMediaArray()
         
@@ -175,8 +176,6 @@ public class LGMediaBrowser: UIViewController {
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         
         addPanExitGesture()
-        
-        contructBottomToolBar()
     }
     
     public override func viewWillAppear(_ animated: Bool) {
@@ -195,11 +194,6 @@ public class LGMediaBrowser: UIViewController {
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         fixInteractiveTransitionActionType()
-        
-        if self.status == .checkMedia {
-            let model = self.mediaArray[self.currentIndex]
-            checkMediaButton.isSelected = model.isSelected
-        }
     }
     
     func fixInteractiveTransitionActionType() {
@@ -209,48 +203,6 @@ public class LGMediaBrowser: UIViewController {
             self.interactiveTransition.actionType = .dismiss
         }
     }
-    
-    func setupTopBarInit() {
-        switch self.status {
-        case .browsing, .browsingAndEditing:
-            setupActionView()
-            break
-        case .checkMedia:
-            setupNavigationItems()
-            break
-        }
-    }
-    
-    lazy var checkMediaButton: LGClickAreaButton = {
-        let tempButton = LGClickAreaButton(type: UIButton.ButtonType.custom)
-        tempButton.frame = CGRect(x: 0, y: 0, width: 23.0, height: 23.0)
-        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
-        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControl.State.selected)
-        tempButton.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControl.Event.touchUpInside)
-        tempButton.setTitleColor(UIColor.white, for: UIControl.State.normal)
-        tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
-        tempButton.enlargeOffset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        return tempButton
-    }()
-    func setupNavigationItems() {
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: checkMediaButton)
-    }
-    
-    func contructBottomToolBar() {
-        self.view.addSubview(bottomToolBar)
-        
-        bottomToolBar.translatesAutoresizingMaskIntoConstraints = false
-        
-        if #available(iOS 11.0, *) {
-            bottomToolBar.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        } else {
-            bottomToolBar.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        }
-        bottomToolBar.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
-        bottomToolBar.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
-        bottomToolBar.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
-    }
-    
     
     // MARK: - 初始化数据源
     func setupMediaArray() {
@@ -363,58 +315,30 @@ public class LGMediaBrowser: UIViewController {
         }
     }
     
-    private var isShowingControls: Bool = true
-    private var isAnimating: Bool = false
+    internal var isShowingControls: Bool = true
+    internal var isAnimating: Bool = false
     func showOrHideControls(_ show: Bool) {
         if isAnimating {
             return
         }
+        
         isShowingControls = show
         if show {
-            switch self.status {
-            case .browsingAndEditing, .browsing:
-                self.actionView.animate(hidden: false)
-                break
-            case .checkMedia:
-                showsStatusBar = true
-                self.navigationController?.setNavigationBarHidden(false, animated: true)
-                self.setNeedsStatusBarAppearanceUpdate()
-                break
-            }
+            self.actionView.animate(hidden: false)
             isAnimating = true
             
             UIView.animate(withDuration: TimeInterval(UINavigationController.hideShowBarDuration),
                            animations:
                 {
-                    if self.status == .checkMedia {
-                        self.bottomToolBar.transform = CGAffineTransform.identity
-                        self.bottomToolBar.alpha = 1.0
-                    }
             }) { (isFinished) in
                 self.isAnimating = false
             }
         } else {
-            switch self.status {
-            case .browsingAndEditing, .browsing:
-                self.actionView.animate(hidden: true)
-                break
-            case .checkMedia:
-                showsStatusBar = false
-                self.navigationController?.setNavigationBarHidden(true, animated: true)
-                self.setNeedsStatusBarAppearanceUpdate()
-                
-                break
-            }
+            self.actionView.animate(hidden: true)
             
             UIView.animate(withDuration: TimeInterval(UINavigationController.hideShowBarDuration),
                            animations:
                 {
-                    if self.status == .checkMedia {
-                        self.bottomToolBar.transform = CGAffineTransform(translationX: 0,
-                                                                         y: self.bottomToolBar.lg_height)
-                        self.bottomToolBar.alpha = 0.0
-                        
-                    }
             }) { (isFinished) in
                 self.isAnimating = false
             }
@@ -428,8 +352,6 @@ public class LGMediaBrowser: UIViewController {
     
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if self.status == .checkMedia {
-        }
         _ = runOnceRefreshFrames
     }
     
@@ -441,16 +363,10 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.frame = frame
         self.collectionView.reloadData()
         
-        switch self.status {
-        case .browsing, .browsingAndEditing:
-            self.actionView.frame = CGRect(x: 0,
-                                           y: 0,
-                                           width: self.view.lg_width,
-                                           height: UIDevice.statusBarHeight + UIDevice.topSafeMargin + 44.0)
-            break
-        case .checkMedia:
-            break
-        }
+        self.actionView.frame = CGRect(x: 0,
+                                       y: 0,
+                                       width: self.view.lg_width,
+                                       height: UIDevice.statusBarHeight + UIDevice.topSafeMargin + 44.0)
         
         if self.currentIndex != 0 {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
@@ -525,23 +441,8 @@ public class LGMediaBrowser: UIViewController {
     
     func refreshCountLayout() {
         let layoutTitle = "\(self.currentIndex + 1) / \(self.mediaArray.count)"
-        if self.status == .checkMedia {
-            self.title = layoutTitle
-        } else {
-            guard let actionView = self.actionView else {return}
-            actionView.titleLabel.text = layoutTitle
-        }
-    }
-    
-    // MARK: -  选择按钮点击事件处理
-    @objc func selectButtonPressed(_ button: UIButton) {
-        if !button.isSelected {
-            button.layer.add(buttonStatusChangedAnimation(), forKey: nil)
-        }
-        
-//        if let selectedBlock = self.selectedBlock {
-//            selectedBlock(button.isSelected)
-//        }
+        guard let actionView = self.actionView else {return}
+        actionView.titleLabel.text = layoutTitle
     }
     
     // MARK: - 编辑图片和选择完成
@@ -573,7 +474,7 @@ public class LGMediaBrowser: UIViewController {
 }
 
 // MARK: - UIViewControllerTransitioningDelegate
-extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserPushAnimationDelegate {
+extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     
     func getCurrentLayoutView() -> UIView? {
         if let cell = self.collectionView.cellForItem(at: IndexPath(row: self.currentIndex, section: 0)) {
@@ -684,84 +585,7 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate, LGMediaBrowserP
         return self.interactiveTransition
     }
     
-    public func navigationController(_ navigationController: UINavigationController,
-                                     animationControllerFor operation: UINavigationController.Operation,
-                                     from fromVC: UIViewController,
-                                     to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning?
-    {
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
-            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
-                self.targetView = view
-            }
-        }
-        
-        if operation == .push {
-            if !self.isViewLoaded {
-                self.loadViewIfNeeded()
-            }
-            let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.push)
-            transition.placeholderImage = animationImage
-            transition.targetView = targetView
-            transition.bottomBar = bottomToolBar
-            return transition
-        } else {
-            if fromVC.self != self.self {
-                return nil
-            }
-            
-            let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.pop)
-            transition.placeholderImage = animationImage
-            transition.targetView = targetView
-            if let layoutView = getCurrentLayoutView() {
-                transition.finalImageSize = layoutView.lg_size
-            }
-            transition.bottomBar = self.bottomToolBar
-            return transition
-        }
-    }
     
-    public func navigationController(_ navigationController: UINavigationController,
-                                     interactionControllerFor controller: UIViewControllerAnimatedTransitioning)
-        -> UIViewControllerInteractiveTransitioning?
-    {
-        if !self.isViewLoaded {
-            return nil
-        }
-        self.interactiveTransition.actionType = .pop
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
-            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
-                self.targetView = view
-            }
-        }
-        
-        if !self.interactiveTransition.isInteration {
-            return nil
-        }
-        
-        var finalImageSize: CGSize = CGSize.zero
-        var fromTargetView: UIView?
-        if let layoutView = getCurrentLayoutView() {
-            fromTargetView = layoutView
-            if self.mediaArray[currentIndex].mediaType == .video ||
-                self.mediaArray[currentIndex].mediaType == .audio {
-                if let image = self.animationImage {
-                    finalImageSize = image.size
-                }
-            } else {
-                finalImageSize = layoutView.lg_size
-            }
-        } else if let image = self.animationImage {
-            finalImageSize = image.size
-        }
-        
-        self.interactiveTransition.targetController = self
-        self.interactiveTransition.toTargetView = self.targetView
-        self.interactiveTransition.fromTargetView = fromTargetView
-        self.interactiveTransition.targetImage = self.animationImage
-        self.interactiveTransition.finalImageSize = finalImageSize
-        self.interactiveTransition.bottomBar = self.bottomToolBar
-        return self.interactiveTransition.isInteration ? self.interactiveTransition : nil
-    }
 }
 
 // MARK: UICollectionViewDataSource & UICollectionViewDelegate
@@ -898,11 +722,6 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didScrollToIndex(_:index:))) == true {
             self.delegate?.didScrollToIndex!(self, index: self.currentIndex)
         }
-        
-        if self.status == .checkMedia {
-            let model = self.mediaArray[index]
-            checkMediaButton.isSelected = model.isSelected
-        }
     }
 }
 
@@ -967,16 +786,81 @@ extension LGMediaBrowser {
     public static let needHideControlsNotification = Notification.Name("NeedHideControlsNotification")
 }
 
-extension LGMediaBrowser: LGMPMediaCheckBottomToolBarDelegate {
-    func editPictureButtonPressed(_ sender: UIButton) {
+extension LGMediaBrowser: LGMediaBrowserPushAnimationDelegate {
+    @objc public func navigationController(_ navigationController: UINavigationController,
+                                           animationControllerFor operation: UINavigationController.Operation,
+                                           from fromVC: UIViewController,
+                                           to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning?
+    {
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
         
+        if operation == .push {
+            if !self.isViewLoaded {
+                self.loadViewIfNeeded()
+            }
+            let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.push)
+            transition.placeholderImage = animationImage
+            transition.targetView = targetView
+            return transition
+        } else {
+            if fromVC.self != self.self {
+                return nil
+            }
+            
+            let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.pop)
+            transition.placeholderImage = animationImage
+            transition.targetView = targetView
+            if let layoutView = getCurrentLayoutView() {
+                transition.finalImageSize = layoutView.lg_size
+            }
+            return transition
+        }
     }
     
-    func doneButtonPressed(_ button: UIButton) {
+    @objc public func navigationController(_ navigationController: UINavigationController,
+                                           interactionControllerFor controller: UIViewControllerAnimatedTransitioning)
+        -> UIViewControllerInteractiveTransitioning?
+    {
+        if !self.isViewLoaded {
+            return nil
+        }
+        self.interactiveTransition.actionType = .pop
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
         
-    }
-    
-    public func position(for bar: UIBarPositioning) -> UIBarPosition {
-        return UIBarPosition.bottom
+        if !self.interactiveTransition.isInteration {
+            return nil
+        }
+        
+        var finalImageSize: CGSize = CGSize.zero
+        var fromTargetView: UIView?
+        if let layoutView = getCurrentLayoutView() {
+            fromTargetView = layoutView
+            if self.mediaArray[currentIndex].mediaType == .video ||
+                self.mediaArray[currentIndex].mediaType == .audio {
+                if let image = self.animationImage {
+                    finalImageSize = image.size
+                }
+            } else {
+                finalImageSize = layoutView.lg_size
+            }
+        } else if let image = self.animationImage {
+            finalImageSize = image.size
+        }
+        
+        self.interactiveTransition.targetController = self
+        self.interactiveTransition.toTargetView = self.targetView
+        self.interactiveTransition.fromTargetView = fromTargetView
+        self.interactiveTransition.targetImage = self.animationImage
+        self.interactiveTransition.finalImageSize = finalImageSize
+        return self.interactiveTransition.isInteration ? self.interactiveTransition : nil
     }
 }
+
