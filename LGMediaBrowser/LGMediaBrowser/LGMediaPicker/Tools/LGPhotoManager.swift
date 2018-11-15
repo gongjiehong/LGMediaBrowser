@@ -44,14 +44,9 @@ public class LGPhotoManager {
     ///   - supportMediaType: 支持的媒体类型
     ///   - complete: 完成回调
     public static func fetchAlbumList(_ supportMediaType: ResultMediaType, complete: ([LGAlbumListModel]) -> Void) {
-        let supportVideo = supportMediaType.contains(.video)
-        let supportImages = supportMediaType.contains(.image)
-        
-        guard supportVideo || supportImages else {
-            complete([])
-            return
-        }
-        
+        let supportVideo = supportMediaType == .video
+        let supportImages = supportMediaType == .image
+        let supportLivePhoto = supportMediaType == .livePhoto
         
         let options = PHFetchOptions()
         
@@ -59,6 +54,14 @@ public class LGPhotoManager {
             options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.image.rawValue)
         } else if supportVideo {
             options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.video.rawValue)
+        } else if supportLivePhoto {
+            // 只要LivePhoto
+            if #available(iOS 9.1, *) {
+                options.predicate = NSPredicate(format: "mediaType == %ld && mediaSubtype == %ld",
+                                                PHAssetMediaType.image.rawValue,
+                                                PHAssetMediaSubtype.photoLive.rawValue)
+            } else {
+            }
         }
         
         options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: self.sort == .ascending)]
@@ -278,13 +281,24 @@ public class LGPhotoManager {
     }
     
     public static func getAllPhotosAlbum(_ supportTypes: ResultMediaType = [.image, .video]) -> LGAlbumListModel {
-        let options = PHFetchOptions()
-        if !supportTypes.contains(.video) {
-            options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
-        }
+        let supportVideo = supportTypes == .video
+        let supportImages = supportTypes == .image
+        let supportLivePhoto = supportTypes == .livePhoto
         
-        if !supportTypes.contains(.image) {
-            options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)
+        let options = PHFetchOptions()
+        
+        if supportImages {
+            options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.image.rawValue)
+        } else if supportVideo {
+            options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.video.rawValue)
+        } else if supportLivePhoto {
+            // 只要LivePhoto
+            if #available(iOS 9.1, *) {
+                options.predicate = NSPredicate(format: "mediaType == %ld && mediaSubtype == %ld",
+                                                PHAssetMediaType.image.rawValue,
+                                                PHAssetMediaSubtype.photoLive.rawValue)
+            } else {
+            }
         }
         
         if self.sort != .ascending {

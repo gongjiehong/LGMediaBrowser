@@ -104,6 +104,8 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         static var cameraCell: String = "LGMPAlbumDetailCameraCell"
     }
     
+    var forchTouch: LGForceTouch!
+    
     func setupListCollectionView() {
         let layout = UICollectionViewFlowLayout()
         layout.minimumLineSpacing = Settings.itemLineSpacing
@@ -130,10 +132,9 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         self.listView.register(LGMPAlbumDetailImageCell.self, forCellWithReuseIdentifier: Reuse.imageCell)
         self.listView.register(LGMPAlbumDetailCameraCell.self, forCellWithReuseIdentifier: Reuse.cameraCell)
         
-        if configs.allowForceTouch, isForceTouchAvailable {
-            let forchTouch = LGForceTouch(viewController: self)
-            forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.listView)
-        }
+        let forchTouch = LGForceTouch(viewController: self)
+        forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.listView)
+        self.forchTouch = forchTouch
         
         listView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -229,7 +230,8 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                     weakSelf.dataArray.removeAll()
                     for temp in album.models {
                         for selectedTemp in weakSelf.mainPicker.selectedDataArray
-                            where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
+                            where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier
+                        {
                             temp.isSelected = true
                         }
                     }
@@ -269,13 +271,20 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
             return
         }
         
-        var row = self.dataArray.count - 1
+        if self.dataArray.count == 0 {
+            return
+        }
+        
+        var row = max(self.dataArray.count - 1, 0)
         if self.allowTakePhoto {
             row += 1
         }
         
         let lastIndexPath = IndexPath(row: row, section: 0)
         self.listView.layoutIfNeeded()
+        if row == 0 {
+            return
+        }
         self.listView.scrollToItem(at: lastIndexPath,
                                    at: UICollectionView.ScrollPosition.bottom,
                                    animated: false)

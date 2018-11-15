@@ -32,11 +32,13 @@ public protocol LGForceTouchPreviewingDelegate: class {
 
 open class LGForceTouch: NSObject {
     var previewingContexts: [LGForceTouchPreviewingContext] = []
+    
     weak var viewController: UIViewController?
     
     weak var forceTouchGestureRecognizer: LGForceTouchGestureRecognizer?
     
-    weak var forceTouchDelegate: LGSystemForceTouchDelegate?
+    var forceTouchDelegate: LGSystemForceTouchDelegate?
+
 
     public init(viewController: UIViewController) {
         self.viewController = viewController

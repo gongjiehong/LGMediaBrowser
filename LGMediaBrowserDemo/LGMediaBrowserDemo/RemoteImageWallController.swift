@@ -23,6 +23,8 @@ fileprivate class RemoteImageLayoutCell: UICollectionViewCell {
         setupImageView()
     }
     
+    
+    
     func setupImageView() {
         let temp = LGAnimatedImageView(frame: CGRect.zero)
         temp.contentMode = UIView.ContentMode.scaleAspectFill
@@ -43,6 +45,7 @@ class RemoteImageWallController: UIViewController {
     
     @IBOutlet weak var collectionView: UICollectionView!
     
+    var forchTouch: LGForceTouch!
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -50,6 +53,7 @@ class RemoteImageWallController: UIViewController {
         
         let forchTouch = LGForceTouch(viewController: self)
         _ = forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.collectionView)
+        self.forchTouch = forchTouch
     }
     
     

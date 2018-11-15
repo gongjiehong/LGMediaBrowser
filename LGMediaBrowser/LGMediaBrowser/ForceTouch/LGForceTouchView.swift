@@ -112,7 +112,6 @@ class LGForceTouchView: UIView {
             let adjustedProgress = min(progress * 3, 1.0)
             animateProgressiveBlur(adjustedProgress)
             let adjustedScale: CGFloat = 1.0 - CGFloat(adjustedProgress) * 0.015
-            println(adjustedScale)
             let adjustedSourceImageScale: CGFloat = 1.0 + CGFloat(adjustedProgress) * 0.015
             blurredImageViewFirst.transform = CGAffineTransform(scaleX: adjustedScale, y: adjustedScale)
             blurredImageViewSecond.transform = CGAffineTransform(scaleX: adjustedScale, y: adjustedScale)
