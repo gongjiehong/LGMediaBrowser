@@ -209,8 +209,8 @@ public class LGMediaBrowser: UIViewController {
         if let dataSource = self.dataSource {
             let count = dataSource.numberOfPhotosInPhotoBrowser(self)
             self.mediaArray = [LGMediaModel](repeating: LGMediaModel(), count: count)
-            self.refreshCountLayout()
         }
+        self.refreshCountLayout()
     }
     
     /// 添加下拉关闭手势

@@ -135,6 +135,7 @@ extension LGActionView {
             titleLabel = UILabel(frame: titleLabelHideFrame)
             titleLabel.textColor = UIColor(colorName: "ActionBarTitle")
             titleLabel.backgroundColor = UIColor.clear
+            titleLabel.textAlignment = NSTextAlignment.center
             titleLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFont.Weight.medium)
             titleLabel.isHidden = true
             self.addSubview(titleLabel)
@@ -142,14 +143,14 @@ extension LGActionView {
     }
     
     var titleLabelShowFrame: CGRect {
-        let titleLabelWidth: CGFloat = self.lg_width - 80.0
+        let titleLabelWidth: CGFloat = self.lg_width - 120.0
         let titleLabelHeight: CGFloat = 30.0
         let topSafeMargin = UIDevice.topSafeMargin
         let statusBarHeight = UIDevice.statusBarHeight
-        let titleLabelOriginY =
-            topSafeMargin + statusBarHeight +
-                (self.lg_height - topSafeMargin - titleLabelHeight - statusBarHeight) / 2.0
-        return CGRect(x: titleLabelWidth / 2.0,
+        let yOffset = (self.lg_height - topSafeMargin - titleLabelHeight - statusBarHeight) / 2.0
+        let titleLabelOriginY = topSafeMargin + statusBarHeight + yOffset
+        
+        return CGRect(x: 60.0,
                       y: titleLabelOriginY,
                       width: titleLabelWidth,
                       height: titleLabelHeight)
