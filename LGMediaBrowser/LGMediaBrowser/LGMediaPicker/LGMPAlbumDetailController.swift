@@ -50,7 +50,6 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         }()
     }
     
-    weak var mainPicker: LGMediaPicker!
     
     var configs: LGMediaPicker.Configuration {
         return mainPicker.config
@@ -163,6 +162,9 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         bottomToolBar.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
         bottomToolBar.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
         bottomToolBar.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
+        
+        bottomToolBar.originalPhotoButton.isHidden = !mainPicker.config.allowSelectOriginal
+        bottomToolBar.originalPhotoButton.isSelected = mainPicker.config.allowSelectOriginal
     }
 
     // MARK: - 显示状态
@@ -199,7 +201,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                     let photos = LGPhotoManager.fetchPhoto(inResult: result,
                                                            supportMediaType: self.configs.resultMediaTypes)
                     for temp in photos {
-                        for selectedTemp in self.mainPicker.selectedDataArray
+                        for selectedTemp in mainPicker.selectedDataArray
                             where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
                                 temp.isSelected = true
                         }
@@ -210,7 +212,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                 } else {
                     let photos = albumListModel.models
                     for temp in albumListModel.models {
-                        for selectedTemp in self.mainPicker.selectedDataArray
+                        for selectedTemp in mainPicker.selectedDataArray
                             where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
                                 temp.isSelected = true
                         }
@@ -229,7 +231,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                     weakSelf.albumListModel = album
                     weakSelf.dataArray.removeAll()
                     for temp in album.models {
-                        for selectedTemp in weakSelf.mainPicker.selectedDataArray
+                        for selectedTemp in mainPicker.selectedDataArray
                             where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier
                         {
                             temp.isSelected = true
@@ -291,8 +293,8 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     }
     
     deinit {
-        if self.mainPicker != nil {
-            self.mainPicker.selectedDataArray.removeAll()
+        if mainPicker != nil {
+            mainPicker.selectedDataArray.removeAll()
         }
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
     }
@@ -355,18 +357,18 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             if !isSelected {
                 if weakSelf.canSelectModel(dataModel) {
                     dataModel.isSelected = true
-                    weakSelf.mainPicker.selectedDataArray.append(dataModel)
+                    mainPicker.selectedDataArray.append(dataModel)
                     weakSelf.selectedIndexPath.append(indexPath)
                     weakCell.selectButton.isSelected = true
                 }
             } else {
                 weakCell.selectButton.isSelected = false
                 dataModel.isSelected = false
-                if let index = weakSelf.mainPicker.selectedDataArray.index(where: { (temp) -> Bool in
+                if let index = mainPicker.selectedDataArray.index(where: { (temp) -> Bool in
                     temp.asset.localIdentifier == dataModel.asset.localIdentifier
                 }) {
                     dataModel.currentSelectedIndex = -1
-                    weakSelf.mainPicker.selectedDataArray.remove(at: index)
+                    mainPicker.selectedDataArray.remove(at: index)
                 }
             }
            
@@ -407,6 +409,13 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             }
         }
         
+        if model.isICloudAsset && !isSelecteOriginalPhoto {
+            let tipsString = LGLocalizedString("iCloud synchronization.")
+            LGStatusBarTips.show(withStatus: tipsString,
+                                 style: LGStatusBarConfig.Style.error)
+            return false
+        }
+        
         return true
     }
 
@@ -417,15 +426,12 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     func refreshBottomBarStatus() {
         if mainPicker.selectedDataArray.count > 0 {
             bottomToolBar.previewButton.isEnabled = true
-            bottomToolBar.originalPhotoButton.isEnabled = true
             bottomToolBar.doneButton.isEnabled = true
             bottomToolBar.doneButton.setTitle(LGLocalizedString("Done") + "(\(mainPicker.selectedDataArray.count))",
                                                for: UIControl.State.normal)
             layoutPhotosBytes()
         } else {
             bottomToolBar.previewButton.isEnabled = false
-            bottomToolBar.originalPhotoButton.isEnabled = false
-            bottomToolBar.originalPhotoButton.isSelected = false
             bottomToolBar.photoBytesLabel.text = ""
             bottomToolBar.doneButton.isEnabled = false
             bottomToolBar.doneButton.setTitle(LGLocalizedString("Done"), for: UIControl.State.normal)
@@ -433,17 +439,15 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     }
     
     func layoutPhotosBytes() {
-        
         if isSelecteOriginalPhoto {
             DispatchQueue.background.async { [weak self] in
-                guard let weakSelf = self else {return}
-                if let photoModel = weakSelf.mainPicker.selectedDataArray.last, photoModel.isICloudAsset {
+                if let photoModel = mainPicker.selectedDataArray.last, photoModel.isICloudAsset {
                     DispatchQueue.main.async { [weak self] in
                         guard let weakSelf = self else {return}
                         weakSelf.bottomToolBar.photoBytesLabel.text = "    "
                         weakSelf.bottomToolBar.photoBytesIndicatorView.startAnimating()
                     }
-                    LGPhotoManager.getPhotoBytes(withPhotos: weakSelf.mainPicker.selectedDataArray)
+                    LGPhotoManager.getPhotoBytes(withPhotos: mainPicker.selectedDataArray)
                     { (mbFormatString, originalLength) in
                         DispatchQueue.main.async { [weak self] in
                             guard let weakSelf = self else {return}
@@ -453,7 +457,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                         }
                     }
                 } else {
-                    LGPhotoManager.getPhotoBytes(withPhotos: weakSelf.mainPicker.selectedDataArray)
+                    LGPhotoManager.getPhotoBytes(withPhotos: mainPicker.selectedDataArray)
                     { (mbFormatString, originalLength) in
                         DispatchQueue.main.async { [weak self] in
                             guard let weakSelf = self else {return}
@@ -664,7 +668,7 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
         if isSelected {
             if canSelectModel(dataModel) {
                 dataModel.isSelected = true
-                self.mainPicker.selectedDataArray.append(dataModel)
+                mainPicker.selectedDataArray.append(dataModel)
                 let indexPath = IndexPath(row: index, section: 0)
                 self.selectedIndexPath.append(indexPath)
                 refreshSelectedIndexsLayout()
@@ -674,11 +678,11 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
             }
         } else {
             dataModel.isSelected = false
-            if let index = self.mainPicker.selectedDataArray.index(where: { (temp) -> Bool in
+            if let index = mainPicker.selectedDataArray.index(where: { (temp) -> Bool in
                 temp.asset.localIdentifier == dataModel.asset.localIdentifier
             }) {
                 dataModel.currentSelectedIndex = -1
-                self.mainPicker.selectedDataArray.remove(at: index)
+                mainPicker.selectedDataArray.remove(at: index)
             }
             self.listView.reloadItems(at: [IndexPath(row: index, section: 0)])
             refreshSelectedIndexsLayout()

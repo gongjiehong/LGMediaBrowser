@@ -31,28 +31,56 @@ public class LGPhotoModel {
     
     /// 判断内容是否在iCloud上，此操作特别耗时
     public var isICloudAsset: Bool {
-        return autoreleasepool {
-            let resources = PHAssetResource.assetResources(for: self.asset)
-            if resources.count > 0,
-                let resource = resources.first,
-                let locallyAvailable = resource.value(forKey: "locallyAvailable") as? NSNumber
-            {
-                return !locallyAvailable.boolValue
-            } else {
-                let options = PHImageRequestOptions()
-                options.isNetworkAccessAllowed = false
-                options.isSynchronous = true
-                
-                var result: Bool = false
-                
-                LGPhotoManager.imageManager.requestImageData(for: self.asset,
-                                                             options: options)
-                { (imageData, dataUTI, orientation, infoDic) in
-                    result = imageData == nil
-                }
-                return result
+        var result = false
+        
+        switch self.type {
+        case .generalImage:
+            let options = PHImageRequestOptions()
+            options.isSynchronous = true
+            options.isNetworkAccessAllowed = false
+            LGPhotoManager.imageManager.requestImageData(for: self.asset,
+                                                         options: options)
+            { (data, dataUTI, orientation, infoDic) in
+                result = data == nil
             }
+            break
+        case .video:
+            let options = PHVideoRequestOptions()
+            options.isNetworkAccessAllowed = false
+            LGPhotoManager.imageManager.requestAVAsset(forVideo: self.asset,
+                                                       options: options)
+            { (avAsset, audioMix, infoDic) in
+                result = avAsset == nil
+            }
+            break
+        case .livePhoto:
+            break
+        default:
+            break
         }
+        return result
+//            autoreleasepool {
+//            let resources = PHAssetResource.assetResources(for: self.asset)
+//            if resources.count > 0,
+//                let resource = resources.first,
+//                let locallyAvailable = resource.value(forKey: "locallyAvailable") as? NSNumber
+//            {
+//                return !locallyAvailable.boolValue
+//            } else {
+//                let options = PHImageRequestOptions()
+//                options.isNetworkAccessAllowed = false
+//                options.isSynchronous = true
+//
+//                var result: Bool = false
+//
+//                LGPhotoManager.imageManager.requestImageData(for: self.asset,
+//                                                             options: options)
+//                { (imageData, dataUTI, orientation, infoDic) in
+//                    result = imageData == nil
+//                }
+//                return result
+//            }
+//        }
     }
     
     public init(asset: PHAsset, type: AssetMediaType, duration: String) {

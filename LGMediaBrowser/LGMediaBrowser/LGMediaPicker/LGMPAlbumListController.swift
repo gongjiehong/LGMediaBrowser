@@ -129,8 +129,6 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     /// 数据源
     public var dataArray: [LGAlbumListModel] = []
-
-    weak var mainPicker: LGMediaPicker!
     
     /// 设置参数
     var configs: LGMediaPicker.Configuration {
@@ -260,7 +258,6 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
         let listModel = self.dataArray[indexPath.row]
         let detail = LGMPAlbumDetailController()
         detail.albumListModel = listModel
-        detail.mainPicker = mainPicker
         self.navigationController?.pushViewController(detail, animated: true)
     }
 }

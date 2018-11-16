@@ -10,9 +10,7 @@ import UIKit
 
 public class LGFPSLabel: UILabel {
 
-    var defaultSize: CGSize {
-        return CGSize(width: 60.0, height: 20.0)
-    }
+    let defaultSize: CGSize = CGSize(width: 60.0, height: 20.0)
     
     var timer: CADisplayLink!
     var count: Int = 0

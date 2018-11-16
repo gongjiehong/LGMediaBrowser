@@ -22,6 +22,16 @@ internal class LGMPMediaCheckBottomToolBar: UIToolbar {
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
         temp.addTarget(self, action: #selector(editPicture(_:)), for: UIControl.Event.touchUpInside)
         temp.isEnabled = false
+        
+        let bottonButtonsHeight: CGFloat = 30.0
+        
+        var editWidth = temp.currentTitle?.width(withConstrainedHeight: 20.0,
+                                                 font: UIFont.systemFont(ofSize: 15.0)) ?? 0.0
+        temp.frame = CGRect(x: 0,
+                            y: 0,
+                            width: editWidth,
+                            height: bottonButtonsHeight)
+        
         return temp
     }()
     

@@ -87,6 +87,7 @@ public class LGPhotoManager {
             
             for album in allAlbums {
                 album.enumerateObjects { (collection, index, stoped) in
+                    // smartAlbumLongExposures = 215
                     if collection.assetCollectionSubtype.rawValue > 215 ||
                         collection.assetCollectionSubtype == .smartAlbumAllHidden {
                         return

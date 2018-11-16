@@ -14,6 +14,8 @@ public protocol LGMediaPickerDelegate: NSObjectProtocol {
     func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGPhotoModel], isOriginalPhoto isOriginal: Bool)
 }
 
+internal weak var mainPicker: LGMediaPicker!
+
 public class LGMediaPicker: LGMPNavigationController {
 
     public struct Configuration {
@@ -127,6 +129,8 @@ public class LGMediaPicker: LGMPNavigationController {
         self.view.backgroundColor = UIColor.white
         
         self.navigationBar.tintColor = UIColor(colorName: "NavigationBarTint")
+        
+        mainPicker = self
     }
     
     public override func loadView() {
@@ -150,10 +154,8 @@ public class LGMediaPicker: LGMPNavigationController {
                 switch status {
                 case .authorized:
                     let albumList = LGMPAlbumListController()
-                    albumList.mainPicker = self
                     
                     let allPhotosList = LGMPAlbumDetailController()
-                    allPhotosList.mainPicker = self
                     weakSelf.viewControllers = [albumList, allPhotosList]
                     break
                 case .denied, .restricted:

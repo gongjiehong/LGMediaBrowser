@@ -52,6 +52,8 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         super.viewDidAppear(animated)
 
         refreshCheckButtonStatus()
+        
+        refreshEditButtonStatus()
     }
     
     // MARK: - setup & refres
@@ -146,6 +148,10 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         }
     }
     
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        self.bottomToolBar.isUserInteractionEnabled = false
+    }
+    
     override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         super.scrollViewDidEndDecelerating(scrollView)
         let index = Int(scrollView.contentOffset.x / scrollView.lg_width)
@@ -155,12 +161,35 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
                 checkMediaButton.isSelected = photoModel.isSelected
             }
         }
+        self.bottomToolBar.isUserInteractionEnabled = true
+        
         refreshCheckButtonStatus()
+        
+        refreshEditButtonStatus()
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let index = Int(scrollView.contentOffset.x / scrollView.lg_width)
         refreshCheckButtonStatus(withIndex: index)
+        refreshEditButtonStatus()
+    }
+    
+    func refreshEditButtonStatus() {
+        guard let mainPicker = mainPicker else {return}
+        let mediaModel = self.mediaArray[self.currentIndex]
+        
+        if !(mainPicker.config.allowEditImage || mainPicker.config.allowEditVideo) {
+            bottomToolBar.editButton.isHidden = true
+        } else {
+            bottomToolBar.editButton.isHidden = false
+        }
+        
+        if (mediaModel.mediaType == .generalPhoto && mainPicker.config.allowEditImage) ||
+            (mediaModel.mediaType == .video && mainPicker.config.allowEditVideo) {
+            bottomToolBar.editButton.isEnabled = true
+        } else {
+            bottomToolBar.editButton.isEnabled = false
+        }
     }
     
     // MARK: -  选择按钮点击事件处理
