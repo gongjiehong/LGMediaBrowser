@@ -274,6 +274,8 @@ open class LGPlayerControlView: LGPlayerView {
         
         self.addSubview(self.progressView)
         self.progressView.center = self.center
+        
+        layoutControls()
     }
     
     private func constructAudioPlayerControls() {

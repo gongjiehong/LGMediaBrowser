@@ -9,7 +9,10 @@
 import UIKit
 
 internal protocol LGCheckMediaBrowserCallBack: NSObjectProtocol {
-    func checkMedia(_ browser: LGCheckMediaBrowser, withIndex index: Int, isSelected: Bool) -> Bool
+    func checkMedia(_ browser: LGCheckMediaBrowser,
+                    withIndex index: Int,
+                    isSelected: Bool,
+                    complete: @escaping (Bool) -> Void)
     func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGPhotoModel])
 }
 
@@ -175,7 +178,7 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
     }
     
     func refreshEditButtonStatus() {
-        guard let mainPicker = mainPicker else {return}
+        guard let mainPicker = mainPicker, self.mediaArray.count > self.currentIndex else {return}
         let mediaModel = self.mediaArray[self.currentIndex]
         
         if !(mainPicker.config.allowEditImage || mainPicker.config.allowEditVideo) {
@@ -200,17 +203,20 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         
         guard let checkMediaCallBack = checkMediaCallBack else {return}
         
-        let operationResult = checkMediaCallBack.checkMedia(self,
+        checkMediaCallBack.checkMedia(self,
                                                             withIndex: self.currentIndex,
                                                             isSelected: !button.isSelected)
-        if operationResult {
-            button.isSelected = !button.isSelected
-            let model = self.mediaArray[currentIndex]
-            if let photoModel = model.photoModel {
-                photoModel.isSelected = button.isSelected
-                refreshCheckButtonStatus()
+        { [weak self] (canSelect) in
+            guard let weakSelf = self else {return}
+            if canSelect {
+                button.isSelected = !button.isSelected
+                let model = weakSelf.mediaArray[weakSelf.currentIndex]
+                if let photoModel = model.photoModel {
+                    photoModel.isSelected = button.isSelected
+                    weakSelf.refreshCheckButtonStatus()
+                }
             }
-        }
+        }        
     }
     
     override var preferredStatusBarStyle: UIStatusBarStyle {

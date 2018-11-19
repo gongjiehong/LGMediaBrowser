@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Photos
+import PhotosUI
 
 open class LGMediaBrowserPreviewCell: UICollectionViewCell {
     open var mediaModel: LGMediaModel? {
@@ -110,8 +112,26 @@ open class LGMediaBrowserGeneralPhotoCell: LGMediaBrowserPreviewCell {
 }
 
 open class LGMediaBrowserLivePhotoCell: LGMediaBrowserPreviewCell {
+//    lazy var livePhotoView: PHLivePhotoView = {
+//        let temp = PHLivePhotoView(frame: CGRect.zero)
+//        temp.clipsToBounds = true
+//        temp.contentMode = UIView.ContentMode.scaleAspectFill
+//        return temp
+//    }()
     open override func refreshLayout() {
-        
+        if #available(iOS 9.1, *) {
+//            if let previewView = self.previewView as? PHLivePhotoView {
+//                mediaModel?.fetchImage(withProgress: <#T##LGProgressHandler?##LGProgressHandler?##(Progress) -> Void#>, completion: <#T##((UIImage?) -> Void)?##((UIImage?) -> Void)?##(UIImage?) -> Void#>)
+//                previewView.livePhoto
+//            } else {
+//                
+//            }
+        } else {
+            self.previewView = LGSectorProgressView(frame: CGRect(x: 0, y: 0, width: 50.0, height: 50.0),
+                                                    isShowError: true)
+            self.contentView.addSubview(self.previewView!)
+            self.previewView?.center = self.contentView.center
+        }
     }
 }
 

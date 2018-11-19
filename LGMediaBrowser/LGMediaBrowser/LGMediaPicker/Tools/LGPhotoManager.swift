@@ -333,6 +333,7 @@ public class LGPhotoManager {
         
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
+        options.isSynchronous = false
         
         autoreleasepool {
             for model in photos {

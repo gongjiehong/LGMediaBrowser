@@ -354,13 +354,37 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         cell.selectedBlock = { [weak self] (isSelected) in
             guard let weakSelf = self else { return }
             guard let weakCell = weakCell else { return }
-            if !isSelected {
-                if weakSelf.canSelectModel(dataModel) {
-                    dataModel.isSelected = true
-                    mainPicker.selectedDataArray.append(dataModel)
-                    weakSelf.selectedIndexPath.append(indexPath)
-                    weakCell.selectButton.isSelected = true
+            
+            func forceReload() {
+                weakCell.selectButton.isUserInteractionEnabled = true
+                if weakSelf.configs.isShowSelectedMask {
+                    weakCell.coverView.isHidden = !dataModel.isSelected
                 }
+                
+                if dataModel.currentSelectedIndex == -1 {
+                    weakCell.selectButton.setTitle(nil,
+                                                   for: UIControl.State.normal)
+                } else {
+                    weakCell.selectButton.setTitle("\(dataModel.currentSelectedIndex)",
+                        for: UIControl.State.normal)
+                }
+                weakSelf.refreshSelectedIndexsLayout()
+                weakSelf.refreshBottomBarStatus()
+            }
+            
+            
+            if !isSelected {
+                weakCell.selectButton.isUserInteractionEnabled = false
+                weakSelf.canSelectModel(dataModel, callback: { (canSelecte) in
+                    if canSelecte {
+                        dataModel.isSelected = true
+                        mainPicker.selectedDataArray.append(dataModel)
+                        weakSelf.selectedIndexPath.append(indexPath)
+                        weakCell.selectButton.isSelected = true
+                    }
+                    
+                    forceReload()
+                })
             } else {
                 weakCell.selectButton.isSelected = false
                 dataModel.isSelected = false
@@ -370,32 +394,21 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                     dataModel.currentSelectedIndex = -1
                     mainPicker.selectedDataArray.remove(at: index)
                 }
+                
+                forceReload()
             }
-           
-            if weakSelf.configs.isShowSelectedMask {
-                weakCell.coverView.isHidden = !dataModel.isSelected
-            }
-            
-            if dataModel.currentSelectedIndex == -1 {
-                weakCell.selectButton.setTitle(nil,
-                                               for: UIControl.State.normal)
-            } else {
-                weakCell.selectButton.setTitle("\(dataModel.currentSelectedIndex)",
-                                               for: UIControl.State.normal)
-            }
-            weakSelf.refreshSelectedIndexsLayout()
-            weakSelf.refreshBottomBarStatus()
         }
         return cell
     }
     
-    func canSelectModel(_ model: LGPhotoModel) -> Bool {
+    func canSelectModel(_ model: LGPhotoModel, callback: @escaping (Bool) -> Void) {
         if mainPicker.selectedDataArray.count >= configs.maxSelectCount {
             let tipsString = String(format: LGLocalizedString("Select a maximum of %d photos."),
                                     configs.maxSelectCount)
             LGStatusBarTips.show(withStatus: tipsString,
                                  style: LGStatusBarConfig.Style.error)
-            return false
+            callback(false)
+            return
         }
         
         if mainPicker.selectedDataArray.count > 0 {
@@ -404,19 +417,23 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                     let tipsString = LGLocalizedString("Can't select photos and videos at the same time.")
                     LGStatusBarTips.show(withStatus: tipsString,
                                          style: LGStatusBarConfig.Style.error)
-                    return false
+                    callback(false)
+                    return
                 }
             }
         }
         
-        if model.isICloudAsset && !isSelecteOriginalPhoto {
-            let tipsString = LGLocalizedString("iCloud synchronization.")
-            LGStatusBarTips.show(withStatus: tipsString,
-                                 style: LGStatusBarConfig.Style.error)
-            return false
-        }
-        
-        return true
+        model.isICloudAsset({ [weak self] (isICloudAsset) in
+            guard let weakSelf = self else {return}
+            if isICloudAsset && weakSelf.isSelecteOriginalPhoto {
+                let tipsString = LGLocalizedString("iCloud synchronization.")
+                LGStatusBarTips.show(withStatus: tipsString,
+                                     style: LGStatusBarConfig.Style.error)
+                callback(false)
+            } else {
+                callback(true)
+            }
+        })
     }
 
     var isSelecteOriginalPhoto: Bool {
@@ -440,35 +457,28 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     
     func layoutPhotosBytes() {
         if isSelecteOriginalPhoto {
-            DispatchQueue.background.async { [weak self] in
-                if let photoModel = mainPicker.selectedDataArray.last, photoModel.isICloudAsset {
-                    DispatchQueue.main.async { [weak self] in
+                if let photoModel = mainPicker.selectedDataArray.last {
+                    photoModel.isICloudAsset { [weak self] (isICloudAsset) in
                         guard let weakSelf = self else {return}
-                        weakSelf.bottomToolBar.photoBytesLabel.text = "    "
-                        weakSelf.bottomToolBar.photoBytesIndicatorView.startAnimating()
-                    }
-                    LGPhotoManager.getPhotoBytes(withPhotos: mainPicker.selectedDataArray)
-                    { (mbFormatString, originalLength) in
-                        DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self else {return}
-                            weakSelf.bottomToolBar.photoBytesIndicatorView.stopAnimating()
-                            weakSelf.bottomToolBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
-                            weakSelf.bottomToolBar.photoBytesLabel.sizeToFit()
+                        if isICloudAsset {
+                            weakSelf.bottomToolBar.photoBytesLabel.text = "  "
+                            weakSelf.bottomToolBar.photoBytesIndicatorView.startAnimating()
+                        }
+                        LGPhotoManager.getPhotoBytes(withPhotos: mainPicker.selectedDataArray)
+                        { (mbFormatString, originalLength) in
+                            DispatchQueue.main.async { [weak self] in
+                                guard let weakSelf = self else {return}
+                                weakSelf.bottomToolBar.photoBytesIndicatorView.stopAnimating()
+                                weakSelf.bottomToolBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
+                            }
                         }
                     }
                 } else {
-                    LGPhotoManager.getPhotoBytes(withPhotos: mainPicker.selectedDataArray)
-                    { (mbFormatString, originalLength) in
-                        DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self else {return}
-                            weakSelf.bottomToolBar.photoBytesIndicatorView.stopAnimating()
-                            weakSelf.bottomToolBar.photoBytesLabel.text = String(format: "(%@)", mbFormatString)
-                            weakSelf.bottomToolBar.photoBytesLabel.sizeToFit()
-                        }
-                    }
+                    self.bottomToolBar.photoBytesIndicatorView.stopAnimating()
+                    self.bottomToolBar.photoBytesLabel.text = ""
                 }
-            }
         } else {
+            self.bottomToolBar.photoBytesIndicatorView.stopAnimating()
             self.bottomToolBar.photoBytesLabel.text = ""
         }
     }
@@ -493,9 +503,9 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             }) {
                 tempModel.currentSelectedIndex = index + 1
             }
-            
-            self.listView.reloadItems(at: indexs)
         }
+        
+        self.listView.reloadItems(at: indexs)
     }
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -657,7 +667,11 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
 }
 
 extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
-    func checkMedia(_ browser: LGCheckMediaBrowser, withIndex index: Int, isSelected: Bool) -> Bool {
+    func checkMedia(_ browser: LGCheckMediaBrowser,
+                    withIndex index: Int,
+                    isSelected: Bool,
+                    complete: @escaping (Bool) -> Void)
+    {
         var dataModel: LGPhotoModel
         if !self.allowTakePhoto || configs.sortBy == .ascending {
             dataModel = self.dataArray[index]
@@ -666,15 +680,21 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
         }
         
         if isSelected {
-            if canSelectModel(dataModel) {
-                dataModel.isSelected = true
-                mainPicker.selectedDataArray.append(dataModel)
-                let indexPath = IndexPath(row: index, section: 0)
-                self.selectedIndexPath.append(indexPath)
-                refreshSelectedIndexsLayout()
-                return true
-            } else {
-                return false
+            canSelectModel(dataModel) { [weak self] (canSelect) in
+                if canSelect {
+                    dataModel.isSelected = true
+                    mainPicker.selectedDataArray.append(dataModel)
+                    let indexPath = IndexPath(row: index, section: 0)
+                    guard let weakSelf = self else {
+                        complete(false)
+                        return
+                    }
+                    weakSelf.selectedIndexPath.append(indexPath)
+                    weakSelf.refreshSelectedIndexsLayout()
+                    complete(true)
+                } else {
+                    complete(false)
+                }
             }
         } else {
             dataModel.isSelected = false
@@ -686,9 +706,10 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
             }
             self.listView.reloadItems(at: [IndexPath(row: index, section: 0)])
             refreshSelectedIndexsLayout()
-            return true
+            complete(true)
         }
     }
+
     
     func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGPhotoModel]) {
         mainPicker.pickerDelegate?.picker(mainPicker,
