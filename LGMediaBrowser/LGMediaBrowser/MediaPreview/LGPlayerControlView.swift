@@ -141,6 +141,8 @@ open class LGPlayerControlView: LGPlayerView {
     var isHiddenTools: Bool = false
     var isAnimating: Bool = false
     
+    public var isShowBottomSlideControls: Bool = true
+    
     lazy var tapGesture: UITapGestureRecognizer = {
         let tap = UITapGestureRecognizer(target: self, action: #selector(showOrHideControls))
         return tap
@@ -245,6 +247,10 @@ open class LGPlayerControlView: LGPlayerView {
                             weakSelf.progressView.isHidden = true
                         }
                     }
+                    if media.mediaType == .video {
+                        self.isShowBottomSlideControls = false
+                        self.toolBackgroundView.removeFromSuperview()
+                    }
                     break
                 }
             } catch {
@@ -287,8 +293,13 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     private func constructVideoPlayerControls() {
-        self.addSubview(toolBackgroundView)
         self.addSubview(centerPlayButton)
+        
+        if !isShowBottomSlideControls {
+            return
+        }
+        
+        self.addSubview(toolBackgroundView)
         toolBackgroundView.addSubview(playOrPauseButton)
         toolBackgroundView.addSubview(progressSlider)
         toolBackgroundView.addSubview(totalTimeLabel)

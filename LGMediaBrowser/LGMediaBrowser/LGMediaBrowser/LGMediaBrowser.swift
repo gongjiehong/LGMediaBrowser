@@ -271,6 +271,8 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.register(LGMediaBrowserAudioCell.self, forCellWithReuseIdentifier: Reuse.AudioCell)
         self.collectionView.register(LGMediaBrowserGeneralPhotoCell.self,
                                      forCellWithReuseIdentifier: Reuse.GeneralPhotoCell)
+        self.collectionView.register(LGMediaBrowserLivePhotoCell.self,
+                                     forCellWithReuseIdentifier: Reuse.LivePhotoCell)
         self.collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: Reuse.Other)
         
         self.collectionView.isMultipleTouchEnabled = true
@@ -485,6 +487,9 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
             } else if cell.isKind(of: LGMediaBrowserAudioCell.self) == true ||
                 cell.isKind(of: LGMediaBrowserVideoCell.self) == true {
                 return (cell as? LGMediaBrowserPreviewCell)?.previewView
+            } else if cell.isKind(of: LGMediaBrowserLivePhotoCell.self) == true ||
+                cell.isKind(of: LGMediaBrowserLivePhotoCell.self) == true {
+                return (cell as? LGMediaBrowserPreviewCell)?.previewView
             } else {
                 return nil
             }
@@ -672,12 +677,12 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
                          livePhotoCellForItemAt indexPath: IndexPath,
                          mediaModel: LGMediaModel) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        var result: LGMediaBrowserLivePhotoCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.LivePhotoCell, for: indexPath)
+        if let temp = cell as? LGMediaBrowserLivePhotoCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMediaBrowserLivePhotoCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaModel
         return result
@@ -687,12 +692,12 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
                          otherCellForItemAt indexPath: IndexPath,
                          mediaModel: LGMediaModel) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        var result: LGMediaBrowserGeneralPhotoCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.GeneralPhotoCell, for: indexPath)
+        if let temp = cell as? LGMediaBrowserGeneralPhotoCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMediaBrowserGeneralPhotoCell(frame: CGRect.zero)
         }
         result.mediaModel = mediaModel
         return result
