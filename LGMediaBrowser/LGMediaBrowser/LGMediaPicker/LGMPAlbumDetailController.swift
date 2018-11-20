@@ -544,7 +544,7 @@ extension LGMPAlbumDetailController: LGForceTouchPreviewingDelegate {
                            commitViewController viewControllerToCommit: UIViewController)
     {
         guard let previewController = viewControllerToCommit as? LGForceTouchPreviewController else {return}
-        preview(with: previewController.currentIndex)
+        preview(with: previewController.currentIndex, animated: false)
     }
 
     func getSizeWith(photoModel: LGPhotoModel) -> CGSize {
@@ -651,7 +651,7 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
                                           isOriginalPhoto: bottomToolBar.originalPhotoButton.isSelected)
     }
     
-    func preview(with index: Int) {
+    func preview(with index: Int, animated: Bool = true) {
         var configs = LGMediaBrowserSettings()
         configs.isClickToTurnOffEnabled = false
         configs.showsStatusBar = true
@@ -662,7 +662,7 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
                                                currentIndex: index)
         mediaBrowser.delegate = self
         mediaBrowser.checkMediaCallBack = self
-        self.navigationController?.pushViewController(mediaBrowser, animated: true)
+        self.navigationController?.pushViewController(mediaBrowser, animated: animated)
     }
 }
 

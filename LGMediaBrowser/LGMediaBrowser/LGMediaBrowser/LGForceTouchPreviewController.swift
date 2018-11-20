@@ -272,6 +272,7 @@ open class LGForceTouchPreviewController: UIViewController {
     
     func fixVideoViewFrame() {
         self.imageView.frame = self.view.bounds
+        self.playerView?.frame = self.view.bounds
         self.progressView.center = self.view.center
     }
     

@@ -14,7 +14,12 @@ class LGForceTouchView: UIView {
     var preferredContentSize = CGSize.zero
     
     lazy var targePreviewPadding: CGSize = {
-        return CGSize(width: 28.0, height: UIScreen.main.bounds.height - preferredContentSize.height)
+        
+//        let yPadding = UIScreen.main.bounds.height - preferredContentSize.height
+//        if yPadding <= 60.0 {
+//            return CGSize(width: 28.0, height: 30.0)
+//        }
+        return CGSize(width: 28.0, height: (28.0 / UIScreen.main.bounds.size.width) * preferredContentSize.height)
     }()
 
     
@@ -47,7 +52,17 @@ class LGForceTouchView: UIView {
     
     var sourceImageView = UIImageView()
     
-    var targetPreviewView = LGForceTouchTargetPreviewView()
+    weak var targetPreviewView: UIView?
+    
+    convenience init(frame: CGRect, targetPreviewView: UIView?) {
+        self.init(frame: frame)
+        if let targetPreviewView = targetPreviewView {
+            self.targetPreviewView = targetPreviewView
+            self.addSubview(targetPreviewView)
+            targetPreviewView.layer.cornerRadius = 15.0
+            targetPreviewView.layer.masksToBounds = true
+        }
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -65,7 +80,6 @@ class LGForceTouchView: UIView {
         self.addSubview(blurredImageViewSecond)
         self.addSubview(overlayView)
         self.addSubview(sourceImageView)
-        self.addSubview(targetPreviewView)
     }
     
     func didAppear() {
@@ -74,9 +88,8 @@ class LGForceTouchView: UIView {
         blurredImageViewSecond.frame = self.bounds
         overlayView.frame = self.bounds
         
-        targetPreviewView.frame.size = sourceViewRect.size
-        targetPreviewView.imageViewFrame = self.bounds
-        targetPreviewView.imageView.image = targetViewControllerScreenshot
+        targetPreviewView?.frame.size = sourceViewRect.size
+
         
         sourceImageView.frame = sourceViewRect
         sourceImageView.image = sourceViewScreenshot
@@ -105,7 +118,7 @@ class LGForceTouchView: UIView {
     func animateProgress(_ progress: CGFloat) {
         
         sourceImageView.isHidden = progress > 0.33
-        targetPreviewView.isHidden = progress < 0.33
+        targetPreviewView?.isHidden = progress < 0.33
         
         if progress < 0.33 {
             // Source rect expand stage
@@ -125,20 +138,19 @@ class LGForceTouchView: UIView {
             let height = sourceViewRect.size.height + sourceToTargetHeightDelta * targetAdjustedScale
             let centerX = sourceViewCenter.x + sourceToCenterXDelta * targetAdjustedScale
             let centerY = sourceViewCenter.y + sourceToCenterYDelta * targetAdjustedScale
-            targetPreviewView.frame.size = CGSize(width: width,
+            targetPreviewView?.frame.size = CGSize(width: width,
                                                   height: height)
-            targetPreviewView.center = CGPoint(x: centerX,
+            targetPreviewView?.center = CGPoint(x: centerX,
                                                y: centerY)
         } else if progress < 0.99 {
             // Target preview expand stage
             let targetAdjustedScale = min(CGFloat(1 + (progress - 0.66) / 6), 1.1)
-            targetPreviewView.transform = CGAffineTransform(scaleX: targetAdjustedScale, y: targetAdjustedScale)
+            targetPreviewView?.transform = CGAffineTransform(scaleX: targetAdjustedScale, y: targetAdjustedScale)
         } else {
             // Commit target view controller
-            targetPreviewView.frame = self.bounds
-            targetPreviewView.imageContainer.layer.cornerRadius = 0
+            targetPreviewView?.frame = self.bounds
+            targetPreviewView?.layer.cornerRadius = 0
         }
-        
     }
 }
 

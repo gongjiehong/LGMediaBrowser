@@ -28,7 +28,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserInteractiveTransition.swift"
-            timestampString = "564399782.834468"
+            timestampString = "564408547.750392"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "155"
@@ -44,7 +44,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserInteractiveTransition.swift"
-            timestampString = "564399782.834829"
+            timestampString = "564408547.7504669"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "149"
@@ -60,7 +60,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserInteractiveTransition.swift"
-            timestampString = "564399782.835011"
+            timestampString = "564408547.750504"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "182"
@@ -243,27 +243,11 @@
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "UICollectionViewFlowLayoutBreakForInvalidSizes"
-                  moduleName = "UIKitCore"
+                  moduleName = "UIKit"
                   usesParentBreakpointCondition = "Yes"
                   offsetFromSymbolStart = "0">
                </Location>
             </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserInteractiveTransition.swift"
-            timestampString = "564399782.835391"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "61"
-            endingLineNumber = "61"
-            landmarkName = "handlePanGesture(_:)"
-            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -337,11 +321,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser.swift"
-            timestampString = "564322339.583679"
+            timestampString = "564408547.750828"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "864"
-            endingLineNumber = "864"
+            startingLineNumber = "865"
+            endingLineNumber = "865"
             landmarkName = "navigationController(_:interactionControllerFor:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -353,7 +337,23 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser.swift"
-            timestampString = "564322339.583716"
+            timestampString = "564408547.750868"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "851"
+            endingLineNumber = "851"
+            landmarkName = "navigationController(_:interactionControllerFor:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser.swift"
+            timestampString = "564408547.750901"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "850"
@@ -369,12 +369,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser.swift"
-            timestampString = "564322339.583748"
+            timestampString = "564408547.750935"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "849"
-            endingLineNumber = "849"
-            landmarkName = "navigationController(_:interactionControllerFor:)"
+            startingLineNumber = "492"
+            endingLineNumber = "492"
+            landmarkName = "getCurrentLayoutView()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -384,13 +384,29 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser.swift"
-            timestampString = "564322339.583778"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGForceTouchPreviewController.swift"
+            timestampString = "564408547.75097"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "491"
-            endingLineNumber = "491"
-            landmarkName = "getCurrentLayoutView()"
+            startingLineNumber = "51"
+            endingLineNumber = "51"
+            landmarkName = "init(nibName:bundle:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/ForceTouch/LGForceTouchView.swift"
+            timestampString = "564408547.7510099"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "62"
+            endingLineNumber = "62"
+            landmarkName = "init(frame:targetPreviewView:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

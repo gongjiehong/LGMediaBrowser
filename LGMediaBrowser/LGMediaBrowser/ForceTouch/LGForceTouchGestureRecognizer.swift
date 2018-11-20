@@ -45,6 +45,10 @@ class LGForceTouchGestureRecognizer: UIGestureRecognizer {
     /// 动作是否开始
     var isForceTouchStarted = false
     
+    
+    /// 显示3Dtouch效果的controller
+    private var previewController: UIViewController?
+    
     /// 初始化
     ///
     /// - Parameter forceTouch: LGForceTouch对象
@@ -58,13 +62,11 @@ class LGForceTouchGestureRecognizer: UIGestureRecognizer {
         super.touchesBegan(touches, with: event)
         if let touch = touches.first, let context = context, isTouchValid(touch)
         {
-            let touchLocation = touch.location(in: self.view)
-            let previewController = context.delegate?.previewingContext(context,
-                                                                        viewControllerForLocation: touchLocation)
-            self.state = (previewController != nil) ? .possible : .failed
-            if self.state == .possible {
-                // 至少0.2秒后才开始触发按压面积动作
+            if let _ = context.delegate {
+                self.state = .possible
                 self.perform(#selector(delayedFirstTouch), with: touch, afterDelay: 0.2)
+            } else {
+                self.state = .failed
             }
         }
         else {
@@ -89,7 +91,19 @@ class LGForceTouchGestureRecognizer: UIGestureRecognizer {
             self.state = .began
             if let context = context {
                 let touchLocation = touch.location(in: self.view)
-                _ = forceTouchManager.forceTouchPossible(context, touchLocation: touchLocation)
+                let delegate = context.delegate
+                if let previewController = delegate?.previewingContext(context,
+                                                                       viewControllerForLocation: touchLocation)
+                {
+                    self.previewController = previewController
+                } else {
+                    cancelTouches()
+                    return
+                }
+                
+                _ = forceTouchManager.forceTouchPossible(context,
+                                                         touchLocation: touchLocation,
+                                                         targetViewController: self.previewController)
             }
             isForceTouchStarted = true
             initialMajorRadius = touch.majorRadius
@@ -119,6 +133,11 @@ class LGForceTouchGestureRecognizer: UIGestureRecognizer {
         NSObject.cancelPreviousPerformRequests(withTarget: self)
         isForceTouchStarted = false
         progress = 0.0
+        previewController?.willMove(toParent: nil)
+        previewController?.removeFromParent()
+        previewController?.didMove(toParent: nil)
+        previewController?.view.removeFromSuperview()
+        previewController = nil
     }
     
     fileprivate func cancelTouches() {

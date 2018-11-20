@@ -194,6 +194,7 @@ public class LGMediaBrowser: UIViewController {
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         fixInteractiveTransitionActionType()
+        self.showOrHideControls(isShowingControls)
     }
     
     func fixInteractiveTransitionActionType() {
