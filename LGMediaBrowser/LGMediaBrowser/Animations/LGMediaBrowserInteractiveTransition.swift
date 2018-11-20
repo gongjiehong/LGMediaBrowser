@@ -147,14 +147,14 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         }
         
         let width: CGFloat = UIScreen.main.bounds.width
-        let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+        let height: CGFloat = UIScreen.main.bounds.height
         
         let imageSize = self.calcfinalImageSize()
         let imageWidth = imageSize.width
         let imageHeight = imageSize.height
         
         tempImageViewFrame = CGRect(x: (width - imageWidth) / 2.0,
-                                    y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                    y: (height - imageHeight) / 2.0,
                                     width: imageWidth,
                                     height: imageHeight)
         

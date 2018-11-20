@@ -13,7 +13,7 @@ import LGWebImage
 import LGHTTPRequest
 
 /// 用于组装progress的最大值
-private let _totalUnitCount: Int64 = 1_000
+private let totalUnitCount: Int64 = 1_000
 
 /// 存储媒体数据的模型，承载下载数据功能
 public class LGMediaModel {
@@ -61,38 +61,9 @@ public class LGMediaModel {
     
     internal weak var photoModel: LGPhotoModel? = nil
     
-    private var _progress: Progress?
     private var _thumbnailImage: UIImage?
     private var _lock: DispatchSemaphore = DispatchSemaphore(value: 1)
     private var _requestId: PHImageRequestID = PHInvalidImageRequestID
-    
-    private var _mediaFileProgress: Progress = Progress(totalUnitCount: _totalUnitCount / 2)
-    private var _thumbnailImageProgress: Progress = Progress(totalUnitCount: _totalUnitCount / 2)
-    
-    /// 下载或导出进度
-    public private(set) var progress: Progress {
-        get {
-            _ = _lock.wait(timeout: DispatchTime.distantFuture)
-            defer {
-                _ = _lock.signal()
-            }
-            
-            if _progress == nil {
-                _progress = Progress(totalUnitCount: _totalUnitCount)
-                _progress?.addChild(_mediaFileProgress, withPendingUnitCount: _totalUnitCount / 2)
-                _progress?.addChild(_thumbnailImageProgress, withPendingUnitCount: _totalUnitCount / 2)
-                return _progress!
-            } else {
-                return _progress!
-            }
-        } set {
-            _ = _lock.wait(timeout: DispatchTime.distantFuture)
-            defer {
-                _ = _lock.signal()
-            }
-            _progress = newValue
-        }
-    }
     
     /// 占位图，大多数时候直接就是原图
     public var thumbnailImage: UIImage? {
@@ -232,11 +203,9 @@ public class LGMediaModel {
                                                         options: LGWebImageOptions.default,
                                                         progress:
                 { (progressValue) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else { return }
-                        weakSelf.progress = progressValue
+                    DispatchQueue.main.async {
                         if let progressBlock = progressBlock {
-                            progressBlock(weakSelf.progress)
+                            progressBlock(progressValue)
                         }
                     }
             }, transform: nil)
@@ -305,12 +274,12 @@ public class LGMediaModel {
                                                      resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                      progressHandlder:
                 { (value, error, stop, info) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else { return }
+                    DispatchQueue.main.async {
                         if error == nil {
-                            weakSelf.progress.completedUnitCount = Int64(Double(_totalUnitCount) * value)
+                            let progress = Progress(totalUnitCount: totalUnitCount)
+                            progress.completedUnitCount = Int64(Double(totalUnitCount) * value)
                             if let progressBlock = progressBlock {
-                                progressBlock(weakSelf.progress)
+                                progressBlock(progress)
                             }
                         }
                     }
@@ -358,11 +327,9 @@ public class LGMediaModel {
                                                         options: LGWebImageOptions.default,
                                                         progress:
                 { (progressValue) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else { return }
-                        weakSelf.progress = progressValue
+                    DispatchQueue.main.async {
                         if let progressBlock = progressBlock {
-                            progressBlock(weakSelf.progress)
+                            progressBlock(progressValue)
                         }
                     }
             }, transform: nil)
@@ -431,13 +398,12 @@ public class LGMediaModel {
                                                                  resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                                  progressHandler:
                         { (progressValue, error, stoped, infoDic) in
-                            DispatchQueue.main.async { [weak self] in
-                                guard let weakSelf = self else { return }
+                            DispatchQueue.main.async {
                                 if error == nil {
-                                    let completedUnitCount = Int64(Double(_totalUnitCount) * progressValue)
-                                    weakSelf.progress.completedUnitCount = completedUnitCount
+                                    let progress = Progress(totalUnitCount: totalUnitCount)
+                                    progress.completedUnitCount = Int64(Double(totalUnitCount) * progressValue)
                                     if let progressBlock = progressBlock {
-                                        progressBlock(weakSelf.progress)
+                                        progressBlock(progress)
                                     }
                                 }
                             }
@@ -464,12 +430,12 @@ public class LGMediaModel {
                                                      resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                      progressHandlder:
                 { (value, error, stop, info) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else { return }
+                    DispatchQueue.main.async {
                         if error == nil {
-                            weakSelf.progress.completedUnitCount = Int64(Double(_totalUnitCount) * value)
+                            let progress = Progress(totalUnitCount: totalUnitCount)
+                            progress.completedUnitCount = Int64(Double(totalUnitCount) * value)
                             if let progressBlock = progressBlock {
-                                progressBlock(weakSelf.progress)
+                                progressBlock(progress)
                             }
                         }
                     }
@@ -515,9 +481,9 @@ public class LGMediaModel {
             let options = PHLivePhotoRequestOptions()
             options.isNetworkAccessAllowed = true
             options.progressHandler = { (progress, error, stoped, infoDic) in
-                let total: Int64 = 100
+                let total: Int64 = totalUnitCount
                 let result = Progress(totalUnitCount: total)
-                result.completedUnitCount = Int64(100.0 * progress)
+                result.completedUnitCount = Int64(Double(totalUnitCount) * progress)
                 progressBlock?(result)
             }
             _requestId = LGPhotoManager.imageManager.requestLivePhoto(for: asset,
@@ -608,9 +574,9 @@ public class LGMediaModel {
                         var totalProgress: Double = 0.0 {
                             didSet {
                                 DispatchQueue.main.async {
-                                    let total: Int64 = 100
+                                    let total: Int64 = totalUnitCount
                                     let result = Progress(totalUnitCount: total)
-                                    result.completedUnitCount = Int64(100.0 * (totalProgress / 2.0))
+                                    result.completedUnitCount = Int64(Double(totalUnitCount) * (totalProgress / 2.0))
                                     progressBlock?(result)
                                 }
                             }
@@ -713,8 +679,8 @@ public class LGMediaModel {
                 options.isNetworkAccessAllowed = true
                 options.progressHandler = {(progress, error, stop, infoDic) in
                     DispatchQueue.main.async {
-                        let progressValue = Progress(totalUnitCount: 100)
-                        progressValue.completedUnitCount = Int64(100.0 * progress)
+                        let progressValue = Progress(totalUnitCount: totalUnitCount)
+                        progressValue.completedUnitCount = Int64(Double(totalUnitCount) * progress)
                         progressBlock?(progressValue)
                     }
                 }

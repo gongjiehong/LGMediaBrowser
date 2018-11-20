@@ -51,8 +51,8 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         
         self.finalImageSize = placeholderImage?.size ?? CGSize.zero
         let imageSize = calcfinalImageSize()
-        let finalWidth = UIScreen.main.bounds.width
-        let finalHeight = UIScreen.main.bounds.height
+        let screenWidth = UIScreen.main.bounds.width
+        let screenHeight = UIScreen.main.bounds.height
         
 
         
@@ -66,7 +66,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         if let targetView = self.targetView {
             tempImageView.frame = targetView.convert(targetView.bounds, to: containerView)
         } else {
-            tempImageView.center = CGPoint(x: finalWidth / 2.0, y: finalHeight / 2.0)
+            tempImageView.center = CGPoint(x: screenWidth / 2.0, y: screenHeight / 2.0)
         }
         
         tempBackgroundView.addSubview(tempImageView)
@@ -110,8 +110,8 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
                        options: options,
                        animations:
             {
-                tempImageView.frame = CGRect(origin: CGPoint(x: (finalWidth - imageSize.width) / 2.0,
-                                                             y: (finalHeight - imageSize.height) / 2.0),
+                tempImageView.frame = CGRect(origin: CGPoint(x: (screenWidth - imageSize.width) / 2.0,
+                                                             y: (screenHeight - imageSize.height) / 2.0),
                                              size: imageSize)
                 tempBackgroundView.backgroundColor = UIColor.black.withAlphaComponent(1.0)
                 bottomBarView.alpha = 1.0
@@ -171,8 +171,6 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         
         if transitionContext.isInteractive {
             tempBackgroundView.backgroundColor = UIColor.black
-            if let navigationController = toVC.navigationController {
-            }
             containerView.insertSubview(tempBackgroundView, belowSubview: fromVC.view)
         } else {
             toVC.view.addSubview(tempBackgroundView)
