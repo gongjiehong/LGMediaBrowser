@@ -27,34 +27,37 @@ extension UIDevice {
     }
     
     static var topSafeMargin: CGFloat {
-        if #available(iOS 11.0, *) {
+        if isNotchScreen {
             guard let keyWindow = UIApplication.shared.keyWindow else {
                 return 0.0
             }
-            return keyWindow.safeAreaInsets.top
+            if #available(iOS 11.0, *) {
+                return keyWindow.safeAreaInsets.top
+            } else {
+                return 0.0
+            }
         } else {
             return 0.0
         }
     }
     
     static var statusBarHeight: CGFloat {
-        if #available(iOS 11.0, *) {
-            guard let keyWindow = UIApplication.shared.keyWindow else {
-                return 20.0
-            }
-            if keyWindow.safeAreaInsets.top > 0 {
-                return 0.0
-            }
+        if isNotchScreen {
+            return 0.0
         }
         return 20.0
     }
         
     static var bottomSafeMargin: CGFloat {
-        if #available(iOS 11.0, *) {
+        if isNotchScreen {
             guard let keyWindow = UIApplication.shared.keyWindow else {
                 return 0.0
             }
-            return keyWindow.safeAreaInsets.bottom
+            if #available(iOS 11.0, *) {
+                return keyWindow.safeAreaInsets.bottom
+            } else {
+                return 0.0
+            }
         } else {
             return 0.0
         }

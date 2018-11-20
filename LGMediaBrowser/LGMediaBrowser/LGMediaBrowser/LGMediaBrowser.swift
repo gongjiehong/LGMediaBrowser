@@ -100,7 +100,7 @@ public class LGMediaBrowser: UIViewController {
     lazy var flowLayout: UICollectionViewFlowLayout  = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 0.0
-        layout.minimumLineSpacing = itemPadding * 2
+        layout.minimumLineSpacing = 2.0 * itemPadding
         layout.scrollDirection = UICollectionView.ScrollDirection.horizontal
         layout.sectionInset = UIEdgeInsets(top: 0.0, left: itemPadding, bottom: 0.0, right: itemPadding)
         return layout
@@ -257,7 +257,6 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.delegate = self
         self.collectionView.dataSource = self
         if #available(iOS 11.0, *) {
-            self.collectionView.contentInset = UIEdgeInsets(top: -20.0, left: 0, bottom: 0, right: 0)
             self.collectionView.contentInsetAdjustmentBehavior = .never
         } else {
             self.automaticallyAdjustsScrollViewInsets = false
@@ -265,7 +264,6 @@ public class LGMediaBrowser: UIViewController {
         
         self.view.addSubview(self.collectionView)
         
-        self.collectionView.delaysContentTouches = false
         
         self.collectionView.register(LGMediaBrowserVideoCell.self, forCellWithReuseIdentifier: Reuse.VideoCell)
         self.collectionView.register(LGMediaBrowserAudioCell.self, forCellWithReuseIdentifier: Reuse.AudioCell)
@@ -750,10 +748,11 @@ extension LGMediaBrowser: LGActionViewDelegate {
     func deleteButtonPressed() {
         func deleteItemRefresh() {
             self.mediaArray.remove(at: self.currentIndex)
-            self.collectionView.performBatchUpdates({
+            self.collectionView.performBatchUpdates({ [unowned self] in
                 self.collectionView.deleteItems(at: [IndexPath(row: self.currentIndex, section: 0)])
-            }) { (isFinished) in
+            }) { [unowned self] (isFinished) in
                 if self.currentIndex < self.mediaArray.count {
+                    self.refreshCountLayout()
                 } else {
                     self.currentIndex -= 1
                 }

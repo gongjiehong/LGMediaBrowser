@@ -52,14 +52,9 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         self.finalImageSize = placeholderImage?.size ?? CGSize.zero
         let imageSize = calcfinalImageSize()
         let finalWidth = UIScreen.main.bounds.width
-        var finalHeight = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+        let finalHeight = UIScreen.main.bounds.height
         
-        let orientation = UIApplication.shared.statusBarOrientation
-        if orientation == .landscapeRight || orientation == .landscapeLeft {
-            if UIDevice.isNotchScreen {
-                finalHeight = UIScreen.main.bounds.height - UIDevice.topSafeMargin - 21.0
-            }
-        }
+
         
         let tempImageView = UIImageView(image: placeholderImage)
         tempImageView.clipsToBounds = true

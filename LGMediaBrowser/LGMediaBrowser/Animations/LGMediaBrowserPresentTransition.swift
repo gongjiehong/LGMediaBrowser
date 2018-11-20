@@ -83,7 +83,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             }
             
             let width: CGFloat = UIScreen.main.bounds.width
-            let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+            let height: CGFloat = UIScreen.main.bounds.height
             
             let imageSize = self.calcfinalImageSize()
             let imageWidth = imageSize.width
@@ -97,7 +97,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                            animations:
                 {
                     tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
-                                                 y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                                 y: (height - imageHeight) / 2.0,
                                                  width: imageWidth,
                                                  height: imageHeight)
             }) { (isFinished) in
@@ -183,13 +183,13 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             fromVC.view.isHidden = true
             
             let width: CGFloat = UIScreen.main.bounds.width
-            let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+            let height: CGFloat = UIScreen.main.bounds.height
             
             let imageSize = self.calcfinalImageSize()
             let imageWidth = imageSize.width
             let imageHeight = imageSize.height
             tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
-                                         y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                         y: (height - imageHeight) / 2.0,
                                          width: imageWidth,
                                          height: imageHeight)
             
