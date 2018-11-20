@@ -87,6 +87,8 @@ open class LGForceTouchPreviewController: UIViewController {
         super.viewDidLoad()
         
         setupSubViews()
+        
+        self.view.translatesAutoresizingMaskIntoConstraints = false
     }
     
     func setupSubViews() {
@@ -149,6 +151,11 @@ open class LGForceTouchPreviewController: UIViewController {
     func setupLivePhotoView() {
         if #available(iOS 9.1, *) {
             self.view.addSubview(livePhotoView)
+            livePhotoView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+            livePhotoView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
+            livePhotoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
+            livePhotoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+            
             self.view.bringSubviewToFront(self.progressView)
             livePhotoView.frame = self.view.bounds
             guard let mediaModel = self.mediaModel else { return }
@@ -214,15 +221,15 @@ open class LGForceTouchPreviewController: UIViewController {
         // 没有实际应用场景，暂不开发
     }
     
-    override open func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
+    override open func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         if let model = self.mediaModel {
             switch model.mediaType {
             case .generalPhoto:
                 fixGeneralPhotoViewFrame()
                 break
             case .livePhoto:
-                fixLivePhotoViewFrame()
+//                fixLivePhotoViewFrame()
                 break
             case .video:
                 fixVideoViewFrame()
