@@ -242,7 +242,10 @@ public class LGMediaModel {
             }, transform: nil)
             { (resultImage, resultURL, sourceType, imageStage, error) in
                 DispatchQueue.main.async { [weak self] in
-                    guard let weakSelf = self else { return }
+                    guard let weakSelf = self else {
+                        completion?(nil)
+                        return
+                    }
                     weakSelf.thumbnailImage = resultImage
                     if let completion = completion {
                         completion(weakSelf.thumbnailImage)
@@ -271,7 +274,10 @@ public class LGMediaModel {
                             let data = try Data(contentsOf: finalURL)
                             let image = LGImage.imageWith(data: data)
                             DispatchQueue.main.async { [weak self] in
-                                guard let weakSelf = self else { return }
+                                guard let weakSelf = self else {
+                                    completion?(nil)
+                                    return
+                                }
                                 weakSelf.thumbnailImage = image
                                 if let completion = completion {
                                     completion(image)
@@ -279,9 +285,12 @@ public class LGMediaModel {
                             }
                         } catch {
                             println(error)
+                            completion?(nil)
                         }
                     }
                 }
+            } else {
+                completion?(self.thumbnailImage)
             }
         }
         
@@ -307,7 +316,10 @@ public class LGMediaModel {
                     }
             }) { (resultImage, info) in
                 DispatchQueue.main.async { [weak self] in
-                    guard let weakSelf = self else { return }
+                    guard let weakSelf = self else {
+                        completion?(nil)
+                        return
+                    }
                     weakSelf.thumbnailImage = resultImage
                     if let completion = completion {
                         completion(weakSelf.thumbnailImage)
@@ -356,7 +368,10 @@ public class LGMediaModel {
             }, transform: nil)
             { (resultImage, resultURL, sourceType, imageStage, error) in
                 DispatchQueue.main.async { [weak self] in
-                    guard let weakSelf = self else { return }
+                    guard let weakSelf = self else {
+                        completion?(nil)
+                        return
+                    }
                     weakSelf.thumbnailImage = resultImage
                     if let completion = completion {
                         completion(weakSelf.thumbnailImage)
@@ -385,7 +400,10 @@ public class LGMediaModel {
                             let data = try Data(contentsOf: finalURL)
                             let image = LGImage.imageWith(data: data)
                             DispatchQueue.main.async { [weak self] in
-                                guard let weakSelf = self else { return }
+                                guard let weakSelf = self else {
+                                    completion?(nil)
+                                    return
+                                }
                                 weakSelf.thumbnailImage = image
                                 if let completion = completion {
                                     completion(image)
@@ -393,9 +411,12 @@ public class LGMediaModel {
                             }
                         } catch {
                             println(error)
+                            completion?(nil)
                         }
                     }
                 }
+            } else {
+                completion?(self.thumbnailImage)
             }
         }
         
@@ -423,7 +444,10 @@ public class LGMediaModel {
                     }) { (imageData, dataUTI, orientation, infoDic) in
                         guard let imageData = imageData else {return}
                         DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self else { return }
+                            guard let weakSelf = self else {
+                                completion?(nil)
+                                return
+                            }
                             weakSelf.thumbnailImage = LGImage.imageWith(data: imageData)
                             if let completion = completion {
                                 completion(weakSelf.thumbnailImage)
@@ -451,7 +475,10 @@ public class LGMediaModel {
                     }
             }) { (resultImage, info) in
                 DispatchQueue.main.async { [weak self] in
-                    guard let weakSelf = self else { return }
+                    guard let weakSelf = self else {
+                        completion?(nil)
+                        return
+                    }
                     weakSelf.thumbnailImage = resultImage
                     if let completion = completion {
                         completion(weakSelf.thumbnailImage)
@@ -473,6 +500,12 @@ public class LGMediaModel {
         }
     }
     
+    /// 获取PHLivePhoto，分别从本地URL，服务器，相册三种获取并合成
+    ///
+    /// - Parameters:
+    ///   - progressBlock: 进度回调
+    ///   - completion: 结果回调
+    /// - Throws: 过程中产生的异常
     @available(iOS 9.1, *)
     public func fetchLivePhoto(withProgress progressBlock: LGProgressHandler?,
                                completion: ((PHLivePhoto?) -> Void)?) throws
@@ -632,52 +665,86 @@ public class LGMediaModel {
         }
     }
     
-    public func fetchMediaFile() {
-        func downloadGeneralPhoto() {
-            do {
-                let thumbnailImageURL = try self.thumbnailImageURL?.asURL()
-                if let mediaURL = try self.mediaURL?.asURL()
-                {
-                    if thumbnailImageURL == mediaURL {
-                        return
-                    } else {
-                        self.progress.addChild(_mediaFileProgress, withPendingUnitCount: _totalUnitCount / 2)
-                        LGWebImageManager.default.downloadImageWith(url: mediaURL,
-                                                                    options: LGWebImageOptions.default,
-                                                                    progress:
-                            { [weak self] (downloadProgress) in
-                                guard let weakSelf = self else { return }
-                                weakSelf._mediaFileProgress = downloadProgress
-                        }, transform: nil) { [weak self] (resultImage, resultURL, sourceType, imageStage, error) in
-                            
-                        }
-                    }
-                }
-            } catch {
-                println(error)
+    /// 获取AVPlayerItem，用于视频播放，内部分本地，远程和相册进行处理
+    ///
+    /// - Parameters:
+    ///   - progressBlock: 进度回调
+    ///   - completion: 结果回调
+    /// - Throws: 过程中产生的异常
+    public func fetchMoviePlayerItem(withProgress progressBlock: LGProgressHandler?,
+                                   completion: ((AVPlayerItem?) -> Void)?) throws
+    {
+        func fetchLocalVideo() throws {
+            if let url = try self.mediaURL?.asURL() {
+                let playerItem = AVPlayerItem(url: url)
+                completion?(playerItem)
             }
         }
         
+        func fetchRemoteVideo() throws {
+            if let url = try self.mediaURL?.asURL() {
+                if globalConfigs.isPlayVideoAfterDownloadEndsOrExportEnds &&
+                    !LGFileDownloader.default.remoteURLIsDownloaded(url)
+                {
+                    LGFileDownloader.default.downloadFile(url,
+                                                          progress:
+                        { (progress) in
+                            DispatchQueue.main.async {
+                                progressBlock?(progress)
+                            }
+                    }) { (destinationURL, isDownloadCompleted, error) in
+                        if let destinationURL = destinationURL, isDownloadCompleted {
+                            let playerItem = AVPlayerItem(url: destinationURL)
+                            completion?(playerItem)
+                        } else {
+                            completion?(nil)
+                        }
+                    }
+                } else {
+                    let playerItem = AVPlayerItem(url: url)
+                    completion?(playerItem)
+                }
+            }
+        }
+        
+        func fetchAlbumVideo() {
+            if let asset = self.mediaAsset {
+                let options = PHVideoRequestOptions()
+                options.isNetworkAccessAllowed = true
+                options.progressHandler = {(progress, error, stop, infoDic) in
+                    DispatchQueue.main.async {
+                        let progressValue = Progress(totalUnitCount: 100)
+                        progressValue.completedUnitCount = Int64(100.0 * progress)
+                        progressBlock?(progressValue)
+                    }
+                }
+                
+                _requestId = LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
+                                                           options: options)
+                { (avAsset, audioMix, infoDic) in
+                    DispatchQueue.main.async {
+                        guard let avAsset = avAsset else {
+                            completion?(nil)
+                            return
+                        }
+                        let playerItem = AVPlayerItem(asset: avAsset)
+                        completion?(playerItem)
+                    }
+                }
+            } else {
+                completion?(nil)
+            }
+        }
         
         switch self.mediaPosition {
-        case Position.remoteFile:
-            switch self.mediaType {
-            case MediaType.generalPhoto:
-                downloadGeneralPhoto()
-                break
-            case MediaType.livePhoto:
-                break
-            case MediaType.audio:
-                break
-            case MediaType.video:
-                break
-            default:
-                break
-            }
+        case .localFile:
+            try fetchLocalVideo()
             break
-        case Position.localFile:
+        case .remoteFile:
+            try fetchRemoteVideo()
             break
-        case Position.album:
+        case .album:
+            fetchAlbumVideo()
             break
         }
     }

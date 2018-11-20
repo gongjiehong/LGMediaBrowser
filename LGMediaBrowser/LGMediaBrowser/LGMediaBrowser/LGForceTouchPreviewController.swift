@@ -123,106 +123,33 @@ open class LGForceTouchPreviewController: UIViewController {
             self.progressView.isShowError = true
             return
         }
-
-        func setImageWithRemoteURL() {
-            do {
-                guard let url = try mediaModel.mediaURL?.asURL() else {
-                    self.progressView.isShowError = true
-                    return
-                }
-
-                self.imageView.lg_setImageWithURL(url,
-                                                  placeholder: nil,
-                                                  options: LGWebImageOptions.default,
-                                                  progressBlock:
-                    {[weak self] (progress) in
-                        self?.progressView.progress = CGFloat(progress.fractionCompleted)
-                    }, transformBlock: nil)
-                {[weak self] (resultImage, imageURL, sourceType, imageStage, error) in
-                    guard let weakSelf = self else { return }
-                    if error == nil, let resultImage = resultImage {
-                        weakSelf.progressView.isHidden = true
-                        weakSelf.preferredContentSize = weakSelf.calcfinalImageSize(resultImage.size)
-                    } else {
-                        weakSelf.progressView.isShowError = true
-                    }
-                }
-            } catch {
-                println(error)
-            }
-
-        }
-
-        func setImageWithLocalFile() {
-            do {
-                guard var url = try mediaModel.mediaURL?.asURL() else {
-                    self.progressView.isShowError = true
-                    return
-                }
-
-                if url.absoluteString.range(of: "://") == nil {
-                    url = URL(fileURLWithPath: url.absoluteString)
-                }
-
-                DispatchQueue.userInitiated.async {
-                    do {
-                        let data = try Data(contentsOf: url)
-                        let image = LGImage.imageWith(data: data)
-                        DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self else { return }
-                            weakSelf.imageView.image = image
-                        }
-                    } catch {
-                        println(error)
-                    }
-                }
-            } catch {
-                println(error)
-            }
-        }
-
-        func setImageWithAlbumAsset() {
-            guard let asset = self.mediaModel?.mediaAsset else {
-                self.progressView.isShowError = true
-                return
-            }
-
-            self.progressView.isHidden = true
-            if let tempImage = self.mediaModel?.thumbnailImage {
-                self.imageView.image = tempImage
-            }
-
-            DispatchQueue.utility.async {
-                PHCachingImageManager.default().requestImageData(for: asset,
-                                                                 options: nil)
-                { [weak self] (imageData, dataUTI, imageOrientation, infoDic) in
-                    guard let data = imageData else { return }
-                    let image = LGImage.imageWith(data: data)
-
+        
+        do {
+            try mediaModel.fetchImage(withProgress:
+                { (progress) in
                     DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else { return }
-                        weakSelf.imageView.image = image
+                        guard let weakSelf = self else {return}
+                        weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
                     }
+            }) { [weak self] (resultImage) in
+                guard let weakSelf = self else { return }
+                if let resultImage = resultImage {
+                    weakSelf.progressView.isHidden = true
+                    weakSelf.imageView.image = resultImage
+                    weakSelf.preferredContentSize = weakSelf.calcfinalImageSize(resultImage.size)
+                } else {
+                    weakSelf.progressView.isShowError = true
                 }
             }
-        }
-
-        switch mediaModel.mediaPosition {
-        case .localFile:
-            setImageWithLocalFile()
-            break
-        case .remoteFile:
-            setImageWithRemoteURL()
-            break
-        case .album:
-            setImageWithAlbumAsset()
-            break
+        } catch {
+            self.progressView.isShowError = true
         }
     }
     
     func setupLivePhotoView() {
         if #available(iOS 9.1, *) {
             self.view.addSubview(livePhotoView)
+            self.view.bringSubviewToFront(self.progressView)
             livePhotoView.frame = self.view.bounds
             guard let mediaModel = self.mediaModel else { return }
 
@@ -238,10 +165,10 @@ open class LGForceTouchPreviewController: UIViewController {
                         weakSelf.progressView.isShowError = true
                         return
                     }
+                    weakSelf.progressView.isHidden = true
                     weakSelf.livePhotoView.livePhoto = livePhoto
                     weakSelf.livePhotoView.startPlayback(with: PHLivePhotoViewPlaybackStyle.full)
                 })
-                
             } catch {
                 self.progressView.isShowError = true
             }
@@ -256,100 +183,30 @@ open class LGForceTouchPreviewController: UIViewController {
         imageView.image = mediaModel.thumbnailImage
         fixGeneralPhotoViewFrame()
         
-        func playLocalVideo() {
-            do {
-                if let url = try mediaModel.mediaURL?.asURL() {
-                    playVideo(withURL: url)
-                }
-            } catch {
-                println(error)
-                self.progressView.isShowError = true
-            }
-        }
-        
-        func playVideo(withURL url: URL) {
+        func playVideo(withItem item: AVPlayerItem) {
             self.playerView = LGPlayerView(frame: self.view.bounds,
-                                               mediaPlayerItem: AVPlayerItem(url: url),
-                                               isMuted: false)
+                                           mediaPlayerItem: item,
+                                           isMuted: false)
             self.view.addSubview(self.playerView!)
             self.playerView?.play()
             self.progressView.isHidden = true
         }
         
-        func playRemoteVideo() {
-            do {
-                if let url = try mediaModel.mediaURL?.asURL() {
-                    if globalConfigs.isPlayVideoAfterDownloadEndsOrExportEnds &&
-                        !LGFileDownloader.default.remoteURLIsDownloaded(url)
-                    {
-                        LGFileDownloader.default.downloadFile(url,
-                                                              progress: { (progress) in
-                                                                
-                        }) { (destinationURL, isDownloadCompleted, error) in
-                            DispatchQueue.main.async { [weak self] in
-                                guard let weakSelf = self else {return}
-                                
-                                if !isDownloadCompleted {
-                                    weakSelf.progressView.isShowError = true
-                                    return
-                                }
-                                
-                                playVideo(withURL: url)
-                            }
-                        }
-                    } else {
-                        playVideo(withURL: url)
-                    }
+        do {
+            try mediaModel.fetchMoviePlayerItem(withProgress:
+            { [weak self] (progress) in
+                guard let weakSelf = self else { return }
+                weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+            }) { [weak self] (resultItem) in
+                guard let weakSelf = self else { return }
+                if let resultItem = resultItem {
+                    playVideo(withItem: resultItem)
+                } else {
+                    weakSelf.progressView.isShowError = true
                 }
-            } catch {
-                println(error)
-                self.progressView.isShowError = true
             }
-            
-        }
-        
-        func playAlbumVideo() {
-            if let asset = mediaModel.mediaAsset {
-                self.view.bringSubviewToFront(self.progressView)
-                
-                let options = PHVideoRequestOptions()
-                options.isNetworkAccessAllowed = true
-                options.progressHandler = {(progress, error, stop, infoDic) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else { return }
-                        weakSelf.progressView.progress = CGFloat(progress)
-                    }
-                }
-                
-                LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
-                                                           options: options)
-                { (avAsset, audioMix, infoDic) in
-                    guard let avAsset = avAsset else { return }
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else { return }
-                        weakSelf.playerView = LGPlayerView(frame: weakSelf.view.bounds,
-                                                           mediaPlayerItem: AVPlayerItem(asset: avAsset),
-                                                           isMuted: false)
-                        weakSelf.view.addSubview(weakSelf.playerView!)
-                        weakSelf.playerView?.play()
-                        weakSelf.progressView.isHidden = true
-                    }
-                }
-            } else {
-                self.progressView.isShowError = true
-            }
-        }
-        
-        switch mediaModel.mediaPosition {
-        case .localFile:
-            playLocalVideo()
-            break
-        case .remoteFile:
-            playRemoteVideo()
-            break
-        case .album:
-            playAlbumVideo()
-            break
+        } catch {
+            self.progressView.isShowError = true
         }
     }
     
@@ -377,7 +234,6 @@ open class LGForceTouchPreviewController: UIViewController {
                 break
             }
         }
-        
     }
     
     func fixGeneralPhotoViewFrame() {
@@ -386,9 +242,33 @@ open class LGForceTouchPreviewController: UIViewController {
     }
     
     func fixLivePhotoViewFrame() {
-        self.imageView.frame = self.view.bounds
+        let size = getSizeWith(mediaModel: self.mediaModel)
+        let frame = CGRect(origin: CGPoint(x: 0,
+                                           y: (self.view.lg_height - size.height) / 2.0),
+                           size: size)
+        if #available(iOS 9.1, *) {
+            self.livePhotoView.frame = frame
+        } else {
+        }
         self.progressView.center = self.view.center
     }
+    
+    func getSizeWith(mediaModel: LGMediaModel?) -> CGSize {
+        guard let asset  = mediaModel?.mediaAsset else {return CGSize.zero}
+        var width = min(CGFloat(asset.pixelWidth),
+                        self.view.lg_width)
+        var height = width * CGFloat(asset.pixelHeight) / CGFloat(asset.pixelWidth)
+        
+        if height.isNaN { return CGSize.zero }
+        
+        if height > self.view.lg_height {
+            height = self.view.lg_height
+            width = height * CGFloat(asset.pixelWidth) / CGFloat(asset.pixelHeight)
+        }
+        
+        return CGSize(width: width, height: height)
+    }
+    
     
     func fixVideoViewFrame() {
         self.imageView.frame = self.view.bounds
