@@ -73,8 +73,8 @@ open class LGZoomingScrollView: UIScrollView {
             try mediaModel.fetchImage(withProgress: { [weak self] (progress) in
                 guard let weakSelf = self else { return }
                 weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-            }, completion: { [weak self] (resultImage) in
-                guard let weakSelf = self else { return }
+            }, completion: { [weak self] (resultImage, identify) in
+                guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
                 guard let _ = resultImage else {
                     weakSelf.progressView.isShowError = true
                     return
@@ -258,7 +258,6 @@ extension LGZoomingScrollView: UIScrollViewDelegate {
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        self.setNeedsLayout()
         self.layoutIfNeeded()
     }
 }

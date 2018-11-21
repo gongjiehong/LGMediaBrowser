@@ -188,7 +188,6 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         refreshBottomBarStatus()
-        
     }
     
     // MARK: - 获取数据并显示
@@ -548,18 +547,32 @@ extension LGMPAlbumDetailController: LGForceTouchPreviewingDelegate {
     }
 
     func getSizeWith(photoModel: LGPhotoModel) -> CGSize {
-        var width = min(CGFloat(photoModel.asset.pixelWidth),
+        let width = min(CGFloat(photoModel.asset.pixelWidth),
                         self.view.lg_width)
-        var height = width * CGFloat(photoModel.asset.pixelHeight) / CGFloat(photoModel.asset.pixelWidth)
+        let height = width * CGFloat(photoModel.asset.pixelHeight) / CGFloat(photoModel.asset.pixelWidth)
         
         if height.isNaN { return CGSize.zero }
-
-        if height > self.view.lg_height {
-            height = self.view.lg_height
-            width = height * CGFloat(photoModel.asset.pixelWidth) / CGFloat(photoModel.asset.pixelHeight)
-        }
         
-        return CGSize(width: width, height: height)
+        return calcFinalImageSize(CGSize(width: width, height: height))
+    }
+    
+    func calcFinalImageSize(_ finalImageSize: CGSize) -> CGSize {
+        let width = UIScreen.main.bounds.width
+        let height = UIScreen.main.bounds.height
+        let imageWidth = finalImageSize.width
+        var imageHeight = finalImageSize.height
+        
+        var resultWidth: CGFloat
+        var resultHeight: CGFloat
+        imageHeight = width / imageWidth * imageHeight
+        if imageHeight > height {
+            resultWidth = height / finalImageSize.height * imageWidth
+            resultHeight = height
+        } else {
+            resultWidth = width
+            resultHeight = imageHeight
+        }
+        return CGSize(width: resultWidth, height: resultHeight)
     }
 }
 

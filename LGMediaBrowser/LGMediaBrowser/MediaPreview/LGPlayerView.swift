@@ -113,36 +113,12 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     func mediaModelDidSet() {
         if let media = mediaModel {
             do {
-                switch media.mediaPosition {
-                case .localFile:
-                    guard var url = try media.mediaURL?.asURL() else {
-                        return
-                    }
-                    if url.absoluteString.range(of: "://") == nil {
-                        url = URL(fileURLWithPath: url.absoluteString)
-                    }
-                    self.player.setItemBy(url)
-                    break
-                case .remoteFile:
-                    guard let url = try media.mediaURL?.asURL() else {
-                        return
-                    }
-                    self.player.setItemBy(url)
-                    break
-                case .album:
-                    guard let asset = media.mediaAsset else {return}
-                    let options = PHVideoRequestOptions()
-                    options.isNetworkAccessAllowed = true
-                    LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
-                                                               options: options)
-                    { (avAsset, audioMix, infoDic) in
-                        DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self, let avAsset = avAsset else {return}
-                            weakSelf.player.setItem(AVPlayerItem(asset: avAsset))
-                            weakSelf.player.play()
-                        }
-                    }
-                    break
+                try media.fetchMoviePlayerItem(withProgress: { (progress) in
+                    
+                }) { [weak self] (playerItem, identify) in
+                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
+                    guard let playerItem = playerItem else {return}
+                    weakSelf.player.replaceCurrentItem(with: playerItem)
                 }
             } catch {
                 println(error)

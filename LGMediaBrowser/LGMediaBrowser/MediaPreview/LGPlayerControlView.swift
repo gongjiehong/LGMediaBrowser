@@ -180,80 +180,27 @@ open class LGPlayerControlView: LGPlayerView {
     
     override func mediaModelDidSet() {
         if let media = mediaModel {
+            if media.mediaType == .video {
+                self.isShowBottomSlideControls = false
+                self.toolBackgroundView.removeFromSuperview()
+            }
+            
             do {
-                switch media.mediaPosition {
-                case .localFile:
-                    guard var url = try media.mediaURL?.asURL() else {
-                        self.progressView.isShowError = true
+                try media.fetchMoviePlayerItem(withProgress: { [weak self] (progress) in
+                    guard let weakSelf = self else {return}
+                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+                }, completion: { [weak self] (playerItem, identify) in
+                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
+                    guard let playerItem = playerItem else {
+                        weakSelf.progressView.isShowError = true
                         return
                     }
-                    if url.absoluteString.range(of: "://") == nil {
-                        url = URL(fileURLWithPath: url.absoluteString)
-                    }
-                    self.player.setItemBy(url)
-                    self.progressView.isHidden = true
-                    break
-                case .remoteFile:
-                    guard let url = try media.mediaURL?.asURL() else {
-                        self.progressView.isShowError = true
-                        return
-                    }
-                    
-                    if !LGFileDownloader.default.remoteURLIsDownloaded(url) &&
-                        isPlayVideoAfterDownloadEndsOrExportEnds
-                    {
-                        LGFileDownloader.default.downloadFile(url,
-                                                              progress:
-                            { (progress) in
-                                DispatchQueue.main.async { [weak self] in
-                                    guard let weakSelf = self else {return}
-                                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-                                }
-                        }) { (destinationURL, isDownloadCompleted, error) in
-                            DispatchQueue.main.async { [weak self] in
-                                guard let weakSelf = self else {return}
-                                if isDownloadCompleted, let destinationURL = destinationURL {
-                                    weakSelf.player.setItemBy(destinationURL)
-                                    weakSelf.progressView.isHidden = true
-                                }
-                            }
-                        }
-                    } else if LGFileDownloader.default.remoteURLIsDownloaded(url) {
-                        let destinationPath = LGFileDownloader.Helper.filePath(withURL: url)
-                        self.player.setItemBy(URL(fileURLWithPath: destinationPath))
-                        self.progressView.isHidden = true
-                    } else {
-                        self.player.setItemBy(url)
-                        self.progressView.isHidden = true
-                    }
-                    break
-                case .album:
-                    guard let asset = media.mediaAsset else {return}
-                    let options = PHVideoRequestOptions()
-                    options.isNetworkAccessAllowed = true
-                    options.progressHandler = { (progress, error, stop, info) in
-                        DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self else {return}
-                            weakSelf.progressView.progress = CGFloat(progress)
-                        }
-                    }
-                    LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
-                                                               options: options)
-                    { (avAsset, audioMix, infoDic) in
-                        DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self, let avAsset = avAsset else {return}
-                            weakSelf.player.setItem(AVPlayerItem(asset: avAsset))
-                            weakSelf.player.play()
-                            weakSelf.progressView.isHidden = true
-                        }
-                    }
-                    if media.mediaType == .video {
-                        self.isShowBottomSlideControls = false
-                        self.toolBackgroundView.removeFromSuperview()
-                    }
-                    break
-                }
+                    weakSelf.player.replaceCurrentItem(with: playerItem)
+                    weakSelf.player.play()
+                    weakSelf.progressView.isHidden = true
+                })
             } catch {
+                self.progressView.isShowError = true
                 println(error)
             }
         }

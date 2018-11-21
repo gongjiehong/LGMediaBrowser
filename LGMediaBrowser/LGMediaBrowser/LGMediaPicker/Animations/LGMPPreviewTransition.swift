@@ -50,7 +50,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         let containerView = transitionContext.containerView
         
         self.finalImageSize = placeholderImage?.size ?? CGSize.zero
-        let imageSize = calcfinalImageSize()
+        let imageSize = calcFinalImageSize()
         let screenWidth = UIScreen.main.bounds.width
         let screenHeight = UIScreen.main.bounds.height
         
@@ -237,7 +237,7 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         }
     }
     
-    func calcfinalImageSize() -> CGSize {
+    func calcFinalImageSize() -> CGSize {
         if self.direction == .pop {
             return self.finalImageSize
         }

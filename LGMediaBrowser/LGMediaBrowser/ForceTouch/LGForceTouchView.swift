@@ -14,17 +14,14 @@ class LGForceTouchView: UIView {
     var preferredContentSize = CGSize.zero
     
     var targePreviewPadding: CGSize {
-        
         var yPadding = UIScreen.main.bounds.height - preferredContentSize.height
-//        if yPadding <= 60.0 {
-//            return CGSize(width: 28.0, height: 30.0)
-//        }
         
         let scale = 28.0 / UIScreen.main.bounds.width
         let scaleOffset = scale * UIScreen.main.bounds.height
         
-        yPadding += scaleOffset
-
+        if preferredContentSize.height > UIScreen.main.bounds.height - scaleOffset {
+            yPadding += scaleOffset
+        }
         return CGSize(width: 28.0, height: yPadding)
     }
 

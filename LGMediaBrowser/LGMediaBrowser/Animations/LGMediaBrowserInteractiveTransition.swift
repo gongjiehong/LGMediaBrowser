@@ -149,7 +149,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         let width: CGFloat = UIScreen.main.bounds.width
         let height: CGFloat = UIScreen.main.bounds.height
         
-        let imageSize = self.calcfinalImageSize()
+        let imageSize = self.calcFinalImageSize()
         let imageWidth = imageSize.width
         let imageHeight = imageSize.height
         
@@ -300,7 +300,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         return 1.0 - self.scale
     }
     
-    func calcfinalImageSize() -> CGSize {
+    func calcFinalImageSize() -> CGSize {
         if finalImageSize == CGSize.zero {
             return CGSize.zero
         }

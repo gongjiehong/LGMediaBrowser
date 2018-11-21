@@ -15,6 +15,8 @@ import LGHTTPRequest
 /// 用于组装progress的最大值
 private let totalUnitCount: Int64 = 1_000
 
+public let LGMediaModelInvalidHashValue: Int64 = -1
+
 /// 存储媒体数据的模型，承载下载数据功能
 public class LGMediaModel {
     
@@ -32,6 +34,8 @@ public class LGMediaModel {
         case audio
         case other
     }
+    
+    public typealias ProgressHandler = (Progress, Int64) -> Void
     
     /// 媒体文件位置
     ///
@@ -54,10 +58,14 @@ public class LGMediaModel {
     public private(set) var mediaAsset: PHAsset?
     
     /// 媒体文件类型
-    public private(set) var mediaType: MediaType
+    public private(set) var mediaType: MediaType = .other
     
     /// 媒体文件位置
-    public private(set) var mediaPosition: Position
+    public private(set) var mediaPosition: Position = .remoteFile
+    
+    public private(set) lazy var identify: Int64 = {
+        return Int64(arc4random() - 1)
+    }()
     
     internal weak var photoModel: LGPhotoModel? = nil
     
@@ -85,6 +93,8 @@ public class LGMediaModel {
     public init() {
         self.mediaType = .other
         self.mediaPosition = .localFile
+        
+        println(identify)
     }
     
 
@@ -98,13 +108,14 @@ public class LGMediaModel {
     ///   - mediaPosition: 媒体文件的位置
     ///   - thumbnailImage: 缩略图
     /// - Throws: 参数不正确的异常抛出
-    public init(thumbnailImageURL: LGURLConvertible?,
+    public convenience init(thumbnailImageURL: LGURLConvertible?,
                 mediaURL: LGURLConvertible?,
                 mediaAsset: PHAsset?,
                 mediaType: MediaType,
                 mediaPosition: Position,
                 thumbnailImage: UIImage? = nil) throws
     {
+        self.init()
         func checkParams() throws {
             switch mediaPosition {
             case .remoteFile:
@@ -188,8 +199,8 @@ public class LGMediaModel {
     ///   - progressBlock: 进度回调
     ///   - completion: 完成回调
     /// - Throws: 抛出过程中产生的异常
-    public func fetchThumbnailImage(withProgress progressBlock: LGProgressHandler?,
-                             completion: ((UIImage?) -> Void)?) throws
+    public func fetchThumbnailImage(withProgress progressBlock: ProgressHandler?,
+                             completion: ((UIImage?, Int64) -> Void)?) throws
     {
         if !isThumbnailImageValid {
             throw LGMediaModelError.unableToGetThumbnail
@@ -203,21 +214,25 @@ public class LGMediaModel {
                                                         options: LGWebImageOptions.default,
                                                         progress:
                 { (progressValue) in
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else {
+                            progressBlock?(progressValue, LGMediaModelInvalidHashValue)
+                            return
+                        }
                         if let progressBlock = progressBlock {
-                            progressBlock(progressValue)
+                            progressBlock(progressValue, weakSelf.identify)
                         }
                     }
             }, transform: nil)
             { (resultImage, resultURL, sourceType, imageStage, error) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else {
-                        completion?(nil)
+                        completion?(nil, LGMediaModelInvalidHashValue)
                         return
                     }
                     weakSelf.thumbnailImage = resultImage
                     if let completion = completion {
-                        completion(weakSelf.thumbnailImage)
+                        completion(weakSelf.thumbnailImage, weakSelf.identify)
                     }
                 }
             }
@@ -244,22 +259,23 @@ public class LGMediaModel {
                             let image = LGImage.imageWith(data: data)
                             DispatchQueue.main.async { [weak self] in
                                 guard let weakSelf = self else {
-                                    completion?(nil)
+                                    completion?(nil, LGMediaModelInvalidHashValue)
                                     return
                                 }
                                 weakSelf.thumbnailImage = image
                                 if let completion = completion {
-                                    completion(image)
+                                    completion(image, weakSelf.identify)
                                 }
                             }
                         } catch {
-                            println(error)
-                            completion?(nil)
+                            DispatchQueue.main.async {
+                                completion?(nil, LGMediaModelInvalidHashValue)
+                            }
                         }
                     }
                 }
             } else {
-                completion?(self.thumbnailImage)
+                completion?(self.thumbnailImage, self.identify)
             }
         }
         
@@ -274,24 +290,27 @@ public class LGMediaModel {
                                                      resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                      progressHandlder:
                 { (value, error, stop, info) in
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
                         if error == nil {
                             let progress = Progress(totalUnitCount: totalUnitCount)
                             progress.completedUnitCount = Int64(Double(totalUnitCount) * value)
                             if let progressBlock = progressBlock {
-                                progressBlock(progress)
+                                guard let weakSelf = self else {
+                                    return
+                                }
+                                progressBlock(progress, weakSelf.identify)
                             }
                         }
                     }
             }) { (resultImage, info) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else {
-                        completion?(nil)
+                        completion?(nil, LGMediaModelInvalidHashValue)
                         return
                     }
                     weakSelf.thumbnailImage = resultImage
                     if let completion = completion {
-                        completion(weakSelf.thumbnailImage)
+                        completion(weakSelf.thumbnailImage, weakSelf.identify)
                     }
                 }
             }
@@ -317,7 +336,7 @@ public class LGMediaModel {
     ///   - completion: 完成回调
     /// - Throws: 抛出过程中产生的异常
     public func fetchImage(withProgress progressBlock: LGProgressHandler?,
-                    completion: ((UIImage?) -> Void)?) throws
+                    completion: ((UIImage?, Int64) -> Void)?) throws
     {
         func downloadImageFromRemote() throws {
             if self.thumbnailImageURL == nil {
@@ -336,12 +355,12 @@ public class LGMediaModel {
             { (resultImage, resultURL, sourceType, imageStage, error) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else {
-                        completion?(nil)
+                        completion?(nil, LGMediaModelInvalidHashValue)
                         return
                     }
                     weakSelf.thumbnailImage = resultImage
                     if let completion = completion {
-                        completion(weakSelf.thumbnailImage)
+                        completion(weakSelf.thumbnailImage, weakSelf.identify)
                     }
                 }
             }
@@ -368,22 +387,23 @@ public class LGMediaModel {
                             let image = LGImage.imageWith(data: data)
                             DispatchQueue.main.async { [weak self] in
                                 guard let weakSelf = self else {
-                                    completion?(nil)
+                                    completion?(nil, LGMediaModelInvalidHashValue)
                                     return
                                 }
                                 weakSelf.thumbnailImage = image
                                 if let completion = completion {
-                                    completion(image)
+                                    completion(image, weakSelf.identify)
                                 }
                             }
                         } catch {
-                            println(error)
-                            completion?(nil)
+                            DispatchQueue.main.async {
+                                completion?(nil, LGMediaModelInvalidHashValue)
+                            }
                         }
                     }
                 }
             } else {
-                completion?(self.thumbnailImage)
+                completion?(self.thumbnailImage, self.identify)
             }
         }
         
@@ -411,12 +431,12 @@ public class LGMediaModel {
                         guard let imageData = imageData else {return}
                         DispatchQueue.main.async { [weak self] in
                             guard let weakSelf = self else {
-                                completion?(nil)
+                                completion?(nil, LGMediaModelInvalidHashValue)
                                 return
                             }
                             weakSelf.thumbnailImage = LGImage.imageWith(data: imageData)
                             if let completion = completion {
-                                completion(weakSelf.thumbnailImage)
+                                completion(weakSelf.thumbnailImage, weakSelf.identify)
                             }
                         }
                     }
@@ -442,12 +462,12 @@ public class LGMediaModel {
             }) { (resultImage, info) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else {
-                        completion?(nil)
+                        completion?(nil, LGMediaModelInvalidHashValue)
                         return
                     }
                     weakSelf.thumbnailImage = resultImage
                     if let completion = completion {
-                        completion(weakSelf.thumbnailImage)
+                        completion(weakSelf.thumbnailImage, weakSelf.identify)
                     }
                 }
             }
@@ -474,17 +494,19 @@ public class LGMediaModel {
     /// - Throws: 过程中产生的异常
     @available(iOS 9.1, *)
     public func fetchLivePhoto(withProgress progressBlock: LGProgressHandler?,
-                               completion: ((PHLivePhoto?) -> Void)?) throws
+                               completion: ((PHLivePhoto?, Int64) -> Void)?) throws
     {
         func fetchLivePhotoFromAlbumAsset() {
             guard let asset = self.mediaAsset else { return }
             let options = PHLivePhotoRequestOptions()
             options.isNetworkAccessAllowed = true
             options.progressHandler = { (progress, error, stoped, infoDic) in
-                let total: Int64 = totalUnitCount
-                let result = Progress(totalUnitCount: total)
-                result.completedUnitCount = Int64(Double(totalUnitCount) * progress)
-                progressBlock?(result)
+                DispatchQueue.main.async {
+                    let total: Int64 = totalUnitCount
+                    let result = Progress(totalUnitCount: total)
+                    result.completedUnitCount = Int64(Double(totalUnitCount) * progress)
+                    progressBlock?(result)
+                }
             }
             _requestId = LGPhotoManager.imageManager.requestLivePhoto(for: asset,
                                                                       targetSize: CGSize(width: asset.pixelWidth,
@@ -492,7 +514,10 @@ public class LGMediaModel {
                                                                       contentMode: PHImageContentMode.aspectFill,
                                                                       options: options)
             { (livePhoto, infoDic) in
-                completion?(livePhoto)
+                DispatchQueue.main.async { [weak self] in
+                    guard let weakSelf = self else {return}
+                    completion?(livePhoto, weakSelf.identify)
+                }
             }
         }
         
@@ -504,8 +529,12 @@ public class LGMediaModel {
                                 placeholderImage: placeholderImage,
                                 targetSize: placeholderImage?.size ?? CGSize.zero,
                                 contentMode: PHImageContentMode.aspectFill)
-            { (resultPhoto, infoDic) in
-                completion?(resultPhoto)
+            { [weak self] (resultPhoto, infoDic) in
+                guard let weakSelf = self else {
+                    completion?(nil, LGMediaModelInvalidHashValue)
+                    return
+                }
+                completion?(resultPhoto, weakSelf.identify)
             }
         }
         
@@ -524,10 +553,10 @@ public class LGMediaModel {
                                    mediaURL: movieFileURL,
                                    placeholderImage: placeholderImage)
                 } else {
-                    completion?(nil)
+                    completion?(nil, LGMediaModelInvalidHashValue)
                 }
             } catch {
-                completion?(nil)
+                completion?(nil, LGMediaModelInvalidHashValue)
             }
         }
         
@@ -588,8 +617,12 @@ public class LGMediaModel {
                                 totalProgress += progress.fractionCompleted
                         }) { (destinationImageURL, isDownloadCompleted, error) in
                             if !isDownloadCompleted {
-                                DispatchQueue.main.async {
-                                    completion?(nil)
+                                DispatchQueue.main.async { [weak self] in
+                                    guard let weakSelf = self else {
+                                        completion?(nil, LGMediaModelInvalidHashValue)
+                                        return
+                                    }
+                                    completion?(nil, weakSelf.identify)
                                 }
                                 return
                             }
@@ -602,8 +635,12 @@ public class LGMediaModel {
                                 totalProgress += progress.fractionCompleted
                         }) { (destinationMovieURL, isDownloadCompleted, error) in
                             if !isDownloadCompleted {
-                                DispatchQueue.main.async {
-                                    completion?(nil)
+                                DispatchQueue.main.async { [weak self] in
+                                    guard let weakSelf = self else {
+                                        completion?(nil, LGMediaModelInvalidHashValue)
+                                        return
+                                    }
+                                    completion?(nil, weakSelf.identify)
                                 }
                                 return
                             }
@@ -611,10 +648,10 @@ public class LGMediaModel {
                         }
                     }
                 } else {
-                    completion?(nil)
+                    completion?(nil, LGMediaModelInvalidHashValue)
                 }
             } catch {
-                completion?(nil)
+                completion?(nil, LGMediaModelInvalidHashValue)
             }
         }
         
@@ -638,12 +675,12 @@ public class LGMediaModel {
     ///   - completion: 结果回调
     /// - Throws: 过程中产生的异常
     public func fetchMoviePlayerItem(withProgress progressBlock: LGProgressHandler?,
-                                   completion: ((AVPlayerItem?) -> Void)?) throws
+                                   completion: ((AVPlayerItem?, Int64) -> Void)?) throws
     {
         func fetchLocalVideo() throws {
             if let url = try self.mediaURL?.asURL() {
                 let playerItem = AVPlayerItem(url: url)
-                completion?(playerItem)
+                completion?(playerItem, self.identify)
             }
         }
         
@@ -658,17 +695,21 @@ public class LGMediaModel {
                             DispatchQueue.main.async {
                                 progressBlock?(progress)
                             }
-                    }) { (destinationURL, isDownloadCompleted, error) in
+                    }) { [weak self] (destinationURL, isDownloadCompleted, error) in
+                        guard let weakSelf = self else {
+                            completion?(nil, LGMediaModelInvalidHashValue)
+                            return
+                        }
                         if let destinationURL = destinationURL, isDownloadCompleted {
                             let playerItem = AVPlayerItem(url: destinationURL)
-                            completion?(playerItem)
+                            completion?(playerItem, weakSelf.identify)
                         } else {
-                            completion?(nil)
+                            completion?(nil, weakSelf.identify)
                         }
                     }
                 } else {
                     let playerItem = AVPlayerItem(url: url)
-                    completion?(playerItem)
+                    completion?(playerItem, self.identify)
                 }
             }
         }
@@ -688,17 +729,17 @@ public class LGMediaModel {
                 _requestId = LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
                                                            options: options)
                 { (avAsset, audioMix, infoDic) in
-                    DispatchQueue.main.async {
-                        guard let avAsset = avAsset else {
-                            completion?(nil)
+                    DispatchQueue.main.async { [weak self] in
+                        guard let avAsset = avAsset, let weakSelf = self else {
+                            completion?(nil, LGMediaModelInvalidHashValue)
                             return
                         }
                         let playerItem = AVPlayerItem(asset: avAsset)
-                        completion?(playerItem)
+                        completion?(playerItem, weakSelf.identify)
                     }
                 }
             } else {
-                completion?(nil)
+                completion?(nil, self.identify)
             }
         }
         
@@ -719,6 +760,15 @@ public class LGMediaModel {
         LGPhotoManager.cancelImageRequest(_requestId)
     }
 }
+
+//extension LGMediaModel: Hashable {
+//    public static func == (lhs: LGMediaModel, rhs: LGMediaModel) -> Bool {
+//        return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
+//    }
+//    public var hashValue: Int {
+//        return ObjectIdentifier(self).identify
+//    }
+//}
 
 
 public enum LGMediaModelError: Error {

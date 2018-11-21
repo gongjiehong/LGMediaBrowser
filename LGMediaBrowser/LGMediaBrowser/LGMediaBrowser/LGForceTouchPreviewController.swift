@@ -60,11 +60,11 @@ open class LGForceTouchPreviewController: UIViewController {
         self.currentIndex = currentIndex
         
         if let image = self.mediaModel?.thumbnailImage {
-            self.preferredContentSize = calcfinalImageSize(image.size)
+            self.preferredContentSize = calcFinalImageSize(image.size)
         }
     }
     
-    func calcfinalImageSize(_ finalImageSize: CGSize) -> CGSize {
+    func calcFinalImageSize(_ finalImageSize: CGSize) -> CGSize {
         let width = UIScreen.main.bounds.width
         let height = UIScreen.main.bounds.height
         let imageWidth = finalImageSize.width
@@ -87,8 +87,6 @@ open class LGForceTouchPreviewController: UIViewController {
         super.viewDidLoad()
         
         setupSubViews()
-        
-        self.view.translatesAutoresizingMaskIntoConstraints = false
     }
     
     func setupSubViews() {
@@ -128,17 +126,15 @@ open class LGForceTouchPreviewController: UIViewController {
         
         do {
             try mediaModel.fetchImage(withProgress:
-                { (progress) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else {return}
-                        weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-                    }
-            }) { [weak self] (resultImage) in
-                guard let weakSelf = self else { return }
+                { [weak self] (progress) in
+                    guard let weakSelf = self else {return}
+                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+            }) { [weak self] (resultImage, hashValue) in
+                guard let weakSelf = self, weakSelf.mediaModel?.identify == hashValue else { return }
                 if let resultImage = resultImage {
                     weakSelf.progressView.isHidden = true
                     weakSelf.imageView.image = resultImage
-                    weakSelf.preferredContentSize = weakSelf.calcfinalImageSize(resultImage.size)
+                    weakSelf.preferredContentSize = weakSelf.calcFinalImageSize(resultImage.size)
                 } else {
                     weakSelf.progressView.isShowError = true
                 }
@@ -151,23 +147,16 @@ open class LGForceTouchPreviewController: UIViewController {
     func setupLivePhotoView() {
         if #available(iOS 9.1, *) {
             self.view.addSubview(livePhotoView)
-            livePhotoView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
-            livePhotoView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor).isActive = true
-            livePhotoView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor).isActive = true
-            livePhotoView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
-            
             self.view.bringSubviewToFront(self.progressView)
             livePhotoView.frame = self.view.bounds
             guard let mediaModel = self.mediaModel else { return }
 
             do {
-                try mediaModel.fetchLivePhoto(withProgress: { (progress) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else {return}
-                        weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-                    }
-                }, completion: { [weak self] (livePhoto) in
-                    guard let weakSelf = self else { return }
+                try mediaModel.fetchLivePhoto(withProgress: { [weak self] (progress) in
+                    guard let weakSelf = self else {return}
+                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+                }, completion: { [weak self] (livePhoto, identify) in
+                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
                     guard let livePhoto = livePhoto  else {
                         weakSelf.progressView.isShowError = true
                         return
@@ -175,6 +164,7 @@ open class LGForceTouchPreviewController: UIViewController {
                     weakSelf.progressView.isHidden = true
                     weakSelf.livePhotoView.livePhoto = livePhoto
                     weakSelf.livePhotoView.startPlayback(with: PHLivePhotoViewPlaybackStyle.full)
+                    weakSelf.preferredContentSize = weakSelf.calcFinalImageSize(livePhoto.size)
                 })
             } catch {
                 self.progressView.isShowError = true
@@ -204,10 +194,13 @@ open class LGForceTouchPreviewController: UIViewController {
             { [weak self] (progress) in
                 guard let weakSelf = self else { return }
                 weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-            }) { [weak self] (resultItem) in
-                guard let weakSelf = self else { return }
+            }) { [weak self] (resultItem, identify) in
+                guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
                 if let resultItem = resultItem {
                     playVideo(withItem: resultItem)
+                    if let size = weakSelf.mediaModel?.thumbnailImage?.size {
+                        weakSelf.preferredContentSize = weakSelf.calcFinalImageSize(size)
+                    }
                 } else {
                     weakSelf.progressView.isShowError = true
                 }
@@ -221,15 +214,19 @@ open class LGForceTouchPreviewController: UIViewController {
         // 没有实际应用场景，暂不开发
     }
     
-    override open func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
+    override open func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        fixSubViewFrame()
+    }
+    
+    func fixSubViewFrame() {
         if let model = self.mediaModel {
             switch model.mediaType {
             case .generalPhoto:
                 fixGeneralPhotoViewFrame()
                 break
             case .livePhoto:
-//                fixLivePhotoViewFrame()
+                fixLivePhotoViewFrame()
                 break
             case .video:
                 fixVideoViewFrame()
@@ -249,15 +246,16 @@ open class LGForceTouchPreviewController: UIViewController {
     }
     
     func fixLivePhotoViewFrame() {
-        let size = getSizeWith(mediaModel: self.mediaModel)
-        let frame = CGRect(origin: CGPoint(x: 0,
-                                           y: (self.view.lg_height - size.height) / 2.0),
-                           size: size)
         if #available(iOS 9.1, *) {
+            guard let livePhotoSize = self.livePhotoView.livePhoto?.size else {return}
+            let size = calcFinalImageSize(livePhotoSize)
+            let frame = CGRect(origin: CGPoint(x: 0,
+                                               y: (self.view.lg_height - size.height) / 2.0),
+                               size: size)
             self.livePhotoView.frame = frame
+            self.progressView.center = self.view.center
         } else {
         }
-        self.progressView.center = self.view.center
     }
     
     func getSizeWith(mediaModel: LGMediaModel?) -> CGSize {

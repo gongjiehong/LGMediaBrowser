@@ -11,9 +11,9 @@ import UIKit
 
 // Only use within this framework
 extension Bundle {
-    static var this: Bundle {
+    static let this: Bundle = {
         return Bundle(for: LGMediaBrowser.self)
-    }
+    }()
 }
 
 extension UIImage {
