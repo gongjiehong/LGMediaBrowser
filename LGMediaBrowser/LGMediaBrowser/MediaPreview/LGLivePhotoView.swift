@@ -79,8 +79,8 @@ open class LGLivePhotoView: UIView, LGMediaPreviewerProtocol {
         do {
             if #available(iOS 9.1, *) {
                 try mediaModel.fetchLivePhoto(withProgress:
-                { [weak self] (progress) in
-                    guard let weakSelf = self else {return}
+                { [weak self] (progress, identify) in
+                    guard let weakSelf = self, weakSelf.mediaModel.identify == identify else {return}
                     weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
                 }, completion: { [weak self] (livePhoto, identify) in
                     guard let weakSelf = self, weakSelf.mediaModel.identify == identify else {return}

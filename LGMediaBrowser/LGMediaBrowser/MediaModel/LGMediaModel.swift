@@ -334,7 +334,7 @@ public class LGMediaModel {
     ///   - progressBlock: 进度回调
     ///   - completion: 完成回调
     /// - Throws: 抛出过程中产生的异常
-    public func fetchImage(withProgress progressBlock: LGProgressHandler?,
+    public func fetchImage(withProgress progressBlock: ProgressHandler?,
                     completion: ((UIImage?, Int64) -> Void)?) throws
     {
         func downloadImageFromRemote() throws {
@@ -345,9 +345,10 @@ public class LGMediaModel {
                                                         options: LGWebImageOptions.default,
                                                         progress:
                 { (progressValue) in
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else {return}
                         if let progressBlock = progressBlock {
-                            progressBlock(progressValue)
+                            progressBlock(progressValue, weakSelf.identify)
                         }
                     }
             }, transform: nil)
@@ -417,12 +418,13 @@ public class LGMediaModel {
                                                                  resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                                  progressHandler:
                         { (progressValue, error, stoped, infoDic) in
-                            DispatchQueue.main.async {
+                            DispatchQueue.main.async { [weak self] in
+                                guard let weakSelf = self else {return}
                                 if error == nil {
                                     let progress = Progress(totalUnitCount: totalUnitCount)
                                     progress.completedUnitCount = Int64(Double(totalUnitCount) * progressValue)
                                     if let progressBlock = progressBlock {
-                                        progressBlock(progress)
+                                        progressBlock(progress, weakSelf.identify)
                                     }
                                 }
                             }
@@ -450,12 +452,13 @@ public class LGMediaModel {
                                                      resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                      progressHandlder:
                 { (value, error, stop, info) in
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else {return}
                         if error == nil {
                             let progress = Progress(totalUnitCount: totalUnitCount)
                             progress.completedUnitCount = Int64(Double(totalUnitCount) * value)
                             if let progressBlock = progressBlock {
-                                progressBlock(progress)
+                                progressBlock(progress, weakSelf.identify)
                             }
                         }
                     }
@@ -489,23 +492,18 @@ public class LGMediaModel {
     private func fixedPixelSize(_ size: CGSize) -> CGSize {
         let screenWidth = UIScreen.main.bounds.width * UIScreen.main.scale
         let screenHeight = UIScreen.main.bounds.height * UIScreen.main.scale
-        if size.width <= screenWidth && size.height < screenHeight {
-            return size
-        }
         
-        if size.width > screenWidth {
+        let aspectRatio = screenWidth / screenHeight
+        
+        if size.width / size.height > aspectRatio {
+            let scale = size.height / screenHeight
+            let resultWidth = size.width / scale
+            return CGSize(width: resultWidth, height: screenHeight)
+        } else {
             let scale = size.width / screenWidth
             let resultHeight = size.height / scale
             return CGSize(width: screenWidth, height: resultHeight)
         }
-        
-        if size.height > screenHeight {
-            let scale = size.height / screenHeight
-            let resultWidth = size.width / scale
-            return CGSize(width: resultWidth, height: screenHeight)
-        }
-        
-        return size
     }
     
     /// 获取PHLivePhoto，分别从本地URL，服务器，相册三种获取并合成
@@ -515,7 +513,7 @@ public class LGMediaModel {
     ///   - completion: 结果回调
     /// - Throws: 过程中产生的异常
     @available(iOS 9.1, *)
-    public func fetchLivePhoto(withProgress progressBlock: LGProgressHandler?,
+    public func fetchLivePhoto(withProgress progressBlock: ProgressHandler?,
                                completion: ((PHLivePhoto?, Int64) -> Void)?) throws
     {
         func fetchLivePhotoFromAlbumAsset() {
@@ -523,16 +521,18 @@ public class LGMediaModel {
             let options = PHLivePhotoRequestOptions()
             options.isNetworkAccessAllowed = true
             options.progressHandler = { (progress, error, stoped, infoDic) in
-                DispatchQueue.main.async {
+                DispatchQueue.main.async { [weak self] in
+                    guard let weakSelf = self else {return}
                     let total: Int64 = totalUnitCount
                     let result = Progress(totalUnitCount: total)
                     result.completedUnitCount = Int64(Double(totalUnitCount) * progress)
-                    progressBlock?(result)
+                    progressBlock?(result, weakSelf.identify)
                 }
             }
+            
+            let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
             _requestId = LGPhotoManager.imageManager.requestLivePhoto(for: asset,
-                                                                      targetSize: CGSize(width: asset.pixelWidth,
-                                                                                         height: asset.pixelHeight),
+                                                                      targetSize: fixedPixelSize(pixelSize),
                                                                       contentMode: PHImageContentMode.aspectFill,
                                                                       options: options)
             { (livePhoto, infoDic) in
@@ -624,11 +624,12 @@ public class LGMediaModel {
                         
                         var totalProgress: Double = 0.0 {
                             didSet {
-                                DispatchQueue.main.async {
+                                DispatchQueue.main.async { [weak self] in
+                                    guard let weakSelf = self else {return}
                                     let total: Int64 = totalUnitCount
                                     let result = Progress(totalUnitCount: total)
                                     result.completedUnitCount = Int64(Double(totalUnitCount) * (totalProgress / 2.0))
-                                    progressBlock?(result)
+                                    progressBlock?(result, weakSelf.identify)
                                 }
                             }
                         }
@@ -696,7 +697,7 @@ public class LGMediaModel {
     ///   - progressBlock: 进度回调
     ///   - completion: 结果回调
     /// - Throws: 过程中产生的异常
-    public func fetchMoviePlayerItem(withProgress progressBlock: LGProgressHandler?,
+    public func fetchMoviePlayerItem(withProgress progressBlock: ProgressHandler?,
                                    completion: ((AVPlayerItem?, Int64) -> Void)?) throws
     {
         func fetchLocalVideo() throws {
@@ -714,8 +715,9 @@ public class LGMediaModel {
                     LGFileDownloader.default.downloadFile(url,
                                                           progress:
                         { (progress) in
-                            DispatchQueue.main.async {
-                                progressBlock?(progress)
+                            DispatchQueue.main.async { [weak self] in
+                                guard let weakSelf = self else {return}
+                                progressBlock?(progress, weakSelf.identify)
                             }
                     }) { [weak self] (destinationURL, isDownloadCompleted, error) in
                         guard let weakSelf = self else {
@@ -741,10 +743,11 @@ public class LGMediaModel {
                 let options = PHVideoRequestOptions()
                 options.isNetworkAccessAllowed = true
                 options.progressHandler = {(progress, error, stop, infoDic) in
-                    DispatchQueue.main.async {
+                    DispatchQueue.main.async { [weak self] in
+                        guard let weakSelf = self else {return}
                         let progressValue = Progress(totalUnitCount: totalUnitCount)
                         progressValue.completedUnitCount = Int64(Double(totalUnitCount) * progress)
-                        progressBlock?(progressValue)
+                        progressBlock?(progressValue, weakSelf.identify)
                     }
                 }
                 
@@ -782,16 +785,6 @@ public class LGMediaModel {
         LGPhotoManager.cancelImageRequest(_requestId)
     }
 }
-
-//extension LGMediaModel: Hashable {
-//    public static func == (lhs: LGMediaModel, rhs: LGMediaModel) -> Bool {
-//        return ObjectIdentifier(lhs) == ObjectIdentifier(rhs)
-//    }
-//    public var hashValue: Int {
-//        return ObjectIdentifier(self).identify
-//    }
-//}
-
 
 public enum LGMediaModelError: Error {
     case thumbnailURLIsInvalid

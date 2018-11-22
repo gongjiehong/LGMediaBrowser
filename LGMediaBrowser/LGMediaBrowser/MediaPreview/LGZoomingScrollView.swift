@@ -70,11 +70,12 @@ open class LGZoomingScrollView: UIScrollView {
             return
         }
         
-        progressView.isHidden = false
+        self.progressView.isHidden = false
+        self.progressView.isShowError = false
         
         do {
-            try mediaModel.fetchImage(withProgress: { [weak self] (progress) in
-                guard let weakSelf = self else { return }
+            try mediaModel.fetchImage(withProgress: { [weak self] (progress, identify) in
+                guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
                 weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
             }, completion: { [weak self] (resultImage, identify) in
                 guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
@@ -302,6 +303,12 @@ extension LGZoomingScrollView: UIGestureRecognizerDelegate {
             otherGestureRecognizer.lg_name == kPanExitGestureName &&
             self.contentOffset.y <= 0.0
         {
+            if let ges = otherGestureRecognizer as? UIPanGestureRecognizer {
+                let velocity = ges.velocity(in: ges.view)
+                if velocity.y < 0 {
+                    return false
+                }
+            }
             return true
         }
 

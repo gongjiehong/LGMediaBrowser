@@ -28,11 +28,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserInteractiveTransition.swift"
-            timestampString = "564561661.694057"
+            timestampString = "564564416.534282"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "164"
-            endingLineNumber = "164"
+            startingLineNumber = "163"
+            endingLineNumber = "163"
             landmarkName = "beginInteractivePercent()"
             landmarkType = "7">
          </BreakpointContent>
@@ -44,11 +44,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserInteractiveTransition.swift"
-            timestampString = "564561661.69438"
+            timestampString = "564564416.534402"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "158"
-            endingLineNumber = "158"
+            startingLineNumber = "157"
+            endingLineNumber = "157"
             landmarkName = "beginInteractivePercent()"
             landmarkType = "7">
          </BreakpointContent>
@@ -60,11 +60,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserInteractiveTransition.swift"
-            timestampString = "564561661.694533"
+            timestampString = "564564416.5344549"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "191"
-            endingLineNumber = "191"
+            startingLineNumber = "190"
+            endingLineNumber = "190"
             landmarkName = "beginInteractivePercent()"
             landmarkType = "7">
          </BreakpointContent>
@@ -156,11 +156,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGPlayerControlView.swift"
-            timestampString = "564492933.838503"
+            timestampString = "564564416.534641"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "308"
-            endingLineNumber = "308"
+            startingLineNumber = "311"
+            endingLineNumber = "311"
             landmarkName = "layoutVideoControls()"
             landmarkType = "7">
          </BreakpointContent>
@@ -227,7 +227,7 @@
                   ignoreCount = "0"
                   continueAfterRunningActions = "No"
                   symbolName = "UICollectionViewFlowLayoutBreakForInvalidSizes"
-                  moduleName = "UIKitCore"
+                  moduleName = "UIKit"
                   usesParentBreakpointCondition = "Yes"
                   offsetFromSymbolStart = "0">
                </Location>
@@ -353,7 +353,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGForceTouchPreviewController.swift"
-            timestampString = "564492933.8395"
+            timestampString = "564564416.53528"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "51"
@@ -369,7 +369,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGForceTouchPreviewController.swift"
-            timestampString = "564492933.839537"
+            timestampString = "564564416.535352"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "63"
@@ -385,7 +385,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGLivePhotoView.swift"
-            timestampString = "564492933.8395751"
+            timestampString = "564564416.5354069"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "17"
@@ -401,7 +401,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGLivePhotoView.swift"
-            timestampString = "564492933.839608"
+            timestampString = "564564416.535463"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "18"
@@ -417,7 +417,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGLivePhotoView.swift"
-            timestampString = "564492933.8396389"
+            timestampString = "564564416.535515"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "107"
@@ -433,27 +433,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGMediaBrowser/LGMediaBrowser/MediaModel/LGMediaModel.swift"
-            timestampString = "564561315.312849"
+            timestampString = "564564416.535569"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "523"
-            endingLineNumber = "523"
-            landmarkName = "fetchLivePhotoFromAlbumAsset()"
-            landmarkType = "9">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowser/LGMediaBrowser/MediaModel/LGMediaModel.swift"
-            timestampString = "564561315.312883"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "539"
-            endingLineNumber = "539"
+            startingLineNumber = "521"
+            endingLineNumber = "521"
             landmarkName = "fetchLivePhotoFromAlbumAsset()"
             landmarkType = "9">
          </BreakpointContent>

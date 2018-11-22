@@ -180,14 +180,17 @@ open class LGPlayerControlView: LGPlayerView {
     
     override func mediaModelDidSet() {
         if let media = mediaModel {
+            
+            self.layer.contents = media.thumbnailImage?.cgImage
+            
             if media.mediaType == .video {
                 self.isShowBottomSlideControls = false
                 self.toolBackgroundView.removeFromSuperview()
             }
             
             do {
-                try media.fetchMoviePlayerItem(withProgress: { [weak self] (progress) in
-                    guard let weakSelf = self else {return}
+                try media.fetchMoviePlayerItem(withProgress: { [weak self] (progress, identify) in
+                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
                     weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
                 }, completion: { [weak self] (playerItem, identify) in
                     guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}

@@ -125,9 +125,12 @@ open class LGForceTouchPreviewController: UIViewController {
         }
         
         do {
+            self.progressView.isHidden = false
+            self.progressView.isShowError = false
+            
             try mediaModel.fetchImage(withProgress:
-                { [weak self] (progress) in
-                    guard let weakSelf = self else {return}
+                { [weak self] (progress, identify) in
+                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
                     weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
             }) { [weak self] (resultImage, hashValue) in
                 guard let weakSelf = self, weakSelf.mediaModel?.identify == hashValue else { return }
@@ -152,8 +155,8 @@ open class LGForceTouchPreviewController: UIViewController {
             guard let mediaModel = self.mediaModel else { return }
 
             do {
-                try mediaModel.fetchLivePhoto(withProgress: { [weak self] (progress) in
-                    guard let weakSelf = self else {return}
+                try mediaModel.fetchLivePhoto(withProgress: { [weak self] (progress, identify) in
+                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
                     weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
                 }, completion: { [weak self] (livePhoto, identify) in
                     guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
@@ -191,8 +194,8 @@ open class LGForceTouchPreviewController: UIViewController {
         
         do {
             try mediaModel.fetchMoviePlayerItem(withProgress:
-            { [weak self] (progress) in
-                guard let weakSelf = self else { return }
+            { [weak self] (progress, identify) in
+                guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
                 weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
             }) { [weak self] (resultItem, identify) in
                 guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
