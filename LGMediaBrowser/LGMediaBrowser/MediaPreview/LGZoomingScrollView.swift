@@ -55,6 +55,7 @@ open class LGZoomingScrollView: UIScrollView {
         self.alwaysBounceHorizontal = false
         
         self.panGestureRecognizer.delegate = self
+        self.pinchGestureRecognizer?.delegate = self
         
         if #available(iOS 11.0, *) {
             self.contentInsetAdjustmentBehavior = .never
@@ -68,6 +69,8 @@ open class LGZoomingScrollView: UIScrollView {
             progressView.isShowError = true
             return
         }
+        
+        progressView.isHidden = false
         
         do {
             try mediaModel.fetchImage(withProgress: { [weak self] (progress) in
@@ -230,9 +233,6 @@ open class LGZoomingScrollView: UIScrollView {
     
     @objc func postDoubleTapNotification() {
         NotificationCenter.default.post(name: LGMediaBrowser.needHideControlsNotification, object: nil)
-    }
-    
-    deinit {
     }
 }
 

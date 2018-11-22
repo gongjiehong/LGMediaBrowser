@@ -144,7 +144,6 @@ extension RemoteImageWallController: LGMediaBrowserDelegate {
     
     
     func viewForMedia(_ browser: LGMediaBrowser, index: Int) -> UIView? {
-        print(index, "-> UIView?")
         return self.collectionView.cellForItem(at: IndexPath(row: index, section: 0))
     }
     

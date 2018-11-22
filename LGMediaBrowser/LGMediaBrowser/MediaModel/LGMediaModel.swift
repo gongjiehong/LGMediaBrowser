@@ -283,10 +283,9 @@ public class LGMediaModel {
             guard let asset = self.mediaAsset else {
                 throw LGMediaModelError.mediaAssetIsInvalid
             }
-            
+            let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
             _requestId = LGPhotoManager.requestImage(forAsset: asset,
-                                                     outputSize: CGSize(width: asset.pixelWidth,
-                                                                        height: asset.pixelHeight),
+                                                     outputSize: fixedPixelSize(pixelSize),
                                                      resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                      progressHandlder:
                 { (value, error, stop, info) in
@@ -444,9 +443,10 @@ public class LGMediaModel {
                 }
             }
             
+            let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+            
             _requestId = LGPhotoManager.requestImage(forAsset: asset,
-                                                     outputSize: CGSize(width: asset.pixelWidth,
-                                                                        height: asset.pixelHeight),
+                                                     outputSize: fixedPixelSize(pixelSize),
                                                      resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                      progressHandlder:
                 { (value, error, stop, info) in
@@ -484,6 +484,28 @@ public class LGMediaModel {
             try exportImageFromAsset()
             break
         }
+    }
+    
+    private func fixedPixelSize(_ size: CGSize) -> CGSize {
+        let screenWidth = UIScreen.main.bounds.width * UIScreen.main.scale
+        let screenHeight = UIScreen.main.bounds.height * UIScreen.main.scale
+        if size.width <= screenWidth && size.height < screenHeight {
+            return size
+        }
+        
+        if size.width > screenWidth {
+            let scale = size.width / screenWidth
+            let resultHeight = size.height / scale
+            return CGSize(width: screenWidth, height: resultHeight)
+        }
+        
+        if size.height > screenHeight {
+            let scale = size.height / screenHeight
+            let resultWidth = size.width / scale
+            return CGSize(width: resultWidth, height: screenHeight)
+        }
+        
+        return size
     }
     
     /// 获取PHLivePhoto，分别从本地URL，服务器，相册三种获取并合成

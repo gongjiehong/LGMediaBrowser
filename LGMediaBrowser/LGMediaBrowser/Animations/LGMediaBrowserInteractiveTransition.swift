@@ -75,9 +75,16 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             if scale < 0 {
                 return
             }
+            
+            let velocity = sender.velocity(in: gestureView)
+            if abs(velocity.x) >= abs(velocity.y) {
+                return
+            }
+
             let location = sender.location(in: sender.view)
             beginX = location.x
             beginY = location.y
+
             isInteration = true
             
             switch self.actionType {
@@ -94,6 +101,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
                 if scale < 0.0 {
                     scale = 0.0
                 }
+                
                 var imageViewScale = 1 - scale * 0.5
                 if imageViewScale < 0.4 {
                     imageViewScale = 0.4
