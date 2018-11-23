@@ -25,8 +25,8 @@ public class LGCameraCapture: UIViewController {
     
     override open func loadView() {
         super.loadView()
-        self.view = _view
-        self.view.frame = UIScreen.main.bounds
+        self.view.addSubview(_view)
+        _view.frame = UIScreen.main.bounds
     }
     
     /// 视频格式定义
@@ -157,7 +157,7 @@ public class LGCameraCapture: UIViewController {
         let sepiaFilter = GPUImageSepiaFilter()
         let sepiaModel = LGFilterModel(filter: sepiaFilter, filterName: "Nostalgia", iconImage: exampleImage)
         resultArray.append(sepiaModel)
-
+        
         /// 黑白
         let grayscaleFilter = GPUImageGrayscaleFilter()
         let grayscaleModel = LGFilterModel(filter: grayscaleFilter, filterName: "Grayscale", iconImage: exampleImage)
@@ -182,12 +182,12 @@ public class LGCameraCapture: UIViewController {
         gaussianFilter.blurRadiusInPixels = 5.0
         let gaussianModel = LGFilterModel(filter: gaussianFilter, filterName: "GaussianBlur", iconImage: exampleImage)
         resultArray.append(gaussianModel)
-
+        
         /// 晕影
         let vignetteFilter = GPUImageVignetteFilter()
         let vignetteModel = LGFilterModel(filter: vignetteFilter, filterName: "Vignette", iconImage: exampleImage)
         resultArray.append(vignetteModel)
-
+        
         /// 浮雕
         let embossFilter = GPUImageEmbossFilter()
         embossFilter.intensity = 1.0
@@ -230,7 +230,7 @@ public class LGCameraCapture: UIViewController {
                                              filterName: "ColorInvert",
                                              iconImage: exampleImage)
         resultArray.append(colorInvertModel)
-
+        
         return resultArray
     }()
     
@@ -346,6 +346,8 @@ public class LGCameraCapture: UIViewController {
         
         let toolViewOriginY = self.view.lg_height - toolViewHeight - UIDevice.bottomSafeMargin
         
+        self.view.addSubview(takedImageView)
+        
         
         filterToolView = LGFilterSelectionView(frame: CGRect(x: 0,
                                                              y: toolViewOriginY - filterToolViewHeight,
@@ -401,7 +403,7 @@ public class LGCameraCapture: UIViewController {
         
         
         
-
+        
         let cropSize = getCropSize(self.view.lg_size)
         let previewFrame = CGRect(x: (self.view.lg_width - cropSize.width) / 2.0,
                                   y: (self.view.lg_height - cropSize.height) / 2.0,
@@ -415,9 +417,9 @@ public class LGCameraCapture: UIViewController {
             let toggleCameraButtonMargin: CGFloat = 20.0
             let originX = self.view.lg_width - toggleCameraButtonMargin - toggleCameraButtonSize.width
             self.toggleCameraButton.frame = CGRect(x: originX,
-                                                y: toggleCameraButtonMargin + UIDevice.topSafeMargin,
-                                                width: toggleCameraButtonSize.width,
-                                                height: toggleCameraButtonSize.height)
+                                                   y: toggleCameraButtonMargin + UIDevice.topSafeMargin,
+                                                   width: toggleCameraButtonSize.width,
+                                                   height: toggleCameraButtonSize.height)
         }
     }
     
@@ -462,7 +464,7 @@ public class LGCameraCapture: UIViewController {
         
         let temp = GPUImageFilter()
         self.filter = temp
-
+        
         movieWriter = GPUImageMovieWriter(movieURL: destinationVideoURL,
                                           size: getFinalOutputSize(movieRealOutputSize),
                                           fileType: videoAVFileType.rawValue,
@@ -484,12 +486,10 @@ public class LGCameraCapture: UIViewController {
         videoCamera.addTarget(cropFilter)
         videoCamera.audioEncodingTarget = movieWriter
         
-
+        
         cropFilter.addTarget((self.filter as! GPUImageInput))
         self.filter?.addTarget(movieWriter)
-        if let filterView = self.view as? GPUImageView {
-            self.filter?.addTarget(filterView)
-        }
+        self.filter?.addTarget(_view)
     }
     
     // MARK: -  获取权限
@@ -557,7 +557,7 @@ public class LGCameraCapture: UIViewController {
             setFocusCursorWithPoint(point)
         }
     }
-
+    
     func setFocusCursorWithPoint(_ point: CGPoint) {
         focusCursorImageView.center = point
         focusCursorImageView.alpha = 1.0
@@ -645,7 +645,7 @@ public class LGCameraCapture: UIViewController {
     // MARK: - 程序将要不活跃的时候关闭本页面
     @objc func willResignActive(_ noti: Notification) {
         if self.videoCamera.isRunning {
-            self.dismiss(animated: true, completion: nil)
+            self.delegate?.captureDidCancel(self)
         }
     }
     
@@ -659,6 +659,7 @@ public class LGCameraCapture: UIViewController {
     
     ///析构
     deinit {
+        _view.removeFromSuperview()
         if videoCamera.isRunning {
             videoCamera.stopCapture()
         }
@@ -671,6 +672,13 @@ public class LGCameraCapture: UIViewController {
         NotificationCenter.default.removeObserver(self)
     }
     
+    // MARK: - 状态条
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
+    }
+    
     /// 是否正在录制
     private var isRecording: Bool = false
 }
@@ -678,8 +686,8 @@ public class LGCameraCapture: UIViewController {
 extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
     /// 拍照
     public func onTakePicture() {
-        cropFilter.useNextFrameForImageCapture()
-        if let image = cropFilter.imageFromCurrentFramebuffer() {
+        filter?.useNextFrameForImageCapture()
+        if let image = filter?.imageFromCurrentFramebuffer() {
             self.videoCamera.stopCapture()
             self.takedImage = image
             self.takedImageView.image = image
@@ -712,7 +720,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
                 self.playVideo()
             }
         }
-
+        
     }
     
     /// 录制完成后播放视频
@@ -767,9 +775,9 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         self.videoCamera.audioEncodingTarget = nil
         let outputSize = getMovieRealOutputSize()
         self.movieWriter = GPUImageMovieWriter(movieURL: destinationVideoURL,
-                                          size: getFinalOutputSize(outputSize),
-                                          fileType: videoAVFileType.rawValue,
-                                          outputSettings: nil)
+                                               size: getFinalOutputSize(outputSize),
+                                               fileType: videoAVFileType.rawValue,
+                                               outputSettings: nil)
         movieWriter.hasAudioTrack = true
         movieWriter.encodingLiveVideo = true
         movieWriter.assetWriter.movieFragmentInterval = CMTime.invalid
@@ -780,14 +788,10 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         if let filter = self.filter {
             self.cropFilter.addTarget(filter as! GPUImageInput)
             filter.addTarget(movieWriter)
-            if let filterView = self.view as? GPUImageView {
-                filter.addTarget(filterView)
-            }
+            filter.addTarget(_view)
         } else {
             cropFilter.addTarget(movieWriter)
-            if let filterView = self.view as? GPUImageView {
-                cropFilter.addTarget(filterView)
-            }
+            cropFilter.addTarget(_view)
         }
     }
     
@@ -800,9 +804,6 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
             result = ResultModel(type: .video, image: nil, videoURL: destinationVideoURL)
         }
         delegate?.captureDidCapturedResult(result, capture: self)
-        self.dismiss(animated: true) {
-            
-        }
     }
     
     /// 取消拍摄并清理拍摄到的视频
@@ -810,9 +811,6 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         self.delegate?.captureDidCancel(self)
         DispatchQueue.background.async { [weak self] in
             self?.removeVideo()
-        }
-        self.dismiss(animated: true) {
-            
         }
     }
 }
@@ -848,7 +846,7 @@ extension LGCameraCapture {
         }
     }
     
-
+    
     /// 计算最终输出大小，如果是相对坐标，则根据视频录制设备支持的最佳大小输出，如果是绝对坐标，则为输入的绝对大小
     ///
     /// - Parameter originSize: 视频的原始大小
@@ -882,9 +880,7 @@ extension LGCameraCapture: LGFilterSelectionViewDelegate {
         
         cropFilter.addTarget(filter)
         self.filter?.addTarget(self.movieWriter)
-        if let filterView = self.view as? GPUImageView {
-            self.filter?.addTarget(filterView)
-        }
+        self.filter?.addTarget(_view)
     }
 }
 

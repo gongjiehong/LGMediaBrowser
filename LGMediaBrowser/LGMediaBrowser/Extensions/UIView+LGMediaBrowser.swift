@@ -107,4 +107,20 @@ extension UIView {
             return self.lg_originX + self.lg_width
         }
     }
+    
+    public var lg_centerX: CGFloat {
+        set {
+            self.center = CGPoint(x: newValue, y: self.center.y)
+        } get {
+            return self.center.x
+        }
+    }
+    
+    public var lg_centerY: CGFloat {
+        set {
+            self.center = CGPoint(x: self.center.x, y: newValue)
+        } get {
+            return self.center.y
+        }
+    }
 }

@@ -203,6 +203,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                         for selectedTemp in mainPicker.selectedDataArray
                             where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
                                 temp.isSelected = true
+                                temp.currentSelectedIndex = selectedTemp.currentSelectedIndex
                         }
                     }
                     self.dataArray.removeAll()
@@ -214,6 +215,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                         for selectedTemp in mainPicker.selectedDataArray
                             where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
                                 temp.isSelected = true
+                                temp.currentSelectedIndex = selectedTemp.currentSelectedIndex
                         }
                     }
                     self.dataArray.removeAll()
@@ -234,6 +236,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                             where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier
                         {
                             temp.isSelected = true
+                            temp.currentSelectedIndex = selectedTemp.currentSelectedIndex
                         }
                     }
                     weakSelf.dataArray += album.models
@@ -296,6 +299,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
             mainPicker.selectedDataArray.removeAll()
         }
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
+        NSObject.cancelPreviousPerformRequests(withTarget: self)
     }
 }
 
@@ -326,7 +330,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                 cell.cornerRadius = configs.cellCornerRadius
                 if configs.isShowCaptureImageOnTakePhotoButton {
                     DispatchQueue.main.after(0.3) {
-                        cell.startCapture()
+//                        cell.startCapture()
                     }
                 }
                 return cell
@@ -402,7 +406,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     
     func canSelectModel(_ model: LGPhotoModel, callback: @escaping (Bool) -> Void) {
         if mainPicker.selectedDataArray.count >= configs.maxSelectCount {
-            let tipsString = String(format: LGLocalizedString("Select a maximum of %d photos."),
+            let tipsString = String(format: LGLocalizedString("Select maximum of %d photos."),
                                     configs.maxSelectCount)
             LGStatusBarTips.show(withStatus: tipsString,
                                  style: LGStatusBarConfig.Style.error)
@@ -509,7 +513,100 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     
     public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
+        if !self.allowTakePhoto || self.configs.sortBy == .ascending {
+            if indexPath.row == self.dataArray.count {
+                if let cell = collectionView.cellForItem(at: indexPath) as? LGMPAlbumDetailCameraCell {
+                    cell.stopCapture()
+                }
+                openCaptureController()
+                return
+            }
+        } else {
+            if indexPath.row == 0 {
+                if let cell = collectionView.cellForItem(at: indexPath) as? LGMPAlbumDetailCameraCell {
+                    cell.stopCapture()
+                }
+                openCaptureController()
+                return
+            }
+        }
         preview(with: indexPath.row)
+    }
+    
+    func openCaptureController() {
+        
+        if mainPicker.selectedDataArray.count >= configs.maxSelectCount {
+            let tipsString = String(format: LGLocalizedString("Select maximum of %d photos."),
+                                    configs.maxSelectCount)
+            LGStatusBarTips.show(withStatus: tipsString,
+                                 style: LGStatusBarConfig.Style.error)
+            return
+        }
+        
+        let capture = LGCameraCapture()
+        capture.delegate = self
+        capture.allowRecordVideo = false
+        self.navigationController?.pushViewController(capture, animated: true)
+    }
+
+}
+
+extension LGMPAlbumDetailController: LGCameraCaptureDelegate {
+    public func captureDidCancel(_ capture: LGCameraCapture) {
+        self.navigationController?.popToViewController(self, animated: true)
+    }
+    
+    public func captureDidCapturedResult(_ result: LGCameraCapture.ResultModel, capture: LGCameraCapture) {
+        switch result.type {
+        case .photo:
+            let hud = LGLoadingHUD.show()
+            result.image?.lg_savetoAlbumWith(completionBlock: { (isSucceed, asset, error) in
+                if isSucceed, let asset = asset {
+                    let photoModel = LGPhotoModel(asset: asset,
+                                                  type: LGPhotoModel.AssetMediaType.generalImage,
+                                                  duration: "")
+                    mainPicker.selectedDataArray.append(photoModel)
+                    mainPicker.pickerDelegate?.picker(mainPicker,
+                                                      didDoneWith: mainPicker.selectedDataArray,
+                                                      isOriginalPhoto: true)
+                } else {
+                    LGStatusBarTips.show(withStatus: error?.localizedDescription ?? "Unknown error",
+                                         style: LGStatusBarConfig.Style.error)
+                }
+                hud.dismiss()
+            })
+            break
+        case .video:
+            guard let videoURL = result.videoURL else {return}
+            var localId: String?
+            let hud = LGLoadingHUD.show()
+            PHPhotoLibrary.shared().performChanges({
+                let request = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
+                localId = request?.placeholderForCreatedAsset?.localIdentifier
+            }) { (isSucceed, error) in
+                DispatchQueue.main.async {
+                    if isSucceed {
+                        if let localId = localId {
+                            let result = PHAsset.fetchAssets(withLocalIdentifiers: [localId], options: nil)
+                            if let asset = result.firstObject {
+                                let photoModel = LGPhotoModel(asset: asset,
+                                                              type: LGPhotoModel.AssetMediaType.generalImage,
+                                                              duration: "")
+                                mainPicker.selectedDataArray.append(photoModel)
+                                mainPicker.pickerDelegate?.picker(mainPicker,
+                                                                  didDoneWith: mainPicker.selectedDataArray,
+                                                                  isOriginalPhoto: true)
+                            }
+                        }
+                    } else {
+                        LGStatusBarTips.show(withStatus: error?.localizedDescription ?? "Unknown error",
+                                             style: LGStatusBarConfig.Style.error)
+                    }
+                    hud.dismiss()
+                }
+            }
+            break
+        }
     }
 
 }
@@ -591,8 +688,8 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
         guard let result = self.albumListModel?.result else { return }
         if let detail = changeInstance.changeDetails(for: result) {
             
-            let photos = LGPhotoManager.fetchPhoto(inResult: detail.fetchResultAfterChanges,
-                                                   supportMediaType: configs.resultMediaTypes)
+//            let photos = LGPhotoManager.fetchPhoto(inResult: detail.fetchResultAfterChanges,
+//                                                   supportMediaType: configs.resultMediaTypes)
 //            self.dataArray.removeAll()
 //            self.dataArray += photos
 //            self.listView.reloadData()

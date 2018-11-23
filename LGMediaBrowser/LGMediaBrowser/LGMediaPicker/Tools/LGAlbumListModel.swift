@@ -178,3 +178,27 @@ extension LGPhotoModel {
         }
     }
 }
+
+
+extension LGPhotoModel {
+    public var imageCachePath: String {
+        guard let fileName = self.asset.localIdentifier.md5Hash() else {
+            return ""
+        }
+        
+        let tmpDirPath = NSTemporaryDirectory()
+        let exportDir = tmpDirPath + "LGPhotoModel/export/"
+        do {
+            if FileManager.default.fileExists(atPath: exportDir) {
+                
+            } else {
+                try FileManager.default.createDirectory(at: URL(fileURLWithPath: exportDir),
+                                                        withIntermediateDirectories: true,
+                                                        attributes: nil)
+            }
+            return exportDir + fileName + ".jpg"
+        } catch {
+            return ""
+        }
+    }
+}

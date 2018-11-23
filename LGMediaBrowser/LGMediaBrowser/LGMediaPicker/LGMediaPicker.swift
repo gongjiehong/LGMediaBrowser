@@ -115,7 +115,13 @@ public class LGMediaPicker: LGMPNavigationController {
     /// 配置，默认使用默认配置
     public var config: Configuration = Configuration.default
     
-    var selectedDataArray: [LGPhotoModel] = []
+    public var selectedDataArray: [LGPhotoModel] = [] {
+        didSet {
+            for (index, photo) in selectedDataArray.enumerated() {
+                photo.currentSelectedIndex = index + 1
+            }
+        }
+    }
     
     public weak var pickerDelegate: LGMediaPickerDelegate?
     

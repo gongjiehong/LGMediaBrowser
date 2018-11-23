@@ -120,6 +120,12 @@ public class LGMPAlbumDetailCameraCell: UICollectionViewCell {
         self.session.startRunning()
     }
     
+    public func stopCapture() {
+        if self.session.isRunning {
+            self.session.stopRunning()
+        }
+    }
+    
     deinit {
         if self.session.isRunning {
             self.session.stopRunning()

@@ -719,20 +719,23 @@ public class LGMediaModel {
                                 guard let weakSelf = self else {return}
                                 progressBlock?(progress, weakSelf.identify)
                             }
-                    }) { [weak self] (destinationURL, isDownloadCompleted, error) in
-                        guard let weakSelf = self else {
-                            completion?(nil, LGMediaModelInvalidHashValue)
-                            return
-                        }
-                        if let destinationURL = destinationURL, isDownloadCompleted {
-                            let playerItem = AVPlayerItem(url: destinationURL)
-                            completion?(playerItem, weakSelf.identify)
-                        } else {
-                            completion?(nil, weakSelf.identify)
+                    }) { (destinationURL, isDownloadCompleted, error) in
+                        DispatchQueue.main.async { [weak self] in
+                            guard let weakSelf = self else {
+                                completion?(nil, LGMediaModelInvalidHashValue)
+                                return
+                            }
+                            if let destinationURL = destinationURL, isDownloadCompleted {
+                                let playerItem = AVPlayerItem(url: destinationURL)
+                                completion?(playerItem, weakSelf.identify)
+                            } else {
+                                completion?(nil, weakSelf.identify)
+                            }
                         }
                     }
                 } else {
-                    let playerItem = AVPlayerItem(url: url)
+                    let destinationURL = URL(fileURLWithPath: LGFileDownloader.Helper.filePath(withURL: url))
+                    let playerItem = AVPlayerItem(url: destinationURL)
                     completion?(playerItem, self.identify)
                 }
             }

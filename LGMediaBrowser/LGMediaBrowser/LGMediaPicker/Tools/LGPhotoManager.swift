@@ -249,6 +249,7 @@ public class LGPhotoManager {
     @discardableResult
     public static func requestImage(forAsset asset: PHAsset,
                                     outputSize: CGSize = CGSize.zero,
+                                    isAsync: Bool = true,
                                     resizeMode: PHImageRequestOptionsResizeMode = PHImageRequestOptionsResizeMode.fast,
                                     progressHandlder: PHAssetImageProgressHandler? = nil,
                                     completion: @escaping (UIImage?, [AnyHashable: Any]?) -> Void) -> PHImageRequestID
@@ -257,7 +258,7 @@ public class LGPhotoManager {
         options.resizeMode = resizeMode
         options.isNetworkAccessAllowed = true
         options.progressHandler = progressHandlder
-        options.isSynchronous = false
+        options.isSynchronous = !isAsync
         
         var realOutputSize: CGSize
         if outputSize.equalTo(CGSize.zero) {

@@ -31,7 +31,7 @@ class LGColorHelper {
 
 
 extension UIColor {
-    convenience init(hexColor: String) {
+    convenience public init(hexColor: String) {
         var red:   CGFloat = 0.0
         var green: CGFloat = 0.0
         var blue:  CGFloat = 0.0

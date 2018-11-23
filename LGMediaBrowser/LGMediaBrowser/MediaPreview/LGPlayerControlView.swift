@@ -189,6 +189,7 @@ open class LGPlayerControlView: LGPlayerView {
             }
             
             do {
+                
                 try media.fetchMoviePlayerItem(withProgress: { [weak self] (progress, identify) in
                     guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
                     weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
