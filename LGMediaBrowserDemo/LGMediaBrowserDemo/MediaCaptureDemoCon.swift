@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import LGMediaBrowser
 
 class MediaCaptureDemoCon: UIViewController {
 
@@ -14,6 +15,16 @@ class MediaCaptureDemoCon: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
+        do {
+            try LGAuthorizationStatusManager.default.requestPrivacy(withType: .contacts) { (type, status) in
+                
+            }
+        } catch {
+            LGStatusBarTips.show(withStatus: error.localizedDescription,
+                                 style: LGStatusBarConfig.Style.error)
+        }
+        
     }
     
 

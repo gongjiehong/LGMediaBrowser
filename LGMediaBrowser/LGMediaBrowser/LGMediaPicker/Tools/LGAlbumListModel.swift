@@ -72,6 +72,7 @@ public class LGPhotoModel {
             let options = PHImageRequestOptions()
             options.isSynchronous = false
             options.isNetworkAccessAllowed = false
+            options.resizeMode = .fast
             LGPhotoManager.imageManager.requestImageData(for: self.asset,
                                                          options: options)
             { (data, dataUTI, orientation, infoDic) in

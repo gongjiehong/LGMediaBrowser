@@ -37,15 +37,19 @@ extension LGAuthorizationStatusError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .unableToReadImmediately:
-            return "无法即时读取权限，需要调用特定方法获取" +
+            return "不支持即时读取权限，需要调用特定方法获取" +
             "requestPrivacy(withType type: PrivacyType, callback: PrivacyStatusCallback)"
         case .privacyDescriptionNotSet(let type):
-            return "类型\(type)未在info.plist中设置对应的申请描述"
+            return "类型\(type)未在Info.plist中设置对应的申请理由"
         case .unSupportType(let type):
             return "类型\(type)不被支持"
         case .healthReadTypesOrShareTypesMustHaveOne:
             return "请求HealthKit权限时读取和写入项必须有一个不为空"
         }
+    }
+    
+    public var localizedDescription: String {
+        return errorDescription ?? "\(self)"
     }
 }
 
@@ -58,14 +62,18 @@ public class LGAuthorizationStatusManager: NSObject {
     /// - calendars: 日历
     /// - reminders: 提醒事项
     /// - photos: 相册
-    /// - bluetooth: 蓝牙
     /// - microphone: 麦克风
     /// - camera: 摄像头
-    /// - health: 健康，相对复杂，不做聚合
-    /// - homeKit: homeKit，异步，不做聚合
+    /// - healthWith: 健康
+    /// - homeKit: 异步
     /// - motionAndFitness: 加速计
     /// - appleMusic: 苹果音乐
     /// - speechRecognition: 语音识别
+    /// - siri: siri
+    /// - bluetooth: 蓝牙
+    /// - NFC: NFC
+    /// - faceID: faceID
+    /// - other: 其它，不支持
     public enum PrivacyType {
         case location
         case contacts
@@ -98,7 +106,7 @@ public class LGAuthorizationStatusManager: NSObject {
     public struct PrivacyKeys {
         public static var LocationWhenInUseUsage = "NSLocationWhenInUseUsageDescription"
         public static var LocationAlwaysUsage = "NSLocationAlwaysUsageDescription"
-
+        
         public static var NFCReaderUsage = "NFCReaderUsageDescription"
         
         public static var AppleMusicUsage = "NSAppleMusicUsageDescription"
@@ -135,7 +143,7 @@ public class LGAuthorizationStatusManager: NSObject {
         
         public static var BluetoothPeripheralUsage = "NSBluetoothPeripheralUsageDescription"
     }
-
+    
     /// 权限状态定义
     ///
     /// - notDetermined: 未向用户获取该权限
@@ -367,14 +375,13 @@ public class LGAuthorizationStatusManager: NSObject {
         
         guard whenInUse != nil || alwaysUse != nil else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.LocationWhenInUseUsage,
-                    "\nor:\n",
+                    "或:",
                     PrivacyKeys.LocationAlwaysUsage)
             throw LGAuthorizationStatusError.privacyDescriptionNotSet(.location)
         }
         
-
+        
         if CLLocationManager.locationServicesEnabled() {
             if locationStatus == .notDetermined {
                 if self.locationManager != nil {
@@ -404,11 +411,10 @@ public class LGAuthorizationStatusManager: NSObject {
         
         guard contactsDes != nil else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.ContactsUsage)
             throw LGAuthorizationStatusError.privacyDescriptionNotSet(.contacts)
         }
-
+        
         if contactsStatus == .notDetermined {
             let contanctsStore = CNContactStore()
             contanctsStore.requestAccess(for: CNEntityType.contacts) { (granted, error) in
@@ -449,16 +455,15 @@ public class LGAuthorizationStatusManager: NSObject {
         default:
             throw LGAuthorizationStatusError.unSupportType(type)
         }
-
+        
         
         let description = Bundle.main.infoDictionary?[descriptionKey]
         guard description != nil else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     descriptionKey)
             throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
         }
-
+        
         
         if status == .notDetermined {
             let store = EKEventStore()
@@ -488,13 +493,11 @@ public class LGAuthorizationStatusManager: NSObject {
         
         guard photoLibraryUsageDes != nil && photoLibraryAddUsageDes != nil else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.PhotoLibraryUsage,
-                    "\nand:\n",
                     PrivacyKeys.PhotoLibraryAddUsage)
             throw LGAuthorizationStatusError.privacyDescriptionNotSet(.photos)
         }
-
+        
         if albumStatus == .notDetermined {
             PHPhotoLibrary.requestAuthorization { (status) in
                 DispatchQueue.main.async { [weak self] in
@@ -512,7 +515,6 @@ public class LGAuthorizationStatusManager: NSObject {
         let description = Bundle.main.infoDictionary?[PrivacyKeys.MicrophoneUsage]
         guard description != nil else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.MicrophoneUsage)
             throw LGAuthorizationStatusError.privacyDescriptionNotSet(.microphone)
         }
@@ -534,7 +536,6 @@ public class LGAuthorizationStatusManager: NSObject {
         let description = Bundle.main.infoDictionary?[PrivacyKeys.CameraUsage]
         guard description != nil else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.CameraUsage)
             throw LGAuthorizationStatusError.privacyDescriptionNotSet(.camera)
         }
@@ -550,7 +551,7 @@ public class LGAuthorizationStatusManager: NSObject {
             callback(.camera, cameraStatus)
         }
     }
-
+    
     // MARK: - HealthKit
     public func requestHealthPrivacy(callback: @escaping PrivacyStatusCallback, type: PrivacyType) throws {
         switch type {
@@ -561,10 +562,9 @@ public class LGAuthorizationStatusManager: NSObject {
                 let updateDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthUpdateUsage]
                 guard clinicalDes != nil, shareDes != nil, updateDes != nil else {
                     println("需要在plist中设置如下内容:",
-                            "\n",
-                            PrivacyKeys.HealthClinicalHealthRecordsShareUsage + "\n",
-                            PrivacyKeys.HealthShareUsage + "\n",
-                            PrivacyKeys.HealthUpdateUsage + "\n")
+                            PrivacyKeys.HealthClinicalHealthRecordsShareUsage,
+                            PrivacyKeys.HealthShareUsage,
+                            PrivacyKeys.HealthUpdateUsage)
                     throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
                 }
             } else if shareTypes == nil && readTypes != nil {
@@ -572,9 +572,8 @@ public class LGAuthorizationStatusManager: NSObject {
                 let shareDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthShareUsage]
                 guard clinicalDes != nil, shareDes != nil else {
                     println("需要在plist中设置如下内容:",
-                            "\n",
-                            PrivacyKeys.HealthClinicalHealthRecordsShareUsage + "\n",
-                            PrivacyKeys.HealthShareUsage + "\n")
+                            PrivacyKeys.HealthClinicalHealthRecordsShareUsage,
+                            PrivacyKeys.HealthShareUsage)
                     throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
                 }
             } else {
@@ -606,7 +605,6 @@ public class LGAuthorizationStatusManager: NSObject {
     func requestHomeKitPrivacy(callback: @escaping PrivacyStatusCallback) throws {
         guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.HomeKitUsage] else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.HomeKitUsage)
             throw LGAuthorizationStatusError.privacyDescriptionNotSet(.homeKit)
         }
@@ -629,7 +627,6 @@ public class LGAuthorizationStatusManager: NSObject {
     func requestMotionPrivacy(callback: @escaping PrivacyStatusCallback) throws {
         guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.MotionUsage] else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.MotionUsage)
             throw LGAuthorizationStatusError.privacyDescriptionNotSet(.motionAndFitness)
         }
@@ -649,7 +646,6 @@ public class LGAuthorizationStatusManager: NSObject {
     func requestAppleMusicPrivacy(callback: @escaping PrivacyStatusCallback) throws {
         guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.AppleMusicUsage] else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.AppleMusicUsage)
             if #available(iOS 9.3, *) {
                 throw LGAuthorizationStatusError.privacyDescriptionNotSet(.appleMusic)
@@ -675,7 +671,6 @@ public class LGAuthorizationStatusManager: NSObject {
     func requestSiriPrivacy(callback: @escaping PrivacyStatusCallback) throws {
         guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.SiriUsage] else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.SiriUsage)
             if #available(iOS 10.0, *) {
                 throw LGAuthorizationStatusError.privacyDescriptionNotSet(.siri)
@@ -701,7 +696,6 @@ public class LGAuthorizationStatusManager: NSObject {
     func requestSpeechRecognitionPrivacy(callback: @escaping PrivacyStatusCallback) throws {
         guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.SpeechRecognition] else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.SpeechRecognition)
             if #available(iOS 10.0, *) {
                 throw LGAuthorizationStatusError.privacyDescriptionNotSet(.speechRecognition)
@@ -721,7 +715,7 @@ public class LGAuthorizationStatusManager: NSObject {
             }
         } else {
         }
-       
+        
     }
     
     // MARK: - 蓝牙BLE
@@ -731,7 +725,6 @@ public class LGAuthorizationStatusManager: NSObject {
     func requestBluetoothPrivacy(callback: @escaping PrivacyStatusCallback) throws {
         guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.BluetoothPeripheralUsage] else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.BluetoothPeripheralUsage)
             if #available(iOS 10.0, *) {
                 throw LGAuthorizationStatusError.privacyDescriptionNotSet(.bluetooth)
@@ -753,7 +746,6 @@ public class LGAuthorizationStatusManager: NSObject {
     func requestNFCPrivacy(callback: @escaping PrivacyStatusCallback) throws {
         guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.NFCReaderUsage] else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.NFCReaderUsage)
             if #available(iOS 11.0, *) {
                 throw LGAuthorizationStatusError.privacyDescriptionNotSet(.NFC)
@@ -778,7 +770,6 @@ public class LGAuthorizationStatusManager: NSObject {
     func requestFaceIDPrivacy(callback: @escaping PrivacyStatusCallback) throws {
         guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.FaceIDUsage] else {
             println("需要在plist中设置如下内容:",
-                    "\n",
                     PrivacyKeys.FaceIDUsage)
             if #available(iOS 11.0, *) {
                 throw LGAuthorizationStatusError.privacyDescriptionNotSet(.faceID)

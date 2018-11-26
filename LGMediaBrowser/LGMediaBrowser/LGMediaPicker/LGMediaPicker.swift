@@ -14,7 +14,9 @@ public protocol LGMediaPickerDelegate: NSObjectProtocol {
     func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGPhotoModel], isOriginalPhoto isOriginal: Bool)
 }
 
-internal weak var mainPicker: LGMediaPicker!
+internal var globleSelectedDataArray: [LGPhotoModel]! = []
+
+internal weak var globleMainPicker: LGMediaPicker!
 
 public class LGMediaPicker: LGMPNavigationController {
 
@@ -112,14 +114,48 @@ public class LGMediaPicker: LGMPNavigationController {
         }()
     }
     
+    public override init(rootViewController: UIViewController) {
+        super.init(rootViewController: rootViewController)
+        setupGloble()
+    }
+    
+    public override init(navigationBarClass: AnyClass?, toolbarClass: AnyClass?) {
+        super.init(navigationBarClass: navigationBarClass, toolbarClass: toolbarClass)
+        setupGloble()
+    }
+    
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        setupGloble()
+    }
+    
+    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        setupGloble()
+    }
+    
+    public convenience init(delegate: LGMediaPickerDelegate) {
+        self.init(nibName: nil, bundle: nil)
+        self.pickerDelegate = delegate
+    }
+    
+    func setupGloble() {
+        if globleSelectedDataArray == nil {
+            globleSelectedDataArray = []
+        }
+        
+        globleMainPicker = self
+    }
+    
     /// 配置，默认使用默认配置
-    public var config: Configuration = Configuration.default
+    public var configs: Configuration = Configuration.default
     
     public var selectedDataArray: [LGPhotoModel] = [] {
         didSet {
             for (index, photo) in selectedDataArray.enumerated() {
                 photo.currentSelectedIndex = index + 1
             }
+            globleSelectedDataArray = selectedDataArray
         }
     }
     
@@ -128,15 +164,13 @@ public class LGMediaPicker: LGMPNavigationController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        LGPhotoManager.sort = self.config.sortBy
+        LGPhotoManager.sort = self.configs.sortBy
         
         self.title = LGLocalizedString("Albums")
         
         self.view.backgroundColor = UIColor.white
         
         self.navigationBar.tintColor = UIColor(colorName: "NavigationBarTint")
-        
-        mainPicker = self
     }
     
     public override func loadView() {
@@ -154,27 +188,61 @@ public class LGMediaPicker: LGMPNavigationController {
     }
     
     public func requestAccessAndSetupLayout() {
-        PHPhotoLibrary.requestAuthorization { [weak self] (status) in
-            DispatchQueue.main.async { [weak self] in
-                guard let weakSelf = self else {return}
-                switch status {
-                case .authorized:
-                    let albumList = LGMPAlbumListController()
-                    
-                    let allPhotosList = LGMPAlbumDetailController()
-                    weakSelf.viewControllers = [albumList, allPhotosList]
-                    break
-                case .denied, .restricted:
-                    let controller = LGUnauthorizedController()
-                    controller.unauthorizedType = .ablum
-                    weakSelf.viewControllers = [controller]
-                    break
-                case .notDetermined:
-                    break
-                }
+        do {
+            let status = try LGAuthorizationStatusManager.default.status(withPrivacyType: .photos)
+            if status == .notDetermined {
+                try LGAuthorizationStatusManager.default.requestPrivacy(withType: .photos,
+                                                                        callback:
+                    { [weak self] (type, status) in
+                        guard let weakSelf = self else {return}
+                        switch type {
+                        case .photos:
+                            weakSelf.setupControllersWith(status)
+                            break
+                        default:
+                            break
+                        }
+                })
+            } else {
+                setupControllersWith(status)
             }
-            println(status)
+        } catch {
+            LGStatusBarTips.show(withStatus: error.localizedDescription,
+                                 style: LGStatusBarConfig.Style.error)
+            DispatchQueue.main.after(0.5) { [weak self] in
+                guard let weakSelf = self else {return}
+                weakSelf.pickerDelegate?.pickerDidCancel(weakSelf)
+            }
         }
+    }
+    
+    func setupControllersWith(_ status: LGAuthorizationStatusManager.Status) {
+        switch status {
+        case .authorized:
+            let albumList = LGMPAlbumListController()
+            albumList.configs = self.configs
+            albumList.delegate = self.pickerDelegate
+            
+            let allPhotosList = LGMPAlbumDetailController()
+            allPhotosList.configs = self.configs
+            allPhotosList.delegate = self.pickerDelegate
+            self.viewControllers = [albumList, allPhotosList]
+            break
+        case .denied, .restricted:
+            let controller = LGUnauthorizedController()
+            controller.unauthorizedType = .ablum
+            self.viewControllers = [controller]
+            break
+        case .notDetermined:
+            break
+        case .unSupport:
+            break
+        }
+    }
+    
+    deinit {
+        globleSelectedDataArray = nil
+        globleMainPicker = nil
     }
     
 

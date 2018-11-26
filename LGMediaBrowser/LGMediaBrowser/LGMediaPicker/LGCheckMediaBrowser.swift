@@ -20,6 +20,8 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
     
     weak var checkMediaCallBack: LGCheckMediaBrowserCallBack?
     
+    var pickerConfigs: LGMediaPicker.Configuration!
+    
     lazy var bottomToolBar: LGMPMediaCheckBottomToolBar = {
         let temp = LGMPMediaCheckBottomToolBar(frame: CGRect(x: 0,
                                                              y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
@@ -178,17 +180,17 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
     }
     
     func refreshEditButtonStatus() {
-        guard let mainPicker = mainPicker, self.mediaArray.count > self.currentIndex else {return}
+        guard self.mediaArray.count > self.currentIndex else {return}
         let mediaModel = self.mediaArray[self.currentIndex]
         
-        if !(mainPicker.config.allowEditImage || mainPicker.config.allowEditVideo) {
+        if !(pickerConfigs.allowEditImage || pickerConfigs.allowEditVideo) {
             bottomToolBar.editButton.isHidden = true
         } else {
             bottomToolBar.editButton.isHidden = false
         }
         
-        if (mediaModel.mediaType == .generalPhoto && mainPicker.config.allowEditImage) ||
-            (mediaModel.mediaType == .video && mainPicker.config.allowEditVideo) {
+        if (mediaModel.mediaType == .generalPhoto && pickerConfigs.allowEditImage) ||
+            (mediaModel.mediaType == .video && pickerConfigs.allowEditVideo) {
             bottomToolBar.editButton.isEnabled = true
         } else {
             bottomToolBar.editButton.isEnabled = false

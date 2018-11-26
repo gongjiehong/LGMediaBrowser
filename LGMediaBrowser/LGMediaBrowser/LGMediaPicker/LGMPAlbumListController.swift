@@ -131,9 +131,9 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     public var dataArray: [LGAlbumListModel] = []
     
     /// 设置参数
-    var configs: LGMediaPicker.Configuration {
-        return mainPicker.config
-    }
+    var configs: LGMediaPicker.Configuration!
+    
+    weak var delegate: LGMediaPickerDelegate?
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -225,6 +225,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     deinit {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
+        NSObject.cancelPreviousPerformRequests(withTarget: self)
     }
     
 }
