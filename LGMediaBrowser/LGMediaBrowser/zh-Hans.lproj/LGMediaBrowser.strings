@@ -40,3 +40,4 @@
 "Select maximum of %d photos." = "最多只能选择%d张图片";
 "Can't select photos and videos at the same time." = "不能同时选择照片和视频";
 "iCloud synchronization." = "iCloud 同步中";
+"Authentication is required to reset your password." = "需要验证才能重置密码";
