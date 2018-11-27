@@ -163,7 +163,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         bottomToolBar.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
         bottomToolBar.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
         
-        bottomToolBar.originalPhotoButton.isHidden = configs.allowSelectOriginal
+        bottomToolBar.originalPhotoButton.isHidden = !configs.allowSelectOriginal
         bottomToolBar.originalPhotoButton.isSelected = configs.allowSelectOriginal
     }
     
@@ -201,7 +201,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                 if needRefresh {
                     guard let result = albumListModel.result else { return }
                     let photos = LGPhotoManager.fetchPhoto(inResult: result,
-                                                           supportMediaType: self.configs.resultMediaTypes)
+                                                           supportTypes: self.configs.resultMediaTypes)
                     for temp in photos {
                         for selectedTemp in globleSelectedDataArray
                             where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
@@ -231,25 +231,26 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
             } else {
                 DispatchQueue.userInteractive.async { [weak self] in
                     guard let weakSelf = self else { return }
-                    let album = LGPhotoManager.getAllPhotosAlbum(weakSelf.configs.resultMediaTypes)
-                    weakSelf.albumListModel = album
-                    weakSelf.dataArray.removeAll()
-                    for temp in album.models {
-                        for selectedTemp in globleSelectedDataArray
-                            where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier
-                        {
-                            temp.isSelected = true
-                            temp.currentSelectedIndex = selectedTemp.currentSelectedIndex
+                    if let album = LGPhotoManager.getAllPhotosAlbum(weakSelf.configs.resultMediaTypes) {
+                        weakSelf.albumListModel = album
+                        weakSelf.dataArray.removeAll()
+                        for temp in album.models {
+                            for selectedTemp in globleSelectedDataArray
+                                where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier
+                            {
+                                temp.isSelected = true
+                                temp.currentSelectedIndex = selectedTemp.currentSelectedIndex
+                            }
                         }
-                    }
-                    weakSelf.dataArray += album.models
-                    DispatchQueue.main.async { [weak self] in
-                        hud.dismiss()
-                        guard let weakSelf = self else { return }
-                        weakSelf.title = album.title
-                        weakSelf.listView.reloadData()
-                        weakSelf.scrollToBottom()
-                        weakSelf.cachingImages()
+                        weakSelf.dataArray += album.models
+                        DispatchQueue.main.async { [weak self] in
+                            hud.dismiss()
+                            guard let weakSelf = self else { return }
+                            weakSelf.title = album.title
+                            weakSelf.listView.reloadData()
+                            weakSelf.scrollToBottom()
+                            weakSelf.cachingImages()
+                        }
                     }
                 }
             }

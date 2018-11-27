@@ -34,7 +34,7 @@ public class LGMediaPicker: LGMPNavigationController {
         public var allowMixSelect: Bool = true
         
         /// 可选的数据类型，默认视频和图片都可选[.image, .video]
-        public var resultMediaTypes: LGPhotoManager.ResultMediaType = [.image, .video, .livePhoto, .animatedImage]
+        public var resultMediaTypes: LGPhotoManager.ResultMediaType = .all
         
         /// 是否支持选择GIF和APNG，默认支持true
         public var allowSelectAnimatedImage: Bool = true
@@ -49,13 +49,13 @@ public class LGMediaPicker: LGMPNavigationController {
         public var allowForceTouch: Bool = true
         
         /// 是否允许编辑图片，单张图片时有效，默认允许true
-        public var allowEditImage: Bool = true
+        public var allowEditImage: Bool = false
         
         /// 是否允许编辑视频，单张选择时有效，默认允许true
-        public var allowEditVideo: Bool = true
+        public var allowEditVideo: Bool = false
         
         /// 是否允许选择原图，默认允许，true
-        public var allowSelectOriginal: Bool = true
+        public var allowSelectOriginal: Bool = false
 
         /// 可编辑的视频最大长度，默认CMTime.zero，表示不限制长度
         public var maxVideoEditDuration: CMTime = CMTime.zero

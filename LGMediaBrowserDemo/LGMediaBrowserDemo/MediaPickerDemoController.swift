@@ -21,7 +21,7 @@ class MediaPickerDemoController: UIViewController {
     @IBAction func toChooseButtonPressed(_ sender: UIButton) {
         let picker = LGMediaPicker()
         picker.pickerDelegate = self
-        picker.configs.resultMediaTypes = [.all]
+        picker.configs.resultMediaTypes = .all
         self.present(picker, animated: true, completion: nil)
     }
 

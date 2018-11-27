@@ -9,6 +9,7 @@
 import Foundation
 import Photos
 
+/// 包装PHAsset对象
 public class LGPhotoModel {
     public enum AssetMediaType {
         case unknown
@@ -16,8 +17,6 @@ public class LGPhotoModel {
         case livePhoto
         case video
         case audio
-        case remoteImage
-        case remoteVideo
     }
     
     public var asset: PHAsset
@@ -121,16 +120,40 @@ public class LGPhotoModel {
 }
 
 
+/// 相册列表模型
 public class LGAlbumListModel {
+    /// 相册名
     public var title: String?
+    
+    /// 此相册中的元素个数
     public var count: Int
+    
+    /// 是否为所有图片那个相册
     public var isAllPhotos: Bool
+    
+    /// PHFetchResult<PHAsset>，存储asset
     public var result: PHFetchResult<PHAsset>?
+    
+    /// 头图asset
     public var headImageAsset: PHAsset?
+    
+    /// 图片/视频/livephoto...对象模型数组
     public var models: [LGPhotoModel] = []
+    
+    /// 被选中的模型数组
     public var selectedModels: [LGPhotoModel] = []
+    
+    /// 此相册中被选中的张数
     public var selectedCount: Int = 0
     
+    /// 构造函数
+    ///
+    /// - Parameters:
+    ///   - title: 相册标题
+    ///   - count: item数量
+    ///   - isAllPhotos: 是否为所有图片那个相册
+    ///   - result: PHFetchResult<PHAsset>，存储asset
+    ///   - headImageAsset: 头图asset
     public init(title: String?,
                 count: Int,
                 isAllPhotos: Bool,
@@ -174,21 +197,20 @@ extension LGPhotoModel {
             return .video
         case .audio:
             return .audio
-        default:
-            return .other
         }
     }
 }
 
 
 extension LGPhotoModel {
+    /// 导出图片的统一存储地址，预先创建文件夹，直接写入
     public var imageCachePath: String {
         guard let fileName = self.asset.localIdentifier.md5Hash() else {
             return ""
         }
         
         let tmpDirPath = NSTemporaryDirectory()
-        let exportDir = tmpDirPath + "LGPhotoModel/export/"
+        let exportDir = tmpDirPath + "LGPhotoModel/Export/Images"
         do {
             if FileManager.default.fileExists(atPath: exportDir) {
                 
@@ -200,6 +222,50 @@ extension LGPhotoModel {
             return exportDir + fileName + ".jpg"
         } catch {
             return ""
+        }
+    }
+    
+    /// LivePhoto导出时的统一存储地址，预先创建文件夹，直接写入
+    public var livePhotoCachePath: (imagePath: String, moviePath: String) {
+        guard let fileName = self.asset.localIdentifier.md5Hash() else {
+            return ("", "")
+        }
+        
+        let tmpDirPath = NSTemporaryDirectory()
+        let exportDir = tmpDirPath + "LGPhotoModel/Export/LivePhoto/"
+        do {
+            if FileManager.default.fileExists(atPath: exportDir) {
+                
+            } else {
+                try FileManager.default.createDirectory(at: URL(fileURLWithPath: exportDir),
+                                                        withIntermediateDirectories: true,
+                                                        attributes: nil)
+            }
+            return (exportDir + fileName + ".jpg", exportDir + fileName + ".mov")
+        } catch {
+            return ("", "")
+        }
+    }
+    
+    /// 视频导出时的统一存储地址，预先创建文件夹，直接写入
+    public var videoCachePath: (thumbnailImagePath: String, moviePath: String) {
+        guard let fileName = self.asset.localIdentifier.md5Hash() else {
+            return ("", "")
+        }
+        
+        let tmpDirPath = NSTemporaryDirectory()
+        let exportDir = tmpDirPath + "LGPhotoModel/Export/Videos/"
+        do {
+            if FileManager.default.fileExists(atPath: exportDir) {
+                
+            } else {
+                try FileManager.default.createDirectory(at: URL(fileURLWithPath: exportDir),
+                                                        withIntermediateDirectories: true,
+                                                        attributes: nil)
+            }
+            return (exportDir + fileName + ".jpg", exportDir + fileName + ".mp4")
+        } catch {
+            return ("", "")
         }
     }
 }
