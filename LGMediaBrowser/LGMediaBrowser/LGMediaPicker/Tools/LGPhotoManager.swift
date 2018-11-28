@@ -34,7 +34,7 @@ public class LGPhotoManager {
         public static var all: ResultMediaType = [.image, .livePhoto, .animatedImage, .video, audio]
     }
     
-    public static var sort: SortBy = .descending
+    public static var sort: SortBy = .ascending
     
     public static var imageManager: PHCachingImageManager = PHCachingImageManager()
     

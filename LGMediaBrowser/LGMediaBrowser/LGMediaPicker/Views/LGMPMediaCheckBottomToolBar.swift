@@ -67,6 +67,16 @@ internal class LGMPMediaCheckBottomToolBar: UIToolbar {
         setupDefault()
     }
     
+    var allowEdit: Bool = true
+    
+    init(frame: CGRect, allowEdit: Bool) {
+        super.init(frame: frame)
+        self.allowEdit = allowEdit
+        editButton.isHidden = !allowEdit
+        
+        setupDefault()
+    }
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupDefault()
@@ -78,10 +88,13 @@ internal class LGMPMediaCheckBottomToolBar: UIToolbar {
         let flexibleSpaceItem = UIBarButtonItem(barButtonSystemItem: UIBarButtonItem.SystemItem.flexibleSpace,
                                                 target: self,
                                                 action: nil)
-        let editItem = UIBarButtonItem(customView: editButton)
         let doneItem = UIBarButtonItem(customView: doneButton)
-        
-        self.items = [editItem, flexibleSpaceItem, doneItem]
+        if allowEdit {
+            let editItem = UIBarButtonItem(customView: editButton)
+            self.items = [editItem, flexibleSpaceItem, doneItem]
+        } else {
+            self.items = [flexibleSpaceItem, doneItem]
+        }
     }
     
     // MARK: - actions
@@ -93,12 +106,9 @@ internal class LGMPMediaCheckBottomToolBar: UIToolbar {
         barDelegate?.doneButtonPressed(sender)
     }
     
-    // MARK: - copy
+    // MARK: - copy(fake)
     override func copy() -> Any {
-        let result = LGMPMediaCheckBottomToolBar(frame: self.frame)
-        result.editButton = editButton
-        result.barDelegate = barDelegate
-        result.doneButton = doneButton
+        let result = LGMPMediaCheckBottomToolBar(frame: self.frame, allowEdit: self.allowEdit)
         return result
     }
 }

@@ -26,7 +26,8 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         let temp = LGMPMediaCheckBottomToolBar(frame: CGRect(x: 0,
                                                              y: self.view.lg_height - UIDevice.bottomSafeMargin - 44.0,
                                                              width: self.view.lg_width,
-                                                             height: UIDevice.bottomSafeMargin + 44.0))
+                                                             height: UIDevice.bottomSafeMargin + 44.0),
+                                               allowEdit: allowEdit)
         temp.barDelegate = self
         return temp
     }()
@@ -42,6 +43,10 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         tempButton.enlargeOffset = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         return tempButton
     }()
+    
+    var allowEdit: Bool {
+        return pickerConfigs.allowEditImage || pickerConfigs.allowEditVideo
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -183,19 +188,19 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         guard self.mediaArray.count > self.currentIndex else {return}
         let mediaModel = self.mediaArray[self.currentIndex]
         
-        if !(pickerConfigs.allowEditImage || pickerConfigs.allowEditVideo) {
-            bottomToolBar.editButton.isHidden = true
+        if !allowEdit {
         } else {
             bottomToolBar.editButton.isHidden = false
-        }
-        
-        if (mediaModel.mediaType == .generalPhoto && pickerConfigs.allowEditImage) ||
-            (mediaModel.mediaType == .video && pickerConfigs.allowEditVideo) {
-            bottomToolBar.editButton.isEnabled = true
-        } else {
-            bottomToolBar.editButton.isEnabled = false
+            if (mediaModel.mediaType == .generalPhoto && pickerConfigs.allowEditImage) ||
+                (mediaModel.mediaType == .video && pickerConfigs.allowEditVideo) {
+                bottomToolBar.editButton.isEnabled = true
+            } else {
+                bottomToolBar.editButton.isEnabled = false
+            }
         }
     }
+    
+    
     
     // MARK: -  选择按钮点击事件处理
     @objc func selectButtonPressed(_ button: UIButton) {

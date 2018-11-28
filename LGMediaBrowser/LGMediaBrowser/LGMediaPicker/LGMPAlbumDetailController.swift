@@ -64,6 +64,10 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         return temp
     }()
     
+    private var isFullDatasourcePreview: Bool = true
+    
+    private var tempSelectedPhotosArray: [LGPhotoModel] = []
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
         
@@ -497,7 +501,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                 if !self.allowTakePhoto || self.configs.sortBy == .ascending {
                     indexs.append(IndexPath(row: index, section: 0))
                 } else {
-                    indexs.append(IndexPath(row: index - 1, section: 0))
+                    indexs.append(IndexPath(row: index + 1, section: 0))
                 }
                 
             }
@@ -804,43 +808,112 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
 
 extension LGMPAlbumDetailController: LGMediaBrowserDataSource {
     public func numberOfPhotosInPhotoBrowser(_ photoBrowser: LGMediaBrowser) -> Int {
-        return self.dataArray.count
+        if isFullDatasourcePreview {
+            return self.dataArray.count
+        } else {
+            return globleSelectedDataArray.count
+        }
     }
     
     public func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel {
-        var thumbnailImage: UIImage?
-        if let cell = self.listView.cellForItem(at: IndexPath(row: index, section: 0)) as? LGMPAlbumDetailImageCell {
-            thumbnailImage = cell.layoutImageView.image
-        }
-        var dataModel: LGPhotoModel
-        if !self.allowTakePhoto || configs.sortBy == .ascending {
-            dataModel = self.dataArray[index]
+        if isFullDatasourcePreview {
+            var thumbnailImage: UIImage?
+            let indexPath = IndexPath(row: index, section: 0)
+            if let cell = self.listView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell {
+                thumbnailImage = cell.layoutImageView.image
+            }
+            var dataModel: LGPhotoModel
+            if !self.allowTakePhoto || configs.sortBy == .ascending {
+                dataModel = self.dataArray[index]
+            } else {
+                dataModel = self.dataArray[index - 1]
+            }
+            let mediaModel = dataModel.asLGMediaModel()
+            mediaModel.thumbnailImage = thumbnailImage
+            return mediaModel
         } else {
-            dataModel = self.dataArray[index - 1]
+            let dataModel = globleSelectedDataArray[index]
+            let dataIndex = self.dataArray.index(where: { (tempModel) -> Bool in
+                return tempModel.asset == dataModel.asset
+            })
+            
+            let mediaModel = dataModel.asLGMediaModel()
+            
+            if var dataIndex = dataIndex {
+                if !self.allowTakePhoto || configs.sortBy == .ascending {
+                } else {
+                    dataIndex += 1
+                }
+                
+                var thumbnailImage: UIImage?
+                let indexPath = IndexPath(row: dataIndex, section: 0)
+                if let cell = self.listView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell {
+                    thumbnailImage = cell.layoutImageView.image
+                    mediaModel.thumbnailImage = thumbnailImage
+                }
+            }
+            return mediaModel
         }
-        let mediaModel = dataModel.asLGMediaModel()
-        mediaModel.thumbnailImage = thumbnailImage
-        return mediaModel
     }
 }
 
 extension LGMPAlbumDetailController: LGMediaBrowserDelegate {
     public func viewForMedia(_ browser: LGMediaBrowser, index: Int) -> UIView? {
-        self.listView.layoutIfNeeded()
-        return self.listView.cellForItem(at: IndexPath(row: index, section: 0))
+        func fullPreviewTargetView(withIndex dataIndex: Int) -> UIView? {
+            self.listView.layoutIfNeeded()
+            return self.listView.cellForItem(at: IndexPath(row: dataIndex, section: 0))
+        }
+        
+        if isFullDatasourcePreview {
+            return fullPreviewTargetView(withIndex: index)
+        } else {
+            let dataModel = tempSelectedPhotosArray[index]
+            if var dataIndex = self.dataArray.firstIndex(where: { (tempModel) -> Bool in
+                return tempModel.asset == dataModel.asset
+            })
+            {
+                if !self.allowTakePhoto || configs.sortBy == .ascending {
+                } else {
+                    dataIndex += 1
+                }
+                return fullPreviewTargetView(withIndex: dataIndex)
+            } else {
+                return nil
+            }
+        }
     }
     
     public func didScrollToIndex(_ browser: LGMediaBrowser, index: Int) {
-        self.listView.layoutIfNeeded()
-        if let tempCell = self.listView.cellForItem(at: IndexPath(row: index, section: 0)) {
-            if self.listView.frame.contains(tempCell.convert(tempCell.bounds, to: self.view)) {
-                
-            } else {
-                self.listView.scrollToItem(at: IndexPath(row: index, section: 0),
-                                           at: UICollectionView.ScrollPosition.centeredVertically,
-                                           animated: true)
+        func didScrollTo(dataIndex: Int) {
+            self.listView.layoutIfNeeded()
+            if let tempCell = self.listView.cellForItem(at: IndexPath(row: dataIndex, section: 0)) {
+                if self.listView.frame.contains(tempCell.convert(tempCell.bounds, to: self.view)) {
+                    
+                } else {
+                    self.listView.scrollToItem(at: IndexPath(row: dataIndex, section: 0),
+                                               at: UICollectionView.ScrollPosition.centeredVertically,
+                                               animated: true)
+                }
             }
         }
+        
+        if isFullDatasourcePreview {
+            didScrollTo(dataIndex: index)
+        } else {
+            let dataModel = tempSelectedPhotosArray[index]
+            if var dataIndex = self.dataArray.firstIndex(where: { (tempModel) -> Bool in
+                return tempModel.asset == dataModel.asset
+            })
+            {
+                if !self.allowTakePhoto || configs.sortBy == .ascending {
+                } else {
+                    dataIndex += 1
+                }
+                didScrollTo(dataIndex: dataIndex)
+            } else {
+            }
+        }
+        
     }
 }
 
@@ -851,7 +924,8 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
     }
     
     func previewButtonPressed(_ button: UIButton) {
-        preview(with: self.selectedIndexPath.last?.row ?? 0)
+        self.tempSelectedPhotosArray = globleSelectedDataArray
+        preview(with: 0, isFullDataSource: false)
     }
     
     func originalButtonPressed(_ button: UIButton) {
@@ -864,7 +938,10 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
                          isOriginalPhoto: bottomToolBar.originalPhotoButton.isSelected)
     }
     
-    func preview(with index: Int, animated: Bool = true) {
+    func preview(with index: Int, animated: Bool = true, isFullDataSource: Bool = true) {
+        
+        self.isFullDatasourcePreview = isFullDataSource
+        
         var configs = LGMediaBrowserSettings()
         configs.isClickToTurnOffEnabled = false
         configs.showsStatusBar = true
@@ -886,45 +963,64 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
                     isSelected: Bool,
                     complete: @escaping (Bool) -> Void)
     {
-        var dataModel: LGPhotoModel
-        if !self.allowTakePhoto || configs.sortBy == .ascending {
-            dataModel = self.dataArray[index]
-        } else {
-            dataModel = self.dataArray[index - 1]
+        func fullCheckWith(_ dataIndex: Int) {
+            var dataModel: LGPhotoModel
+            if !self.allowTakePhoto || configs.sortBy == .ascending {
+                dataModel = self.dataArray[dataIndex]
+            } else {
+                dataModel = self.dataArray[dataIndex - 1]
+            }
+            
+            if isSelected {
+                canSelectModel(dataModel) { [weak self] (canSelect) in
+                    if canSelect {
+                        dataModel.isSelected = true
+                        globleSelectedDataArray.append(dataModel)
+                        let indexPath = IndexPath(row: dataIndex, section: 0)
+                        guard let weakSelf = self else {
+                            complete(false)
+                            return
+                        }
+                        weakSelf.selectedIndexPath.append(indexPath)
+                        weakSelf.refreshSelectedIndexsLayout()
+                        complete(true)
+                    } else {
+                        complete(false)
+                    }
+                }
+            } else {
+                dataModel.isSelected = false
+                if let dataIndex = globleSelectedDataArray.index(where: { (temp) -> Bool in
+                    temp.asset.localIdentifier == dataModel.asset.localIdentifier
+                }) {
+                    dataModel.currentSelectedIndex = -1
+                    globleSelectedDataArray.remove(at: dataIndex)
+                }
+                self.listView.reloadItems(at: [IndexPath(row: dataIndex, section: 0)])
+                refreshSelectedIndexsLayout()
+                complete(true)
+            }
         }
         
-        if isSelected {
-            canSelectModel(dataModel) { [weak self] (canSelect) in
-                if canSelect {
-                    dataModel.isSelected = true
-                    globleSelectedDataArray.append(dataModel)
-                    let indexPath = IndexPath(row: index, section: 0)
-                    guard let weakSelf = self else {
-                        complete(false)
-                        return
-                    }
-                    weakSelf.selectedIndexPath.append(indexPath)
-                    weakSelf.refreshSelectedIndexsLayout()
-                    complete(true)
-                } else {
-                    complete(false)
-                }
-            }
+        if isFullDatasourcePreview {
+            fullCheckWith(index)
         } else {
-            dataModel.isSelected = false
-            if let index = globleSelectedDataArray.index(where: { (temp) -> Bool in
-                temp.asset.localIdentifier == dataModel.asset.localIdentifier
-            }) {
-                dataModel.currentSelectedIndex = -1
-                globleSelectedDataArray.remove(at: index)
+            let dataModel = globleSelectedDataArray[index]
+            if var dataIndex = self.dataArray.firstIndex(where: { (tempModel) -> Bool in
+                return tempModel.asset == dataModel.asset
+            })
+            {
+                if !self.allowTakePhoto || configs.sortBy == .ascending {
+                } else {
+                    dataIndex += 1
+                }
+                fullCheckWith(dataIndex)
+            } else {
+                complete(false)
             }
-            self.listView.reloadItems(at: [IndexPath(row: index, section: 0)])
-            refreshSelectedIndexsLayout()
-            complete(true)
         }
     }
-    
-    
+ 
     func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGPhotoModel]) {
         delegate?.picker(globleMainPicker,
                          didDoneWith: globleSelectedDataArray,

@@ -119,7 +119,6 @@ public class LGPhotoModel {
     }
 }
 
-
 /// 相册列表模型
 public class LGAlbumListModel {
     /// 相册名
