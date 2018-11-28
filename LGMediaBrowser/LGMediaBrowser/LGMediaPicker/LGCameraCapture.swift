@@ -27,6 +27,7 @@ public class LGCameraCapture: UIViewController {
         super.loadView()
         self.view.addSubview(_view)
         _view.frame = UIScreen.main.bounds
+        _view.fillMode = .preserveAspectRatioAndFill
     }
     
     /// 视频格式定义
