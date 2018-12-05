@@ -222,9 +222,9 @@ open class LGFileDownloader {
                         outputStream.open()
                         
                         while inputStream.hasBytesAvailable && outputStream.hasSpaceAvailable {
-                            var buffer = [UInt8](repeating: 0, count: 1024)
+                            var buffer = [UInt8](repeating: 0, count: 1_024)
                             
-                            let bytesRead = inputStream.read(&buffer, maxLength: 1024)
+                            let bytesRead = inputStream.read(&buffer, maxLength: 1_024)
                             if inputStream.streamError != nil || bytesRead < 0 {
                                 break
                             }

@@ -223,7 +223,7 @@ public class LGMediaModel {
                             progressBlock(progressValue, weakSelf.identify)
                         }
                     }
-            }, transform: nil)
+            })
             { (resultImage, resultURL, sourceType, imageStage, error) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else {
@@ -351,7 +351,7 @@ public class LGMediaModel {
                             progressBlock(progressValue, weakSelf.identify)
                         }
                     }
-            }, transform: nil)
+            })
             { (resultImage, resultURL, sourceType, imageStage, error) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else {
