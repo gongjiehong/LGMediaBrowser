@@ -83,7 +83,7 @@ extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewD
         } else {
             cell = RemoteImageLayoutCell(frame: CGRect.zero)
         }
-        cell.imageView.lg_setImageWithURL(ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 256))
+        cell.imageView.lg_setImageWithURL(ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 1024))
         return cell
     }
     
@@ -120,7 +120,7 @@ extension RemoteImageWallController: LGMediaBrowserDataSource {
     }
     
     func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel {
-        let url = ImgaeURLConstructHelper.imageURL(fromFileID: index + 1, size: 256)
+        let url = ImgaeURLConstructHelper.imageURL(fromFileID: index + 1, size: 1024)
         var image: UIImage?
         if let cell = collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? RemoteImageLayoutCell {
             image = cell.imageView.image
@@ -166,7 +166,7 @@ extension RemoteImageWallController: LGForceTouchPreviewingDelegate {
         
         previewingContext.sourceRect = cell.frame
         
-        let url = ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 256)
+        let url = ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 1024)
         let mediaModel = (try? LGMediaModel(thumbnailImageURL: url,
                                             mediaURL: url,
                                             mediaAsset: nil,
@@ -196,7 +196,7 @@ extension RemoteImageWallController: LGForceTouchPreviewingDelegate {
 
 
 let ImageCount: Int = 4_000
-let ImageURLPrefix: String = "http://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/"
+let ImageURLPrefix: String = "https://qzonestyle.gtimg.cn/qzone/app/weishi/client/testimage/"
 class ImgaeURLConstructHelper {
     static func imageURL(fromFile file: String, size: Int) -> String {
         return String(format: "%@%d/%@", ImageURLPrefix, size, file)

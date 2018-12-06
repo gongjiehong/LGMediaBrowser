@@ -9,6 +9,93 @@
 import LGHTTPRequest
 import LGWebImage
 
+/// 将Dictionary封装为线程安全的Dictionary
+public struct LGThreadSafeDictionary<Key, Value>: Sequence where Key : Hashable {
+    
+    /// 原始Dictionary容器
+    private var container: Dictionary<Key, Value> = Dictionary<Key, Value>()
+    
+    /// 线程锁
+    private var lock: NSLock = NSLock()
+    
+    /// 元素类型定义
+    public typealias Element = (key: Key, value: Value)
+    
+    public init() {
+    }
+    
+    public subscript(key: Key) -> Value? {
+        get {
+            lock.lock()
+            defer {
+                lock.unlock()
+            }
+            return self.container[key]
+        } set {
+            lock.lock()
+            defer {
+                lock.unlock()
+            }
+            self.container[key] = newValue
+        }
+    }
+    
+    public var count: Int {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        return self.container.count
+    }
+    
+    public var isEmpty: Bool {
+        return self.count == 0
+    }
+    
+    @discardableResult
+    public mutating func removeValue(forKey key: Key) -> Value? {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        return self.container.removeValue(forKey: key)
+    }
+    
+    public mutating func removeAll(keepingCapacity keepCapacity: Bool = false) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        self.container.removeAll(keepingCapacity: keepCapacity)
+    }
+    
+    
+    public var keys: Dictionary<Key, Value>.Keys {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        return self.container.keys
+    }
+    
+    
+    public var values: Dictionary<Key, Value>.Values {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        return self.container.values
+    }
+    
+    public func makeIterator() -> DictionaryIterator<Key, Value> {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+        return self.container.makeIterator()
+    }
+}
+
 open class LGFileDownloader {
     
     internal struct Helper {
