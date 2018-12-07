@@ -25,6 +25,7 @@ class MediaBrowserEntranceController: UIViewController {
     
     @objc func imageTaped(_ sender: UITapGestureRecognizer) {
         var dataArray = [String]()
+        dataArray.append("https://dtaw5kick3bfu.cloudfront.net/100/%E6%97%A0%E7%A0%81%E5%A4%A7%E5%9B%BE.jpg")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/mew_interlaced.png")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480450.jp2")
         dataArray.append("https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg")
@@ -45,14 +46,19 @@ class MediaBrowserEntranceController: UIViewController {
         dataArray.append("http://staticfile.cxylg.com/IMG_0392.heic")
         
         
-//        var modelArray = [LGMediaModel]()
-//        dataArray.forEach { (stringResult) in
-//            modelArray.append(LGMediaModel(thumbnailImageURL: stringResult,
-//                                           mediaURL: stringResult,
-//                                           mediaAsset: nil,
-//                                           mediaType: LGMediaModel.MediaType.generalPhoto,
-//                                           mediaPosition: LGMediaModel.Position.remoteFile))
-//        }
+        var modelArray = [LGMediaModel]()
+        dataArray.forEach { (stringResult) in
+            if let model = try? LGMediaModel(thumbnailImageURL: stringResult,
+                                             mediaURL: stringResult,
+                                             mediaAsset: nil,
+                                             mediaType: LGMediaModel.MediaType.generalPhoto,
+                                             mediaPosition: LGMediaModel.Position.remoteFile,
+                                             thumbnailImage: nil)
+            {
+                modelArray.append(model)
+
+            }
+        }
 //        modelArray += [LGMediaModel(thumbnailImageURL: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
 //                                    mediaURL: "https://s3-us-west-2.amazonaws.com/julyforcd/100/1510480481.jpg",
 //                                    mediaAsset: nil,
@@ -73,14 +79,14 @@ class MediaBrowserEntranceController: UIViewController {
 //                                    mediaAsset: nil,
 //                                    mediaType: LGMediaModel.MediaType.video,
 //                                    mediaPosition: LGMediaModel.Position.remoteFile)]
-//        
-//        let media = LGMediaBrowser(mediaArray: modelArray,
-//                                   status: LGMediaBrowserStatus.browsingAndEditing,
-//                                   currentIndex: 0)
-//        media.targetView = self.imageView
-//        media.delegate = self
-//        self.present(media, animated: true) {
-//        }
+        
+        let media = LGMediaBrowser(mediaArray: modelArray,
+                                   status: LGMediaBrowserStatus.browsingAndEditing,
+                                   currentIndex: 0)
+        media.targetView = self.imageView
+        media.delegate = self
+        self.present(media, animated: true) {
+        }
     }
     
     override func viewDidLayoutSubviews() {
