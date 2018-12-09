@@ -112,9 +112,17 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     
     func mediaModelDidSet() {
         if let media = mediaModel {
+            self.player.replaceCurrentItem(with: nil)
+            self.layer.contents = media.thumbnailImage?.cgImage
+        }
+    }
+    
+    func playIfCanPlay() {
+        if let media = mediaModel {
             do {
-                
+                self.player.replaceCurrentItem(with: nil)
                 self.layer.contents = media.thumbnailImage?.cgImage
+                
                 try media.fetchMoviePlayerItem(withProgress: { (progress, identify) in
                     
                 }) { [weak self] (playerItem, identify) in

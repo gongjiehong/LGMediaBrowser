@@ -404,4 +404,10 @@ public class LGPhotoManager {
                                             options: options)
         }
     }
+    
+    public static func startCachingImages() {
+        DispatchQueue.background.async {
+            imageManager.stopCachingImagesForAllAssets()
+        }
+    }
 }

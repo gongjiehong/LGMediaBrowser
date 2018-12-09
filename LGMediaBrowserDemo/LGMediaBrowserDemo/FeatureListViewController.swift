@@ -8,6 +8,7 @@
 
 import UIKit
 import LGMediaBrowser
+import LGWebImage
 
 class FeatureListViewController: UITableViewController, UIGestureRecognizerDelegate {
 
@@ -112,6 +113,14 @@ class FeatureListViewController: UITableViewController, UIGestureRecognizerDeleg
     }
     */
     
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        if indexPath.row == 4 {
+            LGWebImageManager.default.clearAllCache {
+                
+            }
+        }
+    }
     
 
 }

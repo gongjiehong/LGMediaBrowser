@@ -723,8 +723,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let index = Int(scrollView.contentOffset.x / scrollView.lg_width)
         self.currentIndex = index
+        
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didScrollToIndex(_:index:))) == true {
             self.delegate?.didScrollToIndex!(self, index: self.currentIndex)
+        }
+        
+        if let cell = self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? LGMediaBrowserPreviewCell {
+            cell.didDisplay()
         }
     }
 }

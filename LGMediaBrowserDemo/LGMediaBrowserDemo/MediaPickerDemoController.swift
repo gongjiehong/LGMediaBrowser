@@ -15,16 +15,6 @@ class MediaPickerDemoController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        // Do any additional setup after loading the view.
-        
-        for index in 0...100 {
-            DispatchQueue.background.async {
-//                let request = LGURLSessionManager.default.streamDownload("https://dtaw5kick3bfu.cloudfront.net/100/%E6%97%A0%E7%A0%81%E5%A4%A7%E5%9B%BE.jpg")
-                let request = LGURLSessionManager.default.download("https://dtaw5kick3bfu.cloudfront.net/100/%E6%97%A0%E7%A0%81%E5%A4%A7%E5%9B%BE.jpg")
-                dump(request)
-            }
-            sleep(1)
-        }
         
     }
     

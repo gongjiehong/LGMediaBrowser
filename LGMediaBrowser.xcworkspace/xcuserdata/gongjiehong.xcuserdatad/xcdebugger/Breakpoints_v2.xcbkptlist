@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGWebImage/LGHTTPRequest/LGHTTPRequest/LGHTTPRequest/Core/LGURLSessionManager.swift"
-            timestampString = "566035875.295714"
+            timestampString = "566058201.826859"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "368"
-            endingLineNumber = "368"
+            startingLineNumber = "370"
+            endingLineNumber = "370"
             landmarkName = "streamDownload(_:to:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGWebImage/LGHTTPRequest/LGHTTPRequest/LGHTTPRequest/Core/LGURLSessionManager.swift"
-            timestampString = "566035875.295777"
+            timestampString = "566058201.826924"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "356"
-            endingLineNumber = "356"
+            startingLineNumber = "357"
+            endingLineNumber = "357"
             landmarkName = "streamDownload(_:to:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGWebImage/LGWebImage/Extensions/UIImageView+LGWebImage.swift"
-            timestampString = "565871924.309301"
+            timestampString = "566058201.8269759"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "29"
-            endingLineNumber = "29"
+            startingLineNumber = "36"
+            endingLineNumber = "36"
             landmarkName = "lg_imageSetter"
             landmarkType = "24">
          </BreakpointContent>
@@ -57,14 +57,14 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGWebImage/LGWebImage/Extensions/UIImageView+LGWebImage.swift"
-            timestampString = "565871924.309661"
+            filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGZoomingScrollView.swift"
+            timestampString = "566058201.827034"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "37"
-            endingLineNumber = "37"
-            landmarkName = "lg_imageSetter"
-            landmarkType = "24">
+            startingLineNumber = "86"
+            endingLineNumber = "86"
+            landmarkName = "layoutImageIfNeeded()"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -73,13 +73,29 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGWebImage/LGHTTPRequest/LGHTTPRequest/LGHTTPRequest/Core/LGURLSessionManager.swift"
-            timestampString = "566035875.295913"
+            filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGZoomingScrollView.swift"
+            timestampString = "566058201.827083"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "406"
-            endingLineNumber = "406"
-            landmarkName = "streamDownload(_:to:)"
+            startingLineNumber = "87"
+            endingLineNumber = "87"
+            landmarkName = "layoutImageIfNeeded()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowser/LGMediaBrowser/MediaPreview/LGZoomingScrollView.swift"
+            timestampString = "566058201.82713"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "82"
+            endingLineNumber = "82"
+            landmarkName = "layoutImageIfNeeded()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -89,29 +105,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowserDemo/LGMediaBrowserDemo/MediaPickerDemoController.swift"
-            timestampString = "566035875.29597"
+            filePath = "LGMediaBrowserDemo/LGMediaBrowserDemo/FeatureListViewController.swift"
+            timestampString = "566058201.827179"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "24"
-            endingLineNumber = "24"
-            landmarkName = "viewDidLoad()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "LGMediaBrowserDemo/LGMediaBrowserDemo/MediaPickerDemoController.swift"
-            timestampString = "566035875.296314"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "25"
-            endingLineNumber = "25"
-            landmarkName = "viewDidLoad()"
+            startingLineNumber = "120"
+            endingLineNumber = "120"
+            landmarkName = "tableView(_:didSelectRowAt:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

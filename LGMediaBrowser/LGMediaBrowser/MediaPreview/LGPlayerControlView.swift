@@ -180,8 +180,15 @@ open class LGPlayerControlView: LGPlayerView {
     
     override func mediaModelDidSet() {
         if let media = mediaModel {
-            
             self.layer.contents = media.thumbnailImage?.cgImage
+            self.player.replaceCurrentItem(with: nil)
+        } else {
+            self.progressView.isShowError = true
+        }
+    }
+    
+    override func playIfCanPlay() {
+        if let media = mediaModel {
             
             if media.mediaType == .video {
                 self.isShowBottomSlideControls = false
@@ -190,23 +197,28 @@ open class LGPlayerControlView: LGPlayerView {
             
             do {
                 
+                self.progressView.isHidden = false
+                self.progressView.isShowError = false
+                self.progressView.progress = 0.0
+                
                 try media.fetchMoviePlayerItem(withProgress: { [weak self] (progress, identify) in
                     guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
                     weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-                }, completion: { [weak self] (playerItem, identify) in
-                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
-                    guard let playerItem = playerItem else {
-                        weakSelf.progressView.isShowError = true
-                        return
-                    }
-                    weakSelf.player.replaceCurrentItem(with: playerItem)
-                    weakSelf.player.play()
-                    weakSelf.progressView.isHidden = true
+                    }, completion: { [weak self] (playerItem, identify) in
+                        guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
+                        guard let playerItem = playerItem else {
+                            weakSelf.progressView.isShowError = true
+                            return
+                        }
+                        weakSelf.player.replaceCurrentItem(with: playerItem)
+                        weakSelf.progressView.isHidden = true
                 })
             } catch {
                 self.progressView.isShowError = true
                 println(error)
             }
+        } else {
+            self.progressView.isShowError = true
         }
     }
     

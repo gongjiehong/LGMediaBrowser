@@ -70,8 +70,11 @@ open class LGZoomingScrollView: UIScrollView {
             return
         }
         
+        self.imageView.image = mediaModel.thumbnailImage
+
         self.progressView.isHidden = false
         self.progressView.isShowError = false
+        self.progressView.progress = 0.0
         
         do {
             try mediaModel.fetchImage(withProgress: { [weak self] (progress, identify) in
@@ -234,6 +237,10 @@ open class LGZoomingScrollView: UIScrollView {
     
     @objc func postDoubleTapNotification() {
         NotificationCenter.default.post(name: LGMediaBrowser.needHideControlsNotification, object: nil)
+    }
+    
+    func reset() {
+        self.setMaxMinZoomScalesForCurrentBounds()
     }
 }
 

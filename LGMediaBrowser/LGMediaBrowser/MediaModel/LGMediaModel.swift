@@ -12,6 +12,8 @@ import AVFoundation
 import LGWebImage
 import LGHTTPRequest
 
+fileprivate var _LGMediaModelIdentify: Int64 = 0
+
 /// 用于组装progress的最大值
 private let totalUnitCount: Int64 = 1_000
 
@@ -64,14 +66,39 @@ public class LGMediaModel {
     public private(set) var mediaPosition: Position = .remoteFile
     
     public private(set) lazy var identify: Int64 = {
-        return Int64(arc4random() - 1)
+        return OSAtomicIncrement64(&_LGMediaModelIdentify)
     }()
     
     internal weak var photoModel: LGPhotoModel? = nil
     
     private var _thumbnailImage: UIImage?
     private var _lock: DispatchSemaphore = DispatchSemaphore(value: 1)
-    private var _requestId: PHImageRequestID = PHInvalidImageRequestID
+    
+    private var _imageRequestId: PHImageRequestID = PHInvalidImageRequestID
+    private var _livePhotoRequestId: Int32 = PHLivePhotoRequestIDInvalid
+    
+    private var _thumbnailImageDownloadResult: LGWebImageManager.DownloadResult? {
+        willSet {
+            _thumbnailImageDownloadResult?.operation.cancel()
+        }
+    }
+    
+    private var _imageDownloadResult: LGWebImageManager.DownloadResult? {
+        willSet {
+            _imageDownloadResult?.operation.cancel()
+        }
+    }
+    
+    private var _thumbnailFileDownloadResult: LGFileDownloader.DownloadResult? {
+        willSet {
+            _thumbnailImageDownloadResult?.operation.cancel()
+        }
+    }
+    private var _fileDownloadResult: LGFileDownloader.DownloadResult? {
+        willSet {
+            _fileDownloadResult?.operation.cancel()
+        }
+    }
     
     /// 占位图，大多数时候直接就是原图
     public var thumbnailImage: UIImage? {
@@ -93,11 +120,9 @@ public class LGMediaModel {
     public init() {
         self.mediaType = .other
         self.mediaPosition = .localFile
-        
-        println(identify)
     }
     
-
+    
     /// 初始化, 此处会校验参数是否合法
     ///
     /// - Parameters:
@@ -109,11 +134,11 @@ public class LGMediaModel {
     ///   - thumbnailImage: 缩略图
     /// - Throws: 参数不正确的异常抛出
     public convenience init(thumbnailImageURL: LGURLConvertible?,
-                mediaURL: LGURLConvertible?,
-                mediaAsset: PHAsset?,
-                mediaType: MediaType,
-                mediaPosition: Position,
-                thumbnailImage: UIImage? = nil) throws
+                            mediaURL: LGURLConvertible?,
+                            mediaAsset: PHAsset?,
+                            mediaType: MediaType,
+                            mediaPosition: Position,
+                            thumbnailImage: UIImage? = nil) throws
     {
         self.init()
         func checkParams() throws {
@@ -177,6 +202,12 @@ public class LGMediaModel {
         self.thumbnailImage = thumbnailImage
     }
     
+    deinit {
+        cancleCurrentFetch()
+    }
+}
+
+extension LGMediaModel {
     /// 缩略图是否有效
     public var isThumbnailImageValid: Bool {
         if let thumbnailImageURL = try? self.thumbnailImageURL?.asURL() {
@@ -200,7 +231,7 @@ public class LGMediaModel {
     ///   - completion: 完成回调
     /// - Throws: 抛出过程中产生的异常
     public func fetchThumbnailImage(withProgress progressBlock: ProgressHandler?,
-                             completion: ((UIImage?, Int64) -> Void)?) throws
+                                    completion: ((UIImage?, Int64) -> Void)?) throws
     {
         if !isThumbnailImageValid {
             throw LGMediaModelError.unableToGetThumbnail
@@ -210,9 +241,10 @@ public class LGMediaModel {
             if self.thumbnailImageURL == nil {
                 throw LGMediaModelError.thumbnailURLIsInvalid
             }
-            LGWebImageManager.default.downloadImageWith(url: self.thumbnailImageURL!,
-                                                        options: LGWebImageOptions.default,
-                                                        progress:
+            
+            _thumbnailImageDownloadResult = LGWebImageManager.default.downloadImageWith(url: self.thumbnailImageURL!,
+                                                                                        options: .default,
+                                                                                        progress:
                 { (progressValue) in
                     DispatchQueue.main.async { [weak self] in
                         guard let weakSelf = self else {
@@ -284,10 +316,10 @@ public class LGMediaModel {
                 throw LGMediaModelError.mediaAssetIsInvalid
             }
             let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
-            _requestId = LGPhotoManager.requestImage(forAsset: asset,
-                                                     outputSize: fixedPixelSize(pixelSize),
-                                                     resizeMode: PHImageRequestOptionsResizeMode.fast,
-                                                     progressHandlder:
+            _imageRequestId = LGPhotoManager.requestImage(forAsset: asset,
+                                                          outputSize: fixedPixelSize(pixelSize),
+                                                          resizeMode: PHImageRequestOptionsResizeMode.fast,
+                                                          progressHandlder:
                 { (value, error, stop, info) in
                     DispatchQueue.main.async { [weak self] in
                         if error == nil {
@@ -335,15 +367,16 @@ public class LGMediaModel {
     ///   - completion: 完成回调
     /// - Throws: 抛出过程中产生的异常
     public func fetchImage(withProgress progressBlock: ProgressHandler?,
-                    completion: ((UIImage?, Int64) -> Void)?) throws
+                           completion: ((UIImage?, Int64) -> Void)?) throws
     {
         func downloadImageFromRemote() throws {
             if self.thumbnailImageURL == nil {
                 throw LGMediaModelError.mediaURLIsInvalid
             }
-            LGWebImageManager.default.downloadImageWith(url: self.mediaURL!,
-                                                        options: LGWebImageOptions.default,
-                                                        progress:
+            
+            _imageDownloadResult = LGWebImageManager.default.downloadImageWith(url: self.mediaURL!,
+                                                                               options: LGWebImageOptions.default,
+                                                                               progress:
                 { (progressValue) in
                     DispatchQueue.main.async { [weak self] in
                         guard let weakSelf = self else {return}
@@ -414,9 +447,9 @@ public class LGMediaModel {
             
             if #available(iOS 11.0, *) {
                 if asset.playbackStyle == .imageAnimated {
-                    _requestId = LGPhotoManager.requestImageData(for: asset,
-                                                                 resizeMode: PHImageRequestOptionsResizeMode.fast,
-                                                                 progressHandler:
+                    _imageRequestId = LGPhotoManager.requestImageData(for: asset,
+                                                                      resizeMode: PHImageRequestOptionsResizeMode.fast,
+                                                                      progressHandler:
                         { (progressValue, error, stoped, infoDic) in
                             DispatchQueue.main.async { [weak self] in
                                 guard let weakSelf = self else {return}
@@ -447,10 +480,10 @@ public class LGMediaModel {
             
             let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
             
-            _requestId = LGPhotoManager.requestImage(forAsset: asset,
-                                                     outputSize: fixedPixelSize(pixelSize),
-                                                     resizeMode: PHImageRequestOptionsResizeMode.fast,
-                                                     progressHandlder:
+            _imageRequestId = LGPhotoManager.requestImage(forAsset: asset,
+                                                          outputSize: fixedPixelSize(pixelSize),
+                                                          resizeMode: PHImageRequestOptionsResizeMode.fast,
+                                                          progressHandlder:
                 { (value, error, stop, info) in
                     DispatchQueue.main.async { [weak self] in
                         guard let weakSelf = self else {return}
@@ -531,10 +564,10 @@ public class LGMediaModel {
             }
             
             let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
-            _requestId = LGPhotoManager.imageManager.requestLivePhoto(for: asset,
-                                                                      targetSize: fixedPixelSize(pixelSize),
-                                                                      contentMode: PHImageContentMode.aspectFill,
-                                                                      options: options)
+            _imageRequestId = LGPhotoManager.imageManager.requestLivePhoto(for: asset,
+                                                                           targetSize: fixedPixelSize(pixelSize),
+                                                                           contentMode: PHImageContentMode.aspectFill,
+                                                                           options: options)
             { (livePhoto, infoDic) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else {return}
@@ -547,10 +580,10 @@ public class LGMediaModel {
                             mediaURL: URL,
                             placeholderImage: UIImage?)
         {
-            PHLivePhoto.request(withResourceFileURLs: [thumbnailImageURL, mediaURL],
-                                placeholderImage: placeholderImage,
-                                targetSize: placeholderImage?.size ?? CGSize.zero,
-                                contentMode: PHImageContentMode.aspectFill)
+            _livePhotoRequestId = PHLivePhoto.request(withResourceFileURLs: [thumbnailImageURL, mediaURL],
+                                                      placeholderImage: placeholderImage,
+                                                      targetSize: placeholderImage?.size ?? CGSize.zero,
+                                                      contentMode: PHImageContentMode.aspectFill)
             { [weak self] (resultPhoto, infoDic) in
                 guard let weakSelf = self else {
                     completion?(nil, LGMediaModelInvalidHashValue)
@@ -634,8 +667,9 @@ public class LGMediaModel {
                             }
                         }
                         
-                        LGFileDownloader.default.downloadFile(thumbnailImageURL,
-                                                              progress:
+                        
+                        _thumbnailFileDownloadResult = LGFileDownloader.default.downloadFile(thumbnailImageURL,
+                                                                                             progress:
                             { (progress) in
                                 totalProgress += progress.fractionCompleted
                         }) { (destinationImageURL, isDownloadCompleted, error) in
@@ -652,8 +686,8 @@ public class LGMediaModel {
                             synchronizeMark += 1
                         }
                         
-                        LGFileDownloader.default.downloadFile(movieFileURL,
-                                                              progress:
+                        _fileDownloadResult = LGFileDownloader.default.downloadFile(movieFileURL,
+                                                                                    progress:
                             { (progress) in
                                 totalProgress += progress.fractionCompleted
                         }) { (destinationMovieURL, isDownloadCompleted, error) in
@@ -698,7 +732,7 @@ public class LGMediaModel {
     ///   - completion: 结果回调
     /// - Throws: 过程中产生的异常
     public func fetchMoviePlayerItem(withProgress progressBlock: ProgressHandler?,
-                                   completion: ((AVPlayerItem?, Int64) -> Void)?) throws
+                                     completion: ((AVPlayerItem?, Int64) -> Void)?) throws
     {
         func fetchLocalVideo() throws {
             if let url = try self.mediaURL?.asURL() {
@@ -712,7 +746,7 @@ public class LGMediaModel {
                 if globalConfigs.isPlayVideoAfterDownloadEndsOrExportEnds &&
                     !LGFileDownloader.default.remoteURLIsDownloaded(url)
                 {
-                    LGFileDownloader.default.downloadFile(url,
+                    _fileDownloadResult = LGFileDownloader.default.downloadFile(url,
                                                           progress:
                         { (progress) in
                             DispatchQueue.main.async { [weak self] in
@@ -754,8 +788,8 @@ public class LGMediaModel {
                     }
                 }
                 
-                _requestId = LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
-                                                           options: options)
+                _imageRequestId = LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
+                                                                             options: options)
                 { (avAsset, audioMix, infoDic) in
                     DispatchQueue.main.async { [weak self] in
                         guard let avAsset = avAsset, let weakSelf = self else {
@@ -784,10 +818,42 @@ public class LGMediaModel {
         }
     }
     
-    deinit {
-        LGPhotoManager.cancelImageRequest(_requestId)
+    func cancleCurrentFetch() {
+        if _imageRequestId != PHInvalidImageRequestID {
+            LGPhotoManager.cancelImageRequest(_imageRequestId)
+            _imageRequestId = PHInvalidImageRequestID
+        }
+        
+        if _livePhotoRequestId != PHLivePhotoRequestIDInvalid {
+            if #available(iOS 9.1, *) {
+                PHLivePhoto.cancelRequest(withRequestID: _livePhotoRequestId)
+                _livePhotoRequestId = PHLivePhotoRequestIDInvalid
+            } else {
+            }
+        }
+        
+        if let fileDownloadResult = _fileDownloadResult {
+            fileDownloadResult.operation.cancel()
+            _fileDownloadResult = nil
+        }
+        
+        if let imageDownloadResult = _imageDownloadResult {
+            imageDownloadResult.operation.cancel()
+            _imageDownloadResult = nil
+        }
+        
+        if let fileDownloadResult = _thumbnailFileDownloadResult {
+            fileDownloadResult.operation.cancel()
+            _thumbnailFileDownloadResult = nil
+        }
+        
+        if let imageDownloadResult = _thumbnailImageDownloadResult {
+            imageDownloadResult.operation.cancel()
+            _thumbnailImageDownloadResult = nil
+        }
     }
 }
+
 
 public enum LGMediaModelError: Error {
     case thumbnailURLIsInvalid
