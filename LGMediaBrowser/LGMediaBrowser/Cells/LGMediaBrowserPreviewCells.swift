@@ -12,9 +12,7 @@ import PhotosUI
 
 open class LGMediaBrowserPreviewCell: UICollectionViewCell {
     open var mediaModel: LGMediaModel? {
-        willSet {
-//            mediaModel?.cancleCurrentFetch()
-        } didSet {
+        didSet {
             refreshLayout()
         }
     }
@@ -47,24 +45,21 @@ open class LGMediaBrowserVideoCell: LGMediaBrowserPreviewCell {
     }
     
     override open func willDisplay() {
-        
+        if let playerView = previewView as? LGPlayerControlView {
+            playerView.isActive = false
+        }
     }
     
     override open func didEndDisplay() {
         if let playerView = previewView as? LGPlayerControlView {
             playerView.stopPlay()
+            playerView.isActive = false
         }
-        
-        guard let media = self.mediaModel else {
-            return
-        }
-        
-        media.cancleCurrentFetch()
     }
     
     open override func didDisplay() {
         if let playerView = previewView as? LGPlayerControlView {
-            playerView.playIfCanPlay()
+            playerView.isActive = true
         }
     }
     
@@ -102,6 +97,7 @@ open class LGMediaBrowserGeneralPhotoCell: LGMediaBrowserPreviewCell {
         guard let media = self.mediaModel else {
             return
         }
+        
         if let imageZoom = previewView as? LGZoomingScrollView {
             imageZoom.mediaModel = media
         } else if previewView != nil {
@@ -111,8 +107,6 @@ open class LGMediaBrowserGeneralPhotoCell: LGMediaBrowserPreviewCell {
         } else {
             initImageZoomView(media)
         }
-        
-        println(CACurrentMediaTime(), "refreshLayout", media.mediaURL)
     }
     
     func initImageZoomView(_ media: LGMediaModel) {
@@ -131,16 +125,10 @@ open class LGMediaBrowserGeneralPhotoCell: LGMediaBrowserPreviewCell {
     open override func didDisplay() {
         if let previewView = self.previewView as? LGZoomingScrollView {
             previewView.layoutImageIfNeeded()
-            println(CACurrentMediaTime(), "didDisplay", self.mediaModel?.mediaURL)
         }
     }
     
     override open func didEndDisplay() {
-        guard let media = self.mediaModel else {
-            return
-        }
-        media.cancleCurrentFetch()
-        println(CACurrentMediaTime(), "didEndDisplay", media.mediaURL)
     }
 }
 
@@ -162,7 +150,9 @@ open class LGMediaBrowserLivePhotoCell: LGMediaBrowserPreviewCell {
     }
     
     open override func didDisplay() {
-        
+        if let previewView = self.previewView as? LGLivePhotoView {
+            previewView.didAppear()
+        }
     }
     
     override open func didEndDisplay() {

@@ -41,6 +41,8 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
     /// 是否自动播放，默认否
     open var isAutoPlay: Bool = false
     
+    open var isActive: Bool = false
+    
     public var isPlayVideoAfterDownloadEndsOrExportEnds: Bool = false
     
     /// 通过frame和媒体文件URL进行初始化，可选静音播放
@@ -110,28 +112,31 @@ open class LGPlayerView: UIView, LGMediaPreviewerProtocol {
         super.init(coder: aDecoder)
     }
     
-    func mediaModelDidSet() {
-        if let media = mediaModel {
-            self.player.replaceCurrentItem(with: nil)
-            self.layer.contents = media.thumbnailImage?.cgImage
-        }
-    }
+    lazy var fetchSetter: LGMediaModelFetchSetter = {
+        return LGMediaModelFetchSetter()
+    }()
     
-    func playIfCanPlay() {
-        if let media = mediaModel {
-            do {
-                self.player.replaceCurrentItem(with: nil)
-                self.layer.contents = media.thumbnailImage?.cgImage
-                
-                try media.fetchMoviePlayerItem(withProgress: { (progress, identify) in
-                    
-                }) { [weak self] (playerItem, identify) in
-                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
-                    guard let playerItem = playerItem else {return}
-                    weakSelf.player.replaceCurrentItem(with: playerItem)
-                }
-            } catch {
-                println(error)
+    func mediaModelDidSet() {
+        let sentinel = fetchSetter.cancel(withNewMediaModel: mediaModel)
+        self.player.replaceCurrentItem(with: nil)
+        self.layer.contents = mediaModel?.thumbnailImage?.cgImage
+        
+        if let mediaModel = mediaModel {
+            LGMediaModelFetchSetter.setterQueue.async { [weak self] in
+                guard let weakSelf = self else {return}
+                var newSentinel = sentinel
+                newSentinel = weakSelf.fetchSetter.setOperation(with: sentinel,
+                                                                mediaModel: mediaModel,
+                                                                progress: nil,
+                                                                videoCompletion:
+                    { [weak self] (playerItem, finished, error) in
+                        guard let weakSelf = self, weakSelf.fetchSetter.sentinel == newSentinel else {return}
+                        guard let playerItem = playerItem else {return}
+                        weakSelf.player.replaceCurrentItem(with: playerItem)
+                        if weakSelf.isAutoPlay && weakSelf.isActive {
+                            weakSelf.play()
+                        }
+                })
             }
         }
     }

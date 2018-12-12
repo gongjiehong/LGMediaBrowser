@@ -73,50 +73,47 @@ open class LGLivePhotoView: UIView, LGMediaPreviewerProtocol {
         livePhotoMarkView.frame = self.livePhotoMarkFrame
     }
     
+    
+    lazy var mediaSetter: LGMediaModelFetchSetter = {
+        return LGMediaModelFetchSetter()
+    }()
+    
     func refreshLayout() {
         self.progressView.center = self.center
         guard let mediaModel = self.mediaModel else {return}
-        do {
-            if #available(iOS 9.1, *) {
-                try mediaModel.fetchLivePhoto(withProgress:
-                { [weak self] (progress, identify) in
-                    guard let weakSelf = self, weakSelf.mediaModel.identify == identify else {return}
+        
+        let sentinel = mediaSetter.cancel(withNewMediaModel: mediaModel)
+        
+        self.stopPlay()
+        
+        LGMediaModelFetchSetter.setterQueue.async { [weak self] in
+            guard let weakSelf = self else {return}
+            var newSentinel = sentinel
+            
+            newSentinel = weakSelf.mediaSetter.setOperation(with: sentinel,
+                                                            mediaModel: mediaModel,
+                                                            progress:
+                { [weak self] (progress) in
+                    guard let weakSelf = self, weakSelf.mediaSetter.sentinel == newSentinel else {return}
                     weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-                }, completion: { [weak self] (livePhoto, identify) in
-                    guard let weakSelf = self, weakSelf.mediaModel.identify == identify else {return}
-
+                }, livePhotoCompletion: { [weak self] (livePhoto, finished, error) in
+                    guard let weakSelf = self else {return}
                     
                     guard let livePhoto = livePhoto,
-                        let livePhotoView = weakSelf.livePhotoView as? PHLivePhotoView,
-                        weakSelf.isShown else
+                        let livePhotoView = weakSelf.livePhotoView as? PHLivePhotoView else
                     {
                         weakSelf.progressView.isShowError = true
                         return
                     }
                     livePhotoView.livePhoto = livePhoto
-                    livePhotoView.startPlayback(with: PHLivePhotoViewPlaybackStyle.full)
                     weakSelf.progressView.isHidden = true
                     weakSelf.fixViewFrame()
-                })
-            } else {
-                try mediaModel.fetchThumbnailImage(withProgress:
-                { [weak self] (progress, identify) in
-                    guard let weakSelf = self, weakSelf.mediaModel.identify == identify else {return}
-                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-                }, completion: { [weak self] (resultImage, identify) in
-                    guard let weakSelf = self, weakSelf.mediaModel.identify == identify else {return}
-                    if let livePhotoView = weakSelf.livePhotoView as? UIImageView,
-                        let resultImage = resultImage {
-                        livePhotoView.image = resultImage
-                        weakSelf.progressView.isHidden = true
-                        weakSelf.fixViewFrame()
+                    if weakSelf.isShown {
+                        livePhotoView.startPlayback(with: PHLivePhotoViewPlaybackStyle.full)
                     } else {
-                        weakSelf.progressView.isShowError = true
+                        livePhotoView.stopPlayback()
                     }
-                })
-            }
-        } catch {
-            self.progressView.isShowError = true
+            })
         }
     }
     
@@ -166,9 +163,17 @@ open class LGLivePhotoView: UIView, LGMediaPreviewerProtocol {
     var isShown: Bool = true
     
     func willAppear() {
+        isShown = false
+        stopPlay()
+    }
+    
+    func didAppear() {
+        isShown = true
+        startPlay()
     }
     
     func didDisappear() {
+        isShown = false
         stopPlay()
     }
     
@@ -180,6 +185,18 @@ open class LGLivePhotoView: UIView, LGMediaPreviewerProtocol {
         } else {
             if let imageView = self.livePhotoView as? UIImageView {
                 imageView.image = nil
+            }
+        }
+    }
+    
+    func startPlay() {
+        if #available(iOS 9.1, *) {
+            if let livePhotoView = self.livePhotoView as? PHLivePhotoView {
+                livePhotoView.startPlayback(with: PHLivePhotoViewPlaybackStyle.full)
+            }
+        } else {
+            if let imageView = self.livePhotoView as? UIImageView {
+                imageView.image = self.mediaModel.thumbnailImage
             }
         }
     }

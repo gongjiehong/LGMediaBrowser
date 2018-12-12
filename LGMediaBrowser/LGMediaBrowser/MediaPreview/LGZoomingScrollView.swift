@@ -17,6 +17,10 @@ open class LGZoomingScrollView: UIScrollView {
         }
     }
     
+    lazy var mediaSetter: LGMediaModelFetchSetter = {
+        return LGMediaModelFetchSetter()
+    }()
+    
     public private(set) var imageView: LGTapDetectingImageView!
     fileprivate var progressView: LGSectorProgressView!
     
@@ -70,28 +74,42 @@ open class LGZoomingScrollView: UIScrollView {
             return
         }
         
-        self.imageView.image = mediaModel.thumbnailImage
-
-        self.progressView.isHidden = false
-        self.progressView.isShowError = false
-        self.progressView.progress = 0.0
+        let sentinel = mediaSetter.cancel(withNewMediaModel: mediaModel)
         
-        do {
-            try mediaModel.fetchImage(withProgress: { [weak self] (progress, identify) in
-                guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
-                weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-            }, completion: { [weak self] (resultImage, identify) in
-                guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else { return }
-                guard let _ = resultImage else {
-                    weakSelf.progressView.isShowError = true
-                    return
-                }
-                weakSelf.progressView.isHidden = true
-                weakSelf.displayImage(complete: true)
+        if let _ = mediaModel.thumbnailImage {
+            self.displayImage(complete: true)
+        } else {
+            self.imageView.image = nil
+            self.progressView.isHidden = false
+            self.progressView.isShowError = false
+            self.progressView.progress = 0.0
+        }
+        
+        LGMediaModelFetchSetter.setterQueue.async { [weak self] in
+            guard let weakSelf = self else {return}
+            var newSentinel = sentinel
+            newSentinel = weakSelf.mediaSetter.setOperation(with: sentinel,
+                                                            mediaModel: mediaModel,
+                                                            progress:
+                { [weak self] (progress) in
+                    guard let weakSelf = self else { return }
+                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+                }, imageCompletion: { [weak self] (resultImage, finished, error) in
+                    guard let weakSelf = self, weakSelf.mediaSetter.sentinel == newSentinel else { return }
+                    guard let resultImage = resultImage else {
+                        weakSelf.progressView.isShowError = true
+                        return
+                    }
+                    
+                    if let currentImage = weakSelf.imageView.image {
+                        if resultImage.size.height <= currentImage.size.width {
+                            return
+                        }
+                    }
+                    
+                    weakSelf.progressView.isHidden = true
+                    weakSelf.displayImage(complete: true)
             })
-        } catch  {
-            println(error)
-            progressView.isShowError = true
         }
     }
     
@@ -208,7 +226,7 @@ open class LGZoomingScrollView: UIScrollView {
             contentSize = imageViewFrame.size
             setMaxMinZoomScalesForCurrentBounds()
         }
-
+        
         setNeedsLayout()
     }
     
@@ -318,7 +336,7 @@ extension LGZoomingScrollView: UIGestureRecognizerDelegate {
             }
             return true
         }
-
+        
         return false
     }
 }

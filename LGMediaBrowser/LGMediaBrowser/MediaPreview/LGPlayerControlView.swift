@@ -172,50 +172,43 @@ open class LGPlayerControlView: LGPlayerView {
         layoutControlsIfNeeded()
     }
     
-
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
     
     override func mediaModelDidSet() {
-        if let media = mediaModel {
-            self.layer.contents = media.thumbnailImage?.cgImage
-            self.player.replaceCurrentItem(with: nil)
-        } else {
-            self.progressView.isShowError = true
-        }
-    }
-    
-    override func playIfCanPlay() {
-        if let media = mediaModel {
-            
-            if media.mediaType == .video {
-                self.isShowBottomSlideControls = false
-                self.toolBackgroundView.removeFromSuperview()
-            }
-            
-            do {
-                
-                self.progressView.isHidden = false
-                self.progressView.isShowError = false
-                self.progressView.progress = 0.0
-                
-                try media.fetchMoviePlayerItem(withProgress: { [weak self] (progress, identify) in
-                    guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
-                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
-                    }, completion: { [weak self] (playerItem, identify) in
-                        guard let weakSelf = self, weakSelf.mediaModel?.identify == identify else {return}
+        let sentinel = fetchSetter.cancel(withNewMediaModel: mediaModel)
+        self.player.replaceCurrentItem(with: nil)
+        self.layer.contents = mediaModel?.thumbnailImage?.cgImage
+        
+        if let mediaModel = mediaModel {
+            self.progressView.isHidden = false
+            self.progressView.isShowError = false
+            self.progressView.progress = 0.0
+            LGMediaModelFetchSetter.setterQueue.async { [weak self] in
+                guard let weakSelf = self else {return}
+                var newSentinel = sentinel
+                newSentinel = weakSelf.fetchSetter.setOperation(with: sentinel,
+                                                                mediaModel: mediaModel,
+                                                                progress:
+                    { [weak self] (progress) in
+                        guard let weakSelf = self, weakSelf.fetchSetter.sentinel == newSentinel else {return}
+                        weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+                    }, videoCompletion: { [weak self] (playerItem, finished, error) in
+                        guard let weakSelf = self, weakSelf.fetchSetter.sentinel == newSentinel else {return}
                         guard let playerItem = playerItem else {
                             weakSelf.progressView.isShowError = true
                             return
                         }
                         weakSelf.player.replaceCurrentItem(with: playerItem)
                         weakSelf.progressView.isHidden = true
+                        
+                        if weakSelf.isAutoPlay && weakSelf.isActive {
+                            weakSelf.play()
+                        }
                 })
-            } catch {
-                self.progressView.isShowError = true
-                println(error)
+                
             }
         } else {
             self.progressView.isShowError = true
@@ -384,14 +377,15 @@ open class LGPlayerControlView: LGPlayerView {
         let value = sender.value
         isSeeking = true
         self.player.seek(to: CMTime(seconds: Double(value), preferredTimescale: 1),
-                          completionHandler: {[weak self] (isFinished) in
-                            if Thread.isMainThread {
-                                self?.isSeeking = false
-                            } else {
-                                DispatchQueue.main.async { [weak self] in
-                                    self?.isSeeking = false
-                                }
-                            }
+                         completionHandler:
+            {[weak self] (isFinished) in
+                if Thread.isMainThread {
+                    self?.isSeeking = false
+                } else {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.isSeeking = false
+                    }
+                }
         })
     }
     
@@ -503,6 +497,10 @@ extension LGPlayerControlView: LGPlayerDelegate {
     public func player(_ player: LGPlayer, didChange item: AVPlayerItem?) {
         if self.mediaType == .video {
             self.centerPlayButton.isHidden = false
+        }
+        
+        if item == nil {
+            self.centerPlayButton.isHidden = true
         }
     }
     
