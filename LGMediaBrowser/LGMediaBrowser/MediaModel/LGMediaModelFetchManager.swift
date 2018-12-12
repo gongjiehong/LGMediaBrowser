@@ -27,6 +27,7 @@ public class LGMediaModelFetchManager {
     
     public typealias DownloadResult = (callbackToken: LGMediaModelFetchCallbackToken, operation: LGMediaModelFetchOperation)
     
+    @discardableResult
     public func fetchResult(withMediaModel model: LGMediaModel,
                             progress: LGMediaModelFetchOperation.ProgressBlock? = nil,
                             thumbnailImageCompletion: LGMediaModelFetchOperation.ThumbnailImageCompletionBlock? = nil,

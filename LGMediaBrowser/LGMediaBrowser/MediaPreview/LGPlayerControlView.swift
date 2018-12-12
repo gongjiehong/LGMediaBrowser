@@ -185,6 +185,7 @@ open class LGPlayerControlView: LGPlayerView {
         if let mediaModel = mediaModel {
             self.progressView.isHidden = false
             self.progressView.isShowError = false
+            self.centerPlayButton.isHidden = true
             self.progressView.progress = 0.0
             LGMediaModelFetchSetter.setterQueue.async { [weak self] in
                 guard let weakSelf = self else {return}
@@ -206,6 +207,8 @@ open class LGPlayerControlView: LGPlayerView {
                         
                         if weakSelf.isAutoPlay && weakSelf.isActive {
                             weakSelf.play()
+                        } else {
+                            weakSelf.centerPlayButton.isHidden = false
                         }
                 })
                 
