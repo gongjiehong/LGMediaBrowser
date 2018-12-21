@@ -17,7 +17,7 @@ extension Bundle {
 }
 
 extension UIImage {
-    public convenience init?(namedFromThisBundle name: String) {
+    convenience init?(namedFromThisBundle name: String) {
         self.init(named: name, in: Bundle.this, compatibleWith: nil)
     }
 }

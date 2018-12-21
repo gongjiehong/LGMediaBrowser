@@ -82,7 +82,7 @@ public class LGFPSLabel: UILabel {
     }
 }
 
-class LGMPWeakTarget: NSObject {
+public class LGMPWeakTarget: NSObject {
     public weak var target: NSObjectProtocol?
     public init(target: NSObjectProtocol) {
         super.init()
