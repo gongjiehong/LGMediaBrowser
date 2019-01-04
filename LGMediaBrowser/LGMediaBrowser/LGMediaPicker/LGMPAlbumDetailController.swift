@@ -8,6 +8,7 @@
 
 import UIKit
 import Photos
+import TOCrop
 
 public class LGMPAlbumDetailController: LGMPBaseViewController {
     weak var listView: UICollectionView!
@@ -357,6 +358,8 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             dataModel = self.dataArray[indexPath.row - 1]
         }
         
+        cell.isShowSelectButton = self.configs.maxSelectCount != 1
+        
         cell.listModel = dataModel
         weak var weakCell = cell
         cell.selectedBlock = { [weak self] (isSelected) in
@@ -525,6 +528,22 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                 }
                 checkCapturePermissionAndOpen()
                 return
+            } else {
+                if self.configs.maxSelectCount == 1,
+                    let cell = collectionView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell,
+                    let mediaModel = cell.listModel?.asLGMediaModel()
+                {
+                    let hud = LGLoadingHUD.show()
+                    LGMediaModelFetchManager.default.fetchResult(withMediaModel: mediaModel,
+                                                                 imageCompletion:
+                        { [weak self] (resultImage, isFinished, error) in
+                            guard let weakSelf = self, let resultImage = resultImage, isFinished == true else {return}
+                            hud.dismiss()
+                            weakSelf.checkAndCropImage(resultImage)
+                    })
+                    return
+                } else {
+                }
             }
         } else {
             if indexPath.row == 0 {
@@ -533,9 +552,38 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                 }
                 checkCapturePermissionAndOpen()
                 return
+            } else {
+                if self.configs.maxSelectCount == 1,
+                    let cell = collectionView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell,
+                    let mediaModel = cell.listModel?.asLGMediaModel()
+                {
+                    
+                    let hud = LGLoadingHUD.show()
+                    LGMediaModelFetchManager.default.fetchResult(withMediaModel: mediaModel,
+                                                                 imageCompletion:
+                        { [weak self] (resultImage, isFinished, error) in
+                            guard let weakSelf = self, let resultImage = resultImage else {return}
+                            hud.dismiss()
+                            weakSelf.checkAndCropImage(resultImage)
+                    })
+                } else {
+                }
             }
         }
         preview(with: indexPath.row)
+    }
+    
+    
+    
+    func checkAndCropImage(_ image: UIImage) {
+        let crop = TOCropViewController(image: image)
+        crop.customAspectRatio = CGSize(width: 2, height: 3)
+        crop.aspectRatioLockEnabled = true
+        crop.resetButtonHidden = true
+        crop.aspectRatioPickerButtonHidden = true
+        crop.rotateButtonsHidden = true
+        crop.delegate = self
+        self.navigationController?.pushViewController(crop, animated: true)
     }
     
     func checkCapturePermissionAndOpen() {
@@ -646,6 +694,11 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         let capture = LGCameraCapture()
         capture.delegate = self
         capture.allowRecordVideo = false
+        
+        if let outputSize = configs.clipRatios.first, configs.maxSelectCount == 1 {
+            capture.outputSize = outputSize
+        }
+        
         self.navigationController?.pushViewController(capture, animated: true)
     }
     
@@ -1025,5 +1078,37 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
         delegate?.picker(globleMainPicker,
                          didDoneWith: globleSelectedDataArray,
                          isOriginalPhoto: bottomToolBar.originalPhotoButton.isSelected)
+    }
+}
+
+extension LGMPAlbumDetailController: TOCropViewControllerDelegate {
+    public func cropViewController(_ cropViewController: TOCropViewController,
+                                   didCropImageTo cropRect: CGRect,
+                                   angle: Int)
+    {
+        UIImage().croppedImage(withFrame: CGRect.zero, angle: 0, circularClip: false)
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    public func cropViewController(_ cropViewController: TOCropViewController,
+                                   didFinishCancelled cancelled: Bool)
+    {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    public func cropViewController(_ cropViewController: TOCropViewController,
+                                   didCropTo image: UIImage,
+                                   with cropRect: CGRect,
+                                   angle: Int)
+    {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    public func cropViewController(_ cropViewController: TOCropViewController,
+                                   didCropToCircularImage image: UIImage,
+                                   with cropRect: CGRect,
+                                   angle: Int)
+    {
+        self.navigationController?.popViewController(animated: true)
     }
 }

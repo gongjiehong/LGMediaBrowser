@@ -21,7 +21,9 @@ class MediaPickerDemoController: UIViewController {
     @IBAction func toChooseButtonPressed(_ sender: UIButton) {
         let picker = LGMediaPicker()
         picker.pickerDelegate = self
-        picker.configs.resultMediaTypes = .all
+        picker.configs.maxSelectCount = 1
+        picker.configs.clipRatios = [CGSize(width: 2, height: 3)]
+        picker.configs.resultMediaTypes = [.image]
         self.present(picker, animated: true, completion: nil)
     }
 

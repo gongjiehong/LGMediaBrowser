@@ -35,6 +35,7 @@
 		FE4A253720B3D06A00955857 /* UIColor+LGMediaBrowser.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4A253620B3D06A00955857 /* UIColor+LGMediaBrowser.swift */; };
 		FE60D6F420E5E00D0082A37D /* LGStatusBarStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE60D6F320E5E00D0082A37D /* LGStatusBarStyle.swift */; };
 		FE60D6FC20E60C660082A37D /* LGStatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE60D6FB20E60C660082A37D /* LGStatusBarView.swift */; };
+		FE6A896F21DF4F1600CEFBBE /* TOCrop.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE6A896E21DF4EB800CEFBBE /* TOCrop.framework */; };
 		FE70E30E20A0363200554854 /* LGSectorProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE70E30D20A0363200554854 /* LGSectorProgressView.swift */; };
 		FE70E31620A0571A00554854 /* LGMediaPreviewerProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE70E31520A0571A00554854 /* LGMediaPreviewerProtocol.swift */; };
 		FE84887D20E381B400B44703 /* LGFPSLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE84887C20E381B400B44703 /* LGFPSLabel.swift */; };
@@ -87,6 +88,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		FE6A896D21DF4EB800CEFBBE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FE6A896821DF4EB800CEFBBE /* TOCrop.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = E150C29B21D221C500245D8C;
+			remoteInfo = TOCrop;
+		};
 		FEF8975B20A2A058005E4880 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */;
@@ -125,6 +133,7 @@
 		FE4A253620B3D06A00955857 /* UIColor+LGMediaBrowser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+LGMediaBrowser.swift"; sourceTree = "<group>"; };
 		FE60D6F320E5E00D0082A37D /* LGStatusBarStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGStatusBarStyle.swift; sourceTree = "<group>"; };
 		FE60D6FB20E60C660082A37D /* LGStatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGStatusBarView.swift; sourceTree = "<group>"; };
+		FE6A896821DF4EB800CEFBBE /* TOCrop.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = TOCrop.xcodeproj; path = ../TOCrop/TOCrop.xcodeproj; sourceTree = "<group>"; };
 		FE70E30D20A0363200554854 /* LGSectorProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGSectorProgressView.swift; sourceTree = "<group>"; };
 		FE70E31520A0571A00554854 /* LGMediaPreviewerProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMediaPreviewerProtocol.swift; sourceTree = "<group>"; };
 		FE84887C20E381B400B44703 /* LGFPSLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGFPSLabel.swift; sourceTree = "<group>"; };
@@ -184,6 +193,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE6A896F21DF4F1600CEFBBE /* TOCrop.framework in Frameworks */,
 				FEF8975E20A2A060005E4880 /* LGWebImage.framework in Frameworks */,
 				FEC1AA7A20DB83EB00E60543 /* GPUImage.framework in Frameworks */,
 			);
@@ -256,6 +266,14 @@
 			path = LGStatusBarTips;
 			sourceTree = "<group>";
 		};
+		FE6A896921DF4EB800CEFBBE /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FE6A896E21DF4EB800CEFBBE /* TOCrop.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		FE93857120EE258C00FEC9AB /* Animations */ = {
 			isa = PBXGroup;
 			children = (
@@ -267,6 +285,7 @@
 		FE9521C72092B4190097600A = {
 			isa = PBXGroup;
 			children = (
+				FE6A896821DF4EB800CEFBBE /* TOCrop.xcodeproj */,
 				FEC1AA7920DB83EB00E60543 /* GPUImage.framework */,
 				FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */,
 				FE9521D32092B41A0097600A /* LGMediaBrowser */,
@@ -516,6 +535,10 @@
 					ProductGroup = FEF8975620A2A058005E4880 /* Products */;
 					ProjectRef = FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */;
 				},
+				{
+					ProductGroup = FE6A896921DF4EB800CEFBBE /* Products */;
+					ProjectRef = FE6A896821DF4EB800CEFBBE /* TOCrop.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -525,6 +548,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		FE6A896E21DF4EB800CEFBBE /* TOCrop.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = TOCrop.framework;
+			remoteRef = FE6A896D21DF4EB800CEFBBE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		FEF8975C20A2A058005E4880 /* LGWebImage.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;

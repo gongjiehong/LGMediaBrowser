@@ -110,7 +110,7 @@ open class LGMediaModelFetchOperation: Operation {
     private var livePhotoRequestId: Int32 = PHLivePhotoRequestIDInvalid
     
     private weak var imageCache = LGImageCache.default
-    private weak var mediaModel: LGMediaModel?
+    private var mediaModel: LGMediaModel?
     
     var progress: ProgressBlock?
     var thumbnailImageCompletion: ThumbnailImageCompletionBlock? = nil
@@ -212,7 +212,7 @@ open class LGMediaModelFetchOperation: Operation {
         guard let completion = self.imageCompletion else {return}
         DispatchQueue.main.async { [weak self] in
             completion(image,
-                       error == nil,
+                       imageStage != .progress,
                        error)
             guard let weakSelf = self else {return}
             if imageStage != .progress {
@@ -545,11 +545,21 @@ open class LGMediaModelFetchOperation: Operation {
                 guard let strongSelf = self else {return}
                 if strongSelf.isCancelled {return}
                 strongSelf.mediaModel?.thumbnailImage = resultImage
-                strongSelf.invokeMediaImageCompletionOnMainThread(resultImage,
-                                                                  remoteURL: nil,
-                                                                  sourceType: .diskCache,
-                                                                  imageStage: LGWebImageStage.finished,
-                                                                  error: nil)
+
+                if info?[PHImageResultIsDegradedKey] as? Int == 1 {
+                    strongSelf.invokeMediaImageCompletionOnMainThread(resultImage,
+                                                                      remoteURL: nil,
+                                                                      sourceType: .diskCache,
+                                                                      imageStage: LGWebImageStage.progress,
+                                                                      error: nil)
+                } else {
+                    strongSelf.invokeMediaImageCompletionOnMainThread(resultImage,
+                                                                      remoteURL: nil,
+                                                                      sourceType: .diskCache,
+                                                                      imageStage: LGWebImageStage.finished,
+                                                                      error: nil)
+                }
+                
             }
         }
         

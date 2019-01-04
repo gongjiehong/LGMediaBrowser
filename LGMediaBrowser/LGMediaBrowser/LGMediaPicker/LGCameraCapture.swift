@@ -27,7 +27,6 @@ public class LGCameraCapture: UIViewController {
         super.loadView()
         self.view.addSubview(_view)
         _view.frame = UIScreen.main.bounds
-        _view.fillMode = .preserveAspectRatioAndFill
     }
     
     /// 视频格式定义
@@ -88,7 +87,13 @@ public class LGCameraCapture: UIViewController {
     /// 输出文件大小
     /// 可以是相对坐标（(1.0, 0.5), (ScreenSize.width * 1.0 px, ScreenSize.height * 0.5 px)）
     /// 也可以是绝对坐标 ((320, 320) 所有设备都输出320px * 320px的视频)
-    public var outputSize: CGSize = CGSize(width: 1, height: 1)
+    public var outputSize: CGSize = CGSize(width: 1, height: 1) {
+        didSet {
+            if outputSize == CGSize(width: 1, height: 1) {
+                _view.fillMode = .preserveAspectRatioAndFill
+            }
+        }
+    }
     
     /// 输出视频格式
     public var videoType: VideoType = .mp4
