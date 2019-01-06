@@ -1083,14 +1083,6 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
 
 extension LGMPAlbumDetailController: TOCropViewControllerDelegate {
     public func cropViewController(_ cropViewController: TOCropViewController,
-                                   didCropImageTo cropRect: CGRect,
-                                   angle: Int)
-    {
-        UIImage().croppedImage(withFrame: CGRect.zero, angle: 0, circularClip: false)
-        self.navigationController?.popViewController(animated: true)
-    }
-    
-    public func cropViewController(_ cropViewController: TOCropViewController,
                                    didFinishCancelled cancelled: Bool)
     {
         self.navigationController?.popViewController(animated: true)
@@ -1101,14 +1093,6 @@ extension LGMPAlbumDetailController: TOCropViewControllerDelegate {
                                    with cropRect: CGRect,
                                    angle: Int)
     {
-        self.navigationController?.popViewController(animated: true)
-    }
-    
-    public func cropViewController(_ cropViewController: TOCropViewController,
-                                   didCropToCircularImage image: UIImage,
-                                   with cropRect: CGRect,
-                                   angle: Int)
-    {
-        self.navigationController?.popViewController(animated: true)
+        delegate?.picker(globleMainPicker, didDoneWith: image)
     }
 }

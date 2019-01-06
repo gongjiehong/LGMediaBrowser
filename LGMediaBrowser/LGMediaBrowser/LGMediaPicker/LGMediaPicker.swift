@@ -12,6 +12,7 @@ import Photos
 public protocol LGMediaPickerDelegate: NSObjectProtocol {
     func pickerDidCancel(_ picker: LGMediaPicker)
     func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGPhotoModel], isOriginalPhoto isOriginal: Bool)
+    func picker(_ picker: LGMediaPicker, didDoneWith resultImage: UIImage?)
 }
 
 internal var globleSelectedDataArray: [LGPhotoModel]! = []

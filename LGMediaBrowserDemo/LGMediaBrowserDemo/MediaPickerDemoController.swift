@@ -41,6 +41,12 @@ class MediaPickerDemoController: UIViewController {
 
 
 extension MediaPickerDemoController: LGMediaPickerDelegate {
+    func picker(_ picker: LGMediaPicker, didDoneWith resultImage: UIImage?) {
+        picker.dismiss(animated: true) {
+            
+        }
+    }
+    
     func pickerDidCancel(_ picker: LGMediaPicker) {
         picker.dismiss(animated: true) {
             
