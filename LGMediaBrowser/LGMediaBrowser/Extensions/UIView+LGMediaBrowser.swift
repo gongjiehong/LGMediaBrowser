@@ -80,10 +80,7 @@ extension UIView {
 
     public var lg_bottom: CGFloat {
         set {
-            if newValue < self.lg_originY {
-                return
-            }
-            self.lg_height = newValue - self.lg_originY
+            self.lg_originY = newValue - self.lg_height
         } get {
             return self.lg_originY + self.lg_height
         }
@@ -99,10 +96,7 @@ extension UIView {
 
     public var lg_right: CGFloat {
         set {
-            if newValue < self.lg_originX {
-                return
-            }
-            self.lg_width = newValue - self.lg_originX
+            self.lg_originX = newValue - self.lg_width
         } get {
             return self.lg_originX + self.lg_width
         }
