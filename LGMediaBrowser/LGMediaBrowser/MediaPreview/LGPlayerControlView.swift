@@ -202,6 +202,7 @@ open class LGPlayerControlView: LGPlayerView {
                             weakSelf.progressView.isShowError = true
                             return
                         }
+                        
                         weakSelf.player.replaceCurrentItem(with: playerItem)
                         weakSelf.progressView.isHidden = true
                         

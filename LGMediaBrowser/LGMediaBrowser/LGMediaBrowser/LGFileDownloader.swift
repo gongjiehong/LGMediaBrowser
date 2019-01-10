@@ -148,7 +148,16 @@ open class LGFileDownloader {
                 return url.absoluteString
             } else {
                 let md5 = url.absoluteString.md5Hash() ?? ""
-                return self.downloaderFilesDirectory + md5 + "." + url.pathExtension
+                if url.pathExtension.isEmpty {
+                    //网易云信坑逼没有后缀的时候强行加后缀
+                    if let query = url.query, query == ".mp4" {
+                        return self.downloaderFilesDirectory + md5 + query
+                    } else {
+                        return self.downloaderFilesDirectory + md5
+                    }
+                } else {
+                    return self.downloaderFilesDirectory + md5 + "." + url.pathExtension
+                }
             }
         }
         
@@ -166,7 +175,16 @@ open class LGFileDownloader {
                 return url.absoluteString
             } else {
                 let md5 = url.absoluteString.md5Hash() ?? ""
-                return self.downloaderTempFilesDirectory + md5 + "." + url.pathExtension
+                if url.pathExtension.isEmpty {
+                    //网易云信坑逼没有后缀的时候强行加后缀
+                    if let query = url.query, query == ".mp4" {
+                        return self.downloaderTempFilesDirectory + md5 + query
+                    } else {
+                        return self.downloaderTempFilesDirectory + md5
+                    }
+                } else {
+                    return self.downloaderTempFilesDirectory + md5 + "." + url.pathExtension
+                }
             }
         }
         
@@ -441,7 +459,6 @@ open class LGFileDownloadOperation: Operation {
             successProcessor()
         }
     }
-    
     
     func invokeCompletionOnMainThread(_ destinationURL: URL?, isSucceed: Bool, error: Error?) {
         guard let completion = self.completion else {return}
