@@ -260,6 +260,7 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
         let detail = LGMPAlbumDetailController()
         detail.albumListModel = listModel
         detail.configs = self.configs
+        detail.delegate = self.delegate
         self.navigationController?.pushViewController(detail, animated: true)
     }
 }
