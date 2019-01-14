@@ -717,23 +717,27 @@ extension LGMPAlbumDetailController: LGCameraCaptureDelegate {
     public func captureDidCapturedResult(_ result: LGCameraCapture.ResultModel, capture: LGCameraCapture) {
         switch result.type {
         case .photo:
-            let hud = LGLoadingHUD.show()
-            result.image?.lg_savetoAlbumWith(completionBlock: { [weak self] (isSucceed, asset, error) in
-                guard let weakSelf = self else {return}
-                if isSucceed, let asset = asset {
-                    let photoModel = LGPhotoModel(asset: asset,
-                                                  type: LGPhotoModel.AssetMediaType.generalImage,
-                                                  duration: "")
-                    globleSelectedDataArray.append(photoModel)
-                    weakSelf.delegate?.picker(globleMainPicker,
-                                     didDoneWith: globleSelectedDataArray,
-                                     isOriginalPhoto: true)
-                } else {
-                    LGStatusBarTips.show(withStatus: error?.localizedDescription ?? "Unknown error",
-                                         style: LGStatusBarConfig.Style.error)
-                }
-                hud.dismiss()
-            })
+            if self.configs.isHeadPortraitMode == true {
+                self.delegate?.picker(globleMainPicker, didDoneWith: result.image)
+            } else {
+                let hud = LGLoadingHUD.show()
+                result.image?.lg_savetoAlbumWith(completionBlock: { [weak self] (isSucceed, asset, error) in
+                    guard let weakSelf = self else {return}
+                    if isSucceed, let asset = asset {
+                        let photoModel = LGPhotoModel(asset: asset,
+                                                      type: LGPhotoModel.AssetMediaType.generalImage,
+                                                      duration: "")
+                        globleSelectedDataArray.append(photoModel)
+                        weakSelf.delegate?.picker(globleMainPicker,
+                                                  didDoneWith: globleSelectedDataArray,
+                                                  isOriginalPhoto: true)
+                    } else {
+                        LGStatusBarTips.show(withStatus: error?.localizedDescription ?? "Unknown error",
+                                             style: LGStatusBarConfig.Style.error)
+                    }
+                    hud.dismiss()
+                })
+            }
             break
         case .video:
             guard let videoURL = result.videoURL else {return}

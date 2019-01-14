@@ -106,6 +106,9 @@ public class LGMediaPicker: LGMPNavigationController {
         /// 输出视频格式, 默认mp4，仅支持mp4和mov
         public var videoExportType: LGCameraCapture.VideoType = .mp4
         
+        /// 是否为头像模式
+        public var isHeadPortraitMode: Bool = false
+        
         public init() {
         }
         
