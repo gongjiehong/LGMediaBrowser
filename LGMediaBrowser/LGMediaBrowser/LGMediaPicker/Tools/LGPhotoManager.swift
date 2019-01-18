@@ -405,9 +405,11 @@ public class LGPhotoManager {
         }
     }
     
-    public static func startCachingImages() {
+    public static func stopCachingImages() {
         DispatchQueue.background.async {
-            imageManager.stopCachingImagesForAllAssets()
+            if LGAuthorizationStatusManager.default.albumStatus == .authorized {
+                imageManager.stopCachingImagesForAllAssets()
+            }
         }
     }
 }

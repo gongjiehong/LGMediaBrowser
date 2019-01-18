@@ -247,7 +247,7 @@ public class LGMediaPicker: LGMPNavigationController {
     deinit {
         globleSelectedDataArray = nil
         globleMainPicker = nil
-        LGPhotoManager.startCachingImages()
+        LGPhotoManager.stopCachingImages()
     }
     
 
