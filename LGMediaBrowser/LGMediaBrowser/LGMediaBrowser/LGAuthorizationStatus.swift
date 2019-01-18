@@ -8,17 +8,17 @@
 
 import Foundation
 import Photos
-import CoreBluetooth
-import Contacts
-import EventKit
-import HealthKit
-import HomeKit
-import CoreMotion
-import StoreKit
-import Intents
-import Speech
-import CoreNFC
-import LocalAuthentication
+//import CoreBluetooth
+//import Contacts
+//import EventKit
+//import HealthKit
+//import HomeKit
+//import CoreMotion
+//import StoreKit
+//import Intents
+//import Speech
+//import CoreNFC
+//import LocalAuthentication
 
 /// 获取权限过程中的错误枚举
 ///
@@ -82,7 +82,7 @@ public class LGAuthorizationStatusManager: NSObject {
         case photos
         case microphone
         case camera
-        case healthWith(shareTypes: Set<HKSampleType>?, readTypes: Set<HKObjectType>?)
+//        case healthWith(shareTypes: Set<HKSampleType>?, readTypes: Set<HKObjectType>?)
         case homeKit
         case motionAndFitness
         @available(iOS 9.3, *)
@@ -211,59 +211,59 @@ public class LGAuthorizationStatusManager: NSObject {
         }
     }
     
-    public var contactsStatus: Status {
-        let status = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
-        return Status(rawValue: status.rawValue) ?? .notDetermined
-    }
-    
-    public var calendarsStatus: Status {
-        let status = EKEventStore.authorizationStatus(for: EKEntityType.event)
-        return Status(rawValue: status.rawValue) ?? .notDetermined
-    }
-    
-    public var remindersStatus: Status {
-        let status = EKEventStore.authorizationStatus(for: EKEntityType.reminder)
-        return Status(rawValue: status.rawValue) ?? .notDetermined
-    }
-    
-    @available(iOS 11.0, *)
-    public var motionStatus: Status {
-        let status = CMMotionActivityManager.authorizationStatus()
-        return Status(rawValue: status.rawValue) ?? .notDetermined
-    }
-    
-    @available(iOS 9.3, *)
-    public var appleMusicStatus: Status {
-        let status = SKCloudServiceController.authorizationStatus()
-        return Status(rawValue: status.rawValue) ?? .notDetermined
-    }
-    
-    @available(iOS 10.0, *)
-    public var siriStatus: Status {
-        let status = INPreferences.siriAuthorizationStatus()
-        return Status(rawValue: status.rawValue) ?? .notDetermined
-    }
-    
-    @available(iOS 10.0, *)
-    public var speechRecognitionStatus: Status {
-        let status = SFSpeechRecognizer.authorizationStatus()
-        return Status(rawValue: status.rawValue) ?? .notDetermined
-    }
-    
-    @available(iOS 10.0, *)
-    public var bluetoothStatus: Status {
-        let status = bluetoothManager.state
-        switch status {
-        case .unknown:
-            return .notDetermined
-        case .unauthorized:
-            return .denied
-        case .unsupported:
-            return .unSupport
-        default:
-            return .authorized
-        }
-    }
+//    public var contactsStatus: Status {
+//        let status = CNContactStore.authorizationStatus(for: CNEntityType.contacts)
+//        return Status(rawValue: status.rawValue) ?? .notDetermined
+//    }
+//
+//    public var calendarsStatus: Status {
+//        let status = EKEventStore.authorizationStatus(for: EKEntityType.event)
+//        return Status(rawValue: status.rawValue) ?? .notDetermined
+//    }
+//
+//    public var remindersStatus: Status {
+//        let status = EKEventStore.authorizationStatus(for: EKEntityType.reminder)
+//        return Status(rawValue: status.rawValue) ?? .notDetermined
+//    }
+//
+//    @available(iOS 11.0, *)
+//    public var motionStatus: Status {
+//        let status = CMMotionActivityManager.authorizationStatus()
+//        return Status(rawValue: status.rawValue) ?? .notDetermined
+//    }
+//
+//    @available(iOS 9.3, *)
+//    public var appleMusicStatus: Status {
+//        let status = SKCloudServiceController.authorizationStatus()
+//        return Status(rawValue: status.rawValue) ?? .notDetermined
+//    }
+//
+//    @available(iOS 10.0, *)
+//    public var siriStatus: Status {
+//        let status = INPreferences.siriAuthorizationStatus()
+//        return Status(rawValue: status.rawValue) ?? .notDetermined
+//    }
+//
+//    @available(iOS 10.0, *)
+//    public var speechRecognitionStatus: Status {
+//        let status = SFSpeechRecognizer.authorizationStatus()
+//        return Status(rawValue: status.rawValue) ?? .notDetermined
+//    }
+//
+//    @available(iOS 10.0, *)
+//    public var bluetoothStatus: Status {
+//        let status = bluetoothManager.state
+//        switch status {
+//        case .unknown:
+//            return .notDetermined
+//        case .unauthorized:
+//            return .denied
+//        case .unsupported:
+//            return .unSupport
+//        default:
+//            return .authorized
+//        }
+//    }
     
     // MARK: - 主线程直接读取状态，一部分不能读取的会抛出异常
     public func status(withPrivacyType type: PrivacyType) throws -> Status  {
@@ -276,40 +276,40 @@ public class LGAuthorizationStatusManager: NSObject {
             return microphoneStatus
         case .location:
             return locationStatus
-        case .contacts:
-            return contactsStatus
-        case .reminders:
-            return remindersStatus
-        case .motionAndFitness:
-            if #available(iOS 11.0, *) {
-                return motionStatus
-            } else {
-                throw LGAuthorizationStatusError.unSupportType(type)
-            }
-        case .appleMusic:
-            if #available(iOS 9.3, *) {
-                return appleMusicStatus
-            } else {
-                throw LGAuthorizationStatusError.unSupportType(type)
-            }
-        case .siri:
-            if #available(iOS 10.0, *) {
-                return siriStatus
-            } else {
-                throw LGAuthorizationStatusError.unSupportType(type)
-            }
-        case .speechRecognition:
-            if #available(iOS 10.0, *) {
-                return speechRecognitionStatus
-            } else {
-                throw LGAuthorizationStatusError.unSupportType(type)
-            }
-        case .bluetooth:
-            if #available(iOS 10.0, *) {
-                return bluetoothStatus
-            } else {
-                throw LGAuthorizationStatusError.unSupportType(type)
-            }
+//        case .contacts:
+//            return contactsStatus
+//        case .reminders:
+//            return remindersStatus
+//        case .motionAndFitness:
+//            if #available(iOS 11.0, *) {
+//                return motionStatus
+//            } else {
+//                throw LGAuthorizationStatusError.unSupportType(type)
+//            }
+//        case .appleMusic:
+//            if #available(iOS 9.3, *) {
+//                return appleMusicStatus
+//            } else {
+//                throw LGAuthorizationStatusError.unSupportType(type)
+//            }
+//        case .siri:
+//            if #available(iOS 10.0, *) {
+//                return siriStatus
+//            } else {
+//                throw LGAuthorizationStatusError.unSupportType(type)
+//            }
+//        case .speechRecognition:
+//            if #available(iOS 10.0, *) {
+//                return speechRecognitionStatus
+//            } else {
+//                throw LGAuthorizationStatusError.unSupportType(type)
+//            }
+//        case .bluetooth:
+//            if #available(iOS 10.0, *) {
+//                return bluetoothStatus
+//            } else {
+//                throw LGAuthorizationStatusError.unSupportType(type)
+//            }
         default:
             throw LGAuthorizationStatusError.unableToReadImmediately
         }
@@ -324,14 +324,14 @@ public class LGAuthorizationStatusManager: NSObject {
         case .location:
             try requestLocationPrivacy(callback: callback)
             break
-        case .contacts:
-            try requestContactsPrivacy(callback: callback)
-        case .calendars, .reminders:
-            try requestEventPrivacy(callback: callback, type: type)
-            break
-        case .motionAndFitness:
-            try requestMotionPrivacy(callback: callback)
-            break
+//        case .contacts:
+//            try requestContactsPrivacy(callback: callback)
+//        case .calendars, .reminders:
+//            try requestEventPrivacy(callback: callback, type: type)
+//            break
+//        case .motionAndFitness:
+//            try requestMotionPrivacy(callback: callback)
+//            break
         case .photos:
             try requestPhotosPrivacy(callback: callback)
             break
@@ -341,27 +341,27 @@ public class LGAuthorizationStatusManager: NSObject {
         case .camera:
             try requestCameraPrivacy(callback: callback)
             break
-        case .homeKit:
-            try requestHomeKitPrivacy(callback: callback)
-            break
-        case .healthWith(shareTypes: _, readTypes: _):
-            try requestHealthPrivacy(callback: callback, type: type)
-            break
-        case .speechRecognition:
-            try requestSpeechRecognitionPrivacy(callback: callback)
-            break
-        case .siri:
-            try requestSiriPrivacy(callback: callback)
-            break
-        case .bluetooth:
-            try requestBluetoothPrivacy(callback: callback)
-            break
-        case .NFC:
-            try requestNFCPrivacy(callback: callback)
-            break
-        case .faceID:
-            try requestFaceIDPrivacy(callback: callback)
-            break
+//        case .homeKit:
+//            try requestHomeKitPrivacy(callback: callback)
+//            break
+//        case .healthWith(shareTypes: _, readTypes: _):
+//            try requestHealthPrivacy(callback: callback, type: type)
+//            break
+//        case .speechRecognition:
+//            try requestSpeechRecognitionPrivacy(callback: callback)
+//            break
+//        case .siri:
+//            try requestSiriPrivacy(callback: callback)
+//            break
+//        case .bluetooth:
+//            try requestBluetoothPrivacy(callback: callback)
+//            break
+//        case .NFC:
+//            try requestNFCPrivacy(callback: callback)
+//            break
+//        case .faceID:
+//            try requestFaceIDPrivacy(callback: callback)
+//            break
         default:
             break
         }
@@ -405,86 +405,86 @@ public class LGAuthorizationStatusManager: NSObject {
         }
     }
     
-    // MARK: - 联系人相关
-    func requestContactsPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        let contactsDes = Bundle.main.infoDictionary?[PrivacyKeys.ContactsUsage]
-        
-        guard contactsDes != nil else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.ContactsUsage)
-            throw LGAuthorizationStatusError.privacyDescriptionNotSet(.contacts)
-        }
-        
-        if contactsStatus == .notDetermined {
-            let contanctsStore = CNContactStore()
-            contanctsStore.requestAccess(for: CNEntityType.contacts) { (granted, error) in
-                DispatchQueue.main.async {
-                    if let error = error {
-                        println(error.localizedDescription)
-                        callback(.contacts, .unSupport)
-                    } else {
-                        if granted {
-                            callback(.contacts, .authorized)
-                        } else {
-                            callback(.contacts, .denied)
-                        }
-                    }
-                }
-            }
-        } else {
-            callback(.contacts, contactsStatus)
-        }
-    }
-    
-    // MARK: - 日历和提醒
-    func requestEventPrivacy(callback: @escaping PrivacyStatusCallback, type: PrivacyType) throws {
-        var descriptionKey: String
-        var status: Status
-        var entityType: EKEntityType
-        switch type {
-        case .calendars:
-            status = calendarsStatus
-            entityType = .event
-            descriptionKey = PrivacyKeys.CalendarsUsage
-            break
-        case .reminders:
-            status = remindersStatus
-            entityType = .reminder
-            descriptionKey = PrivacyKeys.RemindersUsage
-            break
-        default:
-            throw LGAuthorizationStatusError.unSupportType(type)
-        }
-        
-        
-        let description = Bundle.main.infoDictionary?[descriptionKey]
-        guard description != nil else {
-            println("需要在plist中设置如下内容:",
-                    descriptionKey)
-            throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
-        }
-        
-        
-        if status == .notDetermined {
-            let store = EKEventStore()
-            store.requestAccess(to: entityType) { (granted, error) in
-                DispatchQueue.main.async {
-                    if let error = error {
-                        println(error.localizedDescription)
-                        callback(type, .unSupport)
-                    } else {
-                        if granted {
-                            callback(.contacts, .authorized)
-                        } else {
-                            callback(.contacts, .denied)
-                        }
-                    }
-                }
-            }
-        } else {
-            callback(.calendars, calendarsStatus)
-        }
-    }
+//    // MARK: - 联系人相关
+//    func requestContactsPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        let contactsDes = Bundle.main.infoDictionary?[PrivacyKeys.ContactsUsage]
+//
+//        guard contactsDes != nil else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.ContactsUsage)
+//            throw LGAuthorizationStatusError.privacyDescriptionNotSet(.contacts)
+//        }
+//
+//        if contactsStatus == .notDetermined {
+//            let contanctsStore = CNContactStore()
+//            contanctsStore.requestAccess(for: CNEntityType.contacts) { (granted, error) in
+//                DispatchQueue.main.async {
+//                    if let error = error {
+//                        println(error.localizedDescription)
+//                        callback(.contacts, .unSupport)
+//                    } else {
+//                        if granted {
+//                            callback(.contacts, .authorized)
+//                        } else {
+//                            callback(.contacts, .denied)
+//                        }
+//                    }
+//                }
+//            }
+//        } else {
+//            callback(.contacts, contactsStatus)
+//        }
+//    }
+//
+//    // MARK: - 日历和提醒
+//    func requestEventPrivacy(callback: @escaping PrivacyStatusCallback, type: PrivacyType) throws {
+//        var descriptionKey: String
+//        var status: Status
+//        var entityType: EKEntityType
+//        switch type {
+//        case .calendars:
+//            status = calendarsStatus
+//            entityType = .event
+//            descriptionKey = PrivacyKeys.CalendarsUsage
+//            break
+//        case .reminders:
+//            status = remindersStatus
+//            entityType = .reminder
+//            descriptionKey = PrivacyKeys.RemindersUsage
+//            break
+//        default:
+//            throw LGAuthorizationStatusError.unSupportType(type)
+//        }
+//
+//
+//        let description = Bundle.main.infoDictionary?[descriptionKey]
+//        guard description != nil else {
+//            println("需要在plist中设置如下内容:",
+//                    descriptionKey)
+//            throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
+//        }
+//
+//
+//        if status == .notDetermined {
+//            let store = EKEventStore()
+//            store.requestAccess(to: entityType) { (granted, error) in
+//                DispatchQueue.main.async {
+//                    if let error = error {
+//                        println(error.localizedDescription)
+//                        callback(type, .unSupport)
+//                    } else {
+//                        if granted {
+//                            callback(.contacts, .authorized)
+//                        } else {
+//                            callback(.contacts, .denied)
+//                        }
+//                    }
+//                }
+//            }
+//        } else {
+//            callback(.calendars, calendarsStatus)
+//        }
+//    }
     
     // MARK: - 相册
     func requestPhotosPrivacy(callback: @escaping PrivacyStatusCallback) throws {
@@ -552,274 +552,274 @@ public class LGAuthorizationStatusManager: NSObject {
         }
     }
     
-    // MARK: - HealthKit
-    public func requestHealthPrivacy(callback: @escaping PrivacyStatusCallback, type: PrivacyType) throws {
-        switch type {
-        case .healthWith(shareTypes: let shareTypes, readTypes: let readTypes):
-            if (shareTypes != nil && readTypes != nil) || (shareTypes != nil && readTypes == nil) {
-                let clinicalDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthClinicalHealthRecordsShareUsage]
-                let shareDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthShareUsage]
-                let updateDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthUpdateUsage]
-                guard clinicalDes != nil, shareDes != nil, updateDes != nil else {
-                    println("需要在plist中设置如下内容:",
-                            PrivacyKeys.HealthClinicalHealthRecordsShareUsage,
-                            PrivacyKeys.HealthShareUsage,
-                            PrivacyKeys.HealthUpdateUsage)
-                    throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
-                }
-            } else if shareTypes == nil && readTypes != nil {
-                let clinicalDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthClinicalHealthRecordsShareUsage]
-                let shareDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthShareUsage]
-                guard clinicalDes != nil, shareDes != nil else {
-                    println("需要在plist中设置如下内容:",
-                            PrivacyKeys.HealthClinicalHealthRecordsShareUsage,
-                            PrivacyKeys.HealthShareUsage)
-                    throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
-                }
-            } else {
-                throw LGAuthorizationStatusError.healthReadTypesOrShareTypesMustHaveOne
-            }
-            
-            HKHealthStore().requestAuthorization(toShare: shareTypes,
-                                                 read: readTypes)
-            { (granted, error) in
-                if let error = error {
-                    println(error.localizedDescription)
-                    DispatchQueue.main.async {
-                        callback(type, .unSupport)
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        callback(type, .authorized)
-                    }
-                }
-            }
-            break
-        default:
-            throw LGAuthorizationStatusError.unSupportType(type)
-        }
-    }
-    
-    // MARK: - HomeKit
-    var homeManager: HMHomeManager?
-    func requestHomeKitPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.HomeKitUsage] else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.HomeKitUsage)
-            throw LGAuthorizationStatusError.privacyDescriptionNotSet(.homeKit)
-        }
-        if homeManager != nil {
-            homeManager = nil
-        }
-        
-        let manager = HMHomeManager()
-        manager.delegate = self
-        self.homeManager = manager
-    }
-    
-    // MARK: - 加速计
-    var motionManager: CMMotionActivityManager?
-    lazy var motionQueue: OperationQueue = {
-        let queue = OperationQueue()
-        queue.qualityOfService = .background
-        return queue
-    }()
-    func requestMotionPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.MotionUsage] else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.MotionUsage)
-            throw LGAuthorizationStatusError.privacyDescriptionNotSet(.motionAndFitness)
-        }
-        
-        self.motionManager = CMMotionActivityManager()
-        self.motionManager?.startActivityUpdates(to: motionQueue, withHandler: { (activity) in
-            DispatchQueue.main.async {
-                if #available(iOS 11.0, *) {
-                    self.callbackBlcok?(.motionAndFitness, .authorized)
-                } else {
-                }
-            }
-        })
-    }
-    
-    // MARK: - AppleMusic
-    func requestAppleMusicPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.AppleMusicUsage] else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.AppleMusicUsage)
-            if #available(iOS 9.3, *) {
-                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.appleMusic)
-            } else {
-                return
-            }
-        }
-        
-        if #available(iOS 9.3, *) {
-            if self.appleMusicStatus == .notDetermined {
-                SKCloudServiceController.requestAuthorization { (authorizationStatus) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else {return}
-                        callback(.appleMusic, weakSelf.appleMusicStatus)
-                    }
-                }
-            }
-        } else {
-        }
-    }
-    
-    // MARK: - Siri
-    func requestSiriPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.SiriUsage] else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.SiriUsage)
-            if #available(iOS 10.0, *) {
-                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.siri)
-            } else {
-                return
-            }
-        }
-        
-        if #available(iOS 10.0, *) {
-            if self.siriStatus == .notDetermined {
-                INPreferences.requestSiriAuthorization { (authorizationStatus) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else {return}
-                        callback(.siri, weakSelf.siriStatus)
-                    }
-                }
-            }
-        } else {
-        }
-    }
-    
-    // MARK: - 语音识别
-    func requestSpeechRecognitionPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.SpeechRecognition] else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.SpeechRecognition)
-            if #available(iOS 10.0, *) {
-                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.speechRecognition)
-            } else {
-                return
-            }
-        }
-        
-        if #available(iOS 10.0, *) {
-            if self.speechRecognitionStatus == .notDetermined {
-                SFSpeechRecognizer.requestAuthorization { (authorizationStatus) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else {return}
-                        callback(.speechRecognition, weakSelf.speechRecognitionStatus)
-                    }
-                }
-            }
-        } else {
-        }
-        
-    }
-    
-    // MARK: - 蓝牙BLE
-    lazy var bluetoothManager: CBCentralManager =  {
-        return CBCentralManager(delegate: self, queue: nil)
-    }()
-    func requestBluetoothPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.BluetoothPeripheralUsage] else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.BluetoothPeripheralUsage)
-            if #available(iOS 10.0, *) {
-                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.bluetooth)
-            } else {
-                return
-            }
-        }
-        
-        if #available(iOS 10.0, *) {
-            if self.bluetoothStatus == .notDetermined {
-                bluetoothManager.scanForPeripherals(withServices: nil, options: nil)
-            }
-        } else {
-        }
-    }
-    
-    // MARK: - NFC
-    var readerSession: AnyObject?
-    func requestNFCPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.NFCReaderUsage] else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.NFCReaderUsage)
-            if #available(iOS 11.0, *) {
-                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.NFC)
-            } else {
-                return
-            }
-        }
-        
-        if #available(iOS 11.0, *) {
-            if NFCNDEFReaderSession.readingAvailable {
-                readerSession = NFCNDEFReaderSession(delegate: self,
-                                                     queue: nil,
-                                                     invalidateAfterFirstRead: true)
-            } else {
-                callback(.NFC, .unSupport)
-            }
-        } else {
-        }
-    }
-    
-    // MARK: - faceID
-    func requestFaceIDPrivacy(callback: @escaping PrivacyStatusCallback) throws {
-        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.FaceIDUsage] else {
-            println("需要在plist中设置如下内容:",
-                    PrivacyKeys.FaceIDUsage)
-            if #available(iOS 11.0, *) {
-                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.faceID)
-            } else {
-                return
-            }
-        }
-        
-        if #available(iOS 11.0, *) {
-            let authenticationContext = LAContext()
-            
-            let reason = LGLocalizedString("Authentication is required to reset your password.")
-            var authenticationError: NSError?
-            if authenticationContext.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
-                                                       error: &authenticationError)
-            {
-                guard authenticationContext.biometryType == .faceID else {
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else {return}
-                        weakSelf.callbackBlcok?(.faceID, .unSupport)
-                    }
-                    return
-                }
-                
-                authenticationContext.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
-                                                     localizedReason: reason)
-                { success, evaluateError in
-                    if success {
-                        DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self else {return}
-                            weakSelf.callbackBlcok?(.faceID, .authorized)
-                        }
-                    } else {
-                        DispatchQueue.main.async { [weak self] in
-                            guard let weakSelf = self else {return}
-                            weakSelf.callbackBlcok?(.faceID, .denied)
-                        }
-                    }
-                }
-            } else {
-                DispatchQueue.main.async {
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else {return}
-                        weakSelf.callbackBlcok?(.faceID, .notDetermined)
-                    }
-                }
-            }
-        } else {
-        }
-    }
+//    // MARK: - HealthKit
+//    public func requestHealthPrivacy(callback: @escaping PrivacyStatusCallback, type: PrivacyType) throws {
+//        switch type {
+//        case .healthWith(shareTypes: let shareTypes, readTypes: let readTypes):
+//            if (shareTypes != nil && readTypes != nil) || (shareTypes != nil && readTypes == nil) {
+//                let clinicalDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthClinicalHealthRecordsShareUsage]
+//                let shareDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthShareUsage]
+//                let updateDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthUpdateUsage]
+//                guard clinicalDes != nil, shareDes != nil, updateDes != nil else {
+//                    println("需要在plist中设置如下内容:",
+//                            PrivacyKeys.HealthClinicalHealthRecordsShareUsage,
+//                            PrivacyKeys.HealthShareUsage,
+//                            PrivacyKeys.HealthUpdateUsage)
+//                    throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
+//                }
+//            } else if shareTypes == nil && readTypes != nil {
+//                let clinicalDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthClinicalHealthRecordsShareUsage]
+//                let shareDes = Bundle.main.infoDictionary?[PrivacyKeys.HealthShareUsage]
+//                guard clinicalDes != nil, shareDes != nil else {
+//                    println("需要在plist中设置如下内容:",
+//                            PrivacyKeys.HealthClinicalHealthRecordsShareUsage,
+//                            PrivacyKeys.HealthShareUsage)
+//                    throw LGAuthorizationStatusError.privacyDescriptionNotSet(type)
+//                }
+//            } else {
+//                throw LGAuthorizationStatusError.healthReadTypesOrShareTypesMustHaveOne
+//            }
+//
+//            HKHealthStore().requestAuthorization(toShare: shareTypes,
+//                                                 read: readTypes)
+//            { (granted, error) in
+//                if let error = error {
+//                    println(error.localizedDescription)
+//                    DispatchQueue.main.async {
+//                        callback(type, .unSupport)
+//                    }
+//                } else {
+//                    DispatchQueue.main.async {
+//                        callback(type, .authorized)
+//                    }
+//                }
+//            }
+//            break
+//        default:
+//            throw LGAuthorizationStatusError.unSupportType(type)
+//        }
+//    }
+//
+//    // MARK: - HomeKit
+//    var homeManager: HMHomeManager?
+//    func requestHomeKitPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.HomeKitUsage] else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.HomeKitUsage)
+//            throw LGAuthorizationStatusError.privacyDescriptionNotSet(.homeKit)
+//        }
+//        if homeManager != nil {
+//            homeManager = nil
+//        }
+//
+//        let manager = HMHomeManager()
+//        manager.delegate = self
+//        self.homeManager = manager
+//    }
+//
+//    // MARK: - 加速计
+//    var motionManager: CMMotionActivityManager?
+//    lazy var motionQueue: OperationQueue = {
+//        let queue = OperationQueue()
+//        queue.qualityOfService = .background
+//        return queue
+//    }()
+//    func requestMotionPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.MotionUsage] else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.MotionUsage)
+//            throw LGAuthorizationStatusError.privacyDescriptionNotSet(.motionAndFitness)
+//        }
+//
+//        self.motionManager = CMMotionActivityManager()
+//        self.motionManager?.startActivityUpdates(to: motionQueue, withHandler: { (activity) in
+//            DispatchQueue.main.async {
+//                if #available(iOS 11.0, *) {
+//                    self.callbackBlcok?(.motionAndFitness, .authorized)
+//                } else {
+//                }
+//            }
+//        })
+//    }
+//
+//    // MARK: - AppleMusic
+//    func requestAppleMusicPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.AppleMusicUsage] else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.AppleMusicUsage)
+//            if #available(iOS 9.3, *) {
+//                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.appleMusic)
+//            } else {
+//                return
+//            }
+//        }
+//
+//        if #available(iOS 9.3, *) {
+//            if self.appleMusicStatus == .notDetermined {
+//                SKCloudServiceController.requestAuthorization { (authorizationStatus) in
+//                    DispatchQueue.main.async { [weak self] in
+//                        guard let weakSelf = self else {return}
+//                        callback(.appleMusic, weakSelf.appleMusicStatus)
+//                    }
+//                }
+//            }
+//        } else {
+//        }
+//    }
+//
+//    // MARK: - Siri
+//    func requestSiriPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.SiriUsage] else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.SiriUsage)
+//            if #available(iOS 10.0, *) {
+//                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.siri)
+//            } else {
+//                return
+//            }
+//        }
+//
+//        if #available(iOS 10.0, *) {
+//            if self.siriStatus == .notDetermined {
+//                INPreferences.requestSiriAuthorization { (authorizationStatus) in
+//                    DispatchQueue.main.async { [weak self] in
+//                        guard let weakSelf = self else {return}
+//                        callback(.siri, weakSelf.siriStatus)
+//                    }
+//                }
+//            }
+//        } else {
+//        }
+//    }
+//
+//    // MARK: - 语音识别
+//    func requestSpeechRecognitionPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.SpeechRecognition] else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.SpeechRecognition)
+//            if #available(iOS 10.0, *) {
+//                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.speechRecognition)
+//            } else {
+//                return
+//            }
+//        }
+//
+//        if #available(iOS 10.0, *) {
+//            if self.speechRecognitionStatus == .notDetermined {
+//                SFSpeechRecognizer.requestAuthorization { (authorizationStatus) in
+//                    DispatchQueue.main.async { [weak self] in
+//                        guard let weakSelf = self else {return}
+//                        callback(.speechRecognition, weakSelf.speechRecognitionStatus)
+//                    }
+//                }
+//            }
+//        } else {
+//        }
+//
+//    }
+//
+//    // MARK: - 蓝牙BLE
+//    lazy var bluetoothManager: CBCentralManager =  {
+//        return CBCentralManager(delegate: self, queue: nil)
+//    }()
+//    func requestBluetoothPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.BluetoothPeripheralUsage] else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.BluetoothPeripheralUsage)
+//            if #available(iOS 10.0, *) {
+//                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.bluetooth)
+//            } else {
+//                return
+//            }
+//        }
+//
+//        if #available(iOS 10.0, *) {
+//            if self.bluetoothStatus == .notDetermined {
+//                bluetoothManager.scanForPeripherals(withServices: nil, options: nil)
+//            }
+//        } else {
+//        }
+//    }
+//
+//    // MARK: - NFC
+//    var readerSession: AnyObject?
+//    func requestNFCPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.NFCReaderUsage] else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.NFCReaderUsage)
+//            if #available(iOS 11.0, *) {
+//                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.NFC)
+//            } else {
+//                return
+//            }
+//        }
+//
+//        if #available(iOS 11.0, *) {
+//            if NFCNDEFReaderSession.readingAvailable {
+//                readerSession = NFCNDEFReaderSession(delegate: self,
+//                                                     queue: nil,
+//                                                     invalidateAfterFirstRead: true)
+//            } else {
+//                callback(.NFC, .unSupport)
+//            }
+//        } else {
+//        }
+//    }
+//
+//    // MARK: - faceID
+//    func requestFaceIDPrivacy(callback: @escaping PrivacyStatusCallback) throws {
+//        guard let _ = Bundle.main.infoDictionary?[PrivacyKeys.FaceIDUsage] else {
+//            println("需要在plist中设置如下内容:",
+//                    PrivacyKeys.FaceIDUsage)
+//            if #available(iOS 11.0, *) {
+//                throw LGAuthorizationStatusError.privacyDescriptionNotSet(.faceID)
+//            } else {
+//                return
+//            }
+//        }
+//
+//        if #available(iOS 11.0, *) {
+//            let authenticationContext = LAContext()
+//
+//            let reason = LGLocalizedString("Authentication is required to reset your password.")
+//            var authenticationError: NSError?
+//            if authenticationContext.canEvaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
+//                                                       error: &authenticationError)
+//            {
+//                guard authenticationContext.biometryType == .faceID else {
+//                    DispatchQueue.main.async { [weak self] in
+//                        guard let weakSelf = self else {return}
+//                        weakSelf.callbackBlcok?(.faceID, .unSupport)
+//                    }
+//                    return
+//                }
+//
+//                authenticationContext.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics,
+//                                                     localizedReason: reason)
+//                { success, evaluateError in
+//                    if success {
+//                        DispatchQueue.main.async { [weak self] in
+//                            guard let weakSelf = self else {return}
+//                            weakSelf.callbackBlcok?(.faceID, .authorized)
+//                        }
+//                    } else {
+//                        DispatchQueue.main.async { [weak self] in
+//                            guard let weakSelf = self else {return}
+//                            weakSelf.callbackBlcok?(.faceID, .denied)
+//                        }
+//                    }
+//                }
+//            } else {
+//                DispatchQueue.main.async {
+//                    DispatchQueue.main.async { [weak self] in
+//                        guard let weakSelf = self else {return}
+//                        weakSelf.callbackBlcok?(.faceID, .notDetermined)
+//                    }
+//                }
+//            }
+//        } else {
+//        }
+//    }
 }
 
 // MARK: - CLLocationManagerDelegate定位状态更新回调
@@ -833,65 +833,65 @@ extension LGAuthorizationStatusManager: CLLocationManagerDelegate {
 }
 
 // MARK: - HMHomeManagerDelegate HomeKit状态回调
-extension LGAuthorizationStatusManager: HMHomeManagerDelegate {
-    public func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
-        if manager.homes.count > 0 {
-            callbackBlcok?(.homeKit, .authorized)
-        } else {
-            manager.addHome(withName: "LGAuthorizationStatusManager.RequestPermission") { (home, error) in
-                DispatchQueue.main.async { [weak self] in
-                    guard let weakSelf = self else {return}
-                    if error == nil {
-                        weakSelf.callbackBlcok?(.homeKit, .authorized)
-                    } else {
-                        if (error as? HMError)?.code == HMError.homeAccessNotAuthorized {
-                            weakSelf.callbackBlcok?(.homeKit, .denied)
-                        } else {
-                            weakSelf.callbackBlcok?(.homeKit, .authorized)
-                        }
-                    }
-                }
-                
-                if let home = home {
-                    manager.removeHome(home, completionHandler: { (error) in
-                        if let error = error {
-                            println(error.localizedDescription)
-                        }
-                    })
-                }
-            }
-        }
-    }
-}
+//extension LGAuthorizationStatusManager: HMHomeManagerDelegate {
+//    public func homeManagerDidUpdateHomes(_ manager: HMHomeManager) {
+//        if manager.homes.count > 0 {
+//            callbackBlcok?(.homeKit, .authorized)
+//        } else {
+//            manager.addHome(withName: "LGAuthorizationStatusManager.RequestPermission") { (home, error) in
+//                DispatchQueue.main.async { [weak self] in
+//                    guard let weakSelf = self else {return}
+//                    if error == nil {
+//                        weakSelf.callbackBlcok?(.homeKit, .authorized)
+//                    } else {
+//                        if (error as? HMError)?.code == HMError.homeAccessNotAuthorized {
+//                            weakSelf.callbackBlcok?(.homeKit, .denied)
+//                        } else {
+//                            weakSelf.callbackBlcok?(.homeKit, .authorized)
+//                        }
+//                    }
+//                }
+//
+//                if let home = home {
+//                    manager.removeHome(home, completionHandler: { (error) in
+//                        if let error = error {
+//                            println(error.localizedDescription)
+//                        }
+//                    })
+//                }
+//            }
+//        }
+//    }
+//}
 
 // MARK: - CBCentralManagerDelegate 蓝牙BLE状态回调
-extension LGAuthorizationStatusManager: CBCentralManagerDelegate {
-    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        DispatchQueue.main.async { [weak self] in
-            guard let weakSelf = self else {return}
-            if #available(iOS 10.0, *) {
-                weakSelf.callbackBlcok?(.bluetooth, weakSelf.bluetoothStatus)
-            } else {
-            }
-        }
-    }
-}
+//extension LGAuthorizationStatusManager: CBCentralManagerDelegate {
+//    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
+//        DispatchQueue.main.async { [weak self] in
+//            guard let weakSelf = self else {return}
+//            if #available(iOS 10.0, *) {
+//                weakSelf.callbackBlcok?(.bluetooth, weakSelf.bluetoothStatus)
+//            } else {
+//            }
+//        }
+//    }
+//}
 
 // MARK: - NFCNDEFReaderSessionDelegate NFC回调
-extension LGAuthorizationStatusManager: NFCNDEFReaderSessionDelegate {
-    @available(iOS 11.0, *)
-    public func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
-        DispatchQueue.main.async {[weak self] in
-            guard let weakSelf = self else {return}
-            weakSelf.callbackBlcok?(.NFC, .denied)
-        }
-    }
-    
-    @available(iOS 11.0, *)
-    public func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
-        DispatchQueue.main.async {[weak self] in
-            guard let weakSelf = self else {return}
-            weakSelf.callbackBlcok?(.NFC, .authorized)
-        }
-    }
-}
+//extension LGAuthorizationStatusManager: NFCNDEFReaderSessionDelegate {
+//    @available(iOS 11.0, *)
+//    public func readerSession(_ session: NFCNDEFReaderSession, didInvalidateWithError error: Error) {
+//        DispatchQueue.main.async {[weak self] in
+//            guard let weakSelf = self else {return}
+//            weakSelf.callbackBlcok?(.NFC, .denied)
+//        }
+//    }
+//    
+//    @available(iOS 11.0, *)
+//    public func readerSession(_ session: NFCNDEFReaderSession, didDetectNDEFs messages: [NFCNDEFMessage]) {
+//        DispatchQueue.main.async {[weak self] in
+//            guard let weakSelf = self else {return}
+//            weakSelf.callbackBlcok?(.NFC, .authorized)
+//        }
+//    }
+//}

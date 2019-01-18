@@ -223,8 +223,8 @@
 			children = (
 				FE4574F420AE853300CFF847 /* LGMediaBrowser.swift */,
 				FE4574F120AE853300CFF847 /* LGActionView.swift */,
-				FE4574F220AE853300CFF847 /* LGMediaBrowserDefines.swift */,
 				FE4574F320AE853300CFF847 /* LGForceTouchPreviewController.swift */,
+				FE4574F220AE853300CFF847 /* LGMediaBrowserDefines.swift */,
 				FE4574F520AE853300CFF847 /* LGMesurement.swift */,
 				FE4574F620AE853300CFF847 /* LGButtons.swift */,
 				FE45750020AE859A00CFF847 /* LGFileDownloader.swift */,
