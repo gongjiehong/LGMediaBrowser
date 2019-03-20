@@ -83,7 +83,6 @@ extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewD
         } else {
             cell = RemoteImageLayoutCell(frame: CGRect.zero)
         }
-        cell.imageView.lg_setImageWithURL(ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 1024))
         return cell
     }
     
@@ -91,6 +90,10 @@ extension RemoteImageWallController: UICollectionViewDelegate, UICollectionViewD
         return ImageCount//dataArray.count
     }
     
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        let cell = cell as! RemoteImageLayoutCell
+        cell.imageView.lg_setImageWithURL(ImgaeURLConstructHelper.imageURL(fromFileID: indexPath.row + 1, size: 1024))
+    }
 
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
