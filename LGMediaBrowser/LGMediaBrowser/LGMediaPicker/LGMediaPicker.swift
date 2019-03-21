@@ -168,7 +168,7 @@ public class LGMediaPicker: LGMPNavigationController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        LGPhotoManager.sort = self.configs.sortBy
+        LGPhotoManager.default.sort = self.configs.sortBy
         
         self.title = LGLocalizedString("Albums")
         
@@ -247,7 +247,7 @@ public class LGMediaPicker: LGMPNavigationController {
     deinit {
         globleSelectedDataArray = nil
         globleMainPicker = nil
-        LGPhotoManager.stopCachingImages()
+        LGPhotoManager.default.stopCachingImages()
     }
     
 

@@ -800,7 +800,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
             cropFilter.addTarget(_view)
         }
     }
-    
+
     /// 拍摄完成返回结果
     public func onDoneClick() {
         var result: ResultModel

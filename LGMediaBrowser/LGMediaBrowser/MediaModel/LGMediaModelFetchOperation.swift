@@ -342,7 +342,7 @@ open class LGMediaModelFetchOperation: Operation {
             }
             let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
             
-            imageRequestId = LGPhotoManager.requestImage(forAsset: asset,
+            imageRequestId = LGPhotoManager.default.requestImage(forAsset: asset,
                                                          outputSize: fixedPixelSize(pixelSize),
                                                          isAsync: true,
                                                          resizeMode: PHImageRequestOptionsResizeMode.fast,
@@ -484,7 +484,7 @@ open class LGMediaModelFetchOperation: Operation {
             
             if #available(iOS 11.0, *) {
                 if asset.playbackStyle == .imageAnimated {
-                    imageRequestId = LGPhotoManager.requestImageData(for: asset,
+                    imageRequestId = LGPhotoManager.default.requestImageData(for: asset,
                                                                       resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                                       progressHandler:
                         { (progressValue, error, stoped, infoDic) in
@@ -523,7 +523,7 @@ open class LGMediaModelFetchOperation: Operation {
             let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
             
             
-            imageRequestId = LGPhotoManager.requestImage(forAsset: asset,
+            imageRequestId = LGPhotoManager.default.requestImage(forAsset: asset,
                                                          outputSize: fixedPixelSize(pixelSize),
                                                          resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                          progressHandlder:
@@ -601,7 +601,7 @@ open class LGMediaModelFetchOperation: Operation {
             }
             
             let pixelSize = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
-            imageRequestId = LGPhotoManager.imageManager.requestLivePhoto(for: asset,
+            imageRequestId = LGPhotoManager.default.imageManager.requestLivePhoto(for: asset,
                                                                           targetSize: fixedPixelSize(pixelSize),
                                                                           contentMode: PHImageContentMode.aspectFill,
                                                                           options: options)
@@ -834,7 +834,7 @@ open class LGMediaModelFetchOperation: Operation {
                     }
                 }
                 
-                imageRequestId = LGPhotoManager.imageManager.requestAVAsset(forVideo: asset,
+                imageRequestId = LGPhotoManager.default.imageManager.requestAVAsset(forVideo: asset,
                                                                              options: options)
                 { (avAsset, audioMix, infoDic) in
                     DispatchQueue.main.async { [weak self] in
@@ -917,7 +917,7 @@ open class LGMediaModelFetchOperation: Operation {
             self.thumbnailImageDownloadOperation?.cancel()
             
             if imageRequestId != PHInvalidImageRequestID {
-                LGPhotoManager.imageManager.cancelImageRequest(imageRequestId)
+                LGPhotoManager.default.imageManager.cancelImageRequest(imageRequestId)
             }
             
             if livePhotoRequestId != PHLivePhotoRequestIDInvalid {

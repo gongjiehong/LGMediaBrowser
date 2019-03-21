@@ -251,12 +251,12 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
         let scale = UIScreen.main.scale
         let tempSize = CGSize(width: self.contentView.lg_width * scale, height: self.contentView.lg_height * scale)
         
-        LGPhotoManager.cancelImageRequest(self.imageRequestID)
+        LGPhotoManager.default.cancelImageRequest(self.imageRequestID)
         
         self.identifier = model.asset.localIdentifier
         self.layoutImageView.image = nil
         
-        self.imageRequestID = LGPhotoManager.requestImage(forAsset: model.asset,
+        self.imageRequestID = LGPhotoManager.default.requestImage(forAsset: model.asset,
                                                           outputSize: tempSize,
                                                           resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                           completion:

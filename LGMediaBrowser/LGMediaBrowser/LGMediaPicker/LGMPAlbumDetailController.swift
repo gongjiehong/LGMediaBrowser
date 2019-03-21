@@ -205,7 +205,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
             if let albumListModel = albumListModel {
                 if needRefresh {
                     guard let result = albumListModel.result else { return }
-                    let photos = LGPhotoManager.fetchPhoto(inResult: result,
+                    let photos = LGPhotoManager.default.fetchPhoto(inResult: result,
                                                            supportTypes: self.configs.resultMediaTypes)
                     for temp in photos {
                         for selectedTemp in globleSelectedDataArray
@@ -236,7 +236,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
             } else {
                 DispatchQueue.userInteractive.async { [weak self] in
                     guard let weakSelf = self else { return }
-                    if let album = LGPhotoManager.getAllPhotosAlbum(weakSelf.configs.resultMediaTypes) {
+                    if let album = LGPhotoManager.default.getAllPhotosAlbum(weakSelf.configs.resultMediaTypes) {
                         weakSelf.albumListModel = album
                         weakSelf.dataArray.removeAll()
                         for temp in album.models {
@@ -273,7 +273,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         let itemSize = CGSize(width: (width - Settings.itemLineSpacing * (columnCount + 1)) / columnCount,
                               height: (width - Settings.itemLineSpacing * (columnCount + 1)) / columnCount)
         
-        LGPhotoManager.startCachingImages(for: assetArray,
+        LGPhotoManager.default.startCachingImages(for: assetArray,
                                           targetSize: CGSize(width: itemSize.width * UIScreen.main.scale,
                                                              height: itemSize.height * UIScreen.main.scale),
                                           contentMode: PHImageContentMode.aspectFill)
@@ -475,7 +475,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                         weakSelf.bottomToolBar.photoBytesLabel.text = "  "
                         weakSelf.bottomToolBar.photoBytesIndicatorView.startAnimating()
                     }
-                    LGPhotoManager.getPhotoBytes(withPhotos: globleSelectedDataArray)
+                    LGPhotoManager.default.getPhotoBytes(withPhotos: globleSelectedDataArray)
                     { (mbFormatString, originalLength) in
                         DispatchQueue.main.async { [weak self] in
                             guard let weakSelf = self else {return}
@@ -852,7 +852,7 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
         guard let result = self.albumListModel?.result else { return }
         if let detail = changeInstance.changeDetails(for: result) {
         
-            //            let photos = LGPhotoManager.fetchPhoto(inResult: detail.fetchResultAfterChanges,
+            //            let photos = LGPhotoManager.default.fetchPhoto(inResult: detail.fetchResultAfterChanges,
             //                                                   supportMediaType: configs.resultMediaTypes)
             //            self.dataArray.removeAll()
             //            self.dataArray += photos

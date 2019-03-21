@@ -72,7 +72,7 @@ public class LGPhotoModel {
             options.isSynchronous = false
             options.isNetworkAccessAllowed = false
             options.resizeMode = .fast
-            LGPhotoManager.imageManager.requestImageData(for: self.asset,
+            LGPhotoManager.default.imageManager.requestImageData(for: self.asset,
                                                          options: options)
             { (data, dataUTI, orientation, infoDic) in
                 let result = (data == nil)
@@ -84,7 +84,7 @@ public class LGPhotoModel {
         case .video:
             let options = PHVideoRequestOptions()
             options.isNetworkAccessAllowed = false
-            LGPhotoManager.imageManager.requestAVAsset(forVideo: self.asset,
+            LGPhotoManager.default.imageManager.requestAVAsset(forVideo: self.asset,
                                                        options: options)
             { (avAsset, audioMix, infoDic) in
                 let result = (avAsset == nil)
@@ -98,7 +98,7 @@ public class LGPhotoModel {
                 let options = PHLivePhotoRequestOptions()
                 options.isNetworkAccessAllowed = false
                 options.deliveryMode = .fastFormat
-                LGPhotoManager.imageManager.requestLivePhoto(for: self.asset,
+                LGPhotoManager.default.imageManager.requestLivePhoto(for: self.asset,
                                                              targetSize: self.pixelSize,
                                                              contentMode: PHImageContentMode.aspectFill,
                                                              options: options)
