@@ -8,6 +8,6 @@
 
 import Foundation
 
-public protocol LGMediaPreviewerProtocol {
-    init(frame: CGRect, mediaModel: LGMediaModel) throws
+public protocol LGMediaPreviewerProtocol: class {
+    init(frame: CGRect, mediaModel: LGMediaModel)
 }

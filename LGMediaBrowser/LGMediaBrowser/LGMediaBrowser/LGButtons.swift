@@ -8,9 +8,20 @@
 
 import Foundation
 
+internal protocol LGButtonPropertys {
+    var showFrame: CGRect {get set}
+    var hideFrame: CGRect {get set}
+    var padding: CGPoint {get}
+    var imageName: String {get}
+}
+
+
 internal class LGButton: UIButton {
     internal var showFrame: CGRect!
     internal var hideFrame: CGRect!
+    internal var padding: CGPoint {
+        return CGPoint.zero
+    }
     
     fileprivate var insets: UIEdgeInsets {
         if UI_USER_INTERFACE_IDIOM() == .phone {
@@ -22,7 +33,7 @@ internal class LGButton: UIButton {
     fileprivate let size: CGSize = CGSize(width: 44, height: 44)
     fileprivate var marginX: CGFloat = 0
     fileprivate var marginY: CGFloat = 0
-    fileprivate var extraMarginY: CGFloat = LGMesurement.isPhoneX ? 10 : 0
+    fileprivate var extraMarginY: CGFloat = LGMesurement.isNotchScreen ? 24.0 : 0
     
     func setup(_ imageName: String) {
         self.backgroundColor = .clear
@@ -36,7 +47,7 @@ internal class LGButton: UIButton {
         let image = UIImage(named: imageName,
                             in: Bundle(for: LGButton.self),
                             compatibleWith: nil) ?? UIImage()
-        self.setImage(image, for: UIControlState())
+        self.setImage(image, for: UIControl.State())
     }
     
     open func setFrameSize(_ size: CGSize? = nil) {
@@ -69,22 +80,25 @@ internal class LGImageButton: LGButton {
 }
 
 class LGCloseButton: LGImageButton {
+    override var padding: CGPoint {
+        return CGPoint(x: 5, y: 20)
+    }
     override var imageName: String { return "btn_close_white" }
     override var marginX: CGFloat {
         get {
-            let swapCloseAndDeleteButtons = globalConfigs.swapCloseAndDeleteButtons
+            let isExchangeCloseAndDeleteButtons = globalConfigs.isExchangeCloseAndDeleteButtons
             var result: CGFloat
-            if swapCloseAndDeleteButtons {
-                result = LGMesurement.screenWidth - LGButtonOptions.closeButtonPadding.x - self.size.width
+            if isExchangeCloseAndDeleteButtons {
+                result = LGMesurement.screenWidth - padding.x - self.size.width
             } else {
-                result = LGButtonOptions.closeButtonPadding.x
+                result = padding.x
             }
             return result
         }
         set { super.marginX = newValue }
     }
     override var marginY: CGFloat {
-        get { return LGButtonOptions.closeButtonPadding.y + extraMarginY }
+        get { return padding.y + extraMarginY }
         set { super.marginY = newValue }
     }
     
@@ -101,22 +115,25 @@ class LGCloseButton: LGImageButton {
 }
 
 class LGDeleteButton: LGImageButton {
+    override var padding: CGPoint {
+        return CGPoint(x: 5, y: 20)
+    }
     override var imageName: String { return "btn_delete_white" }
     override var marginX: CGFloat {
         get {
-            let swapCloseAndDeleteButtons = globalConfigs.swapCloseAndDeleteButtons
+            let isExchangeCloseAndDeleteButtons = globalConfigs.isExchangeCloseAndDeleteButtons
             var result: CGFloat
-            if swapCloseAndDeleteButtons {
-                result = LGButtonOptions.deleteButtonPadding.x
+            if isExchangeCloseAndDeleteButtons {
+                result = padding.x
             } else {
-                result = LGMesurement.screenWidth - LGButtonOptions.deleteButtonPadding.x - self.size.width
+                result = LGMesurement.screenWidth - padding.x - self.size.width
             }
             return result
         }
         set { super.marginX = newValue }
     }
     override var marginY: CGFloat {
-        get { return LGButtonOptions.deleteButtonPadding.y + extraMarginY }
+        get { return padding.y + extraMarginY }
         set { super.marginY = newValue }
     }
     

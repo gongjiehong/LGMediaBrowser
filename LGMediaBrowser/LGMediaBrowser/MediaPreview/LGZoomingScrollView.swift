@@ -17,6 +17,10 @@ open class LGZoomingScrollView: UIScrollView {
         }
     }
     
+    lazy var mediaSetter: LGMediaModelFetchSetter = {
+        return LGMediaModelFetchSetter()
+    }()
+    
     public private(set) var imageView: LGTapDetectingImageView!
     fileprivate var progressView: LGSectorProgressView!
     
@@ -45,7 +49,7 @@ open class LGZoomingScrollView: UIScrollView {
         self.delegate = self
         self.showsHorizontalScrollIndicator = false
         self.showsVerticalScrollIndicator = false
-        self.decelerationRate = UIScrollViewDecelerationRateFast
+        self.decelerationRate = UIScrollView.DecelerationRate.fast
         self.autoresizingMask = [.flexibleWidth,
                                  .flexibleTopMargin,
                                  .flexibleBottomMargin,
@@ -55,60 +59,57 @@ open class LGZoomingScrollView: UIScrollView {
         self.alwaysBounceHorizontal = false
         
         self.panGestureRecognizer.delegate = self
+        self.pinchGestureRecognizer?.delegate = self
+        
+        if #available(iOS 11.0, *) {
+            self.contentInsetAdjustmentBehavior = .never
+        } else {
+            // Fallback on earlier versions
+        }
     }
     
     func layoutImageIfNeeded() {
-        guard let media = self.mediaModel else {
-            self.imageView.image = nil
-            self.progressView.isShowError = true
+        guard let mediaModel = self.mediaModel else {
+            progressView.isShowError = true
             return
         }
         
-        if let image = media.thumbnailImage {
-            self.imageView.image = image
+        let sentinel = mediaSetter.cancel(withNewMediaModel: mediaModel)
+        
+        if let _ = mediaModel.thumbnailImage {
             self.displayImage(complete: true)
+        } else {
+            self.imageView.image = nil
+            self.progressView.isHidden = false
+            self.progressView.isShowError = false
+            self.progressView.progress = 0.0
         }
-        if let photoURL = media.mediaLocation.toURL() {
-            progressView.isShowError = false
-            if photoURL.isFileURL {
-                DispatchQueue.utility.async {
-                    do {
-                        let data = try Data(contentsOf: photoURL)
-                        let image = LGImage.imageWith(data: data)
-                        DispatchQueue.main.async {
-                            self.imageView.image = image
-                            self.displayImage(complete: true)
-                        }
-                    } catch {
-                        DispatchQueue.main.async {
-                            self.progressView.isShowError = true
-                        }
-                    }
-                }
-            } else if let image = LGImageCache.default.getImage(forKey: photoURL.absoluteString,
-                                                                withType: LGImageCacheType.memory) {
-                self.imageView.image = image
-                self.displayImage(complete: true)
-            } else {
-                self.progressView.isHidden = false
-                imageView.lg_setImageWithURL(photoURL,
-                                             placeholder: media.thumbnailImage,
-                                             options: LGWebImageOptions.default,
-                                             progressBlock:
-                    { (progressModel) in
-                        self.progressView.progress = CGFloat(progressModel.fractionCompleted)
-                }, transformBlock: nil) { (resultImage, _, _, imageStage, error) in
-                    guard error == nil, let image = resultImage else {
-                        self.progressView.isShowError = true
+        
+        LGMediaModelFetchSetter.setterQueue.async { [weak self] in
+            guard let weakSelf = self else {return}
+            var newSentinel = sentinel
+            newSentinel = weakSelf.mediaSetter.setOperation(with: sentinel,
+                                                            mediaModel: mediaModel,
+                                                            progress:
+                { [weak self] (progress) in
+                    guard let weakSelf = self else { return }
+                    weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+                }, imageCompletion: { [weak self] (resultImage, finished, error) in
+                    guard let weakSelf = self, weakSelf.mediaSetter.sentinel == newSentinel else { return }
+                    guard let resultImage = resultImage else {
+                        weakSelf.progressView.isShowError = true
                         return
                     }
-                    self.mediaModel?.thumbnailImage = image
-                    self.progressView.isHidden = imageStage == LGWebImageStage.finished
-                    self.displayImage(complete: imageStage == LGWebImageStage.finished)
-                }
-            }
-        } else {
-            progressView.isShowError = true
+                    
+                    if let currentImage = weakSelf.imageView.image {
+                        if resultImage.size.height <= currentImage.size.width {
+                            return
+                        }
+                    }
+                    
+                    weakSelf.progressView.isHidden = true
+                    weakSelf.displayImage(complete: true)
+            })
         }
     }
     
@@ -161,7 +162,7 @@ open class LGZoomingScrollView: UIScrollView {
         // height in pixels. scale needs to remove if to use the old algorithm
         let deviceScreenHeight = UIScreen.main.bounds.height * scale
         
-        if globalConfigs.longPhotoWidthMatchScreen && imageView.frame.height >= imageView.frame.width
+        if globalConfigs.isLongPhotoWidthMatchScreen && imageView.frame.height >= imageView.frame.width
         {
             minScale = 1.0
             maxScale = 1.5
@@ -213,7 +214,7 @@ open class LGZoomingScrollView: UIScrollView {
             var imageViewFrame: CGRect = .zero
             imageViewFrame.origin = .zero
             // long photo
-            if globalConfigs.longPhotoWidthMatchScreen && image.size.height >= image.size.width
+            if globalConfigs.isLongPhotoWidthMatchScreen && image.size.height >= image.size.width
             {
                 let imageHeight = LGMesurement.screenWidth / image.size.width * image.size.height
                 imageViewFrame.size = CGSize(width: LGMesurement.screenWidth, height: imageHeight)
@@ -225,7 +226,7 @@ open class LGZoomingScrollView: UIScrollView {
             contentSize = imageViewFrame.size
             setMaxMinZoomScalesForCurrentBounds()
         }
-
+        
         setNeedsLayout()
     }
     
@@ -241,7 +242,7 @@ open class LGZoomingScrollView: UIScrollView {
             // zoom out
             setZoomScale(minimumZoomScale, animated: true)
         } else {
-            let zoomRect = zoomRectForScrollViewWith(maximumZoomScale, touchPoint: touchPoint)
+            let zoomRect = zoomRectForScrollViewWith(minimumZoomScale * 2.0, touchPoint: touchPoint)
             zoom(to: zoomRect, animated: true)
         }
         
@@ -249,14 +250,15 @@ open class LGZoomingScrollView: UIScrollView {
     }
     
     @objc func postNotification() {
-        NotificationCenter.default.post(name: kTapedScreenNotification, object: nil)
+        NotificationCenter.default.post(name: LGMediaBrowser.tapedScreenNotification, object: nil)
     }
     
     @objc func postDoubleTapNotification() {
-        NotificationCenter.default.post(name: kNeedHideControlsNotification, object: nil)
+        NotificationCenter.default.post(name: LGMediaBrowser.needHideControlsNotification, object: nil)
     }
     
-    deinit {
+    func reset() {
+        self.setMaxMinZoomScalesForCurrentBounds()
     }
 }
 
@@ -282,7 +284,6 @@ extension LGZoomingScrollView: UIScrollViewDelegate {
     }
     
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        self.setNeedsLayout()
         self.layoutIfNeeded()
     }
 }
@@ -324,12 +325,18 @@ extension LGZoomingScrollView: UIGestureRecognizerDelegate {
                                   shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool
     {
         if gestureRecognizer == self.panGestureRecognizer &&
-            otherGestureRecognizer.lg_name == kPanDissmissGestureName &&
+            otherGestureRecognizer.lg_name == kPanExitGestureName &&
             self.contentOffset.y <= 0.0
         {
+            if let ges = otherGestureRecognizer as? UIPanGestureRecognizer {
+                let velocity = ges.velocity(in: ges.view)
+                if velocity.y < 0 {
+                    return false
+                }
+            }
             return true
         }
-
+        
         return false
     }
 }

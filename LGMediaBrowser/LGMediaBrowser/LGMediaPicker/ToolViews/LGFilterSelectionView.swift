@@ -74,7 +74,7 @@ open class LGFilterSelectionViewCell: UICollectionViewCell {
         iconView = tempIconView
         iconView.clipsToBounds = true
         iconView.layer.cornerRadius = 5.0
-        iconView.contentMode = UIViewContentMode.scaleAspectFill
+        iconView.contentMode = UIView.ContentMode.scaleAspectFill
         self.contentView.addSubview(iconView)
         
         let tempTitleLabel = UILabel(frame: CGRect(x: 0, y: iconView.frame.maxY + 5, width: width, height: 15.0))

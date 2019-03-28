@@ -15,7 +15,7 @@ public protocol LGTapDetectingImageViewDelegate: NSObjectProtocol {
 }
 
 open class LGTapDetectingImageView: LGAnimatedImageView, LGMediaPreviewerProtocol {
-    public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
+    public required convenience init(frame: CGRect, mediaModel: LGMediaModel) {
         self.init(frame: frame)
     }
     
@@ -34,15 +34,6 @@ open class LGTapDetectingImageView: LGAnimatedImageView, LGMediaPreviewerProtoco
     override public init(image: UIImage?, highlightedImage: UIImage?) {
         super.init(image: image, highlightedImage: highlightedImage)
         self.isUserInteractionEnabled = true
-    }
-    
-    public required init(frame: CGRect,
-                         mediaLocation: LGMediaLocation,
-                         mediaType: LGMediaType,
-                         isLocalFile: Bool,
-                         placeholderImage: UIImage?) throws
-    {
-        super.init(frame: frame)
     }
     
     public required init?(coder aDecoder: NSCoder) {

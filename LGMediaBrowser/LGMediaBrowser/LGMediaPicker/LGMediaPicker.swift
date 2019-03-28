@@ -10,8 +10,14 @@ import UIKit
 import Photos
 
 public protocol LGMediaPickerDelegate: NSObjectProtocol {
-    
+    func pickerDidCancel(_ picker: LGMediaPicker)
+    func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGPhotoModel], isOriginalPhoto isOriginal: Bool)
+    func picker(_ picker: LGMediaPicker, didDoneWith resultImage: UIImage?)
 }
+
+internal var globleSelectedDataArray: [LGPhotoModel]! = []
+
+internal weak var globleMainPicker: LGMediaPicker!
 
 public class LGMediaPicker: LGMPNavigationController {
 
@@ -29,7 +35,7 @@ public class LGMediaPicker: LGMPNavigationController {
         public var allowMixSelect: Bool = true
         
         /// 可选的数据类型，默认视频和图片都可选[.image, .video]
-        public var resultMediaTypes: LGPhotoManager.ResultMediaType = [.image, .video, .livePhoto, .animatedImage]
+        public var resultMediaTypes: LGPhotoManager.ResultMediaType = .all
         
         /// 是否支持选择GIF和APNG，默认支持true
         public var allowSelectAnimatedImage: Bool = true
@@ -44,19 +50,19 @@ public class LGMediaPicker: LGMPNavigationController {
         public var allowForceTouch: Bool = true
         
         /// 是否允许编辑图片，单张图片时有效，默认允许true
-        public var allowEditImage: Bool = true
+        public var allowEditImage: Bool = false
         
         /// 是否允许编辑视频，单张选择时有效，默认允许true
-        public var allowEditVideo: Bool = true
+        public var allowEditVideo: Bool = false
         
         /// 是否允许选择原图，默认允许，true
-        public var allowSelectOriginal: Bool = true
+        public var allowSelectOriginal: Bool = false
 
-        /// 可编辑的视频最大长度，默认kCMTimeZero，表示不限制长度
-        public var maxVideoEditDuration: CMTime = kCMTimeZero
+        /// 可编辑的视频最大长度，默认CMTime.zero，表示不限制长度
+        public var maxVideoEditDuration: CMTime = CMTime.zero
         
-        /// 最大视频长度，默认kCMTimeZero，表示不限制
-        public var maxVideoDuration: CMTime = kCMTimeZero
+        /// 最大视频长度，默认CMTime.zero，表示不限制
+        public var maxVideoDuration: CMTime = CMTime.zero
         
         /// 是否允许滑动选择，默认允许true
         public var allowSlideSelect: Bool = true
@@ -80,13 +86,13 @@ public class LGMediaPicker: LGMPNavigationController {
         public var saveNewImageAfterEdit: Bool = false
         
         /// 是否在拍照按钮上显示当前拍摄到的内容
-        public var isShowCaptureImageOnTakePhotoBtn: Bool = true
+        public var isShowCaptureImageOnTakePhotoButton: Bool = true
         
         /// 排序方式，升序还是降序
         public var sortBy: LGPhotoManager.SortBy = .ascending
         
         /// 单选模式下是否显示选择按钮
-        public var isShowSelectBtnAtSingleMode: Bool = false
+        public var isShowSelectButtonAtSingleMode: Bool = false
         
         /// 是否在选中的图片上显示蒙层，默认不显示，false
         public var isShowSelectedMask: Bool = false
@@ -100,6 +106,9 @@ public class LGMediaPicker: LGMPNavigationController {
         /// 输出视频格式, 默认mp4，仅支持mp4和mov
         public var videoExportType: LGCameraCapture.VideoType = .mp4
         
+        /// 是否为头像模式
+        public var isHeadPortraitMode: Bool = false
+        
         public init() {
         }
         
@@ -109,15 +118,57 @@ public class LGMediaPicker: LGMPNavigationController {
         }()
     }
     
-    /// 配置，默认使用默认配置
-    public var config: Configuration = Configuration.default
+    public override init(rootViewController: UIViewController) {
+        super.init(rootViewController: rootViewController)
+        setupGloble()
+    }
     
-    var selectedDataArray: [LGPhotoModel] = []
+    public override init(navigationBarClass: AnyClass?, toolbarClass: AnyClass?) {
+        super.init(navigationBarClass: navigationBarClass, toolbarClass: toolbarClass)
+        setupGloble()
+    }
+    
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        setupGloble()
+    }
+    
+    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        setupGloble()
+    }
+    
+    public convenience init(delegate: LGMediaPickerDelegate) {
+        self.init(nibName: nil, bundle: nil)
+        self.pickerDelegate = delegate
+    }
+    
+    func setupGloble() {
+        if globleSelectedDataArray == nil {
+            globleSelectedDataArray = []
+        }
+        
+        globleMainPicker = self
+    }
+    
+    /// 配置，默认使用默认配置
+    public var configs: Configuration = Configuration.default
+    
+    public var selectedDataArray: [LGPhotoModel] = [] {
+        didSet {
+            for (index, photo) in selectedDataArray.enumerated() {
+                photo.currentSelectedIndex = index + 1
+            }
+            globleSelectedDataArray = selectedDataArray
+        }
+    }
+    
+    public weak var pickerDelegate: LGMediaPickerDelegate?
     
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        LGPhotoManager.sort = self.config.sortBy
+        LGPhotoManager.default.sort = self.configs.sortBy
         
         self.title = LGLocalizedString("Albums")
         
@@ -141,27 +192,62 @@ public class LGMediaPicker: LGMPNavigationController {
     }
     
     public func requestAccessAndSetupLayout() {
-        PHPhotoLibrary.requestAuthorization { [weak self] (status) in
-            DispatchQueue.main.async { [weak self] in
-                switch status {
-                case .authorized:
-                    let albumList = LGMPAlbumListController()
-                    albumList.mainPicker = self
-                    
-                    let allPhotosList = LGMPAlbumDetailController()
-                    allPhotosList.mainPicker = self
-                    self?.viewControllers = [albumList, allPhotosList]
-                    break
-                case .denied, .restricted:
-                    let controller = LGUnauthorizedController()
-                    self?.viewControllers = [controller]
-                    break
-                case .notDetermined:
-                    break
-                }
+        do {
+            let status = try LGAuthorizationStatusManager.default.status(withPrivacyType: .photos)
+            if status == .notDetermined {
+                try LGAuthorizationStatusManager.default.requestPrivacy(withType: .photos,
+                                                                        callback:
+                    { [weak self] (type, status) in
+                        guard let weakSelf = self else {return}
+                        switch type {
+                        case .photos:
+                            weakSelf.setupControllersWith(status)
+                            break
+                        default:
+                            break
+                        }
+                })
+            } else {
+                setupControllersWith(status)
             }
-            println(status)
+        } catch {
+            LGStatusBarTips.show(withStatus: error.localizedDescription,
+                                 style: LGStatusBarConfig.Style.error)
+            DispatchQueue.main.after(0.5) { [weak self] in
+                guard let weakSelf = self else {return}
+                weakSelf.pickerDelegate?.pickerDidCancel(weakSelf)
+            }
         }
+    }
+    
+    func setupControllersWith(_ status: LGAuthorizationStatusManager.Status) {
+        switch status {
+        case .authorized:
+            let albumList = LGMPAlbumListController()
+            albumList.configs = self.configs
+            albumList.delegate = self.pickerDelegate
+            
+            let allPhotosList = LGMPAlbumDetailController()
+            allPhotosList.configs = self.configs
+            allPhotosList.delegate = self.pickerDelegate
+            self.viewControllers = [albumList, allPhotosList]
+            break
+        case .denied, .restricted:
+            let controller = LGUnauthorizedController()
+            controller.unauthorizedType = .ablum
+            self.viewControllers = [controller]
+            break
+        case .notDetermined:
+            break
+        case .unSupport:
+            break
+        }
+    }
+    
+    deinit {
+        globleSelectedDataArray = nil
+        globleMainPicker = nil
+        LGPhotoManager.default.stopCachingImages()
     }
     
 

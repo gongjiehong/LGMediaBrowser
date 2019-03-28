@@ -15,6 +15,7 @@ protocol LGActionViewDelegate: NSObjectProtocol {
 
 class LGActionView: UIView {
     internal var closeButton: LGCloseButton!
+    internal var titleLabel: UILabel!
     internal var deleteButton: LGDeleteButton!
     
     weak var delegate: LGActionViewDelegate?
@@ -27,6 +28,7 @@ class LGActionView: UIView {
         super.init(frame: frame)
         configureCloseButton()
         configureDeleteButton()
+        configureTitleLabel()
     }
     
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
@@ -55,26 +57,34 @@ class LGActionView: UIView {
     func animate(hidden: Bool) {
         let closeFrame: CGRect = hidden ? closeButton.hideFrame : closeButton.showFrame
         let deleteFrame: CGRect = hidden ? deleteButton.hideFrame : deleteButton.showFrame
+        let titleFrame: CGRect = hidden ? titleLabelHideFrame : titleLabelShowFrame
         
-        let closeBtnHidden = !globalConfigs.displayCloseButton
-        let deleteBtnHidden = !globalConfigs.displayDeleteButton
+        let closeButtonHidden = !globalConfigs.showsCloseButton
+        let deleteButtonHidden = !globalConfigs.showsDeleteButton
+        let titleLabelHidden = hidden
         
         if hidden == false {
-            self.closeButton.isHidden = closeBtnHidden
-            self.deleteButton.isHidden = deleteBtnHidden
+            self.closeButton.isHidden = closeButtonHidden
+            self.deleteButton.isHidden = deleteButtonHidden
+            self.titleLabel.isHidden = titleLabelHidden
         }
-        UIView.animate(withDuration: 0.35,
+        
+        UIView.animate(withDuration: TimeInterval(UINavigationController.hideShowBarDuration),
                        animations: {
                         let alpha: CGFloat = hidden ? 0.0 : 1.0
                         self.closeButton.alpha = alpha
                         self.closeButton.frame = closeFrame
                         self.deleteButton.alpha = alpha
                         self.deleteButton.frame = deleteFrame
+                        self.titleLabel.alpha = alpha
+                        self.titleLabel.frame = titleFrame
+                        
         }) { (finished) in
             if finished {
                 if !hidden {
-                    self.closeButton.isHidden = closeBtnHidden
-                    self.deleteButton.isHidden = deleteBtnHidden
+                    self.closeButton.isHidden = closeButtonHidden
+                    self.deleteButton.isHidden = deleteButtonHidden
+                    self.titleLabel.isHidden = titleLabelHidden
                 }
             }
         }
@@ -94,7 +104,7 @@ extension LGActionView {
         if closeButton == nil {
             closeButton = LGCloseButton(frame: .zero)
             closeButton.addTarget(self, action: #selector(closeButtonPressed(_:)), for: .touchUpInside)
-            closeButton.isHidden = !globalConfigs.displayCloseButton
+            closeButton.isHidden = !globalConfigs.showsCloseButton
             addSubview(closeButton)
         }
         
@@ -102,14 +112,14 @@ extension LGActionView {
         closeButton.setFrameSize(size)
         
         guard let image = image else { return }
-        closeButton.setImage(image, for: UIControlState())
+        closeButton.setImage(image, for: UIControl.State())
     }
     
     func configureDeleteButton(image: UIImage? = nil, size: CGSize? = nil) {
         if deleteButton == nil {
             deleteButton = LGDeleteButton(frame: .zero)
             deleteButton.addTarget(self, action: #selector(deleteButtonPressed(_:)), for: .touchUpInside)
-            deleteButton.isHidden = !globalConfigs.displayDeleteButton
+            deleteButton.isHidden = !globalConfigs.showsDeleteButton
             addSubview(deleteButton)
         }
         
@@ -117,6 +127,37 @@ extension LGActionView {
         deleteButton.setFrameSize(size)
         
         guard let image = image else { return }
-        deleteButton.setImage(image, for: UIControlState())
+        deleteButton.setImage(image, for: UIControl.State())
+    }
+    
+    func configureTitleLabel() {
+        if titleLabel == nil {
+            titleLabel = UILabel(frame: titleLabelHideFrame)
+            titleLabel.textColor = UIColor(colorName: "ActionBarTitle")
+            titleLabel.backgroundColor = UIColor.clear
+            titleLabel.textAlignment = NSTextAlignment.center
+            titleLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFont.Weight.medium)
+            titleLabel.isHidden = true
+            self.addSubview(titleLabel)
+        }
+    }
+    
+    var titleLabelShowFrame: CGRect {
+        let titleLabelWidth: CGFloat = self.lg_width - 120.0
+        let titleLabelHeight: CGFloat = 30.0
+        let topSafeMargin = UIDevice.topSafeMargin
+        let statusBarHeight = UIDevice.statusBarHeight
+        let yOffset = (self.lg_height - topSafeMargin - titleLabelHeight - statusBarHeight) / 2.0
+        let titleLabelOriginY = topSafeMargin + statusBarHeight + yOffset
+        
+        return CGRect(x: 60.0,
+                      y: titleLabelOriginY,
+                      width: titleLabelWidth,
+                      height: titleLabelHeight)
+    }
+
+    var titleLabelHideFrame: CGRect {
+        let frame = titleLabelShowFrame
+        return CGRect(x: frame.origin.x, y: -frame.origin.y, width: frame.width, height: frame.height)
     }
 }

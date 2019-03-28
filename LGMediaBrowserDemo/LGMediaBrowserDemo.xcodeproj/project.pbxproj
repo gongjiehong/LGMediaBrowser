@@ -8,12 +8,18 @@
 
 /* Begin PBXBuildFile section */
 		FE0980EC2099B88A006B6D8C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980EB2099B88A006B6D8C /* AppDelegate.swift */; };
-		FE0980EE2099B88A006B6D8C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980ED2099B88A006B6D8C /* ViewController.swift */; };
+		FE0980EE2099B88A006B6D8C /* MediaBrowserEntranceController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980ED2099B88A006B6D8C /* MediaBrowserEntranceController.swift */; };
 		FE0980F12099B88A006B6D8C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FE0980EF2099B88A006B6D8C /* Main.storyboard */; };
 		FE0980F32099B88B006B6D8C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FE0980F22099B88B006B6D8C /* Assets.xcassets */; };
 		FE0980F62099B88B006B6D8C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FE0980F42099B88B006B6D8C /* LaunchScreen.storyboard */; };
 		FE0980FE2099B953006B6D8C /* LGMediaBrowser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */; };
 		FE0980FF2099B953006B6D8C /* LGMediaBrowser.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		FE1DC4EF2109C65500C0EB23 /* FeatureListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1DC4EE2109C65500C0EB23 /* FeatureListViewController.swift */; };
+		FE4FBB242109C87100CA18E6 /* RemoteImageWallController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB232109C87100CA18E6 /* RemoteImageWallController.swift */; };
+		FE4FBB262109C89400CA18E6 /* MediaPickerDemoController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB252109C89400CA18E6 /* MediaPickerDemoController.swift */; };
+		FE4FBB282109C8A900CA18E6 /* MediaCaptureDemoCon.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */; };
+		FEAC89682199686F00E2FA34 /* IMG_0481.MOV in Resources */ = {isa = PBXBuildFile; fileRef = FEAC89662199686E00E2FA34 /* IMG_0481.MOV */; };
+		FEAC89692199686F00E2FA34 /* IMG_0481.HEIC in Resources */ = {isa = PBXBuildFile; fileRef = FEAC89672199686E00E2FA34 /* IMG_0481.HEIC */; };
 		FEF8976020A2A07C005E4880 /* LGWebImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975F20A2A07C005E4880 /* LGWebImage.framework */; };
 		FEF8976120A2A07C005E4880 /* LGWebImage.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8975F20A2A07C005E4880 /* LGWebImage.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FEF8976420A2A0F0005E4880 /* LGHTTPRequest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */; };
@@ -40,14 +46,21 @@
 /* Begin PBXFileReference section */
 		FE0980E82099B88A006B6D8C /* LGMediaBrowserDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LGMediaBrowserDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FE0980EB2099B88A006B6D8C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		FE0980ED2099B88A006B6D8C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		FE0980ED2099B88A006B6D8C /* MediaBrowserEntranceController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaBrowserEntranceController.swift; sourceTree = "<group>"; };
 		FE0980F02099B88A006B6D8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		FE0980F22099B88B006B6D8C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FE0980F52099B88B006B6D8C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FE0980F72099B88B006B6D8C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FE0980FD2099B953006B6D8C /* LGMediaBrowser.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGMediaBrowser.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		FE1DC4EE2109C65500C0EB23 /* FeatureListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureListViewController.swift; sourceTree = "<group>"; };
+		FE4FBB1F2109C69D00CA18E6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
+		FE4FBB232109C87100CA18E6 /* RemoteImageWallController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteImageWallController.swift; sourceTree = "<group>"; };
+		FE4FBB252109C89400CA18E6 /* MediaPickerDemoController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPickerDemoController.swift; sourceTree = "<group>"; };
+		FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCaptureDemoCon.swift; sourceTree = "<group>"; };
 		FEA01DF520C14B9400947D59 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Main.strings"; sourceTree = "<group>"; };
 		FEA01DF620C14B9400947D59 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
+		FEAC89662199686E00E2FA34 /* IMG_0481.MOV */ = {isa = PBXFileReference; lastKnownFileType = video.quicktime; path = IMG_0481.MOV; sourceTree = "<group>"; };
+		FEAC89672199686E00E2FA34 /* IMG_0481.HEIC */ = {isa = PBXFileReference; lastKnownFileType = file; path = IMG_0481.HEIC; sourceTree = "<group>"; };
 		FEF8975F20A2A07C005E4880 /* LGWebImage.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGWebImage.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEF8976320A2A0F0005E4880 /* LGHTTPRequest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = LGHTTPRequest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = "Lenka - Trouble Is a Friend.mp3"; sourceTree = "<group>"; };
@@ -90,9 +103,15 @@
 			isa = PBXGroup;
 			children = (
 				FE0980EB2099B88A006B6D8C /* AppDelegate.swift */,
-				FE0980ED2099B88A006B6D8C /* ViewController.swift */,
+				FE1DC4EE2109C65500C0EB23 /* FeatureListViewController.swift */,
+				FE0980ED2099B88A006B6D8C /* MediaBrowserEntranceController.swift */,
+				FE4FBB232109C87100CA18E6 /* RemoteImageWallController.swift */,
+				FE4FBB252109C89400CA18E6 /* MediaPickerDemoController.swift */,
+				FE4FBB272109C8A900CA18E6 /* MediaCaptureDemoCon.swift */,
 				FEF8979120A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 */,
 				FE0980EF2099B88A006B6D8C /* Main.storyboard */,
+				FEAC89672199686E00E2FA34 /* IMG_0481.HEIC */,
+				FEAC89662199686E00E2FA34 /* IMG_0481.MOV */,
 				FE0980F22099B88B006B6D8C /* Assets.xcassets */,
 				FE0980F42099B88B006B6D8C /* LaunchScreen.storyboard */,
 				FE0980F72099B88B006B6D8C /* Info.plist */,
@@ -133,6 +152,7 @@
 				TargetAttributes = {
 					FE0980E72099B88A006B6D8C = {
 						CreatedOnToolsVersion = 9.3;
+						LastSwiftMigration = 1000;
 					};
 				};
 			};
@@ -143,6 +163,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = FE0980DF2099B889006B6D8C;
 			productRefGroup = FE0980E92099B88A006B6D8C /* Products */;
@@ -160,8 +181,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				FE0980F62099B88B006B6D8C /* LaunchScreen.storyboard in Resources */,
+				FEAC89692199686F00E2FA34 /* IMG_0481.HEIC in Resources */,
 				FE0980F32099B88B006B6D8C /* Assets.xcassets in Resources */,
 				FE0980F12099B88A006B6D8C /* Main.storyboard in Resources */,
+				FEAC89682199686F00E2FA34 /* IMG_0481.MOV in Resources */,
 				FEF8979220A300A1005E4880 /* Lenka - Trouble Is a Friend.mp3 in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -173,8 +196,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FE0980EE2099B88A006B6D8C /* ViewController.swift in Sources */,
+				FE4FBB242109C87100CA18E6 /* RemoteImageWallController.swift in Sources */,
+				FE0980EE2099B88A006B6D8C /* MediaBrowserEntranceController.swift in Sources */,
 				FE0980EC2099B88A006B6D8C /* AppDelegate.swift in Sources */,
+				FE4FBB282109C8A900CA18E6 /* MediaCaptureDemoCon.swift in Sources */,
+				FE1DC4EF2109C65500C0EB23 /* FeatureListViewController.swift in Sources */,
+				FE4FBB262109C89400CA18E6 /* MediaPickerDemoController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -186,6 +213,7 @@
 			children = (
 				FE0980F02099B88A006B6D8C /* Base */,
 				FEA01DF520C14B9400947D59 /* zh-Hans */,
+				FE4FBB1F2109C69D00CA18E6 /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -323,19 +351,19 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = 44YP76NRV2;
+				DEVELOPMENT_TEAM = UNA78PWBGB;
 				INFOPLIST_FILE = LGMediaBrowserDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cxylg.LGMediaBrowserDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "c086cb14-49ea-41bb-9999-f06b5d3e9166";
-				PROVISIONING_PROFILE_SPECIFIER = "* Development";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "all1 Development";
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -345,19 +373,19 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
-				DEVELOPMENT_TEAM = 44YP76NRV2;
+				DEVELOPMENT_TEAM = UNA78PWBGB;
 				INFOPLIST_FILE = LGMediaBrowserDemo/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.cxylg.LGMediaBrowserDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE = "c086cb14-49ea-41bb-9999-f06b5d3e9166";
-				PROVISIONING_PROFILE_SPECIFIER = "* Development";
-				SWIFT_VERSION = 4.0;
+				PROVISIONING_PROFILE_SPECIFIER = "all1 Development";
+				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;

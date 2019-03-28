@@ -30,7 +30,7 @@ public class LGStatusBarTips: NSObject {
         temp.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         temp.backgroundColor = UIColor.clear
         temp.isUserInteractionEnabled = false
-        temp.windowLevel = UIWindowLevelStatusBar
+        temp.windowLevel = UIWindow.Level.statusBar
         temp.rootViewController = LGStatusBarNotificationViewController()
         return temp
     }()
@@ -112,7 +112,7 @@ public class LGStatusBarTips: NSObject {
         super.init()
         
         NotificationCenter.default.addObserver(self, selector: #selector(willChangeStatusBarFrame(_:)),
-                                               name: NSNotification.Name.UIApplicationWillChangeStatusBarFrame,
+                                               name: UIApplication.willChangeStatusBarFrameNotification,
                                                object: nil)
     }
     
@@ -131,7 +131,7 @@ public class LGStatusBarTips: NSObject {
     ///
     /// - Parameter noti: 状态栏高度改变的通知
     @objc func willChangeStatusBarFrame(_ noti: Notification) {
-        let newBarFrame = noti.userInfo?[UIApplicationStatusBarFrameUserInfoKey] as? CGRect ?? CGRect.zero
+        let newBarFrame = noti.userInfo?[UIApplication.statusBarFrameUserInfoKey] as? CGRect ?? CGRect.zero
         let duration = UIApplication.shared.statusBarOrientationAnimationDuration
         
         func updateFrameAnimation() {
@@ -183,7 +183,7 @@ public class LGStatusBarTips: NSObject {
         self.default.progress = progress
     }
     
-    public class func setActivityIndicator(isShow: Bool, indicatorStyle style: UIActivityIndicatorViewStyle) {
+    public class func setActivityIndicator(isShow: Bool, indicatorStyle style: UIActivityIndicatorView.Style) {
         self.default.setActivityIndicator(isShow: isShow, indicatorStyle: style)
     }
     
@@ -247,7 +247,7 @@ public class LGStatusBarTips: NSObject {
         }
         
         self.progress = 0.0
-        self.setActivityIndicator(isShow: false, indicatorStyle: UIActivityIndicatorViewStyle.white)
+        self.setActivityIndicator(isShow: false, indicatorStyle: UIActivityIndicatorView.Style.white)
         
         let isAnimationsEnabled = config.animationType != .none
         if isAnimationsEnabled && config.animationType == .bounce {
@@ -272,7 +272,7 @@ public class LGStatusBarTips: NSObject {
                                   selector: #selector(dismiss(timer:)),
                                   userInfo: nil,
                                   repeats: false)
-        RunLoop.current.add(self.dismissTimer!, forMode: RunLoopMode.commonModes)
+        RunLoop.current.add(self.dismissTimer!, forMode: RunLoop.Mode.common)
     }
     
     @objc func dismiss(timer: Timer) {
@@ -340,11 +340,11 @@ public class LGStatusBarTips: NSObject {
         }
         
         let animation = CAKeyframeAnimation(keyPath: "transform")
-        animation.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+        animation.timingFunction = CAMediaTimingFunction(name: CAMediaTimingFunctionName.linear)
         animation.duration = 0.3
         animation.values = values
         animation.isRemovedOnCompletion = false
-        animation.fillMode = kCAFillModeForwards
+        animation.fillMode = CAMediaTimingFillMode.forwards
         animation.delegate = self
         self.topBar.layer.add(animation, forKey: "LGBounceAnimation")
     }
@@ -402,7 +402,7 @@ public class LGStatusBarTips: NSObject {
         let animated = self.progressView.frame.equalTo(CGRect.zero)
         UIView.animate(withDuration: animated ? 0.05 : 0.0,
                        delay: 0.0,
-                       options: UIViewAnimationOptions.curveLinear,
+                       options: UIView.AnimationOptions.curveLinear,
                        animations: {
                         self.progressView.frame = frame
         }) { (isFinished) in
@@ -410,10 +410,10 @@ public class LGStatusBarTips: NSObject {
         }
     }
     
-    func setActivityIndicator(isShow: Bool, indicatorStyle style: UIActivityIndicatorViewStyle) {
+    func setActivityIndicator(isShow: Bool, indicatorStyle style: UIActivityIndicatorView.Style) {
         if isShow {
             self.topBar.activityIndicatorView.startAnimating()
-            self.topBar.activityIndicatorView.activityIndicatorViewStyle = style
+            self.topBar.activityIndicatorView.style = style
         } else {
             self.topBar.activityIndicatorView.stopAnimating()
         }

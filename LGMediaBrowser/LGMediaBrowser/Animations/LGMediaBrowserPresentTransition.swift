@@ -15,10 +15,11 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         case dismiss
     }
     
-    var direction: Direction = .present
-    var targetView: UIView?
-    var finalImageSize: CGSize = CGSize.zero
-    var placeholderImage: UIImage?
+    public var direction: Direction = .present
+    public var targetView: UIView?
+    public var finalImageSize: CGSize = CGSize.zero
+    public var placeholderImage: UIImage?
+    public weak var bottomBar: UIView?
     
     public init(direction: Direction, targetView: UIView?, finalImageSize: CGSize, placeholderImage: UIImage?) {
         super.init()
@@ -69,13 +70,12 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             let tempBgView = UIView(frame: containerView.bounds)
             
             tempImageView.clipsToBounds = true
-            tempImageView.contentMode = UIViewContentMode.scaleAspectFill
+            tempImageView.contentMode = UIView.ContentMode.scaleAspectFill
             tempImageView.frame = targetView.convert(targetView.bounds, to: containerView)
             
             tempBgView.addSubview(tempImageView)
             containerView.addSubview(toVC.view)
             toVC.view.frame = containerView.bounds
-//            toVC.view.alpha = 0.0
             
             toVC.view.insertSubview(tempBgView, at: 0)
             if let temp = toVC as? LGMediaBrowser {
@@ -83,9 +83,9 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             }
             
             let width: CGFloat = UIScreen.main.bounds.width
-            let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+            let height: CGFloat = UIScreen.main.bounds.height
             
-            let imageSize = self.calcfinalImageSize()
+            let imageSize = self.calcFinalImageSize()
             let imageWidth = imageSize.width
             let imageHeight = imageSize.height
             
@@ -93,22 +93,21 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                            delay: 0.0,
                            usingSpringWithDamping: 0.75,
                            initialSpringVelocity: 0,
-                           options: UIViewAnimationOptions.curveEaseInOut,
+                           options: UIView.AnimationOptions.curveEaseInOut,
                            animations:
                 {
-//                    toVC.view.alpha = 1.0
                     tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
-                                                 y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                                 y: (height - imageHeight) / 2.0,
                                                  width: imageWidth,
                                                  height: imageHeight)
             }) { (isFinished) in
                 if let temp = toVC as? LGMediaBrowser {
                     temp.collectionView?.isHidden = false
                 }
-                let isCanceled = transitionContext.transitionWasCancelled
+                let isCancelled = transitionContext.transitionWasCancelled
                 tempImageView.removeFromSuperview()
                 tempBgView.removeFromSuperview()
-                transitionContext.completeTransition(!isCanceled)
+                transitionContext.completeTransition(!isCancelled)
             }
         } else {
             let fromView = fromVC.view
@@ -129,13 +128,13 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 {
                     toView?.frame = finalFrame
             }) { (isFinished) in
-                let isCanceled = transitionContext.transitionWasCancelled
-                transitionContext.completeTransition(!isCanceled)
+                let isCancelled = transitionContext.transitionWasCancelled
+                transitionContext.completeTransition(!isCancelled)
             }
         }
     }
     
-    func calcfinalImageSize() -> CGSize {
+    func calcFinalImageSize() -> CGSize {
         if self.direction == .dismiss {
             return self.finalImageSize
         }
@@ -173,7 +172,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         if let targetView = self.targetView {
             let tempImageView = UIImageView(image: self.placeholderImage)
             tempImageView.clipsToBounds = true
-            tempImageView.contentMode = UIViewContentMode.scaleAspectFill
+            tempImageView.contentMode = UIView.ContentMode.scaleAspectFill
             
             let containerView = transitionContext.containerView
             tempImageView.frame = containerView.bounds
@@ -184,13 +183,13 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             fromVC.view.isHidden = true
             
             let width: CGFloat = UIScreen.main.bounds.width
-            let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+            let height: CGFloat = UIScreen.main.bounds.height
             
-            let imageSize = self.calcfinalImageSize()
+            let imageSize = self.calcFinalImageSize()
             let imageWidth = imageSize.width
             let imageHeight = imageSize.height
             tempImageView.frame = CGRect(x: (width - imageWidth) / 2.0,
-                                         y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                         y: (height - imageHeight) / 2.0,
                                          width: imageWidth,
                                          height: imageHeight)
             
@@ -200,10 +199,10 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 {
                     tempImageView.frame = rect
             }) { (finished) in
-                let isCanceled = transitionContext.transitionWasCancelled
+                let isCancelled = transitionContext.transitionWasCancelled
                 targetView.isHidden = false
                 tempImageView.removeFromSuperview()
-                if isCanceled {
+                if isCancelled {
                     fromVC.view.isHidden = false
                     fromVC.view.backgroundColor = UIColor.black
                     
@@ -211,7 +210,7 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                     
                 }
                 if !isInteractive {
-                    transitionContext.completeTransition(!isCanceled)
+                    transitionContext.completeTransition(!isCancelled)
                 }
             }
         } else {
@@ -230,9 +229,9 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 {
                     fromView?.frame = finalFrame
             }) { (isFinished) in
-                let isCanceled = transitionContext.transitionWasCancelled
+                let isCancelled = transitionContext.transitionWasCancelled
                 if !isInteractive {
-                    transitionContext.completeTransition(!isCanceled)
+                    transitionContext.completeTransition(!isCancelled)
                 }
             }
         }

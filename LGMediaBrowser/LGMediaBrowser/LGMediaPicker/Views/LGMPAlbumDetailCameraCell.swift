@@ -12,7 +12,7 @@ import AVFoundation
 public class LGMPAlbumDetailCameraCell: UICollectionViewCell {
     public lazy var layoutImageView: UIImageView = {
        let temp = UIImageView(frame: self.contentView.bounds)
-        temp.contentMode = UIViewContentMode.scaleAspectFill
+        temp.contentMode = UIView.ContentMode.scaleAspectFill
         temp.image = UIImage(namedFromThisBundle: "btn_take_photo")
         return temp
     }()
@@ -82,7 +82,7 @@ public class LGMPAlbumDetailCameraCell: UICollectionViewCell {
     }
     
     public func startCapture() {
-        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera) {
+        if UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) {
             let status = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
             
             if status == .restricted || status == .denied {
@@ -118,6 +118,12 @@ public class LGMPAlbumDetailCameraCell: UICollectionViewCell {
         }
         
         self.session.startRunning()
+    }
+    
+    public func stopCapture() {
+        if self.session.isRunning {
+            self.session.stopRunning()
+        }
     }
     
     deinit {

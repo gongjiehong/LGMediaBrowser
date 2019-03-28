@@ -10,7 +10,7 @@ import UIKit
 import Photos
 
 /// override hitTest 解决slider滑动问题
-class LGCollectionView: UICollectionView {
+internal class LGCollectionView: UICollectionView {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         let view = super.hitTest(point, with: event)
         if let view = view, view.isKind(of: UISlider.self) {
@@ -23,13 +23,13 @@ class LGCollectionView: UICollectionView {
 }
 
 /// 全局设置
-var globalConfigs: LGMediaBrowserSettings = LGMediaBrowserSettings()
+var globalConfigs: LGMediaBrowserSettings! = nil
 
 /// 媒体文件浏览器，支持视频，音频（需要系统支持的格式）；普通图片，LivePhoto等
 public class LGMediaBrowser: UIViewController {
     
     /// 重用标识定义
-    private struct Reuse {
+    internal struct Reuse {
         static var VideoCell = "LGMediaBrowserVideoCell"
         static var AudioCell = "LGMediaBrowserAudioCell"
         static var GeneralPhotoCell = "LGMediaBrowserGeneralPhotoCell"
@@ -41,7 +41,15 @@ public class LGMediaBrowser: UIViewController {
     private let itemPadding: CGFloat = 10.0
     
     /// 自定义滑动dismiss Transition
-    private var interactiveTransition: LGMediaBrowserInteractiveTransition!
+    internal lazy var interactiveTransition: LGMediaBrowserInteractiveTransition = {
+        let temp = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView,
+                                                       toTargetView: self.targetView,
+                                                       targetController: self)
+        temp.addPanGestureFor(viewController: self)
+        temp.panExitGesture?.delegate = self
+        
+        return temp
+    }()
     
     /// 显示各种媒体文件的UICollectionView
     public weak var collectionView: UICollectionView!
@@ -61,15 +69,17 @@ public class LGMediaBrowser: UIViewController {
     
     /// 动画用到的图片
     public weak var animationImage: UIImage? {
-        if self.mediaArray.count == 0 {
+        if self.mediaArray.count == 0 || self.mediaArray[currentIndex].thumbnailImage == nil {
+            if let dataSource = self.dataSource {
+                let dataModel = dataSource.photoBrowser(self, photoAtIndex: self.currentIndex)
+                return dataModel.thumbnailImage
+            }
             return nil
         }
+        
         let model = self.mediaArray[currentIndex]
         return model.thumbnailImage
     }
-    
-    /// 分页标记
-    public weak var pageControl: UIPageControl!
     
     /// 关闭和删除按钮视图
     weak var actionView: LGActionView!
@@ -77,10 +87,12 @@ public class LGMediaBrowser: UIViewController {
     /// 浏览器的当前状态，分为纯浏览和浏览并删除，浏览并删除时显示删除按钮
     public var status: LGMediaBrowserStatus = .browsing
     
+    var showsStatusBar: Bool = true
+    
     /// 当前显示的页码
     var currentIndex: Int = 0 {
         didSet {
-            refreshPageControl()
+            refreshCountLayout()
         }
     }
     
@@ -88,8 +100,8 @@ public class LGMediaBrowser: UIViewController {
     lazy var flowLayout: UICollectionViewFlowLayout  = {
         let layout = UICollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 0.0
-        layout.minimumLineSpacing = itemPadding * 2
-        layout.scrollDirection = UICollectionViewScrollDirection.horizontal
+        layout.minimumLineSpacing = 2.0 * itemPadding
+        layout.scrollDirection = UICollectionView.ScrollDirection.horizontal
         layout.sectionInset = UIEdgeInsets(top: 0.0, left: itemPadding, bottom: 0.0, right: itemPadding)
         return layout
     }()
@@ -104,23 +116,51 @@ public class LGMediaBrowser: UIViewController {
     }
     
     public convenience init(mediaArray: [LGMediaModel],
-                            configs: LGMediaBrowserSettings,
+                            configs: LGMediaBrowserSettings? = nil,
                             status: LGMediaBrowserStatus = .browsing,
                             currentIndex: Int = 0) {
         self.init(nibName: nil, bundle: nil)
+        
+        if status == .checkMedia && self.isMember(of: LGMediaBrowser.self) {
+            assert(false, "媒体文件选择模式需要使用LGCheckMediaBrowser")
+        }
+        
         self.mediaArray = mediaArray
-        globalConfigs = configs
+        globalConfigs = configs ?? LGMediaBrowserSettings.settings(with: status)
         self.status = status
         if self.status == .browsingAndEditing {
-            globalConfigs.displayDeleteButton = true
+            globalConfigs.showsDeleteButton = true
         }
         self.currentIndex = currentIndex
+        
+        showsStatusBar = globalConfigs.showsStatusBar
+    }
+    
+    public convenience init(dataSource: LGMediaBrowserDataSource,
+                            configs: LGMediaBrowserSettings? = nil,
+                            status: LGMediaBrowserStatus = .browsing,
+                            currentIndex: Int = 0) {
+        self.init(nibName: nil, bundle: nil)
+        
+        if status == .checkMedia && self.isMember(of: LGMediaBrowser.self) {
+            assert(false, "媒体文件选择模式需要使用LGCheckMediaBrowser")
+        }
+        
+        self.dataSource = dataSource
+        globalConfigs = configs ?? LGMediaBrowserSettings.settings(with: status)
+        self.status = status
+        if self.status == .browsingAndEditing {
+            globalConfigs.showsDeleteButton = true
+        }
+        self.currentIndex = currentIndex
+        
+        showsStatusBar = globalConfigs.showsStatusBar
     }
     
     // MARK: -  视图load后进行一系列初始化操作
     override public func viewDidLoad() {
         super.viewDidLoad()
-
+        
         self.view.backgroundColor = globalConfigs.backgroundColor
         
         setupTransition()
@@ -129,53 +169,89 @@ public class LGMediaBrowser: UIViewController {
         
         setupActionView()
         
-        setupPageControl()
+        setupMediaArray()
         
         installNotifications()
         
         UIDevice.current.beginGeneratingDeviceOrientationNotifications()
         
-        addPanDissmissGesture()
+        addPanExitGesture()
+    }
+    
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if globalConfigs.showsNavigationBar == true {
+            self.navigationController?.setNavigationBarHidden(false, animated: true)
+        } else {
+            self.navigationController?.setNavigationBarHidden(true, animated: true)
+        }
+    }
+    
+    public override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+    }
+    
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        fixInteractiveTransitionActionType()
+        self.showOrHideControls(isShowingControls)
+    }
+    
+    func fixInteractiveTransitionActionType() {
+        if let navi = self.navigationController, navi.topViewController == self, navi.viewControllers.count > 1 {
+            self.interactiveTransition.actionType = .pop
+        } else {
+            self.interactiveTransition.actionType = .dismiss
+        }
+    }
+    
+    // MARK: - 初始化数据源
+    func setupMediaArray() {
+        if let dataSource = self.dataSource {
+            let count = dataSource.numberOfPhotosInPhotoBrowser(self)
+            self.mediaArray = [LGMediaModel](repeating: LGMediaModel(), count: count)
+        }
+        self.refreshCountLayout()
     }
     
     /// 添加下拉关闭手势
-    func addPanDissmissGesture() {
-        self.interactiveTransition = LGMediaBrowserInteractiveTransition(fromTargetView: self.targetView,
-                                                                         toTargetView: self.targetView,
-                                                                         targetController: self)
-        self.interactiveTransition.addPanGestureFor(viewController: self)
-        self.interactiveTransition.panDismissGesture?.delegate = self
+    func addPanExitGesture() {
+        let interactiveTransition = self.interactiveTransition
+        if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
+            interactiveTransition.panExitGesture?.require(toFail: panPopGeusture)
+        }
     }
     
     /// 添加通知
     func installNotifications() {
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(deviceOrientationDidChange(_:)),
-                                               name: NSNotification.Name.UIDeviceOrientationDidChange,
+                                               name: UIDevice.orientationDidChangeNotification,
                                                object: nil)
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(tapedScreen(_:)),
-                                               name: kTapedScreenNotification, object: nil)
+                                               name: LGMediaBrowser.tapedScreenNotification,
+                                               object: nil)
         
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(needHideControls(_:)),
-                                               name: kNeedHideControlsNotification,
+                                               name: LGMediaBrowser.needHideControlsNotification,
                                                object: nil)
     }
     
     /// 设置自定义动画
     func setupTransition() {
         self.transitioningDelegate = self
-        self.modalPresentationStyle = .currentContext
+        self.modalPresentationStyle = .custom
     }
     
     /// 设置collectionView
     func setupCollectionView() {
         let frame = CGRect(x: -itemPadding,
-                            y: UIDevice.topSafeMargin,
-                            width: self.view.lg_width + itemPadding * 2.0,
-                            height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+                           y: 0,
+                           width: self.view.lg_width + itemPadding * 2.0,
+                           height: self.view.lg_height)
         let collection = LGCollectionView(frame: frame,
                                           collectionViewLayout: flowLayout)
         self.collectionView = collection
@@ -184,16 +260,18 @@ public class LGMediaBrowser: UIViewController {
         if #available(iOS 11.0, *) {
             self.collectionView.contentInsetAdjustmentBehavior = .never
         } else {
+            self.automaticallyAdjustsScrollViewInsets = false
         }
         
         self.view.addSubview(self.collectionView)
         
-        self.collectionView.delaysContentTouches = false
         
         self.collectionView.register(LGMediaBrowserVideoCell.self, forCellWithReuseIdentifier: Reuse.VideoCell)
         self.collectionView.register(LGMediaBrowserAudioCell.self, forCellWithReuseIdentifier: Reuse.AudioCell)
         self.collectionView.register(LGMediaBrowserGeneralPhotoCell.self,
                                      forCellWithReuseIdentifier: Reuse.GeneralPhotoCell)
+        self.collectionView.register(LGMediaBrowserLivePhotoCell.self,
+                                     forCellWithReuseIdentifier: Reuse.LivePhotoCell)
         self.collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: Reuse.Other)
         
         self.collectionView.isMultipleTouchEnabled = true
@@ -203,74 +281,65 @@ public class LGMediaBrowser: UIViewController {
         self.collectionView.isPagingEnabled = true
         self.collectionView.backgroundColor = UIColor.clear
         self.collectionView.keyboardDismissMode = .onDrag
+        
+        if let panPopGeusture = self.navigationController?.interactivePopGestureRecognizer {
+            collectionView.panGestureRecognizer.require(toFail: panPopGeusture)
+        }
     }
     
     func setupActionView() {
-        let temp = LGActionView(frame: CGRect(x: 0, y: 0, width: self.view.lg_width, height: 100))
+        let temp = LGActionView(frame: CGRect(x: 0,
+                                              y: 0,
+                                              width: self.view.lg_width,
+                                              height: UIDevice.statusBarHeight + UIDevice.topSafeMargin + 44.0))
         temp.delegate = self
         self.actionView = temp
         self.view.addSubview(temp)
         self.actionView.animate(hidden: false)
     }
     
-    func setupPageControl() {
-        let originY = self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 85
-        let temp = UIPageControl(frame: CGRect(x: 0,
-                                               y: originY,
-                                               width: self.view.lg_width,
-                                               height: 20.0))
-        temp.hidesForSinglePage = true
-        temp.isUserInteractionEnabled = false
-        pageControl = temp
-        self.view.addSubview(pageControl)
-    }
-
-    func refreshPageControl() {
-        self.pageControl.numberOfPages = self.mediaArray.count
-        self.pageControl.currentPage = currentIndex
-    }
-    
     // MARK: -  点击屏幕关闭，或者显示控件
     @objc func tapedScreen(_ noti: Notification) {
-        if globalConfigs.enableTapToClose && self.status == .browsing {
-            self.dismissSelf()
+        if globalConfigs.isClickToTurnOffEnabled && self.status == .browsing {
+            self.closeSelf()
         } else {
             showOrHideControls(!isShowingControls)
         }
     }
     
     @objc func needHideControls(_ noti: Notification) {
-        if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
-            self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+        if self.mediaArray[currentIndex].mediaType == .video ||
+            self.mediaArray[currentIndex].mediaType == .audio {
             showOrHideControls(!isShowingControls)
         } else {
             showOrHideControls(false)
         }
     }
     
-    private var isShowingControls: Bool = true
-    private var isAnimating: Bool = false
+    internal var isShowingControls: Bool = true
+    internal var isAnimating: Bool = false
     func showOrHideControls(_ show: Bool) {
         if isAnimating {
             return
         }
+        
         isShowingControls = show
         if show {
             self.actionView.animate(hidden: false)
             isAnimating = true
-            UIView.animate(withDuration: 0.25,
+            
+            UIView.animate(withDuration: TimeInterval(UINavigationController.hideShowBarDuration),
                            animations:
                 {
-                    self.pageControl.alpha = 1.0
             }) { (isFinished) in
                 self.isAnimating = false
             }
         } else {
             self.actionView.animate(hidden: true)
-            UIView.animate(withDuration: 0.25,
+            
+            UIView.animate(withDuration: TimeInterval(UINavigationController.hideShowBarDuration),
                            animations:
                 {
-                    self.pageControl.alpha = 0.0
             }) { (isFinished) in
                 self.isAnimating = false
             }
@@ -278,58 +347,68 @@ public class LGMediaBrowser: UIViewController {
     }
     
     // MARK: -  视图简要显示，处理frame
-    private var isFirstTimeLayout: Bool = true
+    private lazy var runOnceRefreshFrames: Void = {
+        refreshFrames()
+    }()
     
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        if isFirstTimeLayout {
-            refreshFrames()
-            isFirstTimeLayout = false
-        } else {
-            
-        }
+        _ = runOnceRefreshFrames
     }
     
     func refreshFrames() {
         let frame = CGRect(x: -itemPadding,
-                           y: UIDevice.topSafeMargin,
+                           y: 0,
                            width: self.view.lg_width + itemPadding * 2.0,
-                           height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+                           height: self.view.lg_height)
         self.collectionView.frame = frame
         self.collectionView.reloadData()
         
-        self.actionView.frame = CGRect(x: 0, y: 0, width: self.view.lg_width, height: 100)
-        
-        let originY = self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin - 85
-        self.pageControl.frame = CGRect(x: 0,
-                                        y: originY,
-                                        width: self.view.lg_width,
-                                        height: 20.0)
-        
-        refreshPageControl()
+        self.actionView.frame = CGRect(x: 0,
+                                       y: 0,
+                                       width: self.view.lg_width,
+                                       height: UIDevice.statusBarHeight + UIDevice.topSafeMargin + 44.0)
         
         if self.currentIndex != 0 {
             self.collectionView.scrollToItem(at: IndexPath(row: self.currentIndex,
                                                            section: 0),
-                                             at: UICollectionViewScrollPosition.centeredHorizontally,
+                                             at: UICollectionView.ScrollPosition.centeredHorizontally,
                                              animated: false)
         }
     }
     
     // MARK: -  退出当前页面
     
-    func dismissSelf() {
-        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.willDismissAtPageIndex(_:))) == true {
-            self.delegate?.willDismissAtPageIndex!(self.currentIndex)
+    func closeSelf() {
+        
+        func callWillHide() {
+            if let delegate = self.delegate,
+                delegate.responds(to: #selector(LGMediaBrowserDelegate.willHide(_:atIndex:))) {
+                delegate.willHide!(self, atIndex: self.currentIndex)
+            }
         }
-        self.dismiss(animated: true) {
-            if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didDismissAtPageIndex(_:))) == true {
-                self.delegate?.didDismissAtPageIndex!(self.currentIndex)
+        
+        func callDidHide() {
+            if let delegate = self.delegate,
+                delegate.responds(to: #selector(LGMediaBrowserDelegate.didHide(_:atIndex:)))
+            {
+                delegate.didHide!(self, atIndex: self.currentIndex)
+            }
+        }
+        
+        callWillHide()
+        
+        if let navi = self.navigationController, navi.topViewController == self, navi.viewControllers.count > 1 {
+            self.navigationController?.popViewController(animated: true)
+            callDidHide()
+        } else {
+            self.dismiss(animated: true) {
+                callDidHide()
             }
         }
     }
     
-
+    
     
     // MARK: -  旋转方向处理
     private var lastOrientation: UIDeviceOrientation = UIDevice.current.orientation
@@ -345,29 +424,53 @@ public class LGMediaBrowser: UIViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-
+    
     // MARK: -  状态栏显示与隐藏处理
     override public var preferredStatusBarStyle: UIStatusBarStyle {
         return UIStatusBarStyle.lightContent
     }
     
     override public var prefersStatusBarHidden: Bool {
-        return !globalConfigs.displayStatusbar
-    } 
+        return !showsStatusBar
+    }
+    
+    override public var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        return UIStatusBarAnimation.slide
+    }
+    
+    // MARK: - 刷新数量显示
+    
+    func refreshCountLayout() {
+        let layoutTitle = "\(self.currentIndex + 1) / \(self.mediaArray.count)"
+        guard let actionView = self.actionView else {return}
+        actionView.titleLabel.text = layoutTitle
+    }
+    
+    // MARK: - 编辑图片和选择完成
+    
+    @objc func editPicture(_ sender: UIBarButtonItem) {
+        
+    }
+    
+    @objc func completeSelection(_ sender: UIBarButtonItem) {
+        
+    }
+    
     
     /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
+     // MARK: - Navigation
+     
+     // In a storyboard-based application, you will often want to do a little preparation before navigation
+     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+     // Get the new view controller using [segue destinationViewController].
+     // Pass the selected object to the new view controller.
+     }
+     */
     
     deinit {
         NotificationCenter.default.removeObserver(self)
         UIDevice.current.endGeneratingDeviceOrientationNotifications()
+        globalConfigs = nil
     }
 }
 
@@ -383,6 +486,9 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
             } else if cell.isKind(of: LGMediaBrowserAudioCell.self) == true ||
                 cell.isKind(of: LGMediaBrowserVideoCell.self) == true {
                 return (cell as? LGMediaBrowserPreviewCell)?.previewView
+            } else if cell.isKind(of: LGMediaBrowserLivePhotoCell.self) == true ||
+                cell.isKind(of: LGMediaBrowserLivePhotoCell.self) == true {
+                return (cell as? LGMediaBrowserPreviewCell)?.previewView
             } else {
                 return nil
             }
@@ -393,8 +499,8 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
     
     
     public func animationController(forPresented presented: UIViewController,
-                                             presenting: UIViewController,
-                                             source: UIViewController) -> UIViewControllerAnimatedTransitioning?
+                                    presenting: UIViewController,
+                                    source: UIViewController) -> UIViewControllerAnimatedTransitioning?
     {
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
             if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
@@ -427,8 +533,8 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         var finalImageSize: CGSize = CGSize.zero
         
         if let layoutView = getCurrentLayoutView() {
-            if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
-                self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+            if self.mediaArray[currentIndex].mediaType == .video ||
+                self.mediaArray[currentIndex].mediaType == .audio {
                 if let image = self.animationImage {
                     finalImageSize = image.size
                 }
@@ -442,12 +548,13 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
                                                targetView: self.targetView,
                                                finalImageSize: finalImageSize,
                                                placeholderImage: animationImage)
-
+        
     }
-
+    
     public func interactionControllerForDismissal(using animator: UIViewControllerAnimatedTransitioning) ->
         UIViewControllerInteractiveTransitioning?
     {
+        self.interactiveTransition.actionType = .dismiss
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
             if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
                 self.targetView = view
@@ -462,8 +569,8 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         var fromTargetView: UIView?
         if let layoutView = getCurrentLayoutView() {
             fromTargetView = layoutView
-            if self.mediaArray[currentIndex].mediaType == LGMediaType.video ||
-                self.mediaArray[currentIndex].mediaType == LGMediaType.audio {
+            if self.mediaArray[currentIndex].mediaType == .video ||
+                self.mediaArray[currentIndex].mediaType == .audio {
                 if let image = self.animationImage {
                     finalImageSize = image.size
                 }
@@ -481,36 +588,48 @@ extension LGMediaBrowser: UIViewControllerTransitioningDelegate {
         self.interactiveTransition.finalImageSize = finalImageSize
         return self.interactiveTransition
     }
+    
+    
 }
 
 // MARK: UICollectionViewDataSource & UICollectionViewDelegate
 extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
-    
-    
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return mediaArray.count
+        if let dataSource = self.dataSource {
+            return dataSource.numberOfPhotosInPhotoBrowser(self)
+        } else {
+            return mediaArray.count
+        }
     }
     
     public func collectionView(_ collectionView: UICollectionView,
                                cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
     {
-        let media = mediaArray[indexPath.row]
+        var media: LGMediaModel
+        if let dataSource = self.dataSource {
+            media = dataSource.photoBrowser(self, photoAtIndex: indexPath.row)
+            self.mediaArray[indexPath.row] = media
+        } else {
+            media = mediaArray[indexPath.row]
+        }
+        
         switch media.mediaType {
         case .video:
-            return listView(collectionView, videoCellForItemAt: indexPath)
+            return listView(collectionView, videoCellForItemAt: indexPath, mediaModel: media)
         case .audio:
-            return listView(collectionView, audioCellForItemAt: indexPath)
+            return listView(collectionView, audioCellForItemAt: indexPath, mediaModel: media)
         case .generalPhoto:
-            return listView(collectionView, generalPhotoCellForItemAt: indexPath)
+            return listView(collectionView, generalPhotoCellForItemAt: indexPath, mediaModel: media)
         case .livePhoto:
-            return listView(collectionView, livePhotoCellForItemAt: indexPath)
+            return listView(collectionView, livePhotoCellForItemAt: indexPath, mediaModel: media)
         default:
-            return listView(collectionView, otherCellForItemAt: indexPath)
+            return listView(collectionView, otherCellForItemAt: indexPath, mediaModel: media)
         }
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               videoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         videoCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
         var result: LGMediaBrowserVideoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
@@ -519,12 +638,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             result = LGMediaBrowserVideoCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               audioCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         audioCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
         var result: LGMediaBrowserAudioCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.AudioCell, for: indexPath)
@@ -533,12 +653,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             result = LGMediaBrowserAudioCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               generalPhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         generalPhotoCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
         var result: LGMediaBrowserGeneralPhotoCell
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.GeneralPhotoCell, for: indexPath)
@@ -547,35 +668,37 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
         } else {
             result = LGMediaBrowserGeneralPhotoCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               livePhotoCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         livePhotoCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        var result: LGMediaBrowserLivePhotoCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.LivePhotoCell, for: indexPath)
+        if let temp = cell as? LGMediaBrowserLivePhotoCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMediaBrowserLivePhotoCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
     public func listView(_ collectionView: UICollectionView,
-                               otherCellForItemAt indexPath: IndexPath) -> UICollectionViewCell
+                         otherCellForItemAt indexPath: IndexPath,
+                         mediaModel: LGMediaModel) -> UICollectionViewCell
     {
-        var result: LGMediaBrowserVideoCell
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.VideoCell, for: indexPath)
-        if let temp = cell as? LGMediaBrowserVideoCell {
+        var result: LGMediaBrowserGeneralPhotoCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: Reuse.GeneralPhotoCell, for: indexPath)
+        if let temp = cell as? LGMediaBrowserGeneralPhotoCell {
             result = temp
         } else {
-            result = LGMediaBrowserVideoCell(frame: CGRect.zero)
+            result = LGMediaBrowserGeneralPhotoCell(frame: CGRect.zero)
         }
-        result.mediaModel = mediaArray[indexPath.row]
+        result.mediaModel = mediaModel
         return result
     }
     
@@ -600,8 +723,13 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
     public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let index = Int(scrollView.contentOffset.x / scrollView.lg_width)
         self.currentIndex = index
+        
         if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.didScrollToIndex(_:index:))) == true {
             self.delegate?.didScrollToIndex!(self, index: self.currentIndex)
+        }
+        
+        if let cell = self.collectionView.cellForItem(at: IndexPath(row: index, section: 0)) as? LGMediaBrowserPreviewCell {
+            cell.didDisplay()
         }
     }
 }
@@ -613,30 +741,30 @@ extension LGMediaBrowser: UICollectionViewDelegateFlowLayout {
                                sizeForItemAt indexPath: IndexPath) -> CGSize
     {
         return CGSize(width: self.view.lg_width,
-                      height: self.view.lg_height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin)
+                      height: self.view.lg_height)
     }
 }
 
 // MARK: -  LGActionViewDelegate
 extension LGMediaBrowser: LGActionViewDelegate {
     func closeButtonPressed() {
-        dismissSelf()
+        closeSelf()
     }
     
     func deleteButtonPressed() {
         func deleteItemRefresh() {
             self.mediaArray.remove(at: self.currentIndex)
-            self.collectionView.performBatchUpdates({
+            self.collectionView.performBatchUpdates({ [unowned self] in
                 self.collectionView.deleteItems(at: [IndexPath(row: self.currentIndex, section: 0)])
-            }) { (isFinished) in
+            }) { [unowned self] (isFinished) in
                 if self.currentIndex < self.mediaArray.count {
-                    self.refreshPageControl()
+                    self.refreshCountLayout()
                 } else {
                     self.currentIndex -= 1
                 }
                 
                 if self.currentIndex < 0 {
-                    self.dismissSelf()
+                    self.closeSelf()
                 }
             }
         }
@@ -646,8 +774,9 @@ extension LGMediaBrowser: LGActionViewDelegate {
         {
             delegate.removeMedia!(self,
                                   index: self.currentIndex,
-                                  reload: {
-                                    deleteItemRefresh()
+                                  reload:
+                {
+                    deleteItemRefresh()
             })
         }
     }
@@ -659,6 +788,89 @@ extension LGMediaBrowser: UIGestureRecognizerDelegate {
             return false
         }
         return true
+    }
+}
+
+extension LGMediaBrowser {
+    public static let tapedScreenNotification = Notification.Name("TapedScreenNotification")
+    public static let needHideControlsNotification = Notification.Name("NeedHideControlsNotification")
+}
+
+extension LGMediaBrowser: LGMediaBrowserPushAnimationDelegate {
+    @objc public func navigationController(_ navigationController: UINavigationController,
+                                           animationControllerFor operation: UINavigationController.Operation,
+                                           from fromVC: UIViewController,
+                                           to toVC: UIViewController) -> UIViewControllerAnimatedTransitioning?
+    {
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
+        
+        if operation == .push {
+            if !self.isViewLoaded {
+                self.loadViewIfNeeded()
+            }
+            let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.push)
+            transition.placeholderImage = animationImage
+            transition.targetView = targetView
+            return transition
+        } else {
+            if fromVC.self != self.self {
+                return nil
+            }
+            
+            let transition = LGMPPreviewTransition(withDirection: LGMPPreviewTransition.Direction.pop)
+            transition.placeholderImage = animationImage
+            transition.targetView = targetView
+            if let layoutView = getCurrentLayoutView() {
+                transition.finalImageSize = layoutView.lg_size
+            }
+            return transition
+        }
+    }
+    
+    @objc public func navigationController(_ navigationController: UINavigationController,
+                                           interactionControllerFor controller: UIViewControllerAnimatedTransitioning)
+        -> UIViewControllerInteractiveTransitioning?
+    {
+        if !self.isViewLoaded {
+            return nil
+        }
+        self.interactiveTransition.actionType = .pop
+        if self.delegate?.responds(to: #selector(LGMediaBrowserDelegate.viewForMedia(_:index:))) == true {
+            if let view = delegate?.viewForMedia!(self, index: self.currentIndex) {
+                self.targetView = view
+            }
+        }
+        
+        if !self.interactiveTransition.isInteration {
+            return nil
+        }
+        
+        var finalImageSize: CGSize = CGSize.zero
+        var fromTargetView: UIView?
+        if let layoutView = getCurrentLayoutView() {
+            fromTargetView = layoutView
+            if self.mediaArray[currentIndex].mediaType == .video ||
+                self.mediaArray[currentIndex].mediaType == .audio {
+                if let image = self.animationImage {
+                    finalImageSize = image.size
+                }
+            } else {
+                finalImageSize = layoutView.lg_size
+            }
+        } else if let image = self.animationImage {
+            finalImageSize = image.size
+        }
+        
+        self.interactiveTransition.targetController = self
+        self.interactiveTransition.toTargetView = self.targetView
+        self.interactiveTransition.fromTargetView = fromTargetView
+        self.interactiveTransition.targetImage = self.animationImage
+        self.interactiveTransition.finalImageSize = finalImageSize
+        return self.interactiveTransition.isInteration ? self.interactiveTransition : nil
     }
 }
 

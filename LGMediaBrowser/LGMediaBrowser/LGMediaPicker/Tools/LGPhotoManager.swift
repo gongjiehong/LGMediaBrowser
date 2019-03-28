@@ -1,5 +1,5 @@
 //
-//  LGPhotoManager.swift
+//  LGPhotoManager.default.swift
 //  LGMediaBrowser
 //
 //  Created by 龚杰洪 on 2018/5/22.
@@ -25,57 +25,97 @@ public class LGPhotoManager {
             self.rawValue = rawValue
         }
         
-        public static var image: ResultMediaType = ResultMediaType(rawValue: 1 << 0)
-        public static var livePhoto: ResultMediaType = ResultMediaType(rawValue: 1 << 1)
-        public static var animatedImage: ResultMediaType = ResultMediaType(rawValue: 1 << 2)
-        public static var video: ResultMediaType = ResultMediaType(rawValue: 1 << 3)
-        public static var audio: ResultMediaType = ResultMediaType(rawValue: 1 << 4)
+        public static var image: ResultMediaType {
+            return  ResultMediaType(rawValue: 1 << 0)
+        }
         
-        public static var all: ResultMediaType = [.image, .livePhoto, .animatedImage, .video, audio]
+        public static var livePhoto: ResultMediaType {
+            return  ResultMediaType(rawValue: 1 << 1)
+        }
+        
+        public static var animatedImage: ResultMediaType {
+            return  ResultMediaType(rawValue: 1 << 2)
+        }
+        
+        public static var video: ResultMediaType {
+            return  ResultMediaType(rawValue: 1 << 3)
+        }
+        
+        public static var audio: ResultMediaType {
+            return  ResultMediaType(rawValue: 1 << 4)
+        }
+        
+        public static var all: ResultMediaType {
+            return [.image, .livePhoto, .animatedImage, .video, audio]
+        }
     }
     
-    public static var sort: SortBy = .descending
+    public static let `default`: LGPhotoManager = {
+        return LGPhotoManager()
+    }()
     
-    public static var imageManager: PHCachingImageManager = PHCachingImageManager()
+    public init() {
+    }
+    
+    public var sort: SortBy = .ascending
+    
+    public var imageManager: PHCachingImageManager = PHCachingImageManager()
+    
     
     /// 根据支持的媒体类型获取相册列表
     ///
     /// - Parameters:
-    ///   - supportMediaType: 支持的媒体类型
+    ///   - supportTypes: 支持的媒体类型
     ///   - complete: 完成回调
-    public static func fetchAlbumList(_ supportMediaType: ResultMediaType, complete: ([LGAlbumListModel]) -> Void) {
-        let supportVideo = supportMediaType.contains(.video)
-        let supportImages = supportMediaType.contains(.image)
-        
-        guard supportVideo || supportImages else {
-            complete([])
-            return
-        }
-
+    public func fetchAlbumList(_ supportTypes: ResultMediaType, complete: ([LGAlbumListModel]) -> Void) {
+        let supportVideo = supportTypes == .video
+        let supportImages = supportTypes == .image
+        let supportLivePhoto = supportTypes == .livePhoto
+        let supportLivePhotoAndImages = supportTypes == [.livePhoto, .image]
         
         let options = PHFetchOptions()
-        if !supportVideo {
-            options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.image.rawValue)
-        }
-        if !supportImages {
+        
+        if supportImages {
+            if #available(iOS 9.1, *) {
+                options.predicate = NSPredicate(format: "(mediaType == %ld) && NOT ((mediaSubtype & %d) == 0)",
+                                                PHAssetMediaType.image.rawValue,
+                                                PHAssetMediaSubtype.photoLive.rawValue)
+            } else {
+                options.predicate = NSPredicate(format: "mediaType == %ld",
+                                                PHAssetMediaType.image.rawValue)
+            }
+        } else if supportVideo {
             options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.video.rawValue)
+        } else if supportLivePhoto {
+            // 只要LivePhoto
+            if #available(iOS 9.1, *) {
+                options.predicate = NSPredicate(format: "mediaType == %ld && mediaSubtype == %ld",
+                                                PHAssetMediaType.image.rawValue,
+                                                PHAssetMediaSubtype.photoLive.rawValue)
+            } else {
+                complete([])
+                println("LivePhoto need iOS 9.1 or above")
+                return
+            }
+        } else if supportLivePhotoAndImages {
+            options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.image.rawValue)
         }
         
         options.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: self.sort == .ascending)]
-
+        
         let smartAlbum = PHAssetCollection.fetchAssetCollections(with: PHAssetCollectionType.smartAlbum,
-                                                                  subtype: PHAssetCollectionSubtype.albumRegular,
-                                                                  options: nil)
+                                                                 subtype: PHAssetCollectionSubtype.albumRegular,
+                                                                 options: nil)
         let streamAlbum = PHAssetCollection.fetchAssetCollections(with: .album,
-                                                                   subtype: .albumMyPhotoStream,
-                                                                   options: nil)
+                                                                  subtype: .albumMyPhotoStream,
+                                                                  options: nil)
         let userAlbum = PHAssetCollection.fetchTopLevelUserCollections(with: nil)
         let syncedAlbum = PHAssetCollection.fetchAssetCollections(with: .album,
-                                                                   subtype: .albumSyncedAlbum,
-                                                                   options: nil)
+                                                                  subtype: .albumSyncedAlbum,
+                                                                  options: nil)
         let sharedAlbum = PHAssetCollection.fetchAssetCollections(with: .album,
-                                                                   subtype: .albumCloudShared,
-                                                                   options: nil)
+                                                                  subtype: .albumCloudShared,
+                                                                  options: nil)
         
         if let allAlbums = [smartAlbum, streamAlbum, userAlbum, syncedAlbum, sharedAlbum]
             as? [PHFetchResult<PHAssetCollection>]
@@ -84,6 +124,7 @@ public class LGPhotoManager {
             
             for album in allAlbums {
                 album.enumerateObjects { (collection, index, stoped) in
+                    // smartAlbumLongExposures = 215
                     if collection.assetCollectionSubtype.rawValue > 215 ||
                         collection.assetCollectionSubtype == .smartAlbumAllHidden {
                         return
@@ -100,7 +141,7 @@ public class LGPhotoManager {
                                                      result: result,
                                                      headImageAsset: head)
                         model.models = self.fetchPhoto(inResult: result,
-                                                       supportMediaType: supportMediaType)
+                                                       supportTypes: supportTypes)
                         resultAlbum.insert(model, at: 0)
                     } else {
                         let head = (self.sort == .ascending ? result.lastObject : result.firstObject)
@@ -110,7 +151,7 @@ public class LGPhotoManager {
                                                      result: result,
                                                      headImageAsset: head)
                         model.models = self.fetchPhoto(inResult: result,
-                                                       supportMediaType: supportMediaType)
+                                                       supportTypes: supportTypes)
                         resultAlbum.append(model)
                     }
                 }
@@ -127,32 +168,35 @@ public class LGPhotoManager {
     ///
     /// - Parameters:
     ///   - result: PHFetchResult<PHAsset>
-    ///   - supportMediaType: 支持的媒体类型定义
+    ///   - supportTypes: 支持的媒体类型定义
     ///   - allowSelectLivePhoto: 是否支持LivePhoto
     ///   - limitCount: 数量限制
     /// - Returns: [LGPhotoModel]
-    public static func fetchPhoto(inResult result: PHFetchResult<PHAsset>,
-                                  supportMediaType: ResultMediaType,
+    public func fetchPhoto(inResult result: PHFetchResult<PHAsset>,
+                                  supportTypes: ResultMediaType,
                                   limitCount: Int = Int.max) -> [LGPhotoModel]
     {
         var resultArray: [LGPhotoModel] = []
         var count: Int = 1
-        result.enumerateObjects { (asset, index, stop) in
-            let type = self.getAssetMediaType(from: asset)
-            if type == LGPhotoModel.AssetMediaType.generalImage && !supportMediaType.contains(.image) { return }
-            if type == LGPhotoModel.AssetMediaType.livePhoto && !supportMediaType.contains(.livePhoto)  { return }
-            if type == LGPhotoModel.AssetMediaType.video && !supportMediaType.contains(.video) { return }
-            if count == limitCount {
-                stop.pointee = true
+        
+        autoreleasepool {
+            result.enumerateObjects { (asset, index, stop) in
+                let type = self.getAssetMediaType(from: asset, supportTypes: supportTypes)
+                if type == LGPhotoModel.AssetMediaType.generalImage && !supportTypes.contains(.image) { return }
+                if type == LGPhotoModel.AssetMediaType.livePhoto && !supportTypes.contains(.livePhoto)  { return }
+                if type == LGPhotoModel.AssetMediaType.video && !supportTypes.contains(.video) { return }
+                if count == limitCount {
+                    stop.pointee = true
+                }
+                
+                var durationStr = ""
+                if asset.mediaType == .video {
+                    durationStr = self.formatDuration(asset.duration)
+                }
+                
+                resultArray.append(LGPhotoModel(asset: asset, type: type, duration: durationStr))
+                count += 1
             }
-            
-            var durationStr = ""
-            if asset.mediaType == .video {
-                durationStr = formatDuration(asset.duration)
-            }
-            
-            resultArray.append(LGPhotoModel(asset: asset, type: type, duration: durationStr))
-            count += 1
         }
         
         return resultArray
@@ -162,7 +206,9 @@ public class LGPhotoManager {
     ///
     /// - Parameter asset: PHAsset
     /// - Returns: 结果LGPhotoModel.AssetMediaType
-    public static func getAssetMediaType(from asset: PHAsset) -> LGPhotoModel.AssetMediaType {
+    public func getAssetMediaType(from asset: PHAsset,
+                                         supportTypes: ResultMediaType) -> LGPhotoModel.AssetMediaType
+    {
         var result: LGPhotoModel.AssetMediaType = .unknown
         switch asset.mediaType {
         case .audio:
@@ -174,7 +220,7 @@ public class LGPhotoManager {
         case .image:
             result = .generalImage
             if #available(iOS 9.1, *) {
-                if asset.mediaSubtypes == .photoLive {
+                if asset.mediaSubtypes == .photoLive && supportTypes.contains(.livePhoto) {
                     result = .livePhoto
                 }
             } else {
@@ -185,12 +231,12 @@ public class LGPhotoManager {
         }
         return result
     }
-
+    
     /// 格式化视频时长为hh:mm:ss格式
     ///
     /// - Parameter duration: 视频时长
     /// - Returns: hh:mm:ss格式字符串
-    public static func formatDuration(_ duration: TimeInterval) -> String {
+    public func formatDuration(_ duration: TimeInterval) -> String {
         let durationInt = Int(duration)
         if durationInt < 60 {
             return String(format: "00:%0.2d", durationInt)
@@ -206,23 +252,47 @@ public class LGPhotoManager {
         }
     }
     
+    public typealias ImageDataCompleteBlock = (Data?, String?, UIImage.Orientation, [AnyHashable : Any]?) -> Void
+    
+    @discardableResult
+    public func requestImageData(for asset: PHAsset,
+                                        resizeMode: PHImageRequestOptionsResizeMode,
+                                        progressHandler: PHAssetImageProgressHandler?,
+                                        resultHandler: @escaping ImageDataCompleteBlock) -> PHImageRequestID
+    {
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.resizeMode = resizeMode
+        options.progressHandler = progressHandler
+        return imageManager.requestImageData(for: asset,
+                                             options: options,
+                                             resultHandler: resultHandler)
+    }
+    
+    
+    
     /// 根据图片ASSET，最终输出大小，缩放模式请求图片
     ///
     /// - Parameters:
     ///   - asset: 图片PHAsset对象
     ///   - outputSize: 需要的输出大小
     ///   - resizeMode: 缩放模式，默认选最快速的
+    ///   - progressHandlder: 下载进度回调
     ///   - completion: 完成回调
     /// - Returns: 请求ID PHImageRequestID
     @discardableResult
-    public static func requestImage(forAsset asset: PHAsset,
+    public func requestImage(forAsset asset: PHAsset,
                                     outputSize: CGSize = CGSize.zero,
+                                    isAsync: Bool = true,
                                     resizeMode: PHImageRequestOptionsResizeMode = PHImageRequestOptionsResizeMode.fast,
+                                    progressHandlder: PHAssetImageProgressHandler? = nil,
                                     completion: @escaping (UIImage?, [AnyHashable: Any]?) -> Void) -> PHImageRequestID
     {
         let options = PHImageRequestOptions()
         options.resizeMode = resizeMode
         options.isNetworkAccessAllowed = true
+        options.progressHandler = progressHandlder
+        options.isSynchronous = !isAsync
         
         var realOutputSize: CGSize
         if outputSize.equalTo(CGSize.zero) {
@@ -232,34 +302,51 @@ public class LGPhotoManager {
         }
         
         return imageManager.requestImage(for: asset,
-                                                            targetSize: realOutputSize,
-                                                            contentMode: PHImageContentMode.aspectFill,
-                                                            options: options,
-                                                            resultHandler:
+                                         targetSize: realOutputSize,
+                                         contentMode: PHImageContentMode.aspectFill,
+                                         options: options,
+                                         resultHandler:
             { (resultImage, infoDic) in
-            
+                
                 let isCancelled = infoDic?[PHImageCancelledKey] as? Bool
                 let hasError = (infoDic?[PHImageErrorKey] != nil)
                 if isCancelled != true && hasError == false {
                     completion(resultImage, infoDic)
-//                    DispatchQueue.background.async {
-//                        let result = resultImage?.lg_imageByDecoded
-//                        DispatchQueue.main.async {
-//                            completion(result, infoDic)
-//                        }
-//                    }
                 }
         })
     }
     
-    public static func getAllPhotosAlbum(_ supportTypes: ResultMediaType = [.image, .video]) -> LGAlbumListModel {
-        let options = PHFetchOptions()
-        if !supportTypes.contains(.video) {
-            options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.image.rawValue)
-        }
+    public func getAllPhotosAlbum(_ supportTypes: ResultMediaType = [.image, .video]) -> LGAlbumListModel? {
+        let supportVideo = supportTypes == .video
+        let supportImages = supportTypes == .image
+        let supportLivePhoto = supportTypes == .livePhoto
+        let supportLivePhotoAndImages = supportTypes == [.livePhoto, .image]
         
-        if !supportTypes.contains(.image) {
-            options.predicate = NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)
+        let options = PHFetchOptions()
+        
+        if supportImages {
+            if #available(iOS 9.1, *) {
+                options.predicate = NSPredicate(format: "(mediaType == %ld) && NOT ((mediaSubtype & %d) == 0)",
+                                                PHAssetMediaType.image.rawValue,
+                                                PHAssetMediaSubtype.photoLive.rawValue)
+            } else {
+                options.predicate = NSPredicate(format: "mediaType == %ld",
+                                                PHAssetMediaType.image.rawValue)
+            }
+        } else if supportVideo {
+            options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.video.rawValue)
+        } else if supportLivePhoto {
+            // 只要LivePhoto
+            if #available(iOS 9.1, *) {
+                options.predicate = NSPredicate(format: "mediaType == %ld && mediaSubtype == %ld",
+                                                PHAssetMediaType.image.rawValue,
+                                                PHAssetMediaSubtype.photoLive.rawValue)
+            } else {
+                println("LivePhoto need iOS 9.1 or above")
+                return nil
+            }
+        } else if supportLivePhotoAndImages {
+            options.predicate = NSPredicate(format: "mediaType == %ld", PHAssetMediaType.image.rawValue)
         }
         
         if self.sort != .ascending {
@@ -279,32 +366,39 @@ public class LGPhotoManager {
                                                result: result,
                                                headImageAsset: headImageAsset)
                 resultModel?.models = self.fetchPhoto(inResult: result,
-                                     supportMediaType: supportTypes)
+                                                      supportTypes: supportTypes)
                 resultModel?.isAllPhotos = true
             }
         }
-
-        return resultModel!
+        
+        return resultModel
     }
     
-    public static func getPhotoBytes(withPhotos photos: [LGPhotoModel], completion: @escaping (String, Int) -> Void) {
+    public func getPhotoBytes(withPhotos photos: [LGPhotoModel], completion: @escaping (String, Int) -> Void) {
         var totalDataLength: Int = 0
         var count: Int = 0
-        for model in photos {
-            imageManager.requestImageData(for: model.asset,
-                                          options: nil)
-            { (data, dataUTI, imageOrientation, infoDic) in
-                guard let data = data else { return }
-                totalDataLength += data.count
-                count += 1
-                if count >= photos.count {
-                    completion(self.formatDataLength(totalDataLength), totalDataLength)
+        
+        let options = PHImageRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.isSynchronous = false
+        
+        autoreleasepool {
+            for model in photos {
+                imageManager.requestImageData(for: model.asset,
+                                              options: options)
+                { (data, dataUTI, imageOrientation, infoDic) in
+                    guard let data = data else { return }
+                    totalDataLength += data.count
+                    count += 1
+                    if count >= photos.count {
+                        completion(self.formatDataLength(totalDataLength), totalDataLength)
+                    }
                 }
             }
         }
     }
     
-    public static func formatDataLength(_ dataLength: Int) -> String {
+    public func formatDataLength(_ dataLength: Int) -> String {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = .useMB
         formatter.countStyle = .file
@@ -312,13 +406,13 @@ public class LGPhotoManager {
     }
     
     
-    public static func cancelImageRequest(_ requestId: PHImageRequestID) {
+    public func cancelImageRequest(_ requestId: PHImageRequestID) {
         if requestId != PHInvalidImageRequestID {
             imageManager.cancelImageRequest(requestId)
         }
     }
     
-    public static func startCachingImages(for assets: [PHAsset],
+    public func startCachingImages(for assets: [PHAsset],
                                           targetSize: CGSize,
                                           contentMode: PHImageContentMode,
                                           options: PHImageRequestOptions? = nil)
@@ -328,10 +422,18 @@ public class LGPhotoManager {
         options.isNetworkAccessAllowed = true
         
         DispatchQueue.background.async {
-            imageManager.startCachingImages(for: assets,
+            self.imageManager.startCachingImages(for: assets,
                                             targetSize: targetSize,
                                             contentMode: contentMode,
                                             options: options)
+        }
+    }
+    
+    public func stopCachingImages() {
+        DispatchQueue.background.async {
+            if LGAuthorizationStatusManager.default.albumStatus == .authorized {
+                self.imageManager.stopCachingImagesForAllAssets()
+            }
         }
     }
 }

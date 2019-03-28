@@ -10,15 +10,56 @@ import UIKit
 
 // Only use within this framework
 extension UIDevice {
-    static var deviceIsiPhoneX: Bool {
-        return UIScreen.main.nativeBounds.size.equalTo(CGSize(width: 1125.0, height: 2436.0))
+    static var isNotchScreen: Bool {
+        guard let keyWindow = UIApplication.shared.keyWindow else {
+            return false
+        }
+        
+        if #available(iOS 11.0, *) {
+            if keyWindow.safeAreaInsets.top > 20.0 {
+                return true
+            } else {
+                return false
+            }
+        } else {
+            return false
+        }
     }
     
     static var topSafeMargin: CGFloat {
-        return UIDevice.deviceIsiPhoneX ? 44.0 : 0.0
+        if isNotchScreen {
+            guard let keyWindow = UIApplication.shared.keyWindow else {
+                return 0.0
+            }
+            if #available(iOS 11.0, *) {
+                return keyWindow.safeAreaInsets.top
+            } else {
+                return 0.0
+            }
+        } else {
+            return 0.0
+        }
     }
     
+    static var statusBarHeight: CGFloat {
+        if isNotchScreen {
+            return 0.0
+        }
+        return 20.0
+    }
+        
     static var bottomSafeMargin: CGFloat {
-        return UIDevice.deviceIsiPhoneX ? 34.0 : 0.0
+        if isNotchScreen {
+            guard let keyWindow = UIApplication.shared.keyWindow else {
+                return 0.0
+            }
+            if #available(iOS 11.0, *) {
+                return keyWindow.safeAreaInsets.bottom
+            } else {
+                return 0.0
+            }
+        } else {
+            return 0.0
+        }
     }
 }

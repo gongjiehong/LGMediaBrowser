@@ -13,48 +13,73 @@ public enum LGMediaBrowserError: Error {
     case cannotConvertToPHAsset
 }
 
+
 /// LGMediaBrowser的状态定义，此状态决定内容的显示状态
 ///
 /// - browsing: 纯浏览图片
 /// - rowsingAndEditing: 浏览和编辑，例如修改
+/// - checkMedia: 媒体选择模式，私有，不能直接调用
 public enum LGMediaBrowserStatus {
     case browsing
     case browsingAndEditing
+    case checkMedia
 }
 
 public struct LGMediaBrowserSettings {
-    public var displayStatusbar: Bool = false
-    public var displayCloseButton: Bool = true
-    public var displayDeleteButton: Bool = false
-    public var longPhotoWidthMatchScreen: Bool = true
+    public var showsStatusBar: Bool = true
+    public var showsNavigationBar: Bool = false
+    public var showsCloseButton: Bool = true
+    public var showsDeleteButton: Bool = false
+    public var isLongPhotoWidthMatchScreen: Bool = true
+    public var isExchangeCloseAndDeleteButtons: Bool = false
+    public var isClickToTurnOffEnabled: Bool = true
+    public var isPlayVideoAfterDownloadEndsOrExportEnds: Bool = true
     public var backgroundColor: UIColor = UIColor.black
-    public var browserStatus: LGMediaBrowserStatus = .browsing
-    public var swapCloseAndDeleteButtons: Bool = false
-    public var enableTapToClose: Bool = true
-    public var playVideoAfterDownloadOrExport: Bool = true
     
     public init() {
-        
+    }
+    
+    public static func browsing() -> LGMediaBrowserSettings {
+        return LGMediaBrowserSettings()
+    }
+    
+    public static func browsingAndEditing() -> LGMediaBrowserSettings {
+        var result = LGMediaBrowserSettings()
+        result.showsDeleteButton = true
+        result.isClickToTurnOffEnabled = false
+        return result
+    }
+    
+    public static func checkMedia() -> LGMediaBrowserSettings {
+        var result = LGMediaBrowserSettings()
+        result.isClickToTurnOffEnabled = false
+        result.showsNavigationBar = true
+        result.showsStatusBar = true
+        return result
+    }
+    
+    public static func settings(with status: LGMediaBrowserStatus) -> LGMediaBrowserSettings {
+        switch status {
+        case .browsing:
+            return self.browsing()
+        case .browsingAndEditing:
+            return self.browsingAndEditing()
+        case .checkMedia:
+            return self.checkMedia()
+        }
     }
 }
 
-public let kTapedScreenNotification = Notification.Name("TapedScreenNotification")
-public let kNeedHideControlsNotification = Notification.Name("NeedHideControlsNotification")
-
-public struct LGButtonOptions {
-    public static var closeButtonPadding: CGPoint = CGPoint(x: 5, y: 20)
-    public static var deleteButtonPadding: CGPoint = CGPoint(x: 5, y: 20)
-}
 
 @objc public protocol LGMediaBrowserDelegate: NSObjectProtocol {
     @objc optional
-    func didShowMediaAtIndex(_ browser: LGMediaBrowser, index: Int)
+    func didShow(_ browser: LGMediaBrowser, atIndex index: Int)
     
     @objc optional
-    func willDismissAtPageIndex(_ index: Int)
+    func willHide(_ browser: LGMediaBrowser, atIndex index: Int)
     
     @objc optional
-    func didDismissAtPageIndex(_ index: Int)
+    func didHide(_ browser: LGMediaBrowser, atIndex index: Int)
     
     @objc optional
     func didScrollToIndex(_ browser: LGMediaBrowser, index: Int)
@@ -74,14 +99,12 @@ public protocol LGMediaBrowserDataSource: NSObjectProtocol {
     func photoBrowser(_ photoBrowser: LGMediaBrowser, photoAtIndex index: Int) -> LGMediaModel
 }
 
-let kPanDissmissGestureName = "lg_panDissmiss"
-
+let kPanExitGestureName = "LGMediaBrowser.PanExit"
 
 func LGLocalizedString(_ key: String, comment: String) -> String {
-    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: thisBundle(), value: "", comment: comment)
+    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: Bundle.this, value: "", comment: comment)
 }
 
 func LGLocalizedString(_ key: String) -> String {
-    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: thisBundle(), value: "", comment: key)
+    return NSLocalizedString(key, tableName: "LGMediaBrowser", bundle: Bundle.this, value: "", comment: key)
 }
-

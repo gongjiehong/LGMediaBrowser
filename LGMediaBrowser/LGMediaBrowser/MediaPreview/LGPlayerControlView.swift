@@ -8,17 +8,25 @@
 
 import UIKit
 import AVFoundation
+import Photos
 
+/// 播放工具条的背景视图
 open class LGPlayToolGradientView: UIView {
+    /// 渐变模式
+    ///
+    /// - topToBottom: 从上到下颜色加深
+    /// - center: 中间颜色深，上下浅
     public enum Mode {
         case topToBottom
         case center
     }
     
+    /// 设置layerClass为CAGradientLayer
     open override class var layerClass: Swift.AnyClass {
         return CAGradientLayer.self
     }
     
+    /// 渐变模式，默认从上到下颜色加深topToBottom
     public var mode: Mode = .topToBottom
     
     override open func layoutSubviews() {
@@ -46,7 +54,7 @@ open class LGPlayToolGradientView: UIView {
     }
 }
 
-
+/// <#Description#>
 open class LGPlayerControlView: LGPlayerView {
     fileprivate struct ControlsConfig {
         static var labelWidth: CGFloat = 50.0
@@ -62,30 +70,30 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     lazy var centerPlayButton: UIButton = {
-        let button = UIButton(type: UIButtonType.custom)
+        let button = UIButton(type: UIButton.ButtonType.custom)
         button.setBackgroundImage(UIImage(named: "play_center_big",
                                           in: Bundle(for: LGPlayer.self),
                                           compatibleWith: nil),
-                                  for: UIControlState.normal)
+                                  for: UIControl.State.normal)
         button.bounds = CGRect(x: 0,
                                y: 0,
                                width: ControlsConfig.bigPlayButtonWidth,
                                height: ControlsConfig.bigPlayButtonHeight)
-        button.addTarget(self, action: #selector(centerPlayButtonPressed(_:)), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(centerPlayButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         return button
     }()
     
     lazy var playOrPauseButton: UIButton = {
-        let button = UIButton(type: UIButtonType.custom)
+        let button = UIButton(type: UIButton.ButtonType.custom)
         button.setBackgroundImage(UIImage(named: "menu_play",
                                           in: Bundle(for: LGPlayer.self),
                                           compatibleWith: nil),
-                                  for: UIControlState.normal)
+                                  for: UIControl.State.normal)
         button.bounds = CGRect(x: 0,
                                y: 0,
                                width: ControlsConfig.smallPlayButtonWidth,
                                height: ControlsConfig.smallPlayButtonHeight)
-        button.addTarget(self, action: #selector(playOrPauseButtonPressed(_:)), for: UIControlEvents.touchUpInside)
+        button.addTarget(self, action: #selector(playOrPauseButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         return button
     }()
     
@@ -97,16 +105,16 @@ open class LGPlayerControlView: LGPlayerView {
         slider.setThumbImage(UIImage(named: "slider_handle",
                                      in: Bundle(for: LGPlayerControlView.self),
                                      compatibleWith: nil),
-                             for: UIControlState.normal)
+                             for: UIControl.State.normal)
         slider.setThumbImage(UIImage(named: "slider_handle",
                                      in: Bundle(for: LGPlayerControlView.self),
                                      compatibleWith: nil),
-                             for: UIControlState.highlighted)
-        slider.addTarget(self, action: #selector(sliderTouchDown(_:)), for: UIControlEvents.touchDown)
-        slider.addTarget(self, action: #selector(sliderTouchCancel(_:)), for: UIControlEvents.touchCancel)
-        slider.addTarget(self, action: #selector(sliderTouchUpInside(_:)), for: UIControlEvents.touchUpInside)
-        slider.addTarget(self, action: #selector(sliderTouchUpOutside(_:)), for: UIControlEvents.touchUpOutside)
-        slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: UIControlEvents.valueChanged)
+                             for: UIControl.State.highlighted)
+        slider.addTarget(self, action: #selector(sliderTouchDown(_:)), for: UIControl.Event.touchDown)
+        slider.addTarget(self, action: #selector(sliderTouchCancel(_:)), for: UIControl.Event.touchCancel)
+        slider.addTarget(self, action: #selector(sliderTouchUpInside(_:)), for: UIControl.Event.touchUpInside)
+        slider.addTarget(self, action: #selector(sliderTouchUpOutside(_:)), for: UIControl.Event.touchUpOutside)
+        slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: UIControl.Event.valueChanged)
         return slider
     }()
     
@@ -133,6 +141,8 @@ open class LGPlayerControlView: LGPlayerView {
     var isHiddenTools: Bool = false
     var isAnimating: Bool = false
     
+    public var isShowBottomSlideControls: Bool = true
+    
     lazy var tapGesture: UITapGestureRecognizer = {
         let tap = UITapGestureRecognizer(target: self, action: #selector(showOrHideControls))
         return tap
@@ -148,43 +158,80 @@ open class LGPlayerControlView: LGPlayerView {
         return temp
     }()
     
-    public override init(frame: CGRect, mediaPlayerItem: AVPlayerItem, isMuted: Bool) {
+    public override init(frame: CGRect, mediaPlayerItem: AVPlayerItem? = nil, isMuted: Bool = false) {
         super.init(frame: frame, mediaPlayerItem: mediaPlayerItem, isMuted: isMuted)
-        self.player?.delegate = self
-        self.player?.beginSendingPlayMessages()
+        self.player.delegate = self
+        self.player.beginSendingPlayMessages()
         self.addGestureRecognizer(tapGesture)
     }
     
-    public required convenience init(frame: CGRect, mediaModel: LGMediaModel) throws {
-        if let url = mediaModel.mediaLocation.toURL() {
-            self.init(frame: frame, mediaURL: url, isMuted: false)
-            self.layer.contents = mediaModel.thumbnailImage?.cgImage
-            self.mediaModel = mediaModel
-            layoutControlsIfNeeded()
-        } else {
-            throw LGMediaBrowserError.cannotConvertToURL
-        }
+    public required convenience init(frame: CGRect, mediaModel: LGMediaModel)  {
+        self.init(frame: frame, mediaURL: nil, isMuted: false)
+        self.layer.contents = mediaModel.thumbnailImage?.cgImage
+        self.mediaModel = mediaModel
+        layoutControlsIfNeeded()
     }
     
-
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+    }
+    
+    override func mediaModelDidSet() {
+        let sentinel = fetchSetter.cancel(withNewMediaModel: mediaModel)
+        self.player.replaceCurrentItem(with: nil)
+        self.layer.contents = mediaModel?.thumbnailImage?.cgImage
+        
+        if let mediaModel = mediaModel {
+            self.progressView.isHidden = false
+            self.progressView.isShowError = false
+            self.centerPlayButton.isHidden = true
+            self.progressView.progress = 0.0
+            LGMediaModelFetchSetter.setterQueue.async { [weak self] in
+                guard let weakSelf = self else {return}
+                var newSentinel = sentinel
+                newSentinel = weakSelf.fetchSetter.setOperation(with: sentinel,
+                                                                mediaModel: mediaModel,
+                                                                progress:
+                    { [weak self] (progress) in
+                        guard let weakSelf = self, weakSelf.fetchSetter.sentinel == newSentinel else {return}
+                        weakSelf.progressView.progress = CGFloat(progress.fractionCompleted)
+                    }, videoCompletion: { [weak self] (playerItem, finished, error) in
+                        guard let weakSelf = self, weakSelf.fetchSetter.sentinel == newSentinel else {return}
+                        guard let playerItem = playerItem else {
+                            weakSelf.progressView.isShowError = true
+                            return
+                        }
+                        
+                        weakSelf.player.replaceCurrentItem(with: playerItem)
+                        weakSelf.progressView.isHidden = true
+                        
+                        if weakSelf.isAutoPlay && weakSelf.isActive {
+                            weakSelf.play()
+                        } else {
+                            weakSelf.centerPlayButton.isHidden = false
+                        }
+                })
+                
+            }
+        } else {
+            self.progressView.isShowError = true
+        }
     }
     
     deinit {
     }
     
     
-    public var mediaType: LGMediaType {
-        return self.mediaModel?.mediaType ?? LGMediaType.other
+    public var mediaType: LGMediaModel.MediaType {
+        return self.mediaModel?.mediaType ?? .other
     }
     
     private func layoutControlsIfNeeded() {
         func layoutControls() {
-            if mediaType == LGMediaType.audio {
+            if mediaType == .audio {
                 constructAudioPlayerControls()
-            } else if mediaType == LGMediaType.video {
+            } else if mediaType == .video {
                 constructVideoPlayerControls()
             } else {
                 fatalError("LGPlayer can not support media type: \(mediaType)")
@@ -194,39 +241,7 @@ open class LGPlayerControlView: LGPlayerView {
         self.addSubview(self.progressView)
         self.progressView.center = self.center
         
-        if let url = self.mediaModel?.mediaLocation.toURL() {
-            if globalConfigs.playVideoAfterDownloadOrExport && !url.isFileURL {
-
-                LGFileDownloader.default.downloadFile(url,
-                                                      progress:
-                    { [weak self] (pro) in
-                        DispatchQueue.main.async { [weak self] in
-                            self?.progressView.progress = CGFloat(pro.fractionCompleted)
-                        }
-                }) { [weak self] (fileURL, isDownloaded, error) in
-                    DispatchQueue.main.async { [weak self] in
-                        guard let weakSelf = self else {
-                            return
-                        }
-                        if let fileURL = fileURL, isDownloaded, error == nil {
-                            weakSelf.player?.pause()
-                            weakSelf.player?.setItem(AVPlayerItem(url: fileURL))
-                            weakSelf.player?.play()
-                            layoutControls()
-                            weakSelf.progressView.isHidden = true
-                        } else {
-                            weakSelf.progressView.isShowError = true
-                        }
-                    }
-                }
-                return
-            }
-            layoutControls()
-            self.progressView.isHidden = true
-        } else {
-            self.progressView.isShowError = true
-        }
-        
+        layoutControls()
     }
     
     private func constructAudioPlayerControls() {
@@ -238,8 +253,13 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     private func constructVideoPlayerControls() {
-        self.addSubview(toolBackgroundView)
         self.addSubview(centerPlayButton)
+        
+        if !isShowBottomSlideControls {
+            return
+        }
+        
+        self.addSubview(toolBackgroundView)
         toolBackgroundView.addSubview(playOrPauseButton)
         toolBackgroundView.addSubview(progressSlider)
         toolBackgroundView.addSubview(totalTimeLabel)
@@ -252,7 +272,7 @@ open class LGPlayerControlView: LGPlayerView {
     override open func layoutSubviews() {
         super.layoutSubviews()
         self.tintColor = UIColor.white
-        if self.mediaType == LGMediaType.video {
+        if self.mediaType == .video {
             layoutVideoControls()
         } else {
             layoutAudioControls()
@@ -341,7 +361,7 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     @objc func playOrPauseButtonPressed(_ sender: UIButton) {
-        if self.player?.rate == 0.0 {
+        if self.player.rate == 0.0 {
             self.play()
         } else {
             self.pause()
@@ -360,15 +380,16 @@ open class LGPlayerControlView: LGPlayerView {
         isSliderTouching = false
         let value = sender.value
         isSeeking = true
-        self.player?.seek(to: CMTime(seconds: Double(value), preferredTimescale: 1),
-                          completionHandler: {[weak self] (isFinished) in
-                            if Thread.isMainThread {
-                                self?.isSeeking = false
-                            } else {
-                                DispatchQueue.main.async { [weak self] in
-                                    self?.isSeeking = false
-                                }
-                            }
+        self.player.seek(to: CMTime(seconds: Double(value), preferredTimescale: 1),
+                         completionHandler:
+            {[weak self] (isFinished) in
+                if Thread.isMainThread {
+                    self?.isSeeking = false
+                } else {
+                    DispatchQueue.main.async { [weak self] in
+                        self?.isSeeking = false
+                    }
+                }
         })
     }
     
@@ -388,8 +409,8 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     @objc func showOrHideControls() {
-        NotificationCenter.default.post(name: kNeedHideControlsNotification, object: nil)
-        if self.mediaType == LGMediaType.audio {
+        NotificationCenter.default.post(name: LGMediaBrowser.needHideControlsNotification, object: nil)
+        if self.mediaType == .audio {
             return
         }
         
@@ -424,8 +445,8 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     func stopPlay() {
-        self.player?.pause()
-        self.player?.seek(to: kCMTimeZero)
+        self.player.pause()
+        self.player.seek(to: CMTime.zero)
         self.progressSlider.value = 0.0
         self.currentTimeLabel.text = "00:00"
     }
@@ -437,21 +458,21 @@ open class LGPlayerControlView: LGPlayerView {
 extension LGPlayerControlView: LGPlayerDelegate {
     public func player(_ player: LGPlayer, playStateDidChanged rate: Float) {
         if rate > 0 {
-            if self.mediaType == LGMediaType.video {
+            if self.mediaType == .video {
                 self.centerPlayButton.isHidden = true
             }
             self.playOrPauseButton.setBackgroundImage(UIImage(named: "menu_pause",
                                                               in: Bundle(for: LGPlayerControlView.self),
                                                               compatibleWith: nil),
-                                                      for: UIControlState.normal)
+                                                      for: UIControl.State.normal)
         } else {
-            if self.mediaType == LGMediaType.video {
+            if self.mediaType == .video {
                 self.centerPlayButton.isHidden = false
             }
             self.playOrPauseButton.setBackgroundImage(UIImage(named: "menu_play",
                                                               in: Bundle(for: LGPlayerControlView.self),
                                                               compatibleWith: nil),
-                                                      for: UIControlState.normal)
+                                                      for: UIControl.State.normal)
         }
     }
     
@@ -478,8 +499,12 @@ extension LGPlayerControlView: LGPlayerDelegate {
     }
     
     public func player(_ player: LGPlayer, didChange item: AVPlayerItem?) {
-        if self.mediaType == LGMediaType.video {
+        if self.mediaType == .video {
             self.centerPlayButton.isHidden = false
+        }
+        
+        if item == nil {
+            self.centerPlayButton.isHidden = true
         }
     }
     

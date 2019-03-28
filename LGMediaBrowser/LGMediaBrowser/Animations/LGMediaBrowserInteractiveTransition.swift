@@ -9,6 +9,14 @@
 import UIKit
 
 public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTransition {
+    
+    public enum ActionType {
+        case pop
+        case dismiss
+    }
+    
+    public var actionType: ActionType = .dismiss
+    
     public var isInteration: Bool = false
     public weak var targetController: UIViewController?
     private weak var transitionContext: UIViewControllerContextTransitioning?
@@ -16,14 +24,16 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     public weak var fromTargetView: UIView?
     public weak var toTargetView: UIView?
     public weak var targetImage: UIImage?
+    public weak var bottomBar: UIView?
     public var finalImageSize: CGSize = CGSize.zero
     private var transitionImageViewCenter: CGPoint = CGPoint.zero
     private var beginX: CGFloat = 0
     private var beginY: CGFloat = 0
     private var tempImageView: UIImageView?
     private var backgroundView: UIView?
+    private var tempBottomBar: UIView?
     
-    weak var panDismissGesture: UIPanGestureRecognizer?
+    weak var panExitGesture: UIPanGestureRecognizer?
     
     public init(fromTargetView: UIView?, toTargetView: UIView?, targetController: UIViewController?) {
         super.init()
@@ -40,8 +50,8 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     public func addPanGestureFor(viewController: UIViewController) {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
         viewController.view.addGestureRecognizer(pan)
-        pan.lg_name = kPanDissmissGestureName
-        panDismissGesture = pan
+        pan.lg_name = kPanExitGestureName
+        panExitGesture = pan
         self.targetController = viewController
     }
     
@@ -65,17 +75,33 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             if scale < 0 {
                 return
             }
+            
+            let velocity = sender.velocity(in: gestureView)
+            if abs(velocity.x) >= abs(velocity.y) {
+                return
+            }
+
             let location = sender.location(in: sender.view)
             beginX = location.x
             beginY = location.y
+
             isInteration = true
-            self.targetController?.dismiss(animated: true, completion: nil)
+            
+            switch self.actionType {
+            case .dismiss:
+                self.targetController?.dismiss(animated: true, completion: nil)
+                break
+            case .pop:
+                self.targetController?.navigationController?.popViewController(animated: true)
+                break
+            }
             break
         case .changed:
             if self.isInteration {
                 if scale < 0.0 {
                     scale = 0.0
                 }
+                
                 var imageViewScale = 1 - scale * 0.5
                 if imageViewScale < 0.4 {
                     imageViewScale = 0.4
@@ -129,14 +155,14 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         }
         
         let width: CGFloat = UIScreen.main.bounds.width
-        let height: CGFloat = UIScreen.main.bounds.height - UIDevice.topSafeMargin - UIDevice.bottomSafeMargin
+        let height: CGFloat = UIScreen.main.bounds.height
         
-        let imageSize = self.calcfinalImageSize()
+        let imageSize = self.calcFinalImageSize()
         let imageWidth = imageSize.width
         let imageHeight = imageSize.height
         
         tempImageViewFrame = CGRect(x: (width - imageWidth) / 2.0,
-                                    y: (height - imageHeight) / 2.0 + UIDevice.topSafeMargin,
+                                    y: (height - imageHeight) / 2.0,
                                     width: imageWidth,
                                     height: imageHeight)
         
@@ -144,7 +170,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         tempImageView = imageView
         tempImageView?.layer.masksToBounds = true
         tempImageView?.clipsToBounds = true
-        tempImageView?.contentMode = UIViewContentMode.scaleAspectFill
+        tempImageView?.contentMode = UIView.ContentMode.scaleAspectFill
         
         tempImageView?.image = targetImage
         
@@ -177,6 +203,22 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         containerView.addSubview(fromVC.view)
         toVC.view.addSubview(self.backgroundView!)
         toVC.view.addSubview(self.tempImageView!)
+        
+        if let bottomBar = self.bottomBar, let copy = bottomBar.copy() as? UIView {
+            tempBottomBar = copy
+            containerView.addSubview(tempBottomBar!)
+            tempBottomBar!.translatesAutoresizingMaskIntoConstraints = false
+            tempBottomBar!.leftAnchor.constraint(equalTo: containerView.leftAnchor).isActive = true
+            tempBottomBar!.rightAnchor.constraint(equalTo: containerView.rightAnchor).isActive = true
+            if #available(iOS 11.0, *) {
+                let safeBottomAnchor = containerView.safeAreaLayoutGuide.bottomAnchor
+                tempBottomBar!.bottomAnchor.constraint(equalTo: safeBottomAnchor).isActive = true
+            } else {
+                tempBottomBar!.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
+            }
+            tempBottomBar!.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
+            tempBottomBar?.alpha = 1.0
+        }
     }
     
     func updateInteractivePercent(_ scale: CGFloat) {
@@ -186,6 +228,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
     
         fromVC.view.alpha = scale
         self.backgroundView?.alpha = scale
+        self.tempBottomBar?.alpha = scale
     }
     
     func interactivePercentCancel() {
@@ -205,13 +248,15 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
                 self.tempImageView?.transform = CGAffineTransform.identity
                 self.tempImageView?.center = self.transitionImageViewCenter
                 self.backgroundView?.alpha = 1.0
+                self.tempBottomBar?.alpha = 1.0
         }) { (isFinished) in
             self.tempImageView?.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
             self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
+            self.tempBottomBar?.removeFromSuperview()
             self.backgroundView = nil
-            let isCanceled = transitionContext.transitionWasCancelled
-            transitionContext.completeTransition(!isCanceled)
+            let isCancelled = transitionContext.transitionWasCancelled
+            transitionContext.completeTransition(!isCancelled)
         }
     }
     
@@ -222,7 +267,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         
         let containerView = transitionContext.containerView
         
-        let options = UIViewAnimationOptions.curveEaseOut
+        let options = UIView.AnimationOptions.curveEaseOut
         let tempImageViewFrame = self.tempImageView?.frame ?? CGRect.zero
         self.tempImageView?.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
         self.tempImageView?.transform = CGAffineTransform.identity
@@ -240,14 +285,16 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
                 } else {
                     self.tempImageView?.center = self.transitionImageViewCenter
                     self.tempImageView?.alpha = 0.0
+                    self.tempBottomBar?.alpha = 0.0
                     self.tempImageView?.transform = CGAffineTransform(scaleX: 0.3, y: 0.3)
                 }
                 self.backgroundView?.alpha = 0.0
         }) { (isFinished) in
             self.tempImageView?.removeFromSuperview()
             self.backgroundView?.removeFromSuperview()
-            let isCanceled = transitionContext.transitionWasCancelled
-            transitionContext.completeTransition(!isCanceled)
+            self.tempBottomBar?.removeFromSuperview()
+            let isCancelled = transitionContext.transitionWasCancelled
+            transitionContext.completeTransition(!isCancelled)
         }
     }
     
@@ -261,7 +308,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         return 1.0 - self.scale
     }
     
-    func calcfinalImageSize() -> CGSize {
+    func calcFinalImageSize() -> CGSize {
         if finalImageSize == CGSize.zero {
             return CGSize.zero
         }

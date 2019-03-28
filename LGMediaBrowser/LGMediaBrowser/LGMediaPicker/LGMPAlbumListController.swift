@@ -26,7 +26,7 @@ public class LGAlbumListCell: UITableViewCell {
     weak var titleAndCountLabel: UILabel!
     
     // MARK: -  初始化
-    public override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupDefaultViews()
     }
@@ -39,7 +39,7 @@ public class LGAlbumListCell: UITableViewCell {
     // MARK: - 设置默认视图
     func setupDefaultViews() {
         let thumbnailImageView = UIImageView(frame: CGRect.zero)
-        thumbnailImageView.contentMode = UIViewContentMode.scaleAspectFill
+        thumbnailImageView.contentMode = UIView.ContentMode.scaleAspectFill
         self.contentView.addSubview(thumbnailImageView)
         self.thumbnailImageView = thumbnailImageView
         
@@ -61,7 +61,7 @@ public class LGAlbumListCell: UITableViewCell {
         super.layoutSubviews()
         let thumbnailImageViewSize = self.contentView.lg_height
         thumbnailImageView.frame = CGRect(x: 10,
-                                          y: 0,
+                                          y: 0.0,
                                           width: thumbnailImageViewSize,
                                           height: thumbnailImageViewSize)
         
@@ -89,18 +89,18 @@ public class LGAlbumListCell: UITableViewCell {
         }
         
         let attrString = NSMutableAttributedString(string: titleAndCountText)
-        attrString.addAttributes([NSAttributedStringKey.font: titleFont,
-                                  NSAttributedStringKey.foregroundColor: UIColor(colorName: "AlbumListTitle")],
+        attrString.addAttributes([NSAttributedString.Key.font: titleFont,
+                                  NSAttributedString.Key.foregroundColor: UIColor(colorName: "AlbumListTitle")],
                                  range: NSMakeRange(0, albumTitle.count))
-        attrString.addAttributes([NSAttributedStringKey.font: UIFont.systemFont(ofSize: 12.0),
-                                  NSAttributedStringKey.foregroundColor: UIColor(colorName: "AlbumListCount")],
+        attrString.addAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12.0),
+                                  NSAttributedString.Key.foregroundColor: UIColor(colorName: "AlbumListCount")],
                                  range: NSMakeRange(albumTitle.count, attrString.length - albumTitle.count))
         titleAndCountLabel.attributedText = attrString
         
         if let headImageAsset = listData.headImageAsset {
             let outputSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
-            LGPhotoManager.cancelImageRequest(lastRequestId)
-            lastRequestId = LGPhotoManager.requestImage(forAsset: headImageAsset,
+            LGPhotoManager.default.cancelImageRequest(lastRequestId)
+            lastRequestId = LGPhotoManager.default.requestImage(forAsset: headImageAsset,
                                                         outputSize: outputSize,
                                                         resizeMode: PHImageRequestOptionsResizeMode.exact)
             { [weak self] (resultImage, infoDic) in
@@ -129,13 +129,11 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     /// 数据源
     public var dataArray: [LGAlbumListModel] = []
-
-    weak var mainPicker: LGMediaPicker!
     
     /// 设置参数
-    var configs: LGMediaPicker.Configuration {
-        return mainPicker.config
-    }
+    var configs: LGMediaPicker.Configuration!
+    
+    weak var delegate: LGMediaPickerDelegate?
     
     public override func viewDidLoad() {
         super.viewDidLoad()
@@ -152,7 +150,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     // MARK: -  设置取消按钮
     func setupCancel() {
         let rightItem = UIBarButtonItem(title: LGLocalizedString("Cancel"),
-                                        style: UIBarButtonItemStyle.plain,
+                                        style: UIBarButtonItem.Style.plain,
                                         target: self,
                                         action: #selector(close))
         self.navigationItem.rightBarButtonItem = rightItem
@@ -165,12 +163,13 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     /// 初始化tableview
     func setupTableView() {
-        let temp = UITableView(frame: self.view.bounds, style: UITableViewStyle.plain)
+        let temp = UITableView(frame: self.view.bounds, style: UITableView.Style.plain)
         temp.estimatedRowHeight = 0.0
         temp.estimatedSectionFooterHeight = 0.0
         temp.estimatedSectionHeaderHeight = 0.0
         temp.delegate = self
         temp.dataSource = self
+        temp.separatorInset = UIEdgeInsets(top: 0, left: 10.0, bottom: 0.0, right: 0.0)
         self.view.addSubview(temp)
         self.listTable = temp
         
@@ -187,13 +186,15 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         if self.dataArray.count == 0 {
             fetchAlbumList()
         }
+        self.navigationController?.setToolbarHidden(true, animated: true)
     }
     
     /// 获取相册列表
     @objc func fetchAlbumList() {
         let hud = LGLoadingHUD.show(inView: self.view)
         DispatchQueue.userInteractive.async { [weak self] in
-            LGPhotoManager.fetchAlbumList(LGPhotoManager.ResultMediaType.all) { [weak self] (resultArray) in
+            guard let weakSelf = self else { return }
+            LGPhotoManager.default.fetchAlbumList(weakSelf.configs.resultMediaTypes) { [weak self] (resultArray) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else { return }
                     hud.dismiss()
@@ -217,13 +218,14 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         
         let itemSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
         
-        LGPhotoManager.startCachingImages(for: assetArray,
+        LGPhotoManager.default.startCachingImages(for: assetArray,
                                           targetSize: itemSize,
                                           contentMode: PHImageContentMode.aspectFill)
     }
     
     deinit {
         PHPhotoLibrary.shared().unregisterChangeObserver(self)
+        NSObject.cancelPreviousPerformRequests(withTarget: self)
     }
     
 }
@@ -235,7 +237,7 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
     }
     
     public func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 60.0
+        return 64.0
     }
     
     public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -245,10 +247,10 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
         {
             cell = tempCell
         } else {
-            cell = LGAlbumListCell(style: UITableViewCellStyle.default, reuseIdentifier: Reuse.LGAlbumListCell)
+            cell = LGAlbumListCell(style: UITableViewCell.CellStyle.default, reuseIdentifier: Reuse.LGAlbumListCell)
         }
         cell.dataModel = self.dataArray[indexPath.row]
-        cell.accessoryType = UITableViewCellAccessoryType.disclosureIndicator
+        cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
         return cell
     }
     
@@ -257,7 +259,8 @@ extension LGMPAlbumListController: UITableViewDelegate, UITableViewDataSource {
         let listModel = self.dataArray[indexPath.row]
         let detail = LGMPAlbumDetailController()
         detail.albumListModel = listModel
-        detail.mainPicker = mainPicker
+        detail.configs = self.configs
+        detail.delegate = self.delegate
         self.navigationController?.pushViewController(detail, animated: true)
     }
 }

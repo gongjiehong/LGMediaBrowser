@@ -35,7 +35,7 @@ public class LGLoadingHUD: UIView {
         self.centerBgView = centerBgView
         
         
-        let indicatorView = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.whiteLarge)
+        let indicatorView = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.whiteLarge)
         indicatorView.frame = CGRect(x: 40, y: 30, width: 40, height: 40)
         centerBgView.addSubview(indicatorView)
         indicatorView.startAnimating()

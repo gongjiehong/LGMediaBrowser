@@ -10,12 +10,14 @@ import Foundation
 
 // MARK: - just for this framework
 
-func println(_ object: Any...) {
+func println(_ objects: Any...) {
     #if DEBUG
     let dateFormater = DateFormatter()
     dateFormater.timeZone = TimeZone.current
     dateFormater.dateStyle = .full
     dateFormater.timeStyle = .full
-    Swift.print("[", dateFormater.string(from: Date()), "LGMediaBrowser ]:", object, terminator: "\n")
+    for obj in objects {
+        Swift.print("[", dateFormater.string(from: Date()), "LGMediaBrowser ]:", obj, terminator: "\n")
+    }
     #endif
 }

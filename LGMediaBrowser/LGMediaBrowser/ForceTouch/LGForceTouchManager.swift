@@ -9,19 +9,19 @@
 import Foundation
 
 class LGForceTouchManager {
-    let forceTouch: LGForceTouch
+    var forceTouch: LGForceTouch!
     
     var viewController: UIViewController {
         return forceTouch.viewController ?? UIViewController()
     }
     
-    var targetViewController: UIViewController?
+    weak var targetViewController: UIViewController?
     
     var forceTouchView: LGForceTouchView?
     
     lazy var forceTouchWindow: UIWindow = {
         let window = UIWindow(frame: UIScreen.main.bounds)
-        window.windowLevel = UIWindowLevelAlert
+        window.windowLevel = UIWindow.Level.alert
         window.rootViewController = UIViewController()
         return window
     }()
@@ -30,16 +30,25 @@ class LGForceTouchManager {
         self.forceTouch = forceTouch
     }
     
-    func forceTouchPossible(_ context: LGForceTouchPreviewingContext, touchLocation: CGPoint) -> Bool {
+    func forceTouchPossible(_ context: LGForceTouchPreviewingContext,
+                            touchLocation: CGPoint,
+                            targetViewController: UIViewController?) -> Bool
+    {
         
-        guard let targetVC = context.delegate?.previewingContext(context,
-                                                                 viewControllerForLocation: touchLocation) else
-        {
+        guard let targetVC = targetViewController else {
             return false
         }
+        self.targetViewController = targetVC
         
-        let temp = LGForceTouchView()
+        guard let tempController = forceTouchWindow.rootViewController else {return false}
+        
+        targetVC.willMove(toParent: tempController)
+        tempController.addChild(targetVC)
+        targetVC.didMove(toParent: tempController)
+        
+        let temp = LGForceTouchView(frame: CGRect.zero, targetPreviewView: targetVC.view)
         forceTouchView = temp
+        
         
         if let viewControllerScreenshot = viewController.view.window?.screenShot() {
             forceTouchView?.viewControllerScreenshot = viewControllerScreenshot
@@ -53,7 +62,6 @@ class LGForceTouchManager {
         targetVC.view.frame = viewController.view.bounds
         forceTouchView?.targetViewControllerScreenshot = targetVC.view.screenShot(inHierarchy: false)
         forceTouchView?.preferredContentSize = targetVC.preferredContentSize
-        targetViewController = targetVC
         
         return true
     }
@@ -85,7 +93,7 @@ class LGForceTouchManager {
         forceTouchWindow.makeKeyAndVisible()
         
         if let forceTouchView = forceTouchView {
-            forceTouchWindow.addSubview(forceTouchView)
+            forceTouchWindow.rootViewController?.view.addSubview(forceTouchView)
         }
         
         forceTouchView?.frame = UIScreen.main.bounds
@@ -106,6 +114,7 @@ class LGForceTouchManager {
         guard let targetViewController = targetViewController, let context = context else {
             return
         }
+        
         context.delegate?.previewingContext(context, commitViewController: targetViewController)
         forceTouchEnded()
     }
