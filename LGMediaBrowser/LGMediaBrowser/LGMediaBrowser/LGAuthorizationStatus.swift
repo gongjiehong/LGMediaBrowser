@@ -208,6 +208,8 @@ public class LGAuthorizationStatusManager: NSObject {
             return .notDetermined
         case.restricted:
             return .restricted
+        @unknown default:
+            return .notDetermined
         }
     }
     

@@ -792,7 +792,7 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         self.videoCamera.audioEncodingTarget = movieWriter
         
         if let filter = self.filter {
-            self.cropFilter.addTarget(filter as! GPUImageInput)
+            self.cropFilter.addTarget(filter as? GPUImageInput)
             filter.addTarget(movieWriter)
             filter.addTarget(_view)
         } else {
@@ -877,7 +877,7 @@ extension LGCameraCapture: LGFilterSelectionViewDelegate {
     ///
     /// - Parameter filter: 新滤镜对象
     public func didSelectedFilter(_ filter: GPUImageFilter) {
-        cropFilter.removeTarget(self.filter as! GPUImageInput)
+        cropFilter.removeTarget(self.filter as? GPUImageInput)
         cropFilter.removeTarget(self.movieWriter)
         self.filter?.removeAllTargets()
         

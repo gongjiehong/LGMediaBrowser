@@ -399,7 +399,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             } else {
                 weakCell.selectButton.isSelected = false
                 dataModel.isSelected = false
-                if let index = globleSelectedDataArray.index(where: { (temp) -> Bool in
+                if let index = globleSelectedDataArray.firstIndex(where: { (temp) -> Bool in
                     temp.asset.localIdentifier == dataModel.asset.localIdentifier
                 }) {
                     dataModel.currentSelectedIndex = -1
@@ -498,7 +498,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         var indexs: [IndexPath] = []
         
         for tempModel in globleSelectedDataArray {
-            if let index = dataArray.index(where: { (temp) -> Bool in
+            if let index = dataArray.firstIndex(where: { (temp) -> Bool in
                 tempModel.asset.localIdentifier == temp.asset.localIdentifier
             }) {
                 if !self.allowTakePhoto || self.configs.sortBy == .ascending {
@@ -509,7 +509,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                 
             }
             
-            if let index = globleSelectedDataArray.index(where: { (temp) -> Bool in
+            if let index = globleSelectedDataArray.firstIndex(where: { (temp) -> Bool in
                 tempModel.asset.localIdentifier == temp.asset.localIdentifier
             }) {
                 tempModel.currentSelectedIndex = index + 1
@@ -849,8 +849,8 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
     }
     
     @objc func changeAndReload(_ changeInstance: PHChange) {
-        guard let result = self.albumListModel?.result else { return }
-        if let detail = changeInstance.changeDetails(for: result) {
+//        guard let result = self.albumListModel?.result else { return }
+//        if let detail = changeInstance.changeDetails(for: result) {
         
             //            let photos = LGPhotoManager.default.fetchPhoto(inResult: detail.fetchResultAfterChanges,
             //                                                   supportMediaType: configs.resultMediaTypes)
@@ -859,7 +859,7 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
 //                        self.listView.reloadData()
             //            self.cachingImages()
             //            self.scrollToBottom()
-        }
+//        }
     }
 }
 
@@ -890,7 +890,7 @@ extension LGMPAlbumDetailController: LGMediaBrowserDataSource {
             return mediaModel
         } else {
             let dataModel = globleSelectedDataArray[index]
-            let dataIndex = self.dataArray.index(where: { (tempModel) -> Bool in
+            let dataIndex = self.dataArray.firstIndex(where: { (tempModel) -> Bool in
                 return tempModel.asset == dataModel.asset
             })
             
@@ -1047,7 +1047,7 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
                 }
             } else {
                 dataModel.isSelected = false
-                if let dataIndex = globleSelectedDataArray.index(where: { (temp) -> Bool in
+                if let dataIndex = globleSelectedDataArray.firstIndex(where: { (temp) -> Bool in
                     temp.asset.localIdentifier == dataModel.asset.localIdentifier
                 }) {
                     dataModel.currentSelectedIndex = -1
