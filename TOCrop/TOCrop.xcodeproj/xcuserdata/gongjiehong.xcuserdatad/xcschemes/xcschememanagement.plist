@@ -7,7 +7,11 @@
 		<key>TOCrop.xcscheme_^#shared#^_</key>
 		<dict>
 			<key>orderHint</key>
+<<<<<<< HEAD
 			<integer>4</integer>
+=======
+			<integer>16</integer>
+>>>>>>> swift4.2
 		</dict>
 	</dict>
 </dict>
