@@ -531,7 +531,8 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             } else {
                 if self.configs.maxSelectCount == 1,
                     let cell = collectionView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell,
-                    let mediaModel = cell.listModel?.asLGMediaModel()
+                    let mediaModel = cell.listModel?.asLGMediaModel(),
+                    self.configs.isHeadPortraitMode
                 {
                     let hud = LGLoadingHUD.show()
                     LGMediaModelFetchManager.default.fetchResult(withMediaModel: mediaModel,
@@ -555,7 +556,8 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             } else {
                 if self.configs.maxSelectCount == 1,
                     let cell = collectionView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell,
-                    let mediaModel = cell.listModel?.asLGMediaModel()
+                    let mediaModel = cell.listModel?.asLGMediaModel(),
+                    self.configs.isHeadPortraitMode
                 {
                     
                     let hud = LGLoadingHUD.show()

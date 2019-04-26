@@ -24,6 +24,7 @@ class MediaPickerDemoController: UIViewController {
         picker.configs.maxSelectCount = 1
         picker.configs.clipRatios = [CGSize(width: 2, height: 3)]
         picker.configs.resultMediaTypes = [.image]
+//        picker.configs.isHeadPortraitMode = true
         self.present(picker, animated: true, completion: nil)
     }
 
