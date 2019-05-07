@@ -106,16 +106,22 @@ public class LGMediaPicker: LGMPNavigationController {
         /// 输出视频格式, 默认mp4，仅支持mp4和mov
         public var videoExportType: LGCameraCapture.VideoType = .mp4
         
-        /// 是否为头像模式
-        public var isHeadPortraitMode: Bool = false
+        /// 是否为头像模式， 头像模式不能使用3DTouch
+        public var isHeadPortraitMode: Bool = false {
+            didSet {
+                if isHeadPortraitMode {
+                    self.allowForceTouch = false
+                }
+            }
+        }
         
         public init() {
         }
         
         /// 默认配置
-        public static var `default`: Configuration = {
-           return Configuration()
-        }()
+        public static var `default`: Configuration {
+            return Configuration()
+        }
     }
     
     public override init(rootViewController: UIViewController) {

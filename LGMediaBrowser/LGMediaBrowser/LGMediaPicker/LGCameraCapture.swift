@@ -72,13 +72,16 @@ public class LGCameraCapture: UIViewController {
     /// 每秒帧数
     public var framePerSecond: Int32 = 30
     
-    /// 是否允许拍照
+    /// 是否允许拍照，默认true
     public var allowTakePhoto: Bool = true
     
-    /// 是否允许录制视频
+    /// 是否允许录制视频，默认true
     public var allowRecordVideo: Bool = true
     
-    /// 是否允许切换摄像头，需配合devicePosition使用
+    /// 是否支持滤镜，默认true
+    public var allowFilters: Bool = true
+    
+    /// 是否允许切换摄像头，需配合devicePosition使用，默认true
     public var allowSwitchDevicePosition: Bool = true
     
     /// 指定使用前置还是后置摄像头
@@ -312,7 +315,9 @@ public class LGCameraCapture: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        self.filtersArray = self._filtersArray
+        if allowFilters {
+            self.filtersArray = self._filtersArray
+        }
         
         self.setupSubviewsAndLayout()
         
@@ -327,6 +332,9 @@ public class LGCameraCapture: UIViewController {
     
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if LGAuthorizationStatusManager.default.cameraStatus == .denied {
+            return
+        }
         DispatchQueue.main.after(0.1) {
             self.videoCamera.startCapture()
         }
@@ -348,6 +356,9 @@ public class LGCameraCapture: UIViewController {
     let filterToolViewHeight: CGFloat = 80.0
     let toolViewHeight: CGFloat = 130.0
     func setupSubviewsAndLayout() {
+        if LGAuthorizationStatusManager.default.cameraStatus == .denied {
+            return
+        }
         self.view.backgroundColor = UIColor.black
         
         let toolViewOriginY = self.view.lg_height - toolViewHeight - UIDevice.bottomSafeMargin
@@ -394,7 +405,9 @@ public class LGCameraCapture: UIViewController {
     // MARK: - 视图frame更改
     public override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
+        if LGAuthorizationStatusManager.default.cameraStatus == .denied {
+            return
+        }
         let toolViewOriginY = self.view.lg_height - toolViewHeight - UIDevice.bottomSafeMargin
         
         filterToolView.frame = CGRect(x: 0,
@@ -490,7 +503,9 @@ public class LGCameraCapture: UIViewController {
         cropFilter = GPUImageCropFilter(cropRegion: cropedRect)
         
         videoCamera.addTarget(cropFilter)
-        videoCamera.audioEncodingTarget = movieWriter
+        if self.allowRecordVideo {
+            videoCamera.audioEncodingTarget = movieWriter
+        }
         
         
         cropFilter.addTarget((self.filter as! GPUImageInput))
@@ -500,36 +515,49 @@ public class LGCameraCapture: UIViewController {
     
     // MARK: -  获取权限
     func requestAccess() {
-        AVCaptureDevice.requestAccess(for: AVMediaType.video) { [unowned self] (granted) in
-            if granted {
-                AVCaptureDevice.requestAccess(for: AVMediaType.audio, completionHandler: { [unowned self] (granted) in
-                    if granted {
-                        let sel = #selector(LGCameraCapture.willResignActive(_:))
-                        NotificationCenter.default.addObserver(self,
-                                                               selector: sel,
-                                                               name: UIApplication.willResignActiveNotification,
-                                                               object: nil)
+        func requestCameraAccess() {
+            AVCaptureDevice.requestAccess(for: AVMediaType.video) { [unowned self] (granted) in
+                if granted {
+                    if self.allowRecordVideo {
+                        requestMicrophoneAccess()
                     } else {
-                        self.onDismiss()
+                        // 拍照，无需获取麦克风权限
                     }
-                })
-            } else {
-                self.onDismiss()
+                } else {
+                    self.onDismiss()
+                }
             }
         }
         
-        do {
-            if #available(iOS 10.0, *) {
-                
-                try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord,
-                                                                mode: AVAudioSession.Mode.default)
-            } else {
-                // Fallback on earlier versions
-            }
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            println(error)
+        requestCameraAccess()
+        
+        func requestMicrophoneAccess() {
+            AVCaptureDevice.requestAccess(for: AVMediaType.audio, completionHandler: { [unowned self] (granted) in
+                if granted {
+                    do {
+                        if #available(iOS 10.0, *) {
+                            
+                            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.playAndRecord,
+                                                                            mode: AVAudioSession.Mode.default)
+                        } else {
+                            // Fallback on earlier versions
+                        }
+                        try AVAudioSession.sharedInstance().setActive(true)
+                    } catch {
+                        println(error)
+                    }
+                } else {
+                    self.onDismiss()
+                }
+            })
         }
+        
+        let sel = #selector(LGCameraCapture.willResignActive(_:))
+        NotificationCenter.default.addObserver(self,
+                                               selector: sel,
+                                               name: UIApplication.willResignActiveNotification,
+                                               object: nil)
+        
     }
     
     // MARK: -  焦距相关
@@ -789,7 +817,9 @@ extension LGCameraCapture: LGCameraCaptureToolViewDelegate {
         movieWriter.assetWriter.movieFragmentInterval = CMTime.invalid
         
         self.videoCamera.addTarget(self.cropFilter)
-        self.videoCamera.audioEncodingTarget = movieWriter
+        if self.allowRecordVideo {
+            self.videoCamera.audioEncodingTarget = movieWriter
+        }
         
         if let filter = self.filter {
             self.cropFilter.addTarget(filter as? GPUImageInput)

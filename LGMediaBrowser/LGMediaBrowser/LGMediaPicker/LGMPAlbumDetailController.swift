@@ -136,9 +136,11 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         self.listView.register(LGMPAlbumDetailImageCell.self, forCellWithReuseIdentifier: Reuse.imageCell)
         self.listView.register(LGMPAlbumDetailCameraCell.self, forCellWithReuseIdentifier: Reuse.cameraCell)
         
-        let forchTouch = LGForceTouch(viewController: self)
-        forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.listView)
-        self.forchTouch = forchTouch
+        if self.configs.allowForceTouch {
+            let forchTouch = LGForceTouch(viewController: self)
+            forchTouch.registerForPreviewingWithDelegate(self, sourceView: self.listView)
+            self.forchTouch = forchTouch
+        }
         
         listView.translatesAutoresizingMaskIntoConstraints = false
         
@@ -579,7 +581,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
     
     func checkAndCropImage(_ image: UIImage) {
         let crop = TOCropViewController(image: image)
-        crop.customAspectRatio = CGSize(width: 2, height: 3)
+        crop.customAspectRatio = self.configs.clipRatios.first ?? CGSize(width: 1.0, height: 1.0)
         crop.aspectRatioLockEnabled = true
         crop.resetButtonHidden = true
         crop.aspectRatioPickerButtonHidden = true
@@ -695,7 +697,8 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         
         let capture = LGCameraCapture()
         capture.delegate = self
-        capture.allowRecordVideo = false
+        capture.allowRecordVideo = self.configs.allowRecordVideo
+        capture.allowFilters = !self.configs.isHeadPortraitMode
         
         if let outputSize = configs.clipRatios.first, configs.maxSelectCount == 1 {
             capture.outputSize = outputSize
@@ -998,7 +1001,6 @@ extension LGMPAlbumDetailController: LGMPAlbumDetailBottomToolBarDelegate {
     }
     
     func preview(with index: Int, animated: Bool = true, isFullDataSource: Bool = true) {
-        
         self.isFullDatasourcePreview = isFullDataSource
         
         var configs = LGMediaBrowserSettings()
