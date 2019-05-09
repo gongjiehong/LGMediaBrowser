@@ -8,9 +8,8 @@
 
 import UIKit
 
-// Only use within this framework
 extension UIDevice {
-    static var isNotchScreen: Bool {
+    public static var isNotchScreen: Bool {
         guard let keyWindow = UIApplication.shared.keyWindow else {
             return false
         }
@@ -26,7 +25,7 @@ extension UIDevice {
         }
     }
     
-    static var topSafeMargin: CGFloat {
+    public static var topSafeMargin: CGFloat {
         if isNotchScreen {
             guard let keyWindow = UIApplication.shared.keyWindow else {
                 return 0.0
@@ -41,14 +40,14 @@ extension UIDevice {
         }
     }
     
-    static var statusBarHeight: CGFloat {
+    public static var statusBarHeight: CGFloat {
         if isNotchScreen {
             return 0.0
         }
         return 20.0
     }
         
-    static var bottomSafeMargin: CGFloat {
+    public static var bottomSafeMargin: CGFloat {
         if isNotchScreen {
             guard let keyWindow = UIApplication.shared.keyWindow else {
                 return 0.0

@@ -29,6 +29,8 @@ open class LGStatusBarView: UIView {
         temp.textAlignment = NSTextAlignment.center
         temp.adjustsFontSizeToFitWidth = true
         temp.clipsToBounds = true
+        temp.numberOfLines = 0
+        temp.lineBreakMode = NSLineBreakMode.byWordWrapping
         return temp
     }()
     
