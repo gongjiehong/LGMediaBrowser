@@ -87,7 +87,9 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
             
             let imageSize = self.calcFinalImageSize()
             let imageWidth = imageSize.width
-            let imageHeight = imageSize.height
+            let imageHeight = imageSize.height.isNaN ? 0.0 : imageSize.height
+            
+            
             
             UIView.animate(withDuration: transitionDuration(using: transitionContext),
                            delay: 0.0,
