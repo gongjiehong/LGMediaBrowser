@@ -194,7 +194,7 @@ public class LGAuthorizationStatusManager: NSObject {
     }
     
     public var locationStatus: Status {
-        if CLLocationManager.locationServicesEnabled() {
+        if !CLLocationManager.locationServicesEnabled() {
             return .unSupport
         }
         
