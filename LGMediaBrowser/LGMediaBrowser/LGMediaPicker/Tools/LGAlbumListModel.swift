@@ -58,9 +58,9 @@ public class LGPhotoModel {
         var result: Bool = false
         self.isICloudAsset { (isICloudAsset) in
             result = isICloudAsset
-            _ = lock.signal()
+            lock.lg_unlock()
         }
-        _ = lock.wait(wallTimeout: DispatchWallTime.distantFuture)
+        lock.lg_lock()
         return result
     }
     

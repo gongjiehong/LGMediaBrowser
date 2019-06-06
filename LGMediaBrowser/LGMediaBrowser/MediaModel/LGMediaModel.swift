@@ -72,15 +72,15 @@ public class LGMediaModel {
     /// 占位图，大多数时候直接就是原图
     public var thumbnailImage: UIImage? {
         set {
-            _ = _lock.wait(timeout: DispatchTime.distantFuture)
+            _lock.lg_lock()
             defer {
-                _ = _lock.signal()
+                _lock.lg_unlock()
             }
             _thumbnailImage = newValue
         } get {
-            _ = _lock.wait(timeout: DispatchTime.distantFuture)
+            _lock.lg_lock()
             defer {
-                _ = _lock.signal()
+                _lock.lg_unlock()
             }
             return _thumbnailImage
         }

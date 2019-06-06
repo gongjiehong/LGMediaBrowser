@@ -11,9 +11,9 @@ import Foundation
 internal class LGMediaModelFetchSetter {
     private var _mediaModel: LGMediaModel?
     var mediaModel: LGMediaModel? {
-        _ = lock.wait(timeout: DispatchTime.distantFuture)
+        lock.lg_lock()
         defer {
-            _ = lock.signal()
+            lock.lg_unlock()
         }
         return _mediaModel
     }
@@ -52,9 +52,9 @@ internal class LGMediaModelFetchSetter {
                                                                   videoCompletion: videoCompletion,
                                                                   audioCompletion: audioCompletion,
                                                                   livePhotoCompletion: livePhotoCompletion)
-        _ = lock.wait(timeout: DispatchTime.distantFuture)
+        lock.lg_lock()
         defer {
-            _ = lock.signal()
+            lock.lg_unlock()
         }
         
         if tempSentinel == _sentinel {
@@ -72,9 +72,9 @@ internal class LGMediaModelFetchSetter {
     @discardableResult
     func cancel(withNewMediaModel model: LGMediaModel? = nil) -> Sentinel {
         var tempSentinel: Sentinel
-        _ = lock.wait(timeout: DispatchTime.distantFuture)
+        lock.lg_lock()
         defer {
-            _ = lock.signal()
+            lock.lg_unlock()
         }
         
         if self.operation != nil {
