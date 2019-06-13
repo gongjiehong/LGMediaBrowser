@@ -13,7 +13,7 @@ internal protocol LGCheckMediaBrowserCallBack: NSObjectProtocol {
                     withIndex index: Int,
                     isSelected: Bool,
                     complete: @escaping (Bool) -> Void)
-    func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGPhotoModel])
+    func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGAlbumAssetModel])
 }
 
 internal class LGCheckMediaBrowser: LGMediaBrowser {
@@ -191,7 +191,7 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         if !allowEdit {
         } else {
             bottomToolBar.editButton.isHidden = false
-            if (mediaModel.mediaType == .generalPhoto && pickerConfigs.allowEditImage) ||
+            if (mediaModel.mediaType == .image && pickerConfigs.allowEditImage) ||
                 (mediaModel.mediaType == .video && pickerConfigs.allowEditVideo) {
                 bottomToolBar.editButton.isEnabled = true
             } else {

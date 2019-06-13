@@ -93,7 +93,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     public var cornerRadius: CGFloat = 0.0
     
     /// 需要被显示的对象
-    public var listModel: LGPhotoModel? {
+    public var listModel: LGAlbumAssetModel? {
         didSet {
             refreshLayoutIfNeeded()
         }
@@ -214,20 +214,15 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
             self.typeMarkView.image = UIImage(namedFromThisBundle: "mark_livePhoto")
             self.timeOrTypeMarkLabel.text = LGLocalizedString("Live")
             break
-        case .generalImage:
-            if #available(iOS 11.0, *) {
-                if model.asset.playbackStyle == .imageAnimated {
-                    self.markBgView.isHidden = false
-                    self.typeMarkView.isHidden = false
-                    self.timeOrTypeMarkLabel.isHidden = false
-                    self.typeMarkView.image = nil
-                    self.timeOrTypeMarkLabel.text = LGLocalizedString("GIF")
-                } else {
-                    self.markBgView.isHidden = true
-                }
-            } else {
-                self.markBgView.isHidden = true
-            }
+        case .image:
+            self.markBgView.isHidden = true
+            break
+        case .animatedImage:
+            self.markBgView.isHidden = false
+            self.typeMarkView.isHidden = false
+            self.timeOrTypeMarkLabel.isHidden = false
+            self.typeMarkView.image = nil
+            self.timeOrTypeMarkLabel.text = LGLocalizedString("GIF")
             break
         default:
             self.markBgView.isHidden = true
@@ -251,12 +246,12 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
         let scale = UIScreen.main.scale
         let tempSize = CGSize(width: self.contentView.lg_width * scale, height: self.contentView.lg_height * scale)
         
-        LGPhotoManager.default.cancelImageRequest(self.imageRequestID)
+        LGAssetExportManager.default.cancelImageRequest(self.imageRequestID)
         
         self.identifier = model.asset.localIdentifier
         self.layoutImageView.image = nil
         
-        self.imageRequestID = LGPhotoManager.default.requestImage(forAsset: model.asset,
+        self.imageRequestID = LGAssetExportManager.default.requestImage(forAsset: model.asset,
                                                           outputSize: tempSize,
                                                           resizeMode: PHImageRequestOptionsResizeMode.fast,
                                                           completion:

@@ -15,7 +15,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     var albumListModel: LGAlbumListModel?
     
-    var dataArray: [LGPhotoModel] = []
+    var dataArray: [LGAlbumAssetModel] = []
     
     var selectedIndexPath: [IndexPath] = []
     
@@ -67,7 +67,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     private var isFullDatasourcePreview: Bool = true
     
-    private var tempSelectedPhotosArray: [LGPhotoModel] = []
+    private var tempSelectedPhotosArray: [LGAlbumAssetModel] = []
     
     override public func viewDidLoad() {
         super.viewDidLoad()
@@ -207,7 +207,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
             if let albumListModel = albumListModel {
                 if needRefresh {
                     guard let result = albumListModel.result else { return }
-                    let photos = LGPhotoManager.default.fetchPhoto(inResult: result,
+                    let photos = LGAssetExportManager.default.fetchPhoto(inResult: result,
                                                            supportTypes: self.configs.resultMediaTypes)
                     for temp in photos {
                         for selectedTemp in globleSelectedDataArray
@@ -238,7 +238,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
             } else {
                 DispatchQueue.userInteractive.async { [weak self] in
                     guard let weakSelf = self else { return }
-                    if let album = LGPhotoManager.default.getAllPhotosAlbum(weakSelf.configs.resultMediaTypes) {
+                    if let album = LGAssetExportManager.default.getAllPhotosAlbum(weakSelf.configs.resultMediaTypes) {
                         weakSelf.albumListModel = album
                         weakSelf.dataArray.removeAll()
                         for temp in album.models {
@@ -275,7 +275,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         let itemSize = CGSize(width: (width - Settings.itemLineSpacing * (columnCount + 1)) / columnCount,
                               height: (width - Settings.itemLineSpacing * (columnCount + 1)) / columnCount)
         
-        LGPhotoManager.default.startCachingImages(for: assetArray,
+        LGAssetExportManager.default.startCachingImages(for: assetArray,
                                           targetSize: CGSize(width: itemSize.width * UIScreen.main.scale,
                                                              height: itemSize.height * UIScreen.main.scale),
                                           contentMode: PHImageContentMode.aspectFill)
@@ -353,7 +353,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
             cell = LGMPAlbumDetailImageCell(frame: CGRect.zero)
         }
         
-        var dataModel: LGPhotoModel
+        var dataModel: LGAlbumAssetModel
         if !self.allowTakePhoto || configs.sortBy == .ascending {
             dataModel = self.dataArray[indexPath.row]
         } else {
@@ -414,7 +414,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
         return cell
     }
     
-    func canSelectModel(_ model: LGPhotoModel, callback: @escaping (Bool) -> Void) {
+    func canSelectModel(_ model: LGAlbumAssetModel, callback: @escaping (Bool) -> Void) {
         if globleSelectedDataArray.count >= configs.maxSelectCount {
             let tipsString = String(format: LGLocalizedString("Select maximum of %d photos."),
                                     configs.maxSelectCount)
@@ -477,7 +477,7 @@ extension LGMPAlbumDetailController: UICollectionViewDataSource, UICollectionVie
                         weakSelf.bottomToolBar.photoBytesLabel.text = "  "
                         weakSelf.bottomToolBar.photoBytesIndicatorView.startAnimating()
                     }
-                    LGPhotoManager.default.getPhotoBytes(withPhotos: globleSelectedDataArray)
+                    LGAssetExportManager.default.getPhotoBytes(withPhotos: globleSelectedDataArray)
                     { (mbFormatString, originalLength) in
                         DispatchQueue.main.async { [weak self] in
                             guard let weakSelf = self else {return}
@@ -729,8 +729,8 @@ extension LGMPAlbumDetailController: LGCameraCaptureDelegate {
                 result.image?.lg_savetoAlbumWith(completionBlock: { [weak self] (isSucceed, asset, error) in
                     guard let weakSelf = self else {return}
                     if isSucceed, let asset = asset {
-                        let photoModel = LGPhotoModel(asset: asset,
-                                                      type: LGPhotoModel.AssetMediaType.generalImage,
+                        let photoModel = LGAlbumAssetModel(asset: asset,
+                                                      type: LGMediaType.image,
                                                       duration: "")
                         globleSelectedDataArray.append(photoModel)
                         weakSelf.delegate?.picker(globleMainPicker,
@@ -758,8 +758,8 @@ extension LGMPAlbumDetailController: LGCameraCaptureDelegate {
                         if let localId = localId {
                             let result = PHAsset.fetchAssets(withLocalIdentifiers: [localId], options: nil)
                             if let asset = result.firstObject {
-                                let photoModel = LGPhotoModel(asset: asset,
-                                                              type: LGPhotoModel.AssetMediaType.generalImage,
+                                let photoModel = LGAlbumAssetModel(asset: asset,
+                                                              type: LGMediaType.image,
                                                               duration: "")
                                 globleSelectedDataArray.append(photoModel)
                                 weakSelf.delegate?.picker(globleMainPicker,
@@ -812,7 +812,7 @@ extension LGMPAlbumDetailController: LGForceTouchPreviewingDelegate {
         preview(with: previewController.currentIndex, animated: false)
     }
     
-    func getSizeWith(photoModel: LGPhotoModel) -> CGSize {
+    func getSizeWith(photoModel: LGAlbumAssetModel) -> CGSize {
         let width = min(CGFloat(photoModel.asset.pixelWidth),
                         self.view.lg_width)
         let height = width * CGFloat(photoModel.asset.pixelHeight) / CGFloat(photoModel.asset.pixelWidth)
@@ -857,7 +857,7 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
 //        guard let result = self.albumListModel?.result else { return }
 //        if let detail = changeInstance.changeDetails(for: result) {
         
-            //            let photos = LGPhotoManager.default.fetchPhoto(inResult: detail.fetchResultAfterChanges,
+            //            let photos = LGAssetExportManager.default.fetchPhoto(inResult: detail.fetchResultAfterChanges,
             //                                                   supportMediaType: configs.resultMediaTypes)
             //            self.dataArray.removeAll()
             //            self.dataArray += photos
@@ -884,7 +884,7 @@ extension LGMPAlbumDetailController: LGMediaBrowserDataSource {
             if let cell = self.listView.cellForItem(at: indexPath) as? LGMPAlbumDetailImageCell {
                 thumbnailImage = cell.layoutImageView.image
             }
-            var dataModel: LGPhotoModel
+            var dataModel: LGAlbumAssetModel
             if !self.allowTakePhoto || configs.sortBy == .ascending {
                 dataModel = self.dataArray[index]
             } else {
@@ -1025,7 +1025,7 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
                     complete: @escaping (Bool) -> Void)
     {
         func fullCheckWith(_ dataIndex: Int) {
-            var dataModel: LGPhotoModel
+            var dataModel: LGAlbumAssetModel
             if !self.allowTakePhoto || configs.sortBy == .ascending {
                 dataModel = self.dataArray[dataIndex]
             } else {
@@ -1082,7 +1082,7 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
         }
     }
  
-    func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGPhotoModel]) {
+    func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGAlbumAssetModel]) {
         delegate?.picker(globleMainPicker,
                          didDoneWith: globleSelectedDataArray,
                          isOriginalPhoto: bottomToolBar.originalPhotoButton.isSelected)

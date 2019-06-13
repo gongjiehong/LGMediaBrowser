@@ -11,16 +11,16 @@ import Photos
 
 public protocol LGMediaPickerDelegate: NSObjectProtocol {
     func pickerDidCancel(_ picker: LGMediaPicker)
-    func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGPhotoModel], isOriginalPhoto isOriginal: Bool)
+    func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGAlbumAssetModel], isOriginalPhoto isOriginal: Bool)
     func picker(_ picker: LGMediaPicker, didDoneWith resultImage: UIImage?)
 }
 
-internal var globleSelectedDataArray: [LGPhotoModel]! = []
+internal var globleSelectedDataArray: [LGAlbumAssetModel]! = []
 
 internal weak var globleMainPicker: LGMediaPicker!
 
 public class LGMediaPicker: LGMPNavigationController {
-
+    
     public struct Configuration {
         /// 状态栏显示方式，默认lightContent
         public var statusBarStyle: UIStatusBarStyle = .lightContent
@@ -34,8 +34,9 @@ public class LGMediaPicker: LGMPNavigationController {
         /// 是否允许混合选择，默认可以，如果为true，可以同时选择视频和图片
         public var allowMixSelect: Bool = true
         
-        /// 可选的数据类型，默认视频和图片都可选[.image, .video]
-        public var resultMediaTypes: LGPhotoManager.ResultMediaType = .all
+        /// 可选的数据类型，默认选择全部 .all
+        /// 仅支持4种模式，.all, .image, .animatedImage, .livePhoto, 不支持如 [.animatedImage, .livePhoto]
+        public var resultMediaTypes: LGMediaType = .all
         
         /// 是否支持选择GIF和APNG，默认支持true
         public var allowSelectAnimatedImage: Bool = true
@@ -89,7 +90,7 @@ public class LGMediaPicker: LGMPNavigationController {
         public var isShowCaptureImageOnTakePhotoButton: Bool = true
         
         /// 排序方式，升序还是降序
-        public var sortBy: LGPhotoManager.SortBy = .ascending
+        public var sortBy: LGAssetExportManager.SortBy = .ascending
         
         /// 单选模式下是否显示选择按钮
         public var isShowSelectButtonAtSingleMode: Bool = false
@@ -160,7 +161,7 @@ public class LGMediaPicker: LGMPNavigationController {
     /// 配置，默认使用默认配置
     public var configs: Configuration = Configuration.default
     
-    public var selectedDataArray: [LGPhotoModel] = [] {
+    public var selectedDataArray: [LGAlbumAssetModel] = [] {
         didSet {
             for (index, photo) in selectedDataArray.enumerated() {
                 photo.currentSelectedIndex = index + 1
@@ -174,7 +175,7 @@ public class LGMediaPicker: LGMPNavigationController {
     public override func viewDidLoad() {
         super.viewDidLoad()
         
-        LGPhotoManager.default.sort = self.configs.sortBy
+        LGAssetExportManager.default.sort = self.configs.sortBy
         
         self.title = LGLocalizedString("Albums")
         
@@ -253,7 +254,7 @@ public class LGMediaPicker: LGMPNavigationController {
     deinit {
         globleSelectedDataArray = nil
         globleMainPicker = nil
-        LGPhotoManager.default.stopCachingImages()
+        LGAssetExportManager.default.stopCachingImages()
     }
     
 

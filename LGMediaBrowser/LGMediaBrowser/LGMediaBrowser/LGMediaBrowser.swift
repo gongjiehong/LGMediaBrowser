@@ -618,7 +618,7 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
             return listView(collectionView, videoCellForItemAt: indexPath, mediaModel: media)
         case .audio:
             return listView(collectionView, audioCellForItemAt: indexPath, mediaModel: media)
-        case .generalPhoto:
+        case .image:
             return listView(collectionView, generalPhotoCellForItemAt: indexPath, mediaModel: media)
         case .livePhoto:
             return listView(collectionView, livePhotoCellForItemAt: indexPath, mediaModel: media)

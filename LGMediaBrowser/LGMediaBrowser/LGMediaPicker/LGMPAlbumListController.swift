@@ -99,8 +99,8 @@ public class LGAlbumListCell: UITableViewCell {
         
         if let headImageAsset = listData.headImageAsset {
             let outputSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
-            LGPhotoManager.default.cancelImageRequest(lastRequestId)
-            lastRequestId = LGPhotoManager.default.requestImage(forAsset: headImageAsset,
+            LGAssetExportManager.default.cancelImageRequest(lastRequestId)
+            lastRequestId = LGAssetExportManager.default.requestImage(forAsset: headImageAsset,
                                                         outputSize: outputSize,
                                                         resizeMode: PHImageRequestOptionsResizeMode.exact)
             { [weak self] (resultImage, infoDic) in
@@ -194,7 +194,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         let hud = LGLoadingHUD.show(inView: self.view)
         DispatchQueue.userInteractive.async { [weak self] in
             guard let weakSelf = self else { return }
-            LGPhotoManager.default.fetchAlbumList(weakSelf.configs.resultMediaTypes) { [weak self] (resultArray) in
+            LGAssetExportManager.default.fetchAlbumList(weakSelf.configs.resultMediaTypes) { [weak self] (resultArray) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else { return }
                     hud.dismiss()
@@ -218,7 +218,7 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         
         let itemSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
         
-        LGPhotoManager.default.startCachingImages(for: assetArray,
+        LGAssetExportManager.default.startCachingImages(for: assetArray,
                                           targetSize: itemSize,
                                           contentMode: PHImageContentMode.aspectFill)
     }
@@ -271,7 +271,8 @@ extension LGMPAlbumListController: PHPhotoLibraryChangeObserver {
             guard let weakSelf = self else { return }
             NSObject.cancelPreviousPerformRequests(withTarget: weakSelf)
             weakSelf.perform(#selector(LGMPAlbumListController.fetchAlbumList),
-                             with: nil, afterDelay: 0.3)
+                             with: nil,
+                             afterDelay: 0.3)
         }
     }
 }

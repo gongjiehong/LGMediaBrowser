@@ -19,24 +19,24 @@ class MediaPickerDemoController: UIViewController {
     }
     
     @IBAction func toChooseButtonPressed(_ sender: UIButton) {
-//        let picker = LGMediaPicker()
-//        picker.pickerDelegate = self
-//        picker.configs.maxSelectCount = 1
-//        picker.configs.clipRatios = [CGSize(width: 2, height: 3)]
-//        picker.configs.resultMediaTypes = [.image]
-////        picker.configs.isHeadPortraitMode = true
-//        self.present(picker, animated: true, completion: nil)
+        let picker = LGMediaPicker()
+        picker.pickerDelegate = self
+        picker.configs.maxSelectCount = 9
+        picker.configs.clipRatios = [CGSize(width: 2, height: 3)]
+        picker.configs.resultMediaTypes = .image
+//        picker.configs.isHeadPortraitMode = true
+        self.present(picker, animated: true, completion: nil)
         
-        let capture = LGCameraCapture()
-        capture.allowRecordVideo = false
-        capture.allowTakePhoto = true
-        capture.allowSwitchDevicePosition = false
-        capture.devicePosition = .front
-        capture.outputSize = CGSize(width: 500, height: 500)
-        capture.delegate = self
-        self.present(capture, animated: true) {
-            
-        }
+//        let capture = LGCameraCapture()
+//        capture.allowRecordVideo = false
+//        capture.allowTakePhoto = true
+//        capture.allowSwitchDevicePosition = false
+//        capture.devicePosition = .front
+//        capture.outputSize = CGSize(width: 500, height: 500)
+//        capture.delegate = self
+//        self.present(capture, animated: true) {
+//
+//        }
     }
 
     /*
@@ -65,7 +65,7 @@ extension MediaPickerDemoController: LGMediaPickerDelegate {
         }
     }
     
-    func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGPhotoModel], isOriginalPhoto isOriginal: Bool) {
+    func picker(_ picker: LGMediaPicker, didDoneWith photoList: [LGAlbumAssetModel], isOriginalPhoto isOriginal: Bool) {
         picker.dismiss(animated: true) {
             
         }

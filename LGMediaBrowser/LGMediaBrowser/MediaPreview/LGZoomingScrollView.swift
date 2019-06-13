@@ -40,6 +40,7 @@ open class LGZoomingScrollView: UIScrollView {
         imageView.detectingDelegate = self
         imageView.contentMode = .scaleAspectFill
         imageView.backgroundColor = .clear
+        
         addSubview(imageView)
         
         progressView = LGSectorProgressView(frame: CGRect(x: 0, y: 0, width: 50, height: 50), isShowError: false)
@@ -74,6 +75,8 @@ open class LGZoomingScrollView: UIScrollView {
             return
         }
         
+        imageView.isAutoPlayAnimatedImage = mediaModel.isAutoPlayAnimatedImage
+        
         let sentinel = mediaSetter.cancel(withNewMediaModel: mediaModel)
         
         if let _ = mediaModel.thumbnailImage {
@@ -100,6 +103,9 @@ open class LGZoomingScrollView: UIScrollView {
                         weakSelf.progressView.isShowError = true
                         return
                     }
+                    
+                    weakSelf.imageView.image = resultImage
+                    weakSelf.mediaModel?.thumbnailImage = resultImage
                     
                     if let currentImage = weakSelf.imageView.image {
                         if resultImage.size.height <= currentImage.size.width {

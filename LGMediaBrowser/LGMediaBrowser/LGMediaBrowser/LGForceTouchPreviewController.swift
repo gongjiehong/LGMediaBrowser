@@ -99,8 +99,11 @@ open class LGForceTouchPreviewController: UIViewController {
         self.progressView.center = self.view.center
         if let model = self.mediaModel {
             switch model.mediaType {
-            case .generalPhoto:
-                setupGeneralPhotoView()
+            case .image:
+                setupGeneralPhotoView(animated: false)
+                break
+            case .animatedImage:
+                setupGeneralPhotoView(animated: true)
                 break
             case .livePhoto:
                 setupLivePhotoView()
@@ -120,9 +123,11 @@ open class LGForceTouchPreviewController: UIViewController {
         }
     }
     
-    func setupGeneralPhotoView() {
+    func setupGeneralPhotoView(animated: Bool) {
         self.view.addSubview(self.imageView)
         self.view.bringSubviewToFront(self.progressView)
+        
+        self.imageView.isAutoPlayAnimatedImage = (self.mediaModel?.isAutoPlayAnimatedImage == true)
         
         let sentinel = fetchSetter.cancel(withNewMediaModel: mediaModel)
         
@@ -155,10 +160,6 @@ open class LGForceTouchPreviewController: UIViewController {
         }, videoCompletion: nil,
            audioCompletion: nil,
            livePhotoCompletion: nil)
-        
-        
-        
-        
     }
     
     func setupLivePhotoView() {
@@ -237,7 +238,7 @@ open class LGForceTouchPreviewController: UIViewController {
     func fixSubViewFrame() {
         if let model = self.mediaModel {
             switch model.mediaType {
-            case .generalPhoto:
+            case .image, .animatedImage:
                 fixGeneralPhotoViewFrame()
                 break
             case .livePhoto:
