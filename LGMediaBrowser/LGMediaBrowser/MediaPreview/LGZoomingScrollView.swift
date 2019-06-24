@@ -104,17 +104,12 @@ open class LGZoomingScrollView: UIScrollView {
                         return
                     }
                     
-                    weakSelf.imageView.image = resultImage
                     weakSelf.mediaModel?.thumbnailImage = resultImage
                     
-                    if let currentImage = weakSelf.imageView.image {
-                        if resultImage.size.height <= currentImage.size.width {
-                            return
-                        }
+                    if finished {
+                        weakSelf.progressView.isHidden = true
+                        weakSelf.displayImage(complete: true)
                     }
-                    
-                    weakSelf.progressView.isHidden = true
-                    weakSelf.displayImage(complete: true)
             })
         }
     }

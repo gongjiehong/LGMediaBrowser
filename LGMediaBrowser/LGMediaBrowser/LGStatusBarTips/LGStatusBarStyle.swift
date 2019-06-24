@@ -130,7 +130,7 @@ open class LGStatusBarConfig {
             break
         case .warning:
             config.barColor = UIColor(hexColor: "FFFF00")
-            config.textColor = UIColor(hexColor: "FFFFFF")
+            config.textColor = UIColor(hexColor: "000000")
             config.progressBarColor = UIColor(hexColor: "FFFFFF")
             config.progressBarHeight = 2.0
             config.animationType = .bounce
