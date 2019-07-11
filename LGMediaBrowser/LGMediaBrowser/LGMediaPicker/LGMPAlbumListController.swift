@@ -101,8 +101,8 @@ public class LGAlbumListCell: UITableViewCell {
             let outputSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
             LGAssetExportManager.default.cancelImageRequest(lastRequestId)
             lastRequestId = LGAssetExportManager.default.requestImage(forAsset: headImageAsset,
-                                                        outputSize: outputSize,
-                                                        resizeMode: PHImageRequestOptionsResizeMode.exact)
+                                                                      outputSize: outputSize,
+                                                                      resizeMode: PHImageRequestOptionsResizeMode.exact)
             { [weak self] (resultImage, infoDic) in
                 if let resultImage = resultImage {
                     self?.thumbnailImageView.image = resultImage
@@ -194,7 +194,8 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         let hud = LGLoadingHUD.show(inView: self.view)
         DispatchQueue.userInteractive.async { [weak self] in
             guard let weakSelf = self else { return }
-            LGAssetExportManager.default.fetchAlbumList(weakSelf.configs.resultMediaTypes) { [weak self] (resultArray) in
+            LGAssetExportManager.default.fetchAlbumList(weakSelf.configs.resultMediaTypes)
+            { [weak self] (resultArray) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else { return }
                     hud.dismiss()
@@ -219,8 +220,8 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         let itemSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
         
         LGAssetExportManager.default.startCachingImages(for: assetArray,
-                                          targetSize: itemSize,
-                                          contentMode: PHImageContentMode.aspectFill)
+                                                        targetSize: itemSize,
+                                                        contentMode: PHImageContentMode.aspectFill)
     }
     
     deinit {

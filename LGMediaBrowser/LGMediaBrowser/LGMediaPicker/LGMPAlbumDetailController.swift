@@ -208,7 +208,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
                 if needRefresh {
                     guard let result = albumListModel.result else { return }
                     let photos = LGAssetExportManager.default.fetchPhoto(inResult: result,
-                                                           supportTypes: self.configs.resultMediaTypes)
+                                                                         supportTypes: self.configs.resultMediaTypes)
                     for temp in photos {
                         for selectedTemp in globleSelectedDataArray
                             where selectedTemp.asset.localIdentifier == temp.asset.localIdentifier {
@@ -274,11 +274,11 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         let columnCount = CGFloat(Settings.columnCount)
         let itemSize = CGSize(width: (width - Settings.itemLineSpacing * (columnCount + 1)) / columnCount,
                               height: (width - Settings.itemLineSpacing * (columnCount + 1)) / columnCount)
-        
+        let targetSize = CGSize(width: itemSize.width * UIScreen.main.scale,
+                                height: itemSize.height * UIScreen.main.scale)
         LGAssetExportManager.default.startCachingImages(for: assetArray,
-                                          targetSize: CGSize(width: itemSize.width * UIScreen.main.scale,
-                                                             height: itemSize.height * UIScreen.main.scale),
-                                          contentMode: PHImageContentMode.aspectFill)
+                                                        targetSize: targetSize,
+                                                        contentMode: PHImageContentMode.aspectFill)
     }
     
     func scrollToBottom() {
@@ -730,8 +730,8 @@ extension LGMPAlbumDetailController: LGCameraCaptureDelegate {
                     guard let weakSelf = self else {return}
                     if isSucceed, let asset = asset {
                         let photoModel = LGAlbumAssetModel(asset: asset,
-                                                      type: LGMediaType.image,
-                                                      duration: "")
+                                                           type: LGMediaType.image,
+                                                           duration: "")
                         globleSelectedDataArray.append(photoModel)
                         weakSelf.delegate?.picker(globleMainPicker,
                                                   didDoneWith: globleSelectedDataArray,
@@ -759,8 +759,8 @@ extension LGMPAlbumDetailController: LGCameraCaptureDelegate {
                             let result = PHAsset.fetchAssets(withLocalIdentifiers: [localId], options: nil)
                             if let asset = result.firstObject {
                                 let photoModel = LGAlbumAssetModel(asset: asset,
-                                                              type: LGMediaType.image,
-                                                              duration: "")
+                                                                   type: LGMediaType.image,
+                                                                   duration: "")
                                 globleSelectedDataArray.append(photoModel)
                                 weakSelf.delegate?.picker(globleMainPicker,
                                                           didDoneWith: globleSelectedDataArray,
@@ -854,17 +854,17 @@ extension LGMPAlbumDetailController: PHPhotoLibraryChangeObserver {
     }
     
     @objc func changeAndReload(_ changeInstance: PHChange) {
-//        guard let result = self.albumListModel?.result else { return }
-//        if let detail = changeInstance.changeDetails(for: result) {
+        //        guard let result = self.albumListModel?.result else { return }
+        //        if let detail = changeInstance.changeDetails(for: result) {
         
-            //            let photos = LGAssetExportManager.default.fetchPhoto(inResult: detail.fetchResultAfterChanges,
-            //                                                   supportMediaType: configs.resultMediaTypes)
-            //            self.dataArray.removeAll()
-            //            self.dataArray += photos
-//                        self.listView.reloadData()
-            //            self.cachingImages()
-            //            self.scrollToBottom()
-//        }
+        //            let photos = LGAssetExportManager.default.fetchPhoto(inResult: detail.fetchResultAfterChanges,
+        //                                                   supportMediaType: configs.resultMediaTypes)
+        //            self.dataArray.removeAll()
+        //            self.dataArray += photos
+        //                        self.listView.reloadData()
+        //            self.cachingImages()
+        //            self.scrollToBottom()
+        //        }
     }
 }
 
@@ -1081,7 +1081,7 @@ extension LGMPAlbumDetailController: LGCheckMediaBrowserCallBack {
             }
         }
     }
- 
+    
     func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGAlbumAssetModel]) {
         delegate?.picker(globleMainPicker,
                          didDoneWith: globleSelectedDataArray,

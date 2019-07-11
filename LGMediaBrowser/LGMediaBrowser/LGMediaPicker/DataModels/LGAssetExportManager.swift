@@ -330,11 +330,15 @@ public class LGAssetExportManager {
             } else {
                 fatalError("animated image only need iOS 11.0 and above")
             }
-        } else if supportTypes == .all {
+        } else if supportTypes == .all || supportTypes == [.image, .video] {
             predicateString = String(format: "mediaType = %ld || mediaType = %ld",
                                      PHAssetMediaType.image.rawValue,
                                      PHAssetMediaType.video.rawValue)
-        } else if supportTypes == .image {
+        } else if supportTypes == .image ||
+            supportTypes == [.image, .livePhoto] ||
+            supportTypes == [.image, .livePhoto, .animatedImage] ||
+            supportTypes == [.livePhoto, .animatedImage]
+        {
             predicateString = String(format: "mediaType = %ld",
                                      PHAssetMediaType.image.rawValue)
         }  else {
@@ -404,9 +408,19 @@ public class LGAssetExportManager {
                                    contentMode: PHImageContentMode,
                                    options: PHImageRequestOptions? = nil)
     {
+        if cachedSizeArray.contains(targetSize) {
+            return
+        } else {
+            cachedSizeArray.append(targetSize)
+        }
         let options = PHImageRequestOptions()
         options.resizeMode = .fast
         options.isNetworkAccessAllowed = true
+        options.version = .current
+        
+        if assets.count > 2000 {
+            return
+        }
         
         DispatchQueue.background.async {
             self.imageManager.startCachingImages(for: assets,
@@ -415,6 +429,8 @@ public class LGAssetExportManager {
                                                  options: options)
         }
     }
+    
+    var cachedSizeArray: [CGSize] = []
     
     /// 停止缓存图片
     public func stopCachingImages() {
