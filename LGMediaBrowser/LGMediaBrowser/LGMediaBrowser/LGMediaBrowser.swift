@@ -757,14 +757,15 @@ extension LGMediaBrowser: LGActionViewDelegate {
             self.collectionView.performBatchUpdates({ [unowned self] in
                 self.collectionView.deleteItems(at: [IndexPath(row: self.currentIndex, section: 0)])
             }) { [unowned self] (isFinished) in
-                if self.currentIndex < self.mediaArray.count {
-                    self.refreshCountLayout()
-                } else {
-                    self.currentIndex -= 1
-                }
+                self.currentIndex -= 1
+                self.refreshCountLayout()
                 
-                if self.currentIndex < 0 {
-                    self.closeSelf()
+                if self.currentIndex <= 0 {
+                    if self.mediaArray.count > 0 {
+                        self.currentIndex = 0
+                    } else {
+                        self.closeSelf()
+                    }
                 }
             }
         }
