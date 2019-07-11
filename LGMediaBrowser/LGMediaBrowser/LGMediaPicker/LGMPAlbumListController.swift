@@ -183,11 +183,15 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        _ = fetchAlbumListOnce
+        self.navigationController?.setToolbarHidden(true, animated: true)
+    }
+    
+    lazy var fetchAlbumListOnce: Void = {
         if self.dataArray.count == 0 {
             fetchAlbumList()
         }
-        self.navigationController?.setToolbarHidden(true, animated: true)
-    }
+    }()
     
     /// 获取相册列表
     @objc func fetchAlbumList() {

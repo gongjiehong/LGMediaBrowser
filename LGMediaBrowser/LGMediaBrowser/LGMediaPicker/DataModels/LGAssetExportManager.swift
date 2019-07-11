@@ -132,14 +132,16 @@ public class LGAssetExportManager {
         
         autoreleasepool {
             result.enumerateObjects { (asset, index, stop) in
+                if count >= limitCount {
+                    stop.pointee = true
+                }
+                
                 let type = self.getMediaType(from: asset, supportTypes: supportTypes)
                 if type == LGMediaType.image, !supportTypes.contains(.image) { return }
                 if type == LGMediaType.animatedImage, !supportTypes.contains(.animatedImage) { return }
                 if type == LGMediaType.livePhoto, !supportTypes.contains(.livePhoto)  { return }
                 if type == LGMediaType.video, !supportTypes.contains(.video) { return }
-                if count == limitCount {
-                    stop.pointee = true
-                }
+                
                 
                 var durationStr = ""
                 if asset.mediaType == .video {
@@ -243,13 +245,14 @@ public class LGAssetExportManager {
     public func requestImage(forAsset asset: PHAsset,
                              outputSize: CGSize = CGSize.zero,
                              isAsync: Bool = true,
+                             isNetworkAccessAllowed: Bool = true,
                              resizeMode: PHImageRequestOptionsResizeMode = PHImageRequestOptionsResizeMode.fast,
                              progressHandlder: PHAssetImageProgressHandler? = nil,
                              completion: @escaping (UIImage?, [AnyHashable: Any]?) -> Void) -> PHImageRequestID
     {
         let options = PHImageRequestOptions()
         options.resizeMode = resizeMode
-        options.isNetworkAccessAllowed = true
+        options.isNetworkAccessAllowed = isNetworkAccessAllowed
         options.progressHandler = progressHandlder
         options.isSynchronous = !isAsync
         
@@ -390,9 +393,10 @@ public class LGAssetExportManager {
     /// 取消相册，图片，data等请求
     ///
     /// - Parameter requestId: 有效的请求id
+    @inline(__always)
     public func cancelImageRequest(_ requestId: PHImageRequestID) {
         if requestId != PHInvalidImageRequestID {
-            imageManager.cancelImageRequest(requestId)
+            self.imageManager.cancelImageRequest(requestId)
         }
     }
     
@@ -408,6 +412,10 @@ public class LGAssetExportManager {
                                    contentMode: PHImageContentMode,
                                    options: PHImageRequestOptions? = nil)
     {
+        if assets.count > 1500 {
+            return
+        }
+        
         if cachedSizeArray.contains(targetSize) {
             return
         } else {
@@ -418,10 +426,7 @@ public class LGAssetExportManager {
         options.isNetworkAccessAllowed = true
         options.version = .current
         
-        if assets.count > 2000 {
-            return
-        }
-        
+
         DispatchQueue.background.async {
             self.imageManager.startCachingImages(for: assets,
                                                  targetSize: targetSize,

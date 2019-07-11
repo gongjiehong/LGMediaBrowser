@@ -202,6 +202,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
         if globleSelectedDataArray == nil {
             globleSelectedDataArray = []
         }
+        
         if self.dataArray.count == 0 || needRefresh {
             let hud = LGLoadingHUD.show(inView: self.view)
             if let albumListModel = albumListModel {

@@ -233,7 +233,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
             self.coverView.backgroundColor = self.maskColor
             self.coverView.isHidden = !model.isSelected
         }
-
+        
         self.selectButton.isHidden = !self.isShowSelectButton
         self.selectButton.isEnabled = self.isShowSelectButton
         self.selectButton.isSelected = model.isSelected
@@ -252,13 +252,16 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
         self.layoutImageView.image = nil
         
         self.imageRequestID = LGAssetExportManager.default.requestImage(forAsset: model.asset,
-                                                          outputSize: tempSize,
-                                                          resizeMode: PHImageRequestOptionsResizeMode.fast,
-                                                          completion:
+                                                                        outputSize: tempSize,
+                                                                        isAsync: true,
+                                                                        isNetworkAccessAllowed: false,
+                                                                        resizeMode: .fast,
+                                                                        completion:
             { [weak self] (resultImage, infoDic) in
                 guard let weakSelf = self else { return }
                 if weakSelf.identifier == model.asset.localIdentifier {
                     weakSelf.layoutImageView.image = resultImage
+                    weakSelf.imageRequestID = PHInvalidImageRequestID
                 }
         })
     }
