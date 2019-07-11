@@ -754,9 +754,9 @@ extension LGMediaBrowser: LGActionViewDelegate {
     func deleteButtonPressed() {
         func deleteItemRefresh() {
             self.mediaArray.remove(at: self.currentIndex)
+            
             self.collectionView.performBatchUpdates({ [unowned self] in
                 self.collectionView.deleteItems(at: [IndexPath(row: self.currentIndex, section: 0)])
-            }) { [unowned self] (isFinished) in
                 self.currentIndex -= 1
                 self.refreshCountLayout()
                 
@@ -767,6 +767,8 @@ extension LGMediaBrowser: LGActionViewDelegate {
                         self.closeSelf()
                     }
                 }
+            }) { (isFinished) in
+                
             }
         }
         
