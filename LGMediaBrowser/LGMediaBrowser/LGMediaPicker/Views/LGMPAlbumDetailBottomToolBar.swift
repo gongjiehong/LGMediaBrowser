@@ -25,8 +25,8 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
         temp.setTitle(LGLocalizedString("Preview"), for: UIControl.State.normal)
         temp.addTarget(self, action: #selector(previewButtonPressed(_:)), for: UIControl.Event.touchUpInside)
-        temp.setTitleColor(UIColor(colorName: "BottomBarDisableText"), for: UIControl.State.disabled)
-        temp.setTitleColor(UIColor(colorName: "BottomBarNormalText"), for: UIControl.State.normal)
+        temp.setTitleColor(UIColor(named: "BottomBarDisableText", in: Bundle.this, compatibleWith: nil), for: UIControl.State.disabled)
+        temp.setTitleColor(UIColor(named: "BottomBarNormalText", in: Bundle.this, compatibleWith: nil), for: UIControl.State.normal)
         temp.isEnabled = false
         
         let bottonButtonsHeight: CGFloat = 30.0
@@ -44,10 +44,10 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
         let temp = UIButton(type: UIButton.ButtonType.custom)
         temp.titleLabel?.font = UIFont.systemFont(ofSize: 15.0)
         temp.setTitle(LGLocalizedString("Original"), for: UIControl.State.normal)
-        temp.setImage(UIImage(namedFromThisBundle: "btn_original_normal"), for: UIControl.State.normal)
-        temp.setImage(UIImage(namedFromThisBundle: "btn_original_selected"), for: UIControl.State.selected)
-        temp.setTitleColor(UIColor(colorName: "BottomBarDisableText"), for: UIControl.State.disabled)
-        temp.setTitleColor(UIColor(colorName: "BottomBarNormalText"), for: UIControl.State.normal)
+        temp.setImage(UIImage(namedFromThisBundle: "button_original_normal"), for: UIControl.State.normal)
+        temp.setImage(UIImage(namedFromThisBundle: "button_original_selected"), for: UIControl.State.selected)
+        temp.setTitleColor(UIColor(named: "BottomBarDisableText", in: Bundle.this, compatibleWith: nil), for: UIControl.State.disabled)
+        temp.setTitleColor(UIColor(named: "BottomBarNormalText", in: Bundle.this, compatibleWith: nil), for: UIControl.State.normal)
         temp.addTarget(self, action: #selector(originalButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         temp.isEnabled = false
         
@@ -73,7 +73,7 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
     internal lazy var photoBytesLabel: UILabel = {
         let temp = UILabel(frame: CGRect(x: 0, y: 0, width: 80.0, height: 30.0))
         temp.font = UIFont.systemFont(ofSize: 15.0)
-        temp.textColor = UIColor(colorName: "BottomBarNormalText")
+        temp.textColor = UIColor(named: "BottomBarNormalText", in: Bundle.this, compatibleWith: nil)
         return temp
     }()
     
@@ -86,7 +86,7 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
         temp.layer.masksToBounds = true
         temp.layer.cornerRadius = 3.0
         temp.addTarget(self, action: #selector(doneButtonPressed(_:)), for: UIControl.Event.touchUpInside)
-        temp.backgroundColor = UIColor(colorName: "BottomBarNormalText")
+        temp.backgroundColor = UIColor(named: "BottomBarNormalText", in: Bundle.this, compatibleWith: nil)
         temp.isEnabled = false
         
         let bottonButtonsHeight: CGFloat = 30.0

@@ -23,7 +23,7 @@ open class LGVideoConfiguration: LGMediaTypeConfiguration {
     public struct DefaultSettings {
         
         /// 编码类型，iOS11以后应该为AVVideoCodecType.h264, 暂不做替换
-        public static var codecType: String = AVVideoCodecH264
+        public static var codecType: AVVideoCodecType = AVVideoCodecType.h264
         
         /// 缩放模式
         public static var scalingMode: String = AVVideoScalingModeResizeAspectFill
@@ -84,7 +84,7 @@ open class LGVideoConfiguration: LGMediaTypeConfiguration {
     public var affineTransform: CGAffineTransform = CGAffineTransform.identity
     
     /// 视频文件压缩格式，默认H264
-    public var codecType: String = AVVideoCodecH264
+    public var codecType: AVVideoCodecType = AVVideoCodecType.h264
     
     /// 缩放模式，默认AspectFill
     public var scalingMode: String = AVVideoScalingModeResizeAspectFill

@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "LGWebImage/LGWebImage/Image/LGImage.swift"
-            timestampString = "576495802.696979"
+            timestampString = "589708961.963976"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "161"
@@ -22,96 +22,112 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGWebImage/LGWebImage/Image/LGAnimatedImageView.swift"
-            timestampString = "582107313.370039"
+            filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserPresentTransition.swift"
+            timestampString = "589709003.56222"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "604"
-            endingLineNumber = "604"
-            landmarkName = "didMoved()"
+            startingLineNumber = "172"
+            endingLineNumber = "172"
+            landmarkName = "dismissAnimation(using:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGWebImage/LGWebImage/Image/LGAnimatedImageView.swift"
-            timestampString = "582107313.370093"
+            filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserPresentTransition.swift"
+            timestampString = "589709003.56288"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "601"
-            endingLineNumber = "601"
-            landmarkName = "didMoved()"
+            startingLineNumber = "65"
+            endingLineNumber = "65"
+            landmarkName = "presentAnimation(using:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGWebImage/LGWebImage/Image/LGAnimatedImageView.swift"
-            timestampString = "582107313.3701299"
+            filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserPresentTransition.swift"
+            timestampString = "589709003.563218"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "612"
-            endingLineNumber = "612"
-            landmarkName = "stopAnimating()"
+            startingLineNumber = "221"
+            endingLineNumber = "221"
+            landmarkName = "dismissAnimation(using:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGWebImage/LGWebImage/Image/LGAnimatedImageView.swift"
-            timestampString = "582107313.3701611"
+            filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserPresentTransition.swift"
+            timestampString = "589709003.5634969"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "463"
-            endingLineNumber = "463"
-            landmarkName = "currentImageType()"
+            startingLineNumber = "116"
+            endingLineNumber = "116"
+            landmarkName = "presentAnimation(using:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGWebImage/LGWebImage/Image/LGAnimatedImageView.swift"
-            timestampString = "582107313.3701921"
+            filePath = "LGMediaBrowser/LGMediaBrowser/Animations/LGMediaBrowserPresentTransition.swift"
+            timestampString = "589709003.563771"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "153"
-            endingLineNumber = "153"
-            landmarkName = "image"
-            landmarkType = "24">
+            startingLineNumber = "27"
+            endingLineNumber = "27"
+            landmarkName = "init(direction:targetView:finalImageSize:placeholderImage:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "No"
+            shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "LGWebImage/LGWebImage/Image/LGAnimatedImageView.swift"
-            timestampString = "582107313.370222"
+            filePath = "LGMediaBrowser/LGMediaBrowser/LGMediaBrowser/LGMediaBrowser.swift"
+            timestampString = "589709058.254642"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "333"
-            endingLineNumber = "333"
-            landmarkName = "setImage(image:with:)"
+            startingLineNumber = "527"
+            endingLineNumber = "527"
+            landmarkName = "animationController(forDismissed:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "LGMediaBrowserDemo/LGMediaBrowserDemo/RemoteImageWallController.swift"
+            timestampString = "589709118.7017"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "150"
+            endingLineNumber = "150"
+            landmarkName = "viewForMedia(_:index:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -40,8 +40,8 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     lazy var selectButton: LGClickAreaButton = {
         let tempButton = LGClickAreaButton(type: UIButton.ButtonType.custom)
         tempButton.frame = CGRect(x: self.contentView.lg_width - 26.0, y: 5, width: 23.0, height: 23.0)
-        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
-        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControl.State.selected)
+        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "button_unselected"), for: UIControl.State.normal)
+        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "button_selected"), for: UIControl.State.selected)
         tempButton.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         tempButton.setTitleColor(UIColor.white, for: UIControl.State.normal)
         tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
@@ -76,7 +76,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
                                          height: 20.0))
         temp.textAlignment = NSTextAlignment.right
         temp.font = UIFont.systemFont(ofSize: 13.0)
-        temp.textColor = UIColor(colorName: "TimeOrTypeMarkLabelText")
+        temp.textColor = UIColor(named: "TimeOrTypeMarkLabelText", in: Bundle.this, compatibleWith: nil)
         return temp
     }()
     

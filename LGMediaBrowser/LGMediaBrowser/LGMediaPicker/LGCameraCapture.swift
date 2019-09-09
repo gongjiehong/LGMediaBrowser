@@ -246,8 +246,11 @@ public class LGCameraCapture: UIViewController {
     /// 切换前后摄像头的按钮
     lazy var toggleCameraButton: UIButton = {
         let tempButton = UIButton(type: UIButton.ButtonType.custom)
-        tempButton.setImage(UIImage(namedFromThisBundle: "btn_toggle_camera"), for: UIControl.State.normal)
-        tempButton.addTarget(self, action: #selector(toggleCameraButtonPressed(_:)), for: UIControl.Event.touchUpInside)
+        tempButton.setImage(UIImage(namedFromThisBundle: "button_toggle_camera"),
+                            for: UIControl.State.normal)
+        tempButton.addTarget(self,
+                             action: #selector(toggleCameraButtonPressed(_:)),
+                             for: UIControl.Event.touchUpInside)
         return tempButton
     }()
     
@@ -668,11 +671,33 @@ public class LGCameraCapture: UIViewController {
     
     // MARK: - 切换前后摄像头
     @objc func toggleCameraButtonPressed(_ sender: UIButton) {
-        let cameraCount = AVCaptureDevice.devices(for: AVMediaType.video).count
-        if cameraCount > 1 {
-            self.videoCamera.rotateCamera()
+        if #available(iOS 10, *) {
+            var deviceTypes: [AVCaptureDevice.DeviceType] = [.builtInWideAngleCamera,
+                                                             .builtInTelephotoCamera,
+                                                             .builtInDualCamera]
+            if #available(iOS 11.1, *) {
+                deviceTypes.append(.builtInTrueDepthCamera)
+            } else {
+            }
+            
+            let frontSession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes,
+                                                                mediaType: AVMediaType.video,
+                                                                position: AVCaptureDevice.Position.front)
+            let backSession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes,
+                                                               mediaType: AVMediaType.video,
+                                                               position: AVCaptureDevice.Position.back)
+            if frontSession.devices.count > 0, backSession.devices.count > 0 {
+                self.videoCamera.rotateCamera()
+            } else {
+                println("摄像头数量不足")
+            }
         } else {
-            println("摄像头数量不足")
+            let cameraCount = AVCaptureDevice.devices(for: AVMediaType.video).count
+            if cameraCount > 1 {
+                self.videoCamera.rotateCamera()
+            } else {
+                println("摄像头数量不足")
+            }
         }
     }
     

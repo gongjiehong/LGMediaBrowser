@@ -30,7 +30,7 @@ public class LGLoadingHUD: UIView {
         let centerBgView = UIView(frame: CGRect(origin: CGPoint.zero, size: centerBgViewSize))
         centerBgView.layer.cornerRadius = 5.0
         centerBgView.layer.masksToBounds = true
-        centerBgView.backgroundColor = UIColor(colorName: "HUDBackground")
+        centerBgView.backgroundColor = UIColor(named: "HUDBackground", in: Bundle.this, compatibleWith: nil)
         self.addSubview(centerBgView)
         self.centerBgView = centerBgView
         
@@ -42,7 +42,7 @@ public class LGLoadingHUD: UIView {
         
         let loadingLabel = UILabel()
         loadingLabel.textAlignment = NSTextAlignment.center
-        loadingLabel.textColor = UIColor(colorName: "HUDLoadingText")
+        loadingLabel.textColor = UIColor(named: "HUDLoadingText", in: Bundle.this, compatibleWith: nil)
         loadingLabel.font = UIFont.systemFont(ofSize: 12.0)
         loadingLabel.text = LGLocalizedString("Loading...")
         loadingLabel.frame = CGRect(x: 0,

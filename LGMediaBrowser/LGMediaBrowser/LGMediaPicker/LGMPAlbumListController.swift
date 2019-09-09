@@ -51,7 +51,7 @@ public class LGAlbumListCell: UITableViewCell {
             titleAndCountLabel.font = UIFont.boldSystemFont(ofSize: 14.0)
         }
         titleAndCountLabel.textAlignment = NSTextAlignment.left
-        titleAndCountLabel.textColor = UIColor(colorName: "AlbumListTitle")
+        titleAndCountLabel.textColor = UIColor(named: "AlbumListTitle", in: Bundle.this, compatibleWith: nil)
         self.contentView.addSubview(titleAndCountLabel)
         self.titleAndCountLabel = titleAndCountLabel
     }
@@ -90,10 +90,10 @@ public class LGAlbumListCell: UITableViewCell {
         
         let attrString = NSMutableAttributedString(string: titleAndCountText)
         attrString.addAttributes([NSAttributedString.Key.font: titleFont,
-                                  NSAttributedString.Key.foregroundColor: UIColor(colorName: "AlbumListTitle")],
+                                  NSAttributedString.Key.foregroundColor: UIColor(named: "AlbumListTitle", in: Bundle.this, compatibleWith: nil)],
                                  range: NSMakeRange(0, albumTitle.count))
         attrString.addAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12.0),
-                                  NSAttributedString.Key.foregroundColor: UIColor(colorName: "AlbumListCount")],
+                                  NSAttributedString.Key.foregroundColor: UIColor(named: "AlbumListCount", in: Bundle.this, compatibleWith: nil)],
                                  range: NSMakeRange(albumTitle.count, attrString.length - albumTitle.count))
         titleAndCountLabel.attributedText = attrString
         

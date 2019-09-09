@@ -181,7 +181,7 @@ public class LGMediaPicker: LGMPNavigationController {
         
         self.view.backgroundColor = UIColor.white
         
-        self.navigationBar.tintColor = UIColor(colorName: "NavigationBarTint")
+        self.navigationBar.tintColor = UIColor(named: "NavigationBarTint", in: Bundle.this, compatibleWith: nil)
     }
     
     public override func loadView() {

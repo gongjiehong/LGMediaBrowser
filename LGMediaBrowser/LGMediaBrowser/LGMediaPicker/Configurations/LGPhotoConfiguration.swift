@@ -22,7 +22,7 @@ open class LGPhotoConfiguration: LGMediaTypeConfiguration {
             if let result = _options {
                 return result
             } else {
-                _options = [AVVideoCodecKey: AVVideoCodecJPEG]
+                _options = [AVVideoCodecKey: AVVideoCodecType.jpeg]
                 return _options
             }
         } set {

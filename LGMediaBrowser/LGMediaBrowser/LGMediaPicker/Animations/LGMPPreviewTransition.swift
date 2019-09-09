@@ -41,8 +41,10 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         guard let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from),
             let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) else {return}
         
-        if self.placeholderImage == nil {
-            self.placeholderImage = UIImage(color: UIColor(colorName: "DefaultImage"),
+        if self.placeholderImage == nil,
+            let defaultImageColor = UIColor(named: "DefaultImage", in: Bundle.this, compatibleWith: nil)
+        {
+            self.placeholderImage = UIImage(color: defaultImageColor,
                                             size: CGSize(width: UIScreen.main.bounds.width * 0.3,
                                                          height: UIScreen.main.bounds.width * 0.3))
         }
@@ -131,8 +133,10 @@ extension LGMPPreviewTransition: UIViewControllerAnimatedTransitioning {
         guard let fromVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.from),
             let toVC = transitionContext.viewController(forKey: UITransitionContextViewControllerKey.to) else {return}
         
-        if self.placeholderImage == nil {
-            self.placeholderImage = UIImage(color: UIColor(colorName: "DefaultImage"),
+        if self.placeholderImage == nil,
+            let defaultImageColor = UIColor(named: "DefaultImage", in: Bundle.this, compatibleWith: nil)
+        {
+            self.placeholderImage = UIImage(color: defaultImageColor,
                                             size: CGSize(width: UIScreen.main.bounds.width * 0.3,
                                                          height: UIScreen.main.bounds.width * 0.3))
         }
