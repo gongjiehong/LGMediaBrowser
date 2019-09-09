@@ -170,6 +170,9 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
         }
         
         let containerView = transitionContext.containerView
+        containerView.backgroundColor = UIColor(named: "PresentTransitionContainerBackground",
+                                                in: Bundle.this,
+                                                compatibleWith: nil)
         
         if let targetView = self.targetView {
             let tempImageView = UIImageView(image: self.placeholderImage)
