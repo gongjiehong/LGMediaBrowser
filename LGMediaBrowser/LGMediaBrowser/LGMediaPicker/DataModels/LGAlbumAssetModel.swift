@@ -1,33 +1,25 @@
 //
-//  LGAlbumListModel.swift
+//  LGAlbumAssetModel.swift
 //  LGMediaBrowser
 //
-//  Created by 龚杰洪 on 2018/6/4.
-//  Copyright © 2018年 龚杰洪. All rights reserved.
+//  Created by 龚杰洪 on 2019/6/12.
+//  Copyright © 2019 龚杰洪. All rights reserved.
 //
 
 import Foundation
 import Photos
 
 /// 包装PHAsset对象
-public class LGPhotoModel {
-    public enum AssetMediaType {
-        case unknown
-        case generalImage
-        case livePhoto
-        case video
-        case audio
-    }
-    
+public class LGAlbumAssetModel {
     public var asset: PHAsset
-    public var type: AssetMediaType
+    public var type: LGMediaType
     public var duration: String
     public var isSelected: Bool
     public var url: URL?
     public var image: UIImage?
     public var currentSelectedIndex: Int = -1
     
-    public init(asset: PHAsset, type: AssetMediaType, duration: String) {
+    public init(asset: PHAsset, type: LGMediaType, duration: String) {
         self.asset = asset
         self.type = type
         self.duration = duration
@@ -58,22 +50,22 @@ public class LGPhotoModel {
         var result: Bool = false
         self.isICloudAsset { (isICloudAsset) in
             result = isICloudAsset
-            _ = lock.signal()
+            lock.lg_unlock()
         }
-        _ = lock.wait(wallTimeout: DispatchWallTime.distantFuture)
+        lock.lg_lock()
         return result
     }
     
     /// 判断内容是否在iCloud上，此操作特别耗时, 所以做成异步返回
     public func isICloudAsset(_ callback: @escaping (Bool) -> Void) {
         switch self.type {
-        case .generalImage:
+        case .image, .animatedImage:
             let options = PHImageRequestOptions()
             options.isSynchronous = false
             options.isNetworkAccessAllowed = false
             options.resizeMode = .fast
-            LGPhotoManager.default.imageManager.requestImageData(for: self.asset,
-                                                         options: options)
+            LGAssetExportManager.default.imageManager.requestImageData(for: self.asset,
+                                                                       options: options)
             { (data, dataUTI, orientation, infoDic) in
                 let result = (data == nil)
                 DispatchQueue.main.async {
@@ -84,8 +76,8 @@ public class LGPhotoModel {
         case .video:
             let options = PHVideoRequestOptions()
             options.isNetworkAccessAllowed = false
-            LGPhotoManager.default.imageManager.requestAVAsset(forVideo: self.asset,
-                                                       options: options)
+            LGAssetExportManager.default.imageManager.requestAVAsset(forVideo: self.asset,
+                                                                     options: options)
             { (avAsset, audioMix, infoDic) in
                 let result = (avAsset == nil)
                 DispatchQueue.main.async {
@@ -98,10 +90,10 @@ public class LGPhotoModel {
                 let options = PHLivePhotoRequestOptions()
                 options.isNetworkAccessAllowed = false
                 options.deliveryMode = .fastFormat
-                LGPhotoManager.default.imageManager.requestLivePhoto(for: self.asset,
-                                                             targetSize: self.pixelSize,
-                                                             contentMode: PHImageContentMode.aspectFill,
-                                                             options: options)
+                LGAssetExportManager.default.imageManager.requestLivePhoto(for: self.asset,
+                                                                           targetSize: self.pixelSize,
+                                                                           contentMode: PHImageContentMode.aspectFill,
+                                                                           options: options)
                 { (livePhoto, infoDic) in
                     let result = (livePhoto == nil)
                     DispatchQueue.main.async {
@@ -119,89 +111,27 @@ public class LGPhotoModel {
     }
 }
 
-/// 相册列表模型
-public class LGAlbumListModel {
-    /// 相册名
-    public var title: String?
-    
-    /// 此相册中的元素个数
-    public var count: Int
-    
-    /// 是否为所有图片那个相册
-    public var isAllPhotos: Bool
-    
-    /// PHFetchResult<PHAsset>，存储asset
-    public var result: PHFetchResult<PHAsset>?
-    
-    /// 头图asset
-    public var headImageAsset: PHAsset?
-    
-    /// 图片/视频/livephoto...对象模型数组
-    public var models: [LGPhotoModel] = []
-    
-    /// 被选中的模型数组
-    public var selectedModels: [LGPhotoModel] = []
-    
-    /// 此相册中被选中的张数
-    public var selectedCount: Int = 0
-    
-    /// 构造函数
-    ///
-    /// - Parameters:
-    ///   - title: 相册标题
-    ///   - count: item数量
-    ///   - isAllPhotos: 是否为所有图片那个相册
-    ///   - result: PHFetchResult<PHAsset>，存储asset
-    ///   - headImageAsset: 头图asset
-    public init(title: String?,
-                count: Int,
-                isAllPhotos: Bool,
-                result: PHFetchResult<PHAsset>?,
-                headImageAsset: PHAsset?)
-    {
-        self.title = title
-        self.count = count
-        self.isAllPhotos = isAllPhotos
-        self.result = result
-        self.headImageAsset = headImageAsset
-    }
-}
-
-extension LGPhotoModel {
+extension LGAlbumAssetModel {
     public func asLGMediaModel() -> LGMediaModel {
         do {
             let model = try LGMediaModel(thumbnailImageURL: nil,
                                          mediaURL: nil,
                                          mediaAsset: self.asset,
-                                         mediaType: assetTypeToMediaType(self.type),
+                                         mediaType: self.type,
                                          mediaPosition: LGMediaModel.Position.album,
                                          thumbnailImage: self.image)
             model.photoModel = self
+            model.isAutoPlayAnimatedImage = (self.type == .animatedImage)
             return model
         } catch {
             println(error)
             return LGMediaModel()
         }
     }
-    
-    func assetTypeToMediaType(_ type: LGPhotoModel.AssetMediaType) -> LGMediaModel.MediaType {
-        switch type {
-        case .unknown:
-            return .other
-        case .generalImage:
-            return .generalPhoto
-        case .livePhoto:
-            return .livePhoto
-        case .video:
-            return .video
-        case .audio:
-            return .audio
-        }
-    }
 }
 
 
-extension LGPhotoModel {
+extension LGAlbumAssetModel {
     /// 导出图片的统一存储地址，预先创建文件夹，直接写入
     public var imageCachePath: String {
         guard let fileName = self.asset.localIdentifier.md5Hash() else {
@@ -209,7 +139,7 @@ extension LGPhotoModel {
         }
         
         let tmpDirPath = NSTemporaryDirectory()
-        let exportDir = tmpDirPath + "LGPhotoModel/Export/Images"
+        let exportDir = tmpDirPath + "LGAlbumAssetModel/Export/Images"
         do {
             if FileManager.default.fileExists(atPath: exportDir) {
                 
@@ -231,7 +161,7 @@ extension LGPhotoModel {
         }
         
         let tmpDirPath = NSTemporaryDirectory()
-        let exportDir = tmpDirPath + "LGPhotoModel/Export/LivePhoto/"
+        let exportDir = tmpDirPath + "LGAlbumAssetModel/Export/LivePhoto/"
         do {
             if FileManager.default.fileExists(atPath: exportDir) {
                 
@@ -253,7 +183,7 @@ extension LGPhotoModel {
         }
         
         let tmpDirPath = NSTemporaryDirectory()
-        let exportDir = tmpDirPath + "LGPhotoModel/Export/Videos/"
+        let exportDir = tmpDirPath + "LGAlbumAssetModel/Export/Videos/"
         do {
             if FileManager.default.fileExists(atPath: exportDir) {
                 
@@ -268,3 +198,4 @@ extension LGPhotoModel {
         }
     }
 }
+

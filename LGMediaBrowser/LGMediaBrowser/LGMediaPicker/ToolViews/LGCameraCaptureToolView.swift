@@ -79,7 +79,7 @@ class LGCameraCaptureToolView: UIView {
     lazy var dismissButton: UIButton = {
         let dismissButton = UIButton(type: UIButton.ButtonType.custom)
         dismissButton.frame = CGRect(x: 60, y: self.lg_height / 2 - 25.0 / 2, width: 25.0, height: 25.0)
-        dismissButton.setImage(UIImage(namedFromThisBundle: "btn_arrow_down"),
+        dismissButton.setImage(UIImage(namedFromThisBundle: "button_arrow_down"),
                             for: UIControl.State.normal)
         dismissButton.addTarget(self, action: #selector(dismissButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         return dismissButton
@@ -91,7 +91,7 @@ class LGCameraCaptureToolView: UIView {
                                             green: 244 / 255.0,
                                             blue: 244 / 255.0,
                                             alpha: 0.9)
-        cancelButton.setImage(UIImage(namedFromThisBundle: "btn_retake"), for: UIControl.State.normal)
+        cancelButton.setImage(UIImage(namedFromThisBundle: "button_retake"), for: UIControl.State.normal)
         cancelButton.addTarget(self, action: #selector(retakeButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         cancelButton.layer.masksToBounds = true
         cancelButton.isHidden = true
@@ -102,7 +102,7 @@ class LGCameraCaptureToolView: UIView {
         let doneButton = UIButton(type: UIButton.ButtonType.custom)
         doneButton.frame = self.bottomView.frame
         doneButton.backgroundColor = UIColor.white
-        doneButton.setImage(UIImage(namedFromThisBundle: "btn_take_done"), for: UIControl.State.normal)
+        doneButton.setImage(UIImage(namedFromThisBundle: "button_take_done"), for: UIControl.State.normal)
         doneButton.addTarget(self, action: #selector(doneButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         doneButton.layer.masksToBounds = true
         doneButton.isHidden = true

@@ -131,7 +131,7 @@ extension RemoteImageWallController: LGMediaBrowserDataSource {
         return (try? LGMediaModel(thumbnailImageURL: url,
                                   mediaURL: url,
                                   mediaAsset: nil,
-                                  mediaType: LGMediaModel.MediaType.generalPhoto,
+                                  mediaType: LGMediaType.image,
                                   mediaPosition: LGMediaModel.Position.remoteFile,
                                   thumbnailImage: image)) ?? LGMediaModel()
     }
@@ -173,7 +173,7 @@ extension RemoteImageWallController: LGForceTouchPreviewingDelegate {
         let mediaModel = (try? LGMediaModel(thumbnailImageURL: url,
                                             mediaURL: url,
                                             mediaAsset: nil,
-                                            mediaType: LGMediaModel.MediaType.generalPhoto,
+                                            mediaType: LGMediaType.image,
                                             mediaPosition: LGMediaModel.Position.remoteFile,
                                             thumbnailImage: cell.imageView.image)) ?? LGMediaModel()
         let previewController = LGForceTouchPreviewController(mediaModel: mediaModel, currentIndex: indexPath.row)

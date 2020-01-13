@@ -40,8 +40,8 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     lazy var selectButton: LGClickAreaButton = {
         let tempButton = LGClickAreaButton(type: UIButton.ButtonType.custom)
         tempButton.frame = CGRect(x: self.contentView.lg_width - 26.0, y: 5, width: 23.0, height: 23.0)
-        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
-        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControl.State.selected)
+        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "button_unselected"), for: UIControl.State.normal)
+        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "button_selected"), for: UIControl.State.selected)
         tempButton.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         tempButton.setTitleColor(UIColor.white, for: UIControl.State.normal)
         tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
@@ -76,7 +76,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
                                          height: 20.0))
         temp.textAlignment = NSTextAlignment.right
         temp.font = UIFont.systemFont(ofSize: 13.0)
-        temp.textColor = UIColor(colorName: "TimeOrTypeMarkLabelText")
+        temp.textColor = UIColor(named: "TimeOrTypeMarkLabelText", in: Bundle.this, compatibleWith: nil)
         return temp
     }()
     
@@ -93,7 +93,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
     public var cornerRadius: CGFloat = 0.0
     
     /// 需要被显示的对象
-    public var listModel: LGPhotoModel? {
+    public var listModel: LGAlbumAssetModel? {
         didSet {
             refreshLayoutIfNeeded()
         }
@@ -214,20 +214,15 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
             self.typeMarkView.image = UIImage(namedFromThisBundle: "mark_livePhoto")
             self.timeOrTypeMarkLabel.text = LGLocalizedString("Live")
             break
-        case .generalImage:
-            if #available(iOS 11.0, *) {
-                if model.asset.playbackStyle == .imageAnimated {
-                    self.markBgView.isHidden = false
-                    self.typeMarkView.isHidden = false
-                    self.timeOrTypeMarkLabel.isHidden = false
-                    self.typeMarkView.image = nil
-                    self.timeOrTypeMarkLabel.text = LGLocalizedString("GIF")
-                } else {
-                    self.markBgView.isHidden = true
-                }
-            } else {
-                self.markBgView.isHidden = true
-            }
+        case .image:
+            self.markBgView.isHidden = true
+            break
+        case .animatedImage:
+            self.markBgView.isHidden = false
+            self.typeMarkView.isHidden = false
+            self.timeOrTypeMarkLabel.isHidden = false
+            self.typeMarkView.image = nil
+            self.timeOrTypeMarkLabel.text = LGLocalizedString("GIF")
             break
         default:
             self.markBgView.isHidden = true
@@ -238,7 +233,7 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
             self.coverView.backgroundColor = self.maskColor
             self.coverView.isHidden = !model.isSelected
         }
-
+        
         self.selectButton.isHidden = !self.isShowSelectButton
         self.selectButton.isEnabled = self.isShowSelectButton
         self.selectButton.isSelected = model.isSelected
@@ -251,19 +246,22 @@ public class LGMPAlbumDetailImageCell: UICollectionViewCell {
         let scale = UIScreen.main.scale
         let tempSize = CGSize(width: self.contentView.lg_width * scale, height: self.contentView.lg_height * scale)
         
-        LGPhotoManager.default.cancelImageRequest(self.imageRequestID)
+        LGAssetExportManager.default.cancelImageRequest(self.imageRequestID)
         
         self.identifier = model.asset.localIdentifier
         self.layoutImageView.image = nil
         
-        self.imageRequestID = LGPhotoManager.default.requestImage(forAsset: model.asset,
-                                                          outputSize: tempSize,
-                                                          resizeMode: PHImageRequestOptionsResizeMode.fast,
-                                                          completion:
+        self.imageRequestID = LGAssetExportManager.default.requestImage(forAsset: model.asset,
+                                                                        outputSize: tempSize,
+                                                                        isAsync: true,
+                                                                        isNetworkAccessAllowed: false,
+                                                                        resizeMode: .fast,
+                                                                        completion:
             { [weak self] (resultImage, infoDic) in
                 guard let weakSelf = self else { return }
                 if weakSelf.identifier == model.asset.localIdentifier {
                     weakSelf.layoutImageView.image = resultImage
+                    weakSelf.imageRequestID = PHInvalidImageRequestID
                 }
         })
     }

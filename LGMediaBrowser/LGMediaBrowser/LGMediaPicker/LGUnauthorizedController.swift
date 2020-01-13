@@ -63,22 +63,22 @@ public class LGUnauthorizedController: LGMPBaseViewController {
                                               height: labelHeight))
         tempLabel.numberOfLines = 0
         tempLabel.font = UIFont.systemFont(ofSize: 15.0)
-        tempLabel.textColor = UIColor(colorName: "PromptText")
+        tempLabel.textColor = UIColor(named: "PromptText", in: Bundle.this, compatibleWith: nil)
         tempLabel.textAlignment = NSTextAlignment.center
         self.view.addSubview(tempLabel)
         self.promptLabel = tempLabel
         
         let capInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
-        let normalBgImage = UIImage(namedFromThisBundle: "btn_open_settings_normal")
+        let normalBgImage = UIImage(namedFromThisBundle: "button_open_settings_normal")
         let resizedNormalImage = normalBgImage?.resizableImage(withCapInsets: capInsets)
-        let highlightedBgImage = UIImage(namedFromThisBundle: "btn_open_settings_highlited")
+        let highlightedBgImage = UIImage(namedFromThisBundle: "button_open_settings_highlited")
         let resizedHighImage = highlightedBgImage?.resizableImage(withCapInsets: capInsets)
         
         let tempButton = UIButton(type: UIButton.ButtonType.custom)
         tempButton.setBackgroundImage(resizedNormalImage, for: UIControl.State.normal)
         tempButton.setBackgroundImage(resizedHighImage, for: UIControl.State.highlighted)
         tempButton.setTitle(LGLocalizedString("Open Settings"), for: UIControl.State.normal)
-        tempButton.setTitleColor(UIColor(colorName: "OpenSettingsButtonTitle"), for: UIControl.State.normal)
+        tempButton.setTitleColor(UIColor(named: "OpenSettingsButtonTitle", in: Bundle.this, compatibleWith: nil), for: UIControl.State.normal)
         tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 16.0)
         tempButton.addTarget(self, action: #selector(openSettings), for: UIControl.Event.touchUpInside)
         self.view.addSubview(tempButton)
@@ -161,7 +161,10 @@ public class LGUnauthorizedController: LGMPBaseViewController {
     
     @objc func openSettings() {
         if let url = URL(string: UIApplication.openSettingsURLString) {
-            UIApplication.shared.openURL(url)
+            UIApplication.shared.open(url,
+                                      options: [:]) { (finished) in
+                                        
+            }
         }
     }
     

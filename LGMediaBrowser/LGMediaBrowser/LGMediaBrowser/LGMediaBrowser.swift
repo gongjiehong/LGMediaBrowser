@@ -618,7 +618,7 @@ extension LGMediaBrowser: UICollectionViewDelegate, UICollectionViewDataSource {
             return listView(collectionView, videoCellForItemAt: indexPath, mediaModel: media)
         case .audio:
             return listView(collectionView, audioCellForItemAt: indexPath, mediaModel: media)
-        case .generalPhoto:
+        case .image:
             return listView(collectionView, generalPhotoCellForItemAt: indexPath, mediaModel: media)
         case .livePhoto:
             return listView(collectionView, livePhotoCellForItemAt: indexPath, mediaModel: media)
@@ -754,18 +754,21 @@ extension LGMediaBrowser: LGActionViewDelegate {
     func deleteButtonPressed() {
         func deleteItemRefresh() {
             self.mediaArray.remove(at: self.currentIndex)
+            
             self.collectionView.performBatchUpdates({ [unowned self] in
                 self.collectionView.deleteItems(at: [IndexPath(row: self.currentIndex, section: 0)])
-            }) { [unowned self] (isFinished) in
-                if self.currentIndex < self.mediaArray.count {
-                    self.refreshCountLayout()
-                } else {
-                    self.currentIndex -= 1
-                }
+                self.currentIndex -= 1
+                self.refreshCountLayout()
                 
-                if self.currentIndex < 0 {
-                    self.closeSelf()
+                if self.currentIndex <= 0 {
+                    if self.mediaArray.count > 0 {
+                        self.currentIndex = 0
+                    } else {
+                        self.closeSelf()
+                    }
                 }
+            }) { (isFinished) in
+                
             }
         }
         

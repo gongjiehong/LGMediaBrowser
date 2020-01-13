@@ -51,7 +51,7 @@ public class LGAlbumListCell: UITableViewCell {
             titleAndCountLabel.font = UIFont.boldSystemFont(ofSize: 14.0)
         }
         titleAndCountLabel.textAlignment = NSTextAlignment.left
-        titleAndCountLabel.textColor = UIColor(colorName: "AlbumListTitle")
+        titleAndCountLabel.textColor = UIColor(named: "AlbumListTitle", in: Bundle.this, compatibleWith: nil)
         self.contentView.addSubview(titleAndCountLabel)
         self.titleAndCountLabel = titleAndCountLabel
     }
@@ -90,19 +90,19 @@ public class LGAlbumListCell: UITableViewCell {
         
         let attrString = NSMutableAttributedString(string: titleAndCountText)
         attrString.addAttributes([NSAttributedString.Key.font: titleFont,
-                                  NSAttributedString.Key.foregroundColor: UIColor(colorName: "AlbumListTitle")],
+                                  NSAttributedString.Key.foregroundColor: UIColor(named: "AlbumListTitle", in: Bundle.this, compatibleWith: nil)],
                                  range: NSMakeRange(0, albumTitle.count))
         attrString.addAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12.0),
-                                  NSAttributedString.Key.foregroundColor: UIColor(colorName: "AlbumListCount")],
+                                  NSAttributedString.Key.foregroundColor: UIColor(named: "AlbumListCount", in: Bundle.this, compatibleWith: nil)],
                                  range: NSMakeRange(albumTitle.count, attrString.length - albumTitle.count))
         titleAndCountLabel.attributedText = attrString
         
         if let headImageAsset = listData.headImageAsset {
             let outputSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
-            LGPhotoManager.default.cancelImageRequest(lastRequestId)
-            lastRequestId = LGPhotoManager.default.requestImage(forAsset: headImageAsset,
-                                                        outputSize: outputSize,
-                                                        resizeMode: PHImageRequestOptionsResizeMode.exact)
+            LGAssetExportManager.default.cancelImageRequest(lastRequestId)
+            lastRequestId = LGAssetExportManager.default.requestImage(forAsset: headImageAsset,
+                                                                      outputSize: outputSize,
+                                                                      resizeMode: PHImageRequestOptionsResizeMode.exact)
             { [weak self] (resultImage, infoDic) in
                 if let resultImage = resultImage {
                     self?.thumbnailImageView.image = resultImage
@@ -183,18 +183,23 @@ public class LGMPAlbumListController: LGMPBaseViewController {
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        _ = fetchAlbumListOnce
+        self.navigationController?.setToolbarHidden(true, animated: true)
+    }
+    
+    lazy var fetchAlbumListOnce: Void = {
         if self.dataArray.count == 0 {
             fetchAlbumList()
         }
-        self.navigationController?.setToolbarHidden(true, animated: true)
-    }
+    }()
     
     /// 获取相册列表
     @objc func fetchAlbumList() {
         let hud = LGLoadingHUD.show(inView: self.view)
         DispatchQueue.userInteractive.async { [weak self] in
             guard let weakSelf = self else { return }
-            LGPhotoManager.default.fetchAlbumList(weakSelf.configs.resultMediaTypes) { [weak self] (resultArray) in
+            LGAssetExportManager.default.fetchAlbumList(weakSelf.configs.resultMediaTypes)
+            { [weak self] (resultArray) in
                 DispatchQueue.main.async { [weak self] in
                     guard let weakSelf = self else { return }
                     hud.dismiss()
@@ -218,9 +223,9 @@ public class LGMPAlbumListController: LGMPBaseViewController {
         
         let itemSize = CGSize(width: 60.0 * UIScreen.main.scale, height: 60.0 * UIScreen.main.scale)
         
-        LGPhotoManager.default.startCachingImages(for: assetArray,
-                                          targetSize: itemSize,
-                                          contentMode: PHImageContentMode.aspectFill)
+        LGAssetExportManager.default.startCachingImages(for: assetArray,
+                                                        targetSize: itemSize,
+                                                        contentMode: PHImageContentMode.aspectFill)
     }
     
     deinit {
@@ -271,7 +276,8 @@ extension LGMPAlbumListController: PHPhotoLibraryChangeObserver {
             guard let weakSelf = self else { return }
             NSObject.cancelPreviousPerformRequests(withTarget: weakSelf)
             weakSelf.perform(#selector(LGMPAlbumListController.fetchAlbumList),
-                             with: nil, afterDelay: 0.3)
+                             with: nil,
+                             afterDelay: 0.3)
         }
     }
 }

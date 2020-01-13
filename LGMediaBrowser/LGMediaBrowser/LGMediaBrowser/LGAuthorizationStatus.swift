@@ -194,7 +194,7 @@ public class LGAuthorizationStatusManager: NSObject {
     }
     
     public var locationStatus: Status {
-        if CLLocationManager.locationServicesEnabled() {
+        if !CLLocationManager.locationServicesEnabled() {
             return .unSupport
         }
         
@@ -208,6 +208,8 @@ public class LGAuthorizationStatusManager: NSObject {
             return .notDetermined
         case.restricted:
             return .restricted
+        @unknown default:
+            return .notDetermined
         }
     }
     

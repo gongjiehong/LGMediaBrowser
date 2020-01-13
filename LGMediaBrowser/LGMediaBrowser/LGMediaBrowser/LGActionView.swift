@@ -133,7 +133,7 @@ extension LGActionView {
     func configureTitleLabel() {
         if titleLabel == nil {
             titleLabel = UILabel(frame: titleLabelHideFrame)
-            titleLabel.textColor = UIColor(colorName: "ActionBarTitle")
+            titleLabel.textColor = UIColor(named: "ActionBarTitle", in: Bundle.this, compatibleWith: nil)
             titleLabel.backgroundColor = UIColor.clear
             titleLabel.textAlignment = NSTextAlignment.center
             titleLabel.font = UIFont.systemFont(ofSize: 16.0, weight: UIFont.Weight.medium)

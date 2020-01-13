@@ -13,7 +13,7 @@ public class LGMPAlbumDetailCameraCell: UICollectionViewCell {
     public lazy var layoutImageView: UIImageView = {
        let temp = UIImageView(frame: self.contentView.bounds)
         temp.contentMode = UIView.ContentMode.scaleAspectFill
-        temp.image = UIImage(namedFromThisBundle: "btn_take_photo")
+        temp.image = UIImage(namedFromThisBundle: "button_take_photo")
         return temp
     }()
     

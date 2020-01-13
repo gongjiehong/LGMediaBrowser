@@ -83,7 +83,7 @@ class LGCloseButton: LGImageButton {
     override var padding: CGPoint {
         return CGPoint(x: 5, y: 20)
     }
-    override var imageName: String { return "btn_close_white" }
+    override var imageName: String { return "button_close_white" }
     override var marginX: CGFloat {
         get {
             let isExchangeCloseAndDeleteButtons = globalConfigs.isExchangeCloseAndDeleteButtons
@@ -118,7 +118,7 @@ class LGDeleteButton: LGImageButton {
     override var padding: CGPoint {
         return CGPoint(x: 5, y: 20)
     }
-    override var imageName: String { return "btn_delete_white" }
+    override var imageName: String { return "button_delete_white" }
     override var marginX: CGFloat {
         get {
             let isExchangeCloseAndDeleteButtons = globalConfigs.isExchangeCloseAndDeleteButtons

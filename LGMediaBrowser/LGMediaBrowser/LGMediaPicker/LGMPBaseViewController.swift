@@ -35,7 +35,7 @@ open class LGMPBaseViewController: UIViewController {
     func setupTitleLabel() {
         let titleLabel = UILabel(frame: CGRect.zero)
         titleLabel.font = UIFont.boldSystemFont(ofSize: 17.0)
-        titleLabel.textColor = UIColor(colorName: "NavigationBarTitle")
+        titleLabel.textColor = UIColor(named: "NavigationBarTitle", in: Bundle.this, compatibleWith: nil)
         titleLabel.backgroundColor = UIColor.clear
         self.navigationItem.titleView = titleLabel
     }

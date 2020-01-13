@@ -223,8 +223,8 @@ open class LGPlayerControlView: LGPlayerView {
     }
     
     
-    public var mediaType: LGMediaModel.MediaType {
-        return self.mediaModel?.mediaType ?? .other
+    public var mediaType: LGMediaType {
+        return self.mediaModel?.mediaType ?? .unsupport
     }
     
     private func layoutControlsIfNeeded() {

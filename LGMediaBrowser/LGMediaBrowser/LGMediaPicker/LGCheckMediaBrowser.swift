@@ -13,7 +13,7 @@ internal protocol LGCheckMediaBrowserCallBack: NSObjectProtocol {
                     withIndex index: Int,
                     isSelected: Bool,
                     complete: @escaping (Bool) -> Void)
-    func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGPhotoModel])
+    func checkMedia(_ browser: LGCheckMediaBrowser, didDoneWith photoList: [LGAlbumAssetModel])
 }
 
 internal class LGCheckMediaBrowser: LGMediaBrowser {
@@ -35,8 +35,8 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
     lazy var checkMediaButton: LGClickAreaButton = {
         let tempButton = LGClickAreaButton(type: UIButton.ButtonType.custom)
         tempButton.frame = CGRect(x: 0, y: 0, width: 23.0, height: 23.0)
-        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_unselected"), for: UIControl.State.normal)
-        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "btn_selected"), for: UIControl.State.selected)
+        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "button_unselected"), for: UIControl.State.normal)
+        tempButton.setBackgroundImage(UIImage(namedFromThisBundle: "button_selected"), for: UIControl.State.selected)
         tempButton.addTarget(self, action: #selector(selectButtonPressed(_:)), for: UIControl.Event.touchUpInside)
         tempButton.setTitleColor(UIColor.white, for: UIControl.State.normal)
         tempButton.titleLabel?.font = UIFont.systemFont(ofSize: 12.0)
@@ -191,7 +191,7 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         if !allowEdit {
         } else {
             bottomToolBar.editButton.isHidden = false
-            if (mediaModel.mediaType == .generalPhoto && pickerConfigs.allowEditImage) ||
+            if (mediaModel.mediaType == .image && pickerConfigs.allowEditImage) ||
                 (mediaModel.mediaType == .video && pickerConfigs.allowEditVideo) {
                 bottomToolBar.editButton.isEnabled = true
             } else {

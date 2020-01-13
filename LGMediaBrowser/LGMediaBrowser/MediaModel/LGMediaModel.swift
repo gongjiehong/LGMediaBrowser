@@ -16,22 +16,6 @@ fileprivate var _LGMediaModelIdentify: Int64 = 0
 
 /// 存储媒体数据的模型，承载下载数据功能
 public class LGMediaModel {
-    
-    /// 定义媒体类型
-    ///
-    /// - generalPhoto: 普通图片，支持动图
-    /// - livePhoto: LivePhoto
-    /// - video: 视频
-    /// - audio: 音频
-    /// - other: 其它，此类型会被忽略，不处理展示
-    public enum MediaType {
-        case generalPhoto
-        case livePhoto
-        case video
-        case audio
-        case other
-    }
-    
     public typealias ProgressHandler = (Progress, Int64) -> Void
     
     /// 媒体文件位置
@@ -55,16 +39,19 @@ public class LGMediaModel {
     public private(set) var mediaAsset: PHAsset?
     
     /// 媒体文件类型
-    public private(set) var mediaType: MediaType = .other
+    public private(set) var mediaType: LGMediaType = .unsupport
     
     /// 媒体文件位置
     public private(set) var mediaPosition: Position = .remoteFile
+    
+    /// 是否自动播放动图，默认true，本地相册图片无需播放动图时可特殊处理为false
+    public var isAutoPlayAnimatedImage: Bool = true
     
     public private(set) lazy var identify: Int64 = {
         return OSAtomicIncrement64(&_LGMediaModelIdentify)
     }()
     
-    internal weak var photoModel: LGPhotoModel? = nil
+    internal weak var photoModel: LGAlbumAssetModel? = nil
     
     private var _thumbnailImage: UIImage?
     private var _lock: DispatchSemaphore = DispatchSemaphore(value: 1)
@@ -72,22 +59,22 @@ public class LGMediaModel {
     /// 占位图，大多数时候直接就是原图
     public var thumbnailImage: UIImage? {
         set {
-            _ = _lock.wait(timeout: DispatchTime.distantFuture)
+            _lock.lg_lock()
             defer {
-                _ = _lock.signal()
+                _lock.lg_unlock()
             }
             _thumbnailImage = newValue
         } get {
-            _ = _lock.wait(timeout: DispatchTime.distantFuture)
+            _lock.lg_lock()
             defer {
-                _ = _lock.signal()
+                _lock.lg_unlock()
             }
             return _thumbnailImage
         }
     }
     
     public init() {
-        self.mediaType = .other
+        self.mediaType = .unsupport
         self.mediaPosition = .localFile
     }
     
@@ -105,7 +92,7 @@ public class LGMediaModel {
     public convenience init(thumbnailImageURL: LGURLConvertible?,
                             mediaURL: LGURLConvertible?,
                             mediaAsset: PHAsset?,
-                            mediaType: MediaType,
+                            mediaType: LGMediaType,
                             mediaPosition: Position,
                             thumbnailImage: UIImage? = nil) throws
     {
@@ -114,7 +101,7 @@ public class LGMediaModel {
             switch mediaPosition {
             case .remoteFile:
                 switch mediaType {
-                case .generalPhoto, .livePhoto, .video:
+                case .image, .livePhoto, .video, .animatedImage:
                     if mediaURL == nil {
                         throw LGMediaModelError.mediaURLIsInvalid
                     } else if thumbnailImageURL == nil {
@@ -126,13 +113,13 @@ public class LGMediaModel {
                         throw LGMediaModelError.mediaURLIsInvalid
                     }
                     break
-                case .other:
+                default:
                     break
                 }
                 break
             case .localFile:
                 switch mediaType {
-                case .generalPhoto:
+                case .image, .animatedImage:
                     if mediaURL == nil {
                         throw LGMediaModelError.mediaURLIsInvalid
                     }
@@ -149,7 +136,7 @@ public class LGMediaModel {
                         throw LGMediaModelError.mediaURLIsInvalid
                     }
                     break
-                case .other:
+                default:
                     break
                 }
                 break
