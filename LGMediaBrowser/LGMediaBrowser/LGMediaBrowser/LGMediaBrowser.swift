@@ -109,10 +109,12 @@ public class LGMediaBrowser: UIViewController {
     // MARK: -  初始化
     override public init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        setupTransition()
     }
     
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
+        setupTransition()
     }
     
     public convenience init(mediaArray: [LGMediaModel],
@@ -141,7 +143,7 @@ public class LGMediaBrowser: UIViewController {
                             status: LGMediaBrowserStatus = .browsing,
                             currentIndex: Int = 0) {
         self.init(nibName: nil, bundle: nil)
-        
+                
         if status == .checkMedia && self.isMember(of: LGMediaBrowser.self) {
             assert(false, "媒体文件选择模式需要使用LGCheckMediaBrowser")
         }
@@ -162,9 +164,7 @@ public class LGMediaBrowser: UIViewController {
         super.viewDidLoad()
         
         self.view.backgroundColor = globalConfigs.backgroundColor
-        
-        setupTransition()
-        
+                
         setupCollectionView()
         
         setupActionView()
@@ -243,7 +243,7 @@ public class LGMediaBrowser: UIViewController {
     /// 设置自定义动画
     func setupTransition() {
         self.transitioningDelegate = self
-        self.modalPresentationStyle = .custom
+        self.modalPresentationStyle = .fullScreen
     }
     
     /// 设置collectionView

@@ -210,7 +210,6 @@ public class LGMediaBrowserPresentTransition: NSObject, UIViewControllerAnimated
                 if isCancelled {
                     fromVC.view.isHidden = false
                     fromVC.view.backgroundColor = UIColor.black
-                    
                 } else {
                     
                 }
