@@ -37,7 +37,7 @@ public class LGMPAlbumDetailController: LGMPBaseViewController {
     
     struct Settings {
         static var columnCount: Int = {
-            if UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiom.pad {
+            if UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad {
                 return 6
             } else {
                 return 4

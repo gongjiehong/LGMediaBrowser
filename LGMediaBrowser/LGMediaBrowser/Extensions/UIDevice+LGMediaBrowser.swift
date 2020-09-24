@@ -10,7 +10,7 @@ import UIKit
 
 extension UIDevice {
     public static var isNotchScreen: Bool {
-        guard let keyWindow = UIApplication.shared.keyWindow else {
+        guard let keyWindow = UIApplication.shared.windows.last else {
             return false
         }
         
@@ -27,7 +27,7 @@ extension UIDevice {
     
     public static var topSafeMargin: CGFloat {
         if isNotchScreen {
-            guard let keyWindow = UIApplication.shared.keyWindow else {
+            guard let keyWindow = UIApplication.shared.windows.last else {
                 return 0.0
             }
             if #available(iOS 11.0, *) {
@@ -49,7 +49,7 @@ extension UIDevice {
         
     public static var bottomSafeMargin: CGFloat {
         if isNotchScreen {
-            guard let keyWindow = UIApplication.shared.keyWindow else {
+            guard let keyWindow = UIApplication.shared.windows.last else {
                 return 0.0
             }
             if #available(iOS 11.0, *) {

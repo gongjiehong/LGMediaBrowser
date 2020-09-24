@@ -125,6 +125,16 @@ public class LGMediaPicker: LGMPNavigationController {
         }
     }
     
+    /// iOS13以后的全屏问题，默认改成全屏
+    private var _modalPresentationStyle: UIModalPresentationStyle = UIModalPresentationStyle.fullScreen
+    public override var modalPresentationStyle: UIModalPresentationStyle {
+        set {
+            _modalPresentationStyle = newValue
+        } get {
+            return _modalPresentationStyle
+        }
+    }
+    
     public override init(rootViewController: UIViewController) {
         super.init(rootViewController: rootViewController)
         setupGloble()
@@ -256,7 +266,6 @@ public class LGMediaPicker: LGMPNavigationController {
         globleMainPicker = nil
         LGAssetExportManager.default.stopCachingImages()
     }
-    
 
     /*
     // MARK: - Navigation

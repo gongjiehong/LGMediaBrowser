@@ -42,7 +42,7 @@ class FeatureListViewController: UITableViewController, UIGestureRecognizerDeleg
         super.viewDidAppear(animated)
         
         if fpsLabel.superview == nil {
-            UIApplication.shared.keyWindow?.addSubview(fpsLabel)
+            UIApplication.shared.windows.last?.addSubview(fpsLabel)
         }
     }
 

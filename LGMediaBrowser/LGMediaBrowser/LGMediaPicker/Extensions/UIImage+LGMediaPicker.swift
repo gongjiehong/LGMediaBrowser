@@ -7,15 +7,16 @@
 //
 
 import UIKit
-import GPUImage
+import CoreImage
 
 extension UIImage {
-    func imageWith(filter: GPUImageFilter) -> UIImage? {
-        let picture = GPUImagePicture(image: self)
-        filter.useNextFrameForImageCapture()
-        picture?.addTarget(filter)
-        picture?.processImage()
-
-        return filter.imageFromCurrentFramebuffer(with: self.imageOrientation)
+    func imageWith(filter: CIFilter) -> UIImage? {
+        let picture = CIImage(image: self)
+        filter.setValue(picture, forKey: kCIInputImageKey)
+        if let output = filter.outputImage {
+            let result = UIImage(ciImage: output)
+            return result
+        }
+        return nil
     }
 }

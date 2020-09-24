@@ -68,7 +68,6 @@
 		FEB546D920BAB42F00839967 /* LGCameraCaptureToolView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546D820BAB42F00839967 /* LGCameraCaptureToolView.swift */; };
 		FEB546E020BABE8A00839967 /* LGAudioTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEB546DF20BABE8A00839967 /* LGAudioTools.swift */; };
 		FEBCB3B920BAF93300F8FAB8 /* LGRecorderTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEBCB3B820BAF93300F8FAB8 /* LGRecorderTools.swift */; };
-		FEC1AA7A20DB83EB00E60543 /* GPUImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEC1AA7920DB83EB00E60543 /* GPUImage.framework */; };
 		FEC1AA8B20DBA1E900E60543 /* LGMPAlbumListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEC1AA8A20DBA1E900E60543 /* LGMPAlbumListController.swift */; };
 		FEC1AA8E20DBA20F00E60543 /* LGMPBaseViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEC1AA8D20DBA20F00E60543 /* LGMPBaseViewController.swift */; };
 		FEC2CDFA20A997F600D75C85 /* LGMediaBrowserInteractiveTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF8976920A2D381005E4880 /* LGMediaBrowserInteractiveTransition.swift */; };
@@ -170,7 +169,6 @@
 		FEB546D820BAB42F00839967 /* LGCameraCaptureToolView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGCameraCaptureToolView.swift; sourceTree = "<group>"; };
 		FEB546DF20BABE8A00839967 /* LGAudioTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGAudioTools.swift; sourceTree = "<group>"; };
 		FEBCB3B820BAF93300F8FAB8 /* LGRecorderTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGRecorderTools.swift; sourceTree = "<group>"; };
-		FEC1AA7920DB83EB00E60543 /* GPUImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = GPUImage.framework; sourceTree = "<group>"; };
 		FEC1AA8A20DBA1E900E60543 /* LGMPAlbumListController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMPAlbumListController.swift; sourceTree = "<group>"; };
 		FEC1AA8D20DBA20F00E60543 /* LGMPBaseViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LGMPBaseViewController.swift; sourceTree = "<group>"; };
 		FEC58B58219137B100E86DFD /* LGMPAlbumDetailBottomToolBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMPAlbumDetailBottomToolBar.swift; sourceTree = "<group>"; };
@@ -199,7 +197,6 @@
 			files = (
 				FE6A896F21DF4F1600CEFBBE /* TOCrop.framework in Frameworks */,
 				FEF8975E20A2A060005E4880 /* LGWebImage.framework in Frameworks */,
-				FEC1AA7A20DB83EB00E60543 /* GPUImage.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -302,7 +299,6 @@
 			isa = PBXGroup;
 			children = (
 				FE6A896821DF4EB800CEFBBE /* TOCrop.xcodeproj */,
-				FEC1AA7920DB83EB00E60543 /* GPUImage.framework */,
 				FEF8975520A2A058005E4880 /* LGWebImage.xcodeproj */,
 				FE9521D32092B41A0097600A /* LGMediaBrowser */,
 				FE9521D22092B41A0097600A /* Products */,
@@ -524,7 +520,7 @@
 		FE9521C82092B4190097600A /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = "龚杰洪";
 				TargetAttributes = {
 					FE9521D02092B4190097600A = {
@@ -540,6 +536,7 @@
 			knownRegions = (
 				en,
 				"zh-Hans",
+				Base,
 			);
 			mainGroup = FE9521C72092B4190097600A;
 			productRefGroup = FE9521D22092B41A0097600A /* Products */;
@@ -714,6 +711,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -740,7 +738,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -779,6 +777,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -799,7 +798,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
@@ -828,7 +827,7 @@
 				);
 				INFOPLIST_FILE = LGMediaBrowser/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -863,7 +862,7 @@
 				);
 				INFOPLIST_FILE = LGMediaBrowser/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -12,7 +12,7 @@ import UIKit
 ///
 /// - Returns: keywindow.rootViewController.view.layoutMargins
 func LGStatusBarRootVCLayoutMargin() -> UIEdgeInsets {
-    if let layoutMargins = UIApplication.shared.keyWindow?.rootViewController?.view.layoutMargins {
+    if let layoutMargins = UIApplication.shared.windows.last?.rootViewController?.view.layoutMargins {
         if layoutMargins.top > 8 && layoutMargins.bottom > 8 {
             return layoutMargins
         }
@@ -35,7 +35,7 @@ open class LGStatusBarView: UIView {
     }()
     
     public private(set) lazy var activityIndicatorView: UIActivityIndicatorView = {
-        let temp = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.white)
+        let temp = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.medium)
         temp.hidesWhenStopped = true
         return temp
     }()

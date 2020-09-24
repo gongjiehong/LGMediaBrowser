@@ -7,12 +7,12 @@
 //
 
 import Foundation
-import GPUImage
+import CoreImage.CIFilterBuiltins
 
 /// 滤镜数据模型
 public class LGFilterModel {
     /// 滤镜
-    public var filter: GPUImageFilter
+    public var filter: CIFilter
     
     /// 滤镜名字
     public var filterName: String
@@ -23,7 +23,7 @@ public class LGFilterModel {
     /// 滤镜描述
     public var filterDescription: String?
     
-    public init(filter: GPUImageFilter,
+    public init(filter: CIFilter,
                 filterName: String,
                 iconImage: UIImage,
                 filterDescription: String? = nil)
@@ -121,7 +121,7 @@ open class LGFilterSelectionViewCell: UICollectionViewCell {
 }
 
 public protocol LGFilterSelectionViewDelegate: NSObjectProtocol {
-    func didSelectedFilter(_ filter: GPUImageFilter)
+    func didSelectedFilter(_ filter: CIFilter)
 }
 
 

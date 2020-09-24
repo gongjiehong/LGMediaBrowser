@@ -9,7 +9,7 @@
 import Foundation
 import AVFoundation
 import CoreVideo
-import GPUImage
+import CoreImage
 
 @objc public protocol LGVideoOverlay {
     @objc optional
@@ -103,7 +103,7 @@ open class LGVideoConfiguration: LGMediaTypeConfiguration {
     public var keepInputAffineTransform: Bool = true
     
     /// 需要应用的滤镜
-    public var filter: GPUImageOutput?
+    public var filter: CIFilter?
     public var composition: AVVideoComposition?
     public var waterMark: WaterMark?
     public var profileLevel: String?
