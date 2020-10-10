@@ -24,7 +24,7 @@ internal class LGButton: UIButton {
     }
     
     fileprivate var insets: UIEdgeInsets {
-        if UI_USER_INTERFACE_IDIOM() == .phone {
+        if UIDevice.current.userInterfaceIdiom == .phone {
             return UIEdgeInsets(top: 15.25, left: 15.25, bottom: 15.25, right: 15.25)
         } else {
             return UIEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)

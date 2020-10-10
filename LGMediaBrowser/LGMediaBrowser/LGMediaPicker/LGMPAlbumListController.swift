@@ -90,10 +90,14 @@ public class LGAlbumListCell: UITableViewCell {
         
         let attrString = NSMutableAttributedString(string: titleAndCountText)
         attrString.addAttributes([NSAttributedString.Key.font: titleFont,
-                                  NSAttributedString.Key.foregroundColor: UIColor(named: "AlbumListTitle", in: Bundle.this, compatibleWith: nil)],
+                                  NSAttributedString.Key.foregroundColor: UIColor(named: "AlbumListTitle",
+                                                                                  in: Bundle.this,
+                                                                                  compatibleWith: nil) as Any],
                                  range: NSMakeRange(0, albumTitle.count))
         attrString.addAttributes([NSAttributedString.Key.font: UIFont.systemFont(ofSize: 12.0),
-                                  NSAttributedString.Key.foregroundColor: UIColor(named: "AlbumListCount", in: Bundle.this, compatibleWith: nil)],
+                                  NSAttributedString.Key.foregroundColor: UIColor(named: "AlbumListCount",
+                                                                                  in: Bundle.this,
+                                                                                  compatibleWith: nil) as Any],
                                  range: NSMakeRange(albumTitle.count, attrString.length - albumTitle.count))
         titleAndCountLabel.attributedText = attrString
         
