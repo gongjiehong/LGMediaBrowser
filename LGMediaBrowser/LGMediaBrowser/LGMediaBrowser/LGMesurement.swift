@@ -6,7 +6,7 @@
 //  Copyright © 2018年 龚杰洪. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 public struct LGMesurement {
     public static let isPhone: Bool = {
@@ -18,7 +18,7 @@ public struct LGMesurement {
     }()
 
     public static let statusBarHeight: CGFloat = {
-        return UIApplication.shared.statusBarFrame.height
+        return UIApplication.shared.lg_keyWindow?.windowScene?.statusBarManager?.statusBarFrame.height ?? 20.0
     }()
     
     public static let screenWidth: CGFloat = {
@@ -38,7 +38,7 @@ public struct LGMesurement {
     }()
     
     public static var isNotchScreen: Bool {
-        guard let keyWindow = UIApplication.shared.keyWindow else {
+        guard let keyWindow = UIApplication.shared.lg_keyWindow else {
             return false
         }
         
@@ -53,3 +53,4 @@ public struct LGMesurement {
         }
     }
 }
+

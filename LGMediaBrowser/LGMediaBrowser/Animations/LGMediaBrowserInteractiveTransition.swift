@@ -216,7 +216,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
             } else {
                 tempBottomBar!.bottomAnchor.constraint(equalTo: containerView.bottomAnchor).isActive = true
             }
-            tempBottomBar!.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
+            tempBottomBar!.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin).isActive = true
             tempBottomBar?.alpha = 1.0
         }
     }
@@ -235,8 +235,7 @@ public class LGMediaBrowserInteractiveTransition: UIPercentDrivenInteractiveTran
         guard let transitionContext = transitionContext else {
             return
         }
-        guard let fromVC = transitionContext.viewController(forKey: .from) else
-        {
+        guard let fromVC = transitionContext.viewController(forKey: .from) else {
             assert(false, "fromVC or toVC is invalid")
             return
         }

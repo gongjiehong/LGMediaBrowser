@@ -12,7 +12,18 @@ import AVFoundation
 public class LGRecorderTools {
     /// 所有输入设备支持的最高质量预设值
     public static var bestCaptureSessionPresetCompatibleWithAllDevices: AVCaptureSession.Preset {
-        let videoDevices = AVCaptureDevice.devices(for: AVMediaType.video)
+        let deviceTypes = [AVCaptureDevice.DeviceType.builtInWideAngleCamera,
+                           AVCaptureDevice.DeviceType.builtInUltraWideCamera,
+                           AVCaptureDevice.DeviceType.builtInTelephotoCamera,
+                           AVCaptureDevice.DeviceType.builtInDualCamera,
+                           AVCaptureDevice.DeviceType.builtInDualWideCamera,
+                           AVCaptureDevice.DeviceType.builtInTripleCamera,
+                           AVCaptureDevice.DeviceType.builtInTrueDepthCamera]
+        
+        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes,
+                                                                      mediaType: AVMediaType.video,
+                                                                      position: AVCaptureDevice.Position.unspecified)
+        let videoDevices = deviceDiscoverySession.devices
         var highestCompatibleDimension: CMVideoDimensions = CMVideoDimensions(width: 0, height: 0)
         var lowestSet = false
         
@@ -153,7 +164,18 @@ public class LGRecorderTools {
     /// - Parameter position: 摄像头方向
     /// - Returns: 输入设备
     public class func videoDeviceForPosition(_ position: AVCaptureDevice.Position) -> AVCaptureDevice? {
-        let devices = AVCaptureDevice.devices(for: AVMediaType.video)
+        let deviceTypes = [AVCaptureDevice.DeviceType.builtInWideAngleCamera,
+                           AVCaptureDevice.DeviceType.builtInUltraWideCamera,
+                           AVCaptureDevice.DeviceType.builtInTelephotoCamera,
+                           AVCaptureDevice.DeviceType.builtInDualCamera,
+                           AVCaptureDevice.DeviceType.builtInDualWideCamera,
+                           AVCaptureDevice.DeviceType.builtInTripleCamera,
+                           AVCaptureDevice.DeviceType.builtInTrueDepthCamera]
+        
+        let deviceDiscoverySession = AVCaptureDevice.DiscoverySession(deviceTypes: deviceTypes,
+                                                                      mediaType: AVMediaType.video,
+                                                                      position: AVCaptureDevice.Position.unspecified)
+        let devices = deviceDiscoverySession.devices
         for device in devices where device.position == position {
             return device
         }
