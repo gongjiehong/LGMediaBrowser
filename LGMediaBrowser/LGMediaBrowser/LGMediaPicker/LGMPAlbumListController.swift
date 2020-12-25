@@ -40,6 +40,7 @@ public class LGAlbumListCell: UITableViewCell {
     func setupDefaultViews() {
         let thumbnailImageView = UIImageView(frame: CGRect.zero)
         thumbnailImageView.contentMode = UIView.ContentMode.scaleAspectFill
+        thumbnailImageView.clipsToBounds = true
         self.contentView.addSubview(thumbnailImageView)
         self.thumbnailImageView = thumbnailImageView
         

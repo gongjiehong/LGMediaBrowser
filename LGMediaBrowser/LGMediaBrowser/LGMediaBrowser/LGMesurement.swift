@@ -18,7 +18,7 @@ public struct LGMesurement {
     }()
 
     public static let statusBarHeight: CGFloat = {
-        return UIApplication.shared.statusBarFrame.height
+        return UIApplication.shared.lg_statusBarFrame.height
     }()
     
     public static let screenWidth: CGFloat = {

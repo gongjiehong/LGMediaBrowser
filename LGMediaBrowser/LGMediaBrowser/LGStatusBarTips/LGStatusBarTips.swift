@@ -199,7 +199,7 @@ public class LGStatusBarTips: NSObject {
         }
         
         updateWindowTransform()
-        updateTopBarFrame(withStatusBarFrame: UIApplication.shared.statusBarFrame)
+        updateTopBarFrame(withStatusBarFrame: UIApplication.shared.lg_statusBarFrame)
     }
     
     
@@ -209,7 +209,7 @@ public class LGStatusBarTips: NSObject {
         
         setupInitStatus()
         
-        if UIApplication.shared.isStatusBarHidden { return nil }
+        if UIApplication.shared.lg_isStatusBarHidden { return nil }
         
         guard let config = self.allConfigs[style] else { return nil }
         
@@ -458,6 +458,11 @@ class LGStatusBarNotificationViewController: UIViewController {
         return nil
     }
     
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        println(size)
+        println(coordinator)
+    }
+    
     
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return mainController?.supportedInterfaceOrientations ?? super.supportedInterfaceOrientations
@@ -482,7 +487,7 @@ class LGStatusBarNotificationViewController: UIViewController {
         if viewControllerBasedStatusBarAppearanceEnabled {
             return mainController?.preferredStatusBarStyle ?? super.preferredStatusBarStyle
         } else {
-            return UIApplication.shared.statusBarStyle
+            return UIApplication.shared.lg_statusBarStyle
         }
     }
     
