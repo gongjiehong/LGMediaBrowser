@@ -13,6 +13,7 @@
 		FE0980DA2099A2FF006B6D8C /* LGPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */; };
 		FE0980DC2099A7E5006B6D8C /* LGPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */; };
 		FE0980DE2099AF34006B6D8C /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FE0980DD2099AF34006B6D8C /* Images.xcassets */; };
+		FE0B59BE2595903000F5D147 /* UIApplication+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE0B59BB2595903000F5D147 /* UIApplication+Extensions.swift */; };
 		FE1A0B3322B116BF0074DB76 /* LGMediaType.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A0B3222B116BF0074DB76 /* LGMediaType.swift */; };
 		FE1A0B3522B1187D0074DB76 /* LGAlbumAssetModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1A0B3422B1187D0074DB76 /* LGAlbumAssetModel.swift */; };
 		FE1AEA4E215B6A6D00319B5B /* LGTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE1AEA4D215B6A6D00319B5B /* LGTextView.swift */; };
@@ -113,6 +114,7 @@
 		FE0980D92099A2FF006B6D8C /* LGPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayerView.swift; sourceTree = "<group>"; };
 		FE0980DB2099A7E5006B6D8C /* LGPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGPlayer.swift; sourceTree = "<group>"; };
 		FE0980DD2099AF34006B6D8C /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		FE0B59BB2595903000F5D147 /* UIApplication+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIApplication+Extensions.swift"; sourceTree = "<group>"; };
 		FE1A0B3222B116BF0074DB76 /* LGMediaType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGMediaType.swift; sourceTree = "<group>"; };
 		FE1A0B3422B1187D0074DB76 /* LGAlbumAssetModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGAlbumAssetModel.swift; sourceTree = "<group>"; };
 		FE1AEA4D215B6A6D00319B5B /* LGTextView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LGTextView.swift; sourceTree = "<group>"; };
@@ -396,6 +398,7 @@
 		FE96C46D20A158FD00FC8F0A /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				FE0B59BB2595903000F5D147 /* UIApplication+Extensions.swift */,
 				FE96C46E20A1590F00FC8F0A /* UIDevice+LGMediaBrowser.swift */,
 				FEF8975020A2960B005E4880 /* UIView+LGMediaBrowser.swift */,
 				FEABD5D120A546F700E24585 /* UIScreen+LGMediaBrowser.swift */,
@@ -597,6 +600,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FE0B59BE2595903000F5D147 /* UIApplication+Extensions.swift in Sources */,
 				FE8A86B821BE3EDD00621349 /* LGMediaModelFetchOperation.swift in Sources */,
 				FEAB31AC20E1E60E003593F6 /* LGMPAlbumDetailImageCell.swift in Sources */,
 				FE93856E20EE1BD300FEC9AB /* LGMPEditImageController.swift in Sources */,
