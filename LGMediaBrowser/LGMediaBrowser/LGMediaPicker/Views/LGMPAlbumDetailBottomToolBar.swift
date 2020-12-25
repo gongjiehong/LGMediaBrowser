@@ -63,7 +63,7 @@ internal class LGMPAlbumDetailBottomToolBar: UIToolbar {
     }()
     
     internal lazy var photoBytesIndicatorView: UIActivityIndicatorView = {
-        let temp = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.gray)
+        let temp = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.medium)
         temp.frame = CGRect(x: 0, y: 0, width: 60.0, height: 30.0)
         temp.hidesWhenStopped = true
         temp.stopAnimating()
