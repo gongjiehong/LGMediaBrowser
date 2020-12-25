@@ -156,6 +156,8 @@ public class LGMediaPicker: LGMPNavigationController {
         }
         
         globleMainPicker = self
+        
+        self.modalPresentationStyle = .fullScreen
     }
     
     /// 配置，默认使用默认配置

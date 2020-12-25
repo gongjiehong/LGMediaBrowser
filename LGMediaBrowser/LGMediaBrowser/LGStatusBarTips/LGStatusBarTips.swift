@@ -247,7 +247,7 @@ public class LGStatusBarTips: NSObject {
         }
         
         self.progress = 0.0
-        self.setActivityIndicator(isShow: false, indicatorStyle: UIActivityIndicatorView.Style.white)
+        self.setActivityIndicator(isShow: false, indicatorStyle: UIActivityIndicatorView.Style.medium)
         
         let isAnimationsEnabled = config.animationType != .none
         if isAnimationsEnabled && config.animationType == .bounce {

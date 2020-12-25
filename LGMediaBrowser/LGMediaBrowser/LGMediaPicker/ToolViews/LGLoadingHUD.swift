@@ -35,7 +35,7 @@ public class LGLoadingHUD: UIView {
         self.centerBgView = centerBgView
         
         
-        let indicatorView = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.whiteLarge)
+        let indicatorView = UIActivityIndicatorView(style: UIActivityIndicatorView.Style.large)
         indicatorView.frame = CGRect(x: 40, y: 30, width: 40, height: 40)
         centerBgView.addSubview(indicatorView)
         indicatorView.startAnimating()
@@ -61,7 +61,7 @@ public class LGLoadingHUD: UIView {
             frame = targetView.bounds
             realTargetView = targetView
         } else {
-            if let window = UIApplication.shared.keyWindow {
+            if let window = UIApplication.shared.lg_keyWindow {
                 frame = window.frame
                 realTargetView = window
             }
@@ -89,7 +89,7 @@ public class LGLoadingHUD: UIView {
         
         var realTargetView: UIView?
         if targetView == nil {
-            realTargetView = UIApplication.shared.keyWindow
+            realTargetView = UIApplication.shared.lg_keyWindow
         }
         
         if realTargetView != nil {

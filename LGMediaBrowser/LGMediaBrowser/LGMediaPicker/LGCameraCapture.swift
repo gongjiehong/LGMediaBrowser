@@ -315,6 +315,16 @@ public class LGCameraCapture: UIViewController {
         return playerView
     }()
     
+    public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {
+        super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
+        self.modalPresentationStyle = .fullScreen
+    }
+    
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        self.modalPresentationStyle = .fullScreen
+    }
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
         

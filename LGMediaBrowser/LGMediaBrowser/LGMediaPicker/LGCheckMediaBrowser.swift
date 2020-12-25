@@ -105,14 +105,10 @@ internal class LGCheckMediaBrowser: LGMediaBrowser {
         
         bottomToolBar.translatesAutoresizingMaskIntoConstraints = false
         
-        if #available(iOS 11.0, *) {
-            bottomToolBar.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        } else {
-            bottomToolBar.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
-        }
+        bottomToolBar.bottomAnchor.constraint(equalTo: self.view.bottomAnchor).isActive = true
         bottomToolBar.leftAnchor.constraint(equalTo: self.view.leftAnchor).isActive = true
         bottomToolBar.rightAnchor.constraint(equalTo: self.view.rightAnchor).isActive = true
-        bottomToolBar.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin)
+        bottomToolBar.heightAnchor.constraint(equalToConstant: 44.0 + UIDevice.bottomSafeMargin).isActive = true
     }
     
     // MARK: - 显示和隐藏控件

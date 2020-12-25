@@ -38,7 +38,7 @@ public struct LGMesurement {
     }()
     
     public static var isNotchScreen: Bool {
-        guard let keyWindow = UIApplication.shared.keyWindow else {
+        guard let keyWindow = UIApplication.shared.lg_keyWindow else {
             return false
         }
         
